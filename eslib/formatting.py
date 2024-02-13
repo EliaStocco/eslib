@@ -26,7 +26,7 @@ def esfmt(prepare_parser:callable, description:str=None):
 
     #---------------------------------------#
     # Description of the script's purpose
-    description = description if description is not None else "Script without description"
+    description = description if description is not None else "Script without description."
     try: description = Fore.GREEN  + Style.BRIGHT + description + Style.RESET_ALL
     except: pass
     # print(description)
@@ -41,19 +41,27 @@ def esfmt(prepare_parser:callable, description:str=None):
         yield
 
     def wrapper(main: callable):
-        def wrapped_main():
+        def wrapped_main(args=None):
             # Call the specified prepare_parser function
 
-            args = prepare_parser(description)
+            if args is None and prepare_parser is not None:
+                args = prepare_parser(description)
+            # elif args is not None and prepare_parser is not None:
+            #     raise ValueError(f'You can not provide \'main\' arguments if a function ({prepare_parser}) to provide them is already defined.')
+            elif type(args) == dict:
+                from eslib.functions import Dict2Obj
+                args = Dict2Obj(args)
 
             # Print the script's description and input arguments
             with print_header(args):
                 # main
-                main(args)
+                out = main(args)
 
             #------------------#
             # Script completion message
             print("\n\t{:s}\n".format(closure))
+
+            return out
 
         return wrapped_main
 

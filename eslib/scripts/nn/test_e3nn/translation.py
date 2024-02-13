@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+import numpy as np
+import os
+from eslib.nn.functions import get_model
+from ase.io import read
+from e3nn.o3 import rand_matrix
+from eslib.formatting import esfmt
+
+#---------------------------------------#
+# Description of the script's purpose
+description = "Check the E(3)-equivariance of a neural network."
+
+def prepare_args(description):
+    """Prepare parser of user input arguments."""
+    import argparse
+    parser = argparse.ArgumentParser(description=description)
+    argv = {"metavar":"\b"}
+    parser.add_argument("-i" , "--instructions", type=str, **argv, help="model input file (default: 'instructions.json')", default="instructions.json")
+    parser.add_argument("-p" , "--parameters"  , type=str, **argv, help="torch parameters file (default: 'parameters.pth')", default=None)
+    parser.add_argument("-s" , "--structure"   , type=str, **argv, help="file with an atomic structure [a.u.]")
+    parser.add_argument("-n" , "--number"      , type=int, **argv, help="number of tests to perform", default=100)
+    return parser.parse_args()
+
+#---------------------------------------#
+@esfmt(prepare_args,description)
+def main(args):
+
+    #------------------#
+    # trajectory
+    print("\tReading atomic structures from file '{:s}' ... ".format(args.structure), end="")
+    atoms = read(args.structure)
+    print("done")
+
+    #------------------#
+    print("\tLoading model ... ",end="")
+    file_in = os.path.normpath("{:s}".format(args.instructions))
+    file_pa = os.path.normpath("{:s}".format(args.parameters)) if args.parameters is not None else None
+    model = get_model(file_in,file_pa)
+    print("done")
+
+    #------------------#
+    
+    pos = atoms.positions
+    # in i-PI format
+    pbc = np.all(atoms.get_pbc())
+    cell = np.asarray(atoms.get_cell()).T if pbc else None
+
+    #------------------#
+    print("\n\tGenerating {:d} random translation vectors ... ".format(args.number),end="")
+    allT = np.random.rand(args.number, 3)
+    print("done")
+
+    #------------------#
+    print("\tComparing 'outputs from rotated inputs' with 'rotated outputs' ... ",end="")
+    y,_ = model.get(pos=pos.reshape((-1,3)),cell=cell)
+    y = y.detach().numpy()
+    norm = np.zeros(len(allT))
+    for n,T in enumerate(allT):
+        # Translated input (x) to output (y)
+        Tx2y, _ = model.get(pos=pos.reshape((-1,3))+T,cell=cell) 
+        Tx2y = Tx2y.detach().numpy()
+        norm[n] = np.linalg.norm(Tx2y - y)
+    print("done")
+    
+    print("\tSummary of the norm between 'outputs from translated inputs' and 'outputs'")
+    print("\t{:>20s}: {:.4e}".format("min norm",norm.min()))
+    print("\t{:>20s}: {:.4e}".format("max norm",norm.max()))
+    print("\t{:>20s}: {:.4e}".format("mean norm",norm.mean()))
+
+    return norm
+
+#---------------------------------------#
+if __name__ == "__main__":
+    main()

@@ -669,15 +669,15 @@ def get_line_with_pattern(file, pattern):
         raise ValueError("error in 'get_line_with_pattern'")
 
 
-def get_floats_from_line(line):
-    # Use regular expressions to find numbers in scientific or simple notation
-    pattern = "[-+]?\d*\.\d+(?:[eE][-+]?\d+)?|\b[-+]?\d+\b"
-    matches = re.findall(pattern, line)
+# def get_floats_from_line(line):
+#     # Use regular expressions to find numbers in scientific or simple notation
+#     pattern = "[-+]?\d*\.\d+(?:[eE][-+]?\d+)?|\b[-+]?\d+\b"
+#     matches = re.findall(pattern, line)
 
-    output = list()
+#     output = list()
 
-    # Print the extracted numbers
-    for match in matches:
-        output.append(match)
+#     # Print the extracted numbers
+#     for match in matches:
+#         output.append(match)
 
-    return output
+#     return output

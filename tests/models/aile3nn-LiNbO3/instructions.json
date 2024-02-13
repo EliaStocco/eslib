@@ -1,0 +1,23 @@
+{
+    "kwargs": {
+        "output": "D",
+        "irreps_in": "3x0e",
+        "irreps_out": "1x1o",
+        "max_radius": 6,
+        "num_neighbors": 2,
+        "pool_nodes": true,
+        "number_of_basis": 10,
+        "mul": 3,
+        "layers": 3,
+        "lmax": 2,
+        "dropout_probability": 0.0,
+        "use_shift": false
+    },
+    "class": "aile3nn",
+    "module": "eslib.nn.network",
+    "chemical-symbols": ["Nb", "Nb", "Nb", "Nb", "Nb", "Nb", 
+                         "Li", "Li", "Li", "Li", "Li", "Li", 
+                          "O",  "O",  "O",  "O",  "O",  "O", 
+                          "O",  "O",  "O",  "O",  "O",  "O", 
+                          "O",  "O",  "O",  "O",  "O",  "O" ]
+}

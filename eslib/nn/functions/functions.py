@@ -49,7 +49,7 @@ def get_class(module_name, class_name):
     except Exception as e:
         raise ValueError(f"An error occurred: {e}")
     
-def get_model(instructions,parameters:str):
+def get_model(instructions,parameters:str)->torch.nn.Module:
 
     if type(instructions) == str :
 
