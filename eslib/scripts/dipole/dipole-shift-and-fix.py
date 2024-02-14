@@ -2,7 +2,7 @@
 import numpy as np
 from ase.io import write, read
 from copy import copy
-from eslib.tools import cart2lattice, lattice2cart
+from eslib.tools import cart2lattice, lattice2cart, frac2cart
 from eslib.input import flist, str2bool
 from eslib.formatting import esfmt
 
@@ -78,10 +78,14 @@ def main(args):
     if args.fix or args.shift is not None:
         print("\tConverting dipoles from lattice to cartesian coordinates ... ", end="")
         for n in range(N):
-            cell = np.asarray(atoms[n].cell.array).T
-            R = lattice2cart(cell)
-            atoms[n].info[args.name] = R @ ( phases[n,:] * lenght[n,:] )
+            # cell = np.asarray(atoms[n].cell.array).T
+            # R = lattice2cart(cell)
+            # atoms[n].info[args.name] = R @ ( phases[n,:] * lenght[n,:] )
+
+            # The previous code lines should be the same as the following:
+            atoms[n].info[args.name] = frac2cart(cell=atoms[n].get_cell(),v=phases[n,:])
         print("done")
+        
 
     if args.fix:
         index = np.where(np.diff(old-phases,axis=0))[0]

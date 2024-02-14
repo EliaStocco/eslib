@@ -5,7 +5,7 @@ from ase import Atoms
 from eslib.classes.dipole import dipoleLM
 from eslib.classes.trajectory import trajectory as Trajectory
 from eslib.input import flist
-from eslib.tools import lattice2cart
+from eslib.tools import lattice2cart, frac2cart
 from eslib.formatting import esfmt, warning, error
 
 #---------------------------------------#
@@ -68,7 +68,10 @@ def main(args):
             print("\tThe provided reference configuration is periodic: the input dipole will be interpreted as 'dipole quanta'")
             print("\tConverting the dipole quanta into cartesian coordinates:")
             print("\t{:10s}: ".format("quanta"),args.dipole)
-            dipole = lattice2cart(cell=ref.get_cell(),v=args.dipole)
+            # dipole = lattice2cart(cell=ref.get_cell(),v=args.dipole)
+            # 'args.dipole' is a 3-vectos with numbers in [0,1].
+            # The cartesian components has to be stretched depending on the lattice vectors lenght. 
+            dipole = frac2cart(cell=ref.get_cell(),v=args.dipole)
         else:
             print("\tThe provided reference configuration is not periodic: the input dipole will be interpreted as cartesian coordinates of the dipole.")
         

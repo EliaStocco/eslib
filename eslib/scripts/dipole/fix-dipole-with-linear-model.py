@@ -5,7 +5,7 @@ from eslib.plot import plot_bisector
 from eslib.classes.dipole import dipoleLM
 from eslib.classes.trajectory import info
 from eslib.classes.trajectory import trajectory as Trajectory
-from eslib.tools import cart2lattice, lattice2cart
+from eslib.tools import cart2lattice, lattice2cart, frac2cart
 from eslib.output import output_folder
 
 #---------------------------------------#
@@ -195,8 +195,12 @@ def main():
     fixed_dipole = np.full((N,3),np.nan)
     cell = trajectory[0].get_cell()#lattices[n]
     lenght = cell.cellpar()[0:3]
-    R = lattice2cart(cell)
-    fixed_dipole = ( R @ (quanta["DFT"] -  intfactor).T ).T* lenght
+    
+    # R = lattice2cart(cell)
+    # fixed_dipole = ( R @ (quanta["DFT"] -  intfactor).T ).T* lenght
+    
+    # The previous code lines should be the same as the following:
+    fixed_dipole = frac2cart(cell=trajectory[0].get_cell(),v=(quanta["DFT"] -  intfactor))
     print("done")
 
     #------------------#
