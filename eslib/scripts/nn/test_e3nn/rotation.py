@@ -41,7 +41,7 @@ def main(args):
     #------------------#
     pbc = np.all(atoms.get_pbc())
     pos = atoms.positions
-    cell = np.asarray(atoms.cell) if np.all(atoms.get_pbc()) else np.full((3,3),np.nan)   
+    cell = atoms.get_cell() if pbc else None
     def func(array):
         if pbc:
             cell = array[0:3,:].T
@@ -49,11 +49,11 @@ def main(args):
         else:
             cell = None
             pos = array
-        y,_ = model.get(pos=pos.reshape((-1,3)),cell=cell)
+        y,_ = model.get(pos=pos.reshape((-1,3)),cell=cell,check=False)
         return y.detach().numpy()
     
     if pbc:
-        array = np.concatenate([cell,pos])
+        array = np.concatenate([np.asarray(cell),pos])
     else:
         array = pos
 
