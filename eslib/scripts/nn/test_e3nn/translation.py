@@ -3,8 +3,9 @@ import numpy as np
 import os
 from eslib.nn.functions import get_model
 from ase.io import read
-from e3nn.o3 import rand_matrix
+from ase.geometry import wrap_positions
 from eslib.formatting import esfmt
+from eslib.input import str2bool
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -19,6 +20,7 @@ def prepare_args(description):
     parser.add_argument("-p" , "--parameters"  , type=str, **argv, help="torch parameters file (default: 'parameters.pth')", default=None)
     parser.add_argument("-s" , "--structure"   , type=str, **argv, help="file with an atomic structure [a.u.]")
     parser.add_argument("-n" , "--number"      , type=int, **argv, help="number of tests to perform", default=100)
+    parser.add_argument("-f" , "--fold"        , type=str2bool, **argv, help="whether the atomic structures have to be folded into the primitive unit cell (default: false)", default=False)
     return parser.parse_args()
 
 #---------------------------------------#
@@ -40,9 +42,11 @@ def main(args):
 
     #------------------#
     
-    pos = atoms.positions
+    pos = atoms.positions.reshape((-1,3))
     # in i-PI format
     pbc = np.all(atoms.get_pbc())
+    if not pbc:
+        args.fold = False
     cell = atoms.get_cell() if pbc else None
 
     #------------------#
@@ -57,7 +61,10 @@ def main(args):
     norm = np.zeros(len(allT))
     for n,T in enumerate(allT):
         # Translated input (x) to output (y)
-        Tx2y, _ = model.get(pos=pos.reshape((-1,3))+T,cell=cell) 
+        newpos = pos + T
+        if args.fold:
+            newpos = wrap_positions(positions=newpos,cell=cell)
+        Tx2y, _ = model.get(pos=newpos,cell=cell) 
         Tx2y = Tx2y.detach().numpy()
         norm[n] = np.linalg.norm(Tx2y - y)
     print("done")

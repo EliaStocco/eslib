@@ -5,6 +5,8 @@ from eslib.nn.functions import get_model
 from ase.io import read
 from e3nn.o3 import rand_matrix
 from eslib.formatting import esfmt
+from eslib.input import str2bool
+from ase.geometry import wrap_positions
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -19,6 +21,7 @@ def prepare_args(description):
     parser.add_argument("-p" , "--parameters"  , type=str, **argv, help="torch parameters file (default: 'parameters.pth')", default=None)
     parser.add_argument("-s" , "--structure"   , type=str, **argv, help="file with an atomic structure [a.u.]")
     parser.add_argument("-n" , "--number"      , type=int, **argv, help="number of tests to perform", default=100)
+    parser.add_argument("-f" , "--fold"        , type=str2bool, **argv, help="whether the atomic structures have to be folded into the primitive unit cell (default: false)", default=False)
     return parser.parse_args()
 
 #---------------------------------------#
@@ -40,16 +43,20 @@ def main(args):
 
     #------------------#
     pbc = np.all(atoms.get_pbc())
+    if not pbc:
+        args.fold = False
     pos = atoms.positions
     cell = atoms.get_cell() if pbc else None
     def func(array):
         if pbc:
             cell = array[0:3,:].T
-            pos  = array[3:,:]
+            pos  = array[3:,:].reshape((-1,3))
+            if args.fold:
+                pos = wrap_positions(positions=pos,cell=cell.T)
         else:
             cell = None
-            pos = array
-        y,_ = model.get(pos=pos.reshape((-1,3)),cell=cell,check=False)
+            pos = array.reshape((-1,3))
+        y,_ = model.get(pos=pos,cell=cell,check=False)
         return y.detach().numpy()
     
     if pbc:

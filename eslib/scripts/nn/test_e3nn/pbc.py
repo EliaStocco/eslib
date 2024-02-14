@@ -5,6 +5,7 @@ from eslib.nn.functions import get_model
 from ase.io import read
 from eslib.formatting import esfmt
 from eslib.tools import frac2cart
+from eslib.input import str2bool
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -19,6 +20,7 @@ def prepare_args(description):
     parser.add_argument("-p" , "--parameters"  , type=str, **argv, help="torch parameters file (default: 'parameters.pth')", default=None)
     parser.add_argument("-s" , "--structure"   , type=str, **argv, help="file with an atomic structure [a.u.]")
     parser.add_argument("-n" , "--number"      , type=int, **argv, help="number of tests to perform", default=100)
+    parser.add_argument("-f" , "--fold"        , type=str2bool, **argv, help="whether the atomic structures have to be folded into the primitive unit cell (default: false)", default=False)
     return parser.parse_args()
 
 #---------------------------------------#
