@@ -154,6 +154,36 @@ def lattice2cart(cell:Union[np.ndarray,Cell],v:np.ndarray=None): #,*argc,**argv)
     return matrix
 
 #---------------------------------------#
+@return_transformed_components
+@ase_cell_to_np_transpose
+def frac2cart(cell:Union[np.ndarray,Cell],v:np.ndarray=None): #,*argc,**argv):
+    """ Fractional to Cartesian coordinates rotation matrix.
+    The lattice vectors are not normalized, differently w.r.t. `lattice2cart`.
+    
+    Input:
+        cell: lattice parameters, 
+            where the i^th basis vector is stored in the i^th columns
+            (it's the opposite of ASE, QE, FHI-aims)
+            lattice : 
+                | a_1x a_2x a_3x |\n
+                | a_1y a_2y a_3y |\n
+                | a_1z a_2z a_3z |\n
+    Output:
+        rotation matrix
+    """
+
+    if cell.shape != (3,3):
+        raise ValueError("lattice with wrong shape:",cell.shape)
+    from copy import copy
+    # I have to divide normalize the lattice parameters
+    length = np.linalg.norm(cell,axis=0)
+    matrix = copy(cell)
+    # normalize the columns
+    # for i in range(3):
+    #     matrix[:,i] /= length[i]
+    return matrix
+
+#---------------------------------------#
 def string2function(input_string:str)->callable:
     """Converts a Python code string into a callable function."""
     import ast
@@ -222,3 +252,24 @@ def distance(s1:Atoms, s2:Atoms, permute=True):
         dists.append(dd(s1, s2, permute))
    
     return min(dists), s1, s2
+
+def check_cell_format(cell:Union[np.ndarray,Cell]):
+    """
+    Check if the given cell is upper triangular (if the columns are the lattice vectors).
+
+    Args:
+    - cell: 2D list or NumPy array representing the cell
+
+    Returns:
+    - True if the cell is upper triangular, False otherwise
+    """
+    if isinstance(cell,Cell):
+        cell = np.asarray(cell).T
+        return check_cell_format(cell)
+    else:
+        n = len(cell)  # Assuming square matrix
+        for i in range(n):
+            for j in range(0,i):
+                if cell[i,j] != 0:
+                    return False
+        return True
