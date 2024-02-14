@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
-from eslib.scripts.nn.test_e3nn import translation, rotation
+from eslib.scripts.nn.test_e3nn import translation, rotation, pbc
+from eslib.functions import suppress_output
 
 torun = {
     "aile3nn-water" :
@@ -19,10 +20,25 @@ torun = {
     },
 }
 
+@pytest.fixture(params=[(translation, 'translation'), (rotation, 'rotation'), (pbc, 'pbc')])
+#@pytest.fixture(params=[(rotation, 'rotation'), (pbc, 'pbc')])
+def functions(request):
+    return request.param
+
 @pytest.mark.parametrize("name, tests", torun.items())
-def test_check_e3nn_equivariance(name, tests):
-    print("\tRunning test for {:s}".format(name))
-    functions = [translation,rotation]
-    for func in functions:
-        result:np.ndarray = func(tests)
-        assert np.allclose(result, np.zeros(result.shape))
+def test_check_e3nn_equivariance(name, tests, functions):
+    function, function_name = functions
+    print("\tRunning '{:s}' test for '{:s}' ... ".format(function_name,name),end="")    
+    with suppress_output():
+        result = function(tests)
+    if isinstance(result, np.ndarray):
+        comparison = np.zeros(result.shape)
+    elif isinstance(result, (float, int)):
+        comparison = 0.0
+    else:
+        comparison = None
+    print("done")
+    output = np.allclose(result, comparison)
+    if not output:
+        pass # just for debugging
+    assert output
