@@ -15,8 +15,9 @@ rascal
 scikit-learn
 scipy
 spglib==2.1.0
-pytorch
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==1.4.0+cpu
 torch-geometric
-# torch-scatter
+torch-scatter
 tqdm
 xarray==2023.12.0
