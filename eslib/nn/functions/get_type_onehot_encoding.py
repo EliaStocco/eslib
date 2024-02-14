@@ -39,6 +39,10 @@ def get_type_onehot_encoding(species:list)->Tuple[torch.Tensor,dict]:
 @vectorize
 def symbols2x(symbols): 
     symbols = np.asarray(symbols)
+    # `np.unique` returns the sorted unique values of an array!
+    # We need species to be sorted! 
+    # Any kind of sorting is okay, as long as the ouput does not depend on order on the input elements.
+    # https://numpy.org/doc/stable/reference/generated/numpy.unique.html
     species = np.unique(symbols)
     type_onehot, type_encoding = get_type_onehot_encoding(species)
     return type_onehot[[type_encoding[atom] for atom in symbols]]
