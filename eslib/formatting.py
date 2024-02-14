@@ -43,13 +43,13 @@ def esfmt(prepare_parser:callable, description:str=None):
     def wrapper(main: callable):
         def wrapped_main(args=None):
             # Call the specified prepare_parser function
-
-            if args is None and prepare_parser is not None:
-                args = prepare_parser(description)
-            # elif args is not None and prepare_parser is not None:
-            #     raise ValueError(f'You can not provide \'main\' arguments if a function ({prepare_parser}) to provide them is already defined.')
-            elif type(args) == dict:
-                from eslib.functions import Dict2Obj
+            args_script = dict()
+            if prepare_parser is not None:
+                args_script = prepare_parser(description)
+            if type(args) == dict:
+                from eslib.functions import Dict2Obj, args_to_dict
+                from eslib.functions import add_default
+                args = add_default(args,args_to_dict(args_script))
                 args = Dict2Obj(args)
 
             # Print the script's description and input arguments
