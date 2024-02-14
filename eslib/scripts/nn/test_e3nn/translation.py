@@ -43,7 +43,7 @@ def main(args):
     pos = atoms.positions
     # in i-PI format
     pbc = np.all(atoms.get_pbc())
-    cell = np.asarray(atoms.get_cell()).T if pbc else None
+    cell = atoms.get_cell() if pbc else None
 
     #------------------#
     print("\n\tGenerating {:d} random translation vectors ... ".format(args.number),end="")
