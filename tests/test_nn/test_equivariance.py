@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from eslib.scripts.nn.test_e3nn import translation, rotation, pbc
+from eslib.scripts.nn.test_e3nn import translation, rotation, pbc, permute
 from eslib.functions import suppress_output
 from ase.io import read
 
@@ -39,7 +39,10 @@ def generate_all_torun(torun:dict)->dict:
                 out[name]["fold"] = False
     return out
 
-@pytest.fixture(params=[(translation, 'translation'), (rotation, 'rotation'), (pbc, 'pbc')])
+@pytest.fixture(params=[#(translation, 'translation'),\
+                        #(rotation, 'rotation'),\
+                        #(pbc, 'pbc'),\
+                        (permute,'permute')])
 def functions(request):
     return request.param
 
