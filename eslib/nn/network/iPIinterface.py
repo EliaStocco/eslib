@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from ase.io import read
 from ase.cell import Cell
+from ase import Atoms
 from eslib.nn.dataset import make_datapoint
 from eslib.tools import check_cell_format
 from torch_geometric.data import Data
@@ -34,7 +35,7 @@ class iPIinterface(ABC):
                   "pbc": lattice is not None and np.linalg.det(lattice) != np.inf }
         return make_datapoint(**other,**argv) 
         
-    def store_chemical_species(self,file=None,atoms=None,**argv):
+    def store_chemical_species(self,file:str=None,atoms:Atoms=None,**argv):
         if file is not None:
             atoms = read(file,**argv)
         elif atoms is None:
@@ -51,7 +52,22 @@ class iPIinterface(ABC):
             raise ValueError("provided cell has a wrong format.")
         return cell
     
+    def get_from_structure(self,atoms:Atoms)->Tuple[torch.tensor,Data]:
+        """Compute the dipole given an atomic structure as an `ase.Atoms` object.
+        The function takes care of an eventual permutation of the atoms.
+        """
+        pos = atoms.get_positions()
+        cell = atoms.get_cell() if np.all(atoms.get_pbc()) else None
+        symbols = self._symbols
+        self._symbols = atoms.get_chemical_symbols()
+        y = self.get(pos=pos,cell=cell)
+        self._symbols =symbols
+        return y
+
+    
     def get(self,pos,cell=None,check=True)->Tuple[torch.tensor,Data]:
+        """Compute the dipole given an the positions and the cell.
+        The function requires the atoms to respect the order given by `self._symbols`."""
         # 'cell' has to be in i-PI format (upper triangular) or ase.cell
         pbc = cell is not None
         cell = self.correct_cell(cell,check=check)
