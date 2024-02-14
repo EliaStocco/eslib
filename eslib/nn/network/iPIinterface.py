@@ -1,7 +1,9 @@
 import torch
 import numpy as np
 from ase.io import read
+from ase.cell import Cell
 from eslib.nn.dataset import make_datapoint
+from eslib.tools import check_cell_format
 from torch_geometric.data import Data
 from abc import ABC, abstractproperty, abstractmethod
 from typing import TypeVar, Tuple
@@ -39,15 +41,20 @@ class iPIinterface(ABC):
             raise ValueError("'file' or 'atoms' can not be both None.")
         self._symbols = atoms.get_chemical_symbols()
     
-    def correct_cell(self,cell=None):
+    def correct_cell(self,cell=None,check:bool=True):
+        """Set the cell to a cube with infinite lattice vectors or check that it is upper triangular."""
         if cell is None:
             cell = torch.eye(3).fill_diagonal_(torch.inf)
+        if isinstance(cell,Cell):
+            cell = np.asarray(cell).T
+        if check and not check_cell_format(cell):
+            raise ValueError("provided cell has a wrong format.")
         return cell
     
-    def get(self,pos,cell=None)->Tuple[torch.tensor,Data]:
-        # 'cell' has to be in i-PI format
+    def get(self,pos,cell=None,check=True)->Tuple[torch.tensor,Data]:
+        # 'cell' has to be in i-PI format (upper triangular) or ase.cell
         pbc = cell is not None
-        cell = self.correct_cell(cell)
+        cell = self.correct_cell(cell,check=check)
         self.eval()
         requires_grad = {   "pos"        : True,\
                             "lattice"    : True,\
