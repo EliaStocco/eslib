@@ -153,6 +153,30 @@ def lattice2cart(cell:Union[np.ndarray,Cell],v:np.ndarray=None): #,*argc,**argv)
         matrix[:,i] /= length[i]
     return matrix
 
+
+#---------------------------------------# 
+@return_transformed_components
+@ase_cell_to_np_transpose
+def cart2frac(cell:Union[np.ndarray,Cell],v:np.ndarray=None):
+    """ Cartesian to lattice coordinates rotation matrix
+    The lattice vectors are not normalized, differently w.r.t. `lcart2attice`.
+
+    Input:
+        cell: lattice parameters, 
+            where the i^th basis vector is stored in the i^th columns
+            (it's the opposite of ASE, QE, FHI-aims)
+            lattice : 
+                | a_1x a_2x a_3x |
+                | a_1y a_2y a_3y |
+                | a_1z a_2z a_3z |
+    Output:
+        rotation matrix
+    """
+    matrix = frac2cart(cell)
+    matrix = np.linalg.inv( matrix )
+    return matrix
+
+
 #---------------------------------------#
 @return_transformed_components
 @ase_cell_to_np_transpose
@@ -176,12 +200,12 @@ def frac2cart(cell:Union[np.ndarray,Cell],v:np.ndarray=None): #,*argc,**argv):
         raise ValueError("lattice with wrong shape:",cell.shape)
     from copy import copy
     # I have to divide normalize the lattice parameters
-    length = np.linalg.norm(cell,axis=0)
-    matrix = copy(cell)
+    # length = np.linalg.norm(cell,axis=0)
+    # matrix = copy(cell)
     # normalize the columns
     # for i in range(3):
     #     matrix[:,i] /= length[i]
-    return matrix
+    return cell
 
 #---------------------------------------#
 def string2function(input_string:str)->callable:

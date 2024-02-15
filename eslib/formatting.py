@@ -1,3 +1,13 @@
+import os
+from contextlib import contextmanager
+from eslib.functions import Dict2Obj, args_to_dict
+from eslib.functions import add_default
+from datetime import datetime
+import inspect
+import colorama
+from colorama import Fore, Style
+colorama.init(autoreset=True)
+
 float_format = '%24.12e' # Elia Stocco float format
 
 #---------------------------------------#
@@ -8,21 +18,14 @@ input_arguments = "Input arguments"
 
 #---------------------------------------#
 # colors
-try :
-    import colorama
-    from colorama import Fore, Style
-    colorama.init(autoreset=True)
-    error           = Fore.RED      + Style.BRIGHT + error.replace("*","")   + Style.RESET_ALL
-    closure         = Fore.BLUE   + Style.BRIGHT + closure                 + Style.RESET_ALL
-    input_arguments = Fore.GREEN  + Style.NORMAL + input_arguments         + Style.RESET_ALL
-    warning         = Fore.MAGENTA    + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
-except:
-    pass
+error           = Fore.RED      + Style.BRIGHT + error.replace("*","")   + Style.RESET_ALL
+closure         = Fore.BLUE   + Style.BRIGHT + closure                 + Style.RESET_ALL
+input_arguments = Fore.GREEN  + Style.NORMAL + input_arguments         + Style.RESET_ALL
+warning         = Fore.MAGENTA    + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
+
 
 def esfmt(prepare_parser:callable, description:str=None):
     """Decorator for the 'main' function of many scripts."""
-
-    from contextlib import contextmanager
 
     #---------------------------------------#
     # Description of the script's purpose
@@ -32,7 +35,16 @@ def esfmt(prepare_parser:callable, description:str=None):
     # print(description)
 
     @contextmanager
-    def print_header(args):
+    def print_header(args:dict,main:callable):
+        
+        try: print("script file: {:s}".format(inspect.getfile(main))) #main.__file__))
+        except: pass
+        # try: print("script module: {:s}".format(inspect.getmodule(main.__name__)))
+        # except: pass
+        print("working directory: {:s}".format(os.getcwd()))
+        print("date: {:s}".format(datetime.now().date().strftime("%Y-%m-%d")))
+        print("time: {:s}".format(datetime.now().time().strftime("%H:%M:%S")))
+
         print("\n\t{:s}".format(description))
         print("\n\t{:s}:".format(input_arguments))
         for k in args.__dict__.keys():
@@ -41,19 +53,20 @@ def esfmt(prepare_parser:callable, description:str=None):
         yield
 
     def wrapper(main: callable):
-        def wrapped_main(args=None):
+        def wrapped_main(args=dict()):
             # Call the specified prepare_parser function
             args_script = dict()
             if prepare_parser is not None:
                 args_script = prepare_parser(description)
             if type(args) == dict:
-                from eslib.functions import Dict2Obj, args_to_dict
-                from eslib.functions import add_default
                 args = add_default(args,args_to_dict(args_script))
                 args = Dict2Obj(args)
 
+            if args is None:
+                raise ValueError("code bug")
+
             # Print the script's description and input arguments
-            with print_header(args):
+            with print_header(args,main):
                 # main
                 out = main(args)
 

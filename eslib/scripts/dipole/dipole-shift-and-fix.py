@@ -2,7 +2,8 @@
 import numpy as np
 from ase.io import write, read
 from copy import copy
-from eslib.tools import cart2lattice, lattice2cart, frac2cart
+from eslib.tools import cart2lattice, lattice2cart
+from eslib.tools import frac2cart, cart2frac
 from eslib.input import flist, str2bool
 from eslib.formatting import esfmt
 
@@ -33,19 +34,15 @@ def main(args):
     atoms = read(args.input,format='extxyz',index=":")
     print("done")
 
+
     print("\n\tConverting '{:s}' from cartesian to lattice coordinates ... ".format(args.name), end="")
     N = len(atoms)
     phases = np.full((N,3),np.nan)
-    lenght = np.full((N,3),np.nan)
-    # old = np.full((N,3),np.nan)
     for n in range(N):
+        # for some strange reason I need the following line .... ???
         atoms[n].set_calculator(None)
-        cell = np.asarray(atoms[n].cell.array).T
-        lenght[n,:] = np.linalg.norm(cell,axis=0)
-        R = cart2lattice(cell)
-        dipole = R @ atoms[n].info[args.name]
-        phases[n,:] = dipole / lenght[n,:]
-    print("done")
+        phases[n,:] = cart2frac(cell=atoms[n].get_cell(),v=atoms[n].info[args.name])
+    print("done\n")
 
     if args.fix :
         print("\tFixing the '{:s}' jumps ... ".format(args.name), end="")
@@ -54,46 +51,33 @@ def main(args):
             phases[:,i] = np.unwrap(phases[:,i],period=1)
         print("done")
 
-    # if args.shift is not None:
-    #     shift = np.asarray([ int(i) for i in phases.mean(axis=0) ]).astype(float)
-    #     print("\tShifting the dipoles by the following quantum (on top of the global mean): ",args.shift," ... ", end="")
-    #     shift += args.shift
-    #     for i in range(3):
-    #         phases[:,i] -= shift[i]
-    #     print("done")
-
-    if args.shift is not None :
-        shift = np.zeros(3)
-        if args.average_shift:
-            shift = np.asarray([ int(i) for i in phases.mean(axis=0) ]).astype(float)
-            print("\tThe dipole quanta will be shifted by the average value: ",shift)
-        if args.shift is not None:        
-            print("\tUser-defined shift of the dipole quanta: ",args.shift)
-            shift += args.shift
-        print("\tShifting the dipoles quanta by ",shift, " ... ",end="")
-        for i in range(3):
-            phases[:,i] -= shift[i]
-        print("done")
-
-    if args.fix or args.shift is not None:
-        print("\tConverting dipoles from lattice to cartesian coordinates ... ", end="")
-        for n in range(N):
-            # cell = np.asarray(atoms[n].cell.array).T
-            # R = lattice2cart(cell)
-            # atoms[n].info[args.name] = R @ ( phases[n,:] * lenght[n,:] )
-
-            # The previous code lines should be the same as the following:
-            atoms[n].info[args.name] = frac2cart(cell=atoms[n].get_cell(),v=phases[n,:])
-        print("done")
-        
-
-    if args.fix:
         index = np.where(np.diff(old-phases,axis=0))[0]
         print("\n\tFound {:d} jumps".format(len(index)))
         if args.jumps is not None:
             print("\tSaving the indices of the jumps to file '{:s}' ... ".format(args.jumps), end="")
             np.savetxt(args.jumps,index)
             print("done")
+        print()
+
+    shift = np.zeros(3)
+    if args.average_shift:
+        shift = np.asarray([ int(i) for i in phases.mean(axis=0) ]).astype(float)
+        print("\tThe dipole quanta will be shifted by the average value: ",shift)
+        
+    if args.shift is not None:        
+        print("\tUser-defined shift of the dipole quanta: ",args.shift)
+        shift += args.shift
+
+    print("\tShifting the dipoles quanta by ",shift, " ... ",end="")
+    for i in range(3):
+        phases[:,i] -= shift[i]
+    print("done")
+
+
+    print("\tConverting dipoles from lattice to cartesian coordinates ... ", end="")
+    for n in range(N):
+        atoms[n].info[args.name] = frac2cart(cell=atoms[n].get_cell(),v=phases[n,:]).reshape((3,))
+    print("done")
 
     ###
     # writing

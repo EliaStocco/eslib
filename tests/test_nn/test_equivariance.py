@@ -5,17 +5,23 @@ from eslib.functions import suppress_output
 from ase.io import read
 
 torun = {
-    "aile3nn-water" :
-    {
-        "instructions" : "tests/models/aile3nn-water/instructions.json",
-        "parameters"   : "tests/models/aile3nn-water/parameters.pth",
-        "structure"    : "tests/structures/water/water.au.xyz",
-    },
+    # "aile3nn-water" :
+    # {
+    #     "instructions" : "tests/models/aile3nn-water/instructions.json",
+    #     "parameters"   : "tests/models/aile3nn-water/parameters.pth",
+    #     "structure"    : "tests/structures/water/water.au.xyz",
+    # },
+    # "aile3nn-LiNbO3" :
+    # {
+    #     "instructions" : "tests/models/aile3nn-LiNbO3/instructions.json",
+    #     "parameters"   : "tests/models/aile3nn-LiNbO3/parameters.pth",
+    #     "structure"    : "tests/structures/LiNbO3/LiNbO3.au.extxyz",
+    # },
     "aile3nn-LiNbO3" :
     {
         "instructions" : "tests/models/aile3nn-LiNbO3/instructions.json",
         "parameters"   : "tests/models/aile3nn-LiNbO3/parameters.pth",
-        "structure"    : "tests/structures/LiNbO3/LiNbO3.au.extxyz",
+        "structure"    : "tests/structures/LiNbO3/LiNbO3.au.xsf",
     },
 }
 
@@ -39,9 +45,9 @@ def generate_all_torun(torun:dict)->dict:
                 out[name]["fold"] = False
     return out
 
-@pytest.fixture(params=[#(translation, 'translation'),\
-                        #(rotation, 'rotation'),\
-                        #(pbc, 'pbc'),\
+@pytest.fixture(params=[(translation, 'translation'),\
+                        (rotation, 'rotation'),\
+                        (pbc, 'pbc'),\
                         (permute,'permute')])
 def functions(request):
     return request.param
@@ -49,7 +55,7 @@ def functions(request):
 @pytest.mark.parametrize("name, tests", generate_all_torun(torun).items())
 def test_check_e3nn_equivariance(name, tests, functions):
     function, function_name = functions
-    print("Running '{:s}' test for '{:s}' ... ".format(function_name,name))    
+    print("Running '{:s}' test for '{:s}'.".format(function_name,name))    
     with suppress_output():
         result = function(tests)
     if isinstance(result, np.ndarray):
