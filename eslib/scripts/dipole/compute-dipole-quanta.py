@@ -1,35 +1,16 @@
 #!/usr/bin/env python
 import argparse
 import numpy as np
-from eslib.tools import cart2lattice
-from eslib.classes.trajectory import trajectory
+from eslib.tools import cart2frac
+from ase.io import read
+from eslib.formatting import esfmt
 
 #---------------------------------------#
 # Description of the script's purpose
 description = "Compute the dipole quanta."
-warning = "***Warning***"
-error = "***Error***"
-closure = "Job done :)"
-information = "You should provide the positions as printed by i-PI."
-input_arguments = "Input arguments"
 
 #---------------------------------------#
-# colors
-try :
-    import colorama
-    from colorama import Fore, Style
-    colorama.init(autoreset=True)
-    description     = Fore.GREEN    + Style.BRIGHT + description             + Style.RESET_ALL
-    warning         = Fore.MAGENTA  + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
-    error           = Fore.RED      + Style.BRIGHT + error.replace("*","")   + Style.RESET_ALL
-    closure         = Fore.BLUE     + Style.BRIGHT + closure                 + Style.RESET_ALL
-    information     = Fore.YELLOW   + Style.NORMAL + information             + Style.RESET_ALL
-    input_arguments = Fore.GREEN    + Style.NORMAL + input_arguments         + Style.RESET_ALL
-except:
-    pass
-
-#---------------------------------------#
-def prepare_args():
+def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , **argv,type=str, help="input file")
@@ -40,54 +21,51 @@ def prepare_args():
     return parser.parse_args()
 
 #---------------------------------------#
-def main():
-
-    #------------------#
-    # Parse the command-line arguments
-    args = prepare_args()
-
-    # Print the script's description
-    print("\n\t{:s}".format(description))
-
-    print("\n\t{:s}:".format(input_arguments))
-    for k in args.__dict__.keys():
-        print("\t{:>20s}:".format(k),getattr(args,k))
-    print()
+@esfmt(prepare_args,description)
+def main(args):
 
     #---------------------------------------#
     # atomic structures
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms = trajectory(args.input,format=args.input_format)
+    atoms = read(args.input,format=args.input_format,index=":")
     print("done")
 
-    #---------------------------------------#
-    # dipole
-    print("\tExtracting '{:s}' from the trajectory ... ".format(args.keyword), end="")
-    dipole = atoms.call(lambda e:e.info[args.keyword])
-    print("done")
+    # #---------------------------------------#
+    # # dipole
+    # print("\tExtracting '{:s}' from the trajectory ... ".format(args.keyword), end="")
+    # dipole = atoms.call(lambda e:e.info[args.keyword])
+    # print("done")
 
-    #---------------------------------------#
-    # lattice vectors
-    print("\tExtracting the lattice vectors from the trajectory ... ", end="")
-    lattices = atoms.call(lambda e:e.get_cell())
-    print("done")
+    # #---------------------------------------#
+    # # lattice vectors
+    # print("\tExtracting the lattice vectors from the trajectory ... ", end="")
+    # lattices = atoms.call(lambda e:e.get_cell())
+    # print("done")
 
     #---------------------------------------#
     # pbc
-    pbc = atoms.call(lambda e:e.pbc)
-    if not np.all(pbc):
-        raise ValueError("the system is not periodic: it's not")
+    # # pbc = atoms.call(lambda e:e.pbc)
+    # if not np.all([ np.all(a.get_pbc()) for a in atoms ]):
+    #     raise ValueError("The system is not periodic.")
 
     #---------------------------------------#
     # quanta
     print("\tComputing the dipole quanta ... ", end="")
     N = len(atoms)
     quanta = np.zeros((N,3))
+    # for n in range(N):
+    #     cell = lattices[n].T
+    #     R = cart2lattice(lattices[n])
+    #     lenght = np.linalg.norm(cell,axis=0)
+    #     quanta[n,:] = R @ dipole[n] / lenght
     for n in range(N):
-        cell = lattices[n].T
-        R = cart2lattice(lattices[n])
-        lenght = np.linalg.norm(cell,axis=0)
-        quanta[n,:] = R @ dipole[n] / lenght
+        # atoms[n].set_calculator(None)
+        # cell = np.asarray(atoms[n].cell.array).T
+        # lenght[n,:] = np.linalg.norm(cell,axis=0)
+        # R = cart2lattice(cell)
+        # dipole = R @ atoms[n].info[args.name]
+        # phases[n,:] = dipole / lenght[n,:]
+        quanta[n,:] = cart2frac(cell=atoms[n].get_cell(),v=atoms[n].info[args.keyword])
     print("done")
 
     #---------------------------------------#
@@ -98,10 +76,6 @@ def main():
         print("done")
     except Exception as e:
         print("\n\tError: {:s}".format(e))
-
-    #------------------#
-    # Script completion message
-    print("\n\t{:s}\n".format(closure))
 
 if __name__ == "__main__":
     main()
