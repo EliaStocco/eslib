@@ -11,6 +11,31 @@ from eslib.show import show_dict
 description = "Convert a 'torch' dataset into an 'extxyz' file."
 
 #---------------------------------------#
+def Data2Atoms(entry:Data,warnings:dict={}):
+    positions = entry.pos.detach().numpy()
+    try: cell = entry.lattice.detach().numpy()[0,:,:]
+    except: cell = None
+    symbols = entry.symbols
+    atoms = Atoms(positions=positions,cell=cell,symbols=symbols,pbc=cell is not None)
+    Natoms = atoms.get_global_number_of_atoms()
+    # atoms[n].info["dipole"] = test[n].dipole.detach().numpy()
+
+    for key, value in entry.items():
+        if key in ["pos","lattice","pbc","symbols"]:
+            continue
+        if type(value) in [float,int,str]:
+            atoms.info["key"] = value
+        else:
+            if value.ndim == 1:
+                atoms.info[key] = value.detach().numpy().reshape((-1,))
+            if value.ndim == 2:
+                if value.shape[0] == Natoms :
+                    atoms.arrays[key] = value.detach().numpy().reshape((Natoms,-1))
+                else:
+                    warnings.update({key:list(value.shape)})
+        return atoms,warnings
+
+#---------------------------------------#
 def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
@@ -37,26 +62,7 @@ def main(args):
     atoms = [None]*N
     for n,entry in enumerate(dataset):
         print("\tConverting dataset: structure {:d}/{:d}".format(n+1,N),end="\r")
-        positions = entry.pos.detach().numpy()
-        cell = entry.lattice.detach().numpy()[0,:,:]
-        symbols = entry.symbols
-        atoms[n] = Atoms(positions=positions,cell=cell,symbols=symbols,pbc=cell is not None)
-        Natoms = atoms[n].get_global_number_of_atoms()
-        # atoms[n].info["dipole"] = test[n].dipole.detach().numpy()
-
-        for key, value in entry.items():
-            if key in ["pos","lattice","pbc","symbols"]:
-                continue
-            if type(value) in [float,int,str]:
-                atoms[n].info["key"] = value
-            else:
-                if value.ndim == 1:
-                    atoms[n].info[key] = value.detach().numpy().reshape((-1,))
-                if value.ndim == 2:
-                    if value.shape[0] == Natoms :
-                        atoms[n].arrays[key] = value.detach().numpy().reshape((Natoms,-1))
-                    else:
-                        warnings.update({key:list(value.shape)})
+        atoms[n], warnings = Data2Atoms(entry,warnings)
                 
     print("\t{:s}: it was not possible to save this information to file due to their shape:".format(warning))
     show_dict(warnings,string="\t\t",width=10)
