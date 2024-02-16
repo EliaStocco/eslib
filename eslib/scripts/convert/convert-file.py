@@ -49,12 +49,12 @@ def main(args):
     if args.input_format is None:
         print("\tDeducing input file format: ", end="")
         from ase.io.formats import filetype
-        args.input_format = filetype(args.input, read=isinstance(args.input, str))
+        args.input_format = filetype(args.input, read=True)
         print(args.input_format)
     if args.output_format is None:
         print("\tDeducing output file format: ", end="")
         from ase.io.formats import filetype
-        args.output_format = filetype(args.output, read=isinstance(args.output, str))
+        args.output_format = filetype(args.output, read=False)
         print(args.output_format)
 
     if args.input_format is None:
