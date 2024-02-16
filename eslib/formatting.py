@@ -34,6 +34,10 @@ def esfmt(prepare_parser:callable, description:str=None):
     except: pass
     # print(description)
 
+    start      = datetime.now()
+    start_date = start.date().strftime("%Y-%m-%d")
+    start_time = start.time().strftime("%H:%M:%S")
+
     @contextmanager
     def print_header(args:dict,main:callable):
         
@@ -42,15 +46,41 @@ def esfmt(prepare_parser:callable, description:str=None):
         # try: print("script module: {:s}".format(inspect.getmodule(main.__name__)))
         # except: pass
         print("working directory: {:s}".format(os.getcwd()))
-        print("date: {:s}".format(datetime.now().date().strftime("%Y-%m-%d")))
-        print("time: {:s}".format(datetime.now().time().strftime("%H:%M:%S")))
+        print("start date: {:s}".format(start_date))
+        print("starttime: {:s}".format(start_time))
 
         print("\n\t{:s}".format(description))
         print("\n\t{:s}:".format(input_arguments))
         for k in args.__dict__.keys():
             print("\t{:>20s}:".format(k), getattr(args, k))
         print()
-        yield
+    
+    def print_end():
+        print("\n\t{:s}\n".format(closure))
+
+        end      = datetime.now()  
+        end_date = end.date().strftime("%Y-%m-%d")
+        end_time = end.time().strftime("%H:%M:%S")
+
+
+        elapsed_seconds = int((end - start).total_seconds())
+
+        def format_seconds_to_hhmmss(seconds):
+            hours = seconds // (60*60)
+            seconds %= (60*60)
+            minutes = seconds // 60
+            seconds %= 60
+            return "%02i:%02i:%02i" % (hours, minutes, seconds)
+
+        # # Convert elapsed time into hours, minutes, and seconds
+        # hours   = int(elapsed_seconds // 3600)
+        # minutes = int(elapsed_seconds % 3600 // 60)
+        # seconds = int(elapsed_seconds % 60)
+
+        print("end date: {:s}".format(end_date))
+        print("end time: {:s}".format(end_time))
+        print("elapsed time: {:s}".format(format_seconds_to_hhmmss(elapsed_seconds)))
+        print("elapsed seconds: {:d}".format(elapsed_seconds))
 
     def wrapper(main: callable):
         def wrapped_main(args=dict()):
@@ -65,14 +95,14 @@ def esfmt(prepare_parser:callable, description:str=None):
             if args is None:
                 raise ValueError("code bug")
 
-            # Print the script's description and input arguments
-            with print_header(args,main):
-                # main
-                out = main(args)
+            # print the script's description and input arguments
+            print_header(args,main)
 
-            #------------------#
-            # Script completion message
-            print("\n\t{:s}\n".format(closure))
+            # run the script
+            out = main(args)
+
+            # print completion message
+            print_end()
 
             return out
 
