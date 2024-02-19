@@ -194,20 +194,20 @@ def train(
         case "plateau":
             from torch.optim.lr_scheduler import ReduceLROnPlateau
             scheduler = ReduceLROnPlateau(optimizer,factor=parameters["scheduler-factor"],patience=parameters["scheduler-patience"])
-        case "ma":
-            from eslib.nn.functions import MovingAverage
-            movingaverage = MovingAverage(parameters["scheduler-window"])
-            movingaverageLR = MovingAverage(parameters["scheduler-window"])
-            from torch.optim.lr_scheduler import LambdaLR
-            def myscheduler(epoch):
-                if epoch < parameters["scheduler-epoch"]:
-                    movingaverageLR.update(1)
-                    return movingaverageLR.get_ma() 
-                else:
-                    new = 1 - parameters["scheduler-max"] * np.exp( - movingaverage.get_madt() )
-                    movingaverageLR.update(new)
-                    return movingaverageLR.get_ma()
-            scheduler = LambdaLR(optimizer,lr_lambda=myscheduler)
+        # case "ma":
+        #     from eslib.nn.functions import MovingAverage
+        #     movingaverage = MovingAverage(parameters["scheduler-window"])
+        #     movingaverageLR = MovingAverage(parameters["scheduler-window"])
+        #     from torch.optim.lr_scheduler import LambdaLR
+        #     def myscheduler(epoch):
+        #         if epoch < parameters["scheduler-epoch"]:
+        #             movingaverageLR.update(1)
+        #             return movingaverageLR.get_ma() 
+        #         else:
+        #             new = 1 - parameters["scheduler-max"] * np.exp( - movingaverage.get_madt() )
+        #             movingaverageLR.update(new)
+        #             return movingaverageLR.get_ma()
+        #     scheduler = LambdaLR(optimizer,lr_lambda=myscheduler)
         case _:
             raise ValueError("scheduler not known")
         

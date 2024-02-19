@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 from ase.io import read
 import matplotlib.pyplot as plt
-from eslib.nn.functions.functions import get_model
+from eslib.nn.user import get_model
 
 # from chart_studio.plotly import plotly as py
 # import chart_studio.tools as tls

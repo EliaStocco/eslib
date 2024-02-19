@@ -12,7 +12,7 @@ torch.set_default_dtype(default_dtype)
 from eslib.nn.training import hyper_train_at_fixed_model
 # from elia.nn.network import aile3nn
 from eslib.functions import add_default, str2bool
-from eslib.nn.functions import get_class
+from eslib.nn.user import get_class
 
 #----------------------------------------------------------------#
 # Documentation
