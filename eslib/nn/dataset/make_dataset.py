@@ -10,7 +10,10 @@ import numpy as np
 #----------------------------------------------------------------#
 def compute_edge_vec(pos,lattice,edge_src,edge_dst,edge_shift,pbc):
     edge_vec = pos[edge_dst] - pos[edge_src]
-    if pbc :
+    pbc = np.asarray(pbc)
+    if not (np.all(pbc) or np.all(~pbc)):
+        raise ValueError("All the structures have to be periodic or non periodic. The code can not deal with both of them.")
+    if np.all(pbc) :
         batch = pos.new_zeros(pos.shape[0], dtype=torch.long)
         edge_batch = batch[edge_src]
         edge_vec = edge_vec + torch.einsum('ni,nij->nj',edge_shift,lattice[edge_batch])
@@ -127,7 +130,6 @@ def preprocess(lattice, positions:torch.Tensor, symbols:list, max_radius, defaul
     return pos, lattice, x, edge_vec, edge_index, edge_shift
 
 #----------------------------------------------------------------#
-
 def make_dataset(systems:Atoms,max_radius:float,disable:bool=False):
 
     dataset = [None] * len(systems)
@@ -182,9 +184,8 @@ def make_dataset(systems:Atoms,max_radius:float,disable:bool=False):
     return dataset
 
 #----------------------------------------------------------------#
-
 def make_datapoint(lattice, positions, symbols, max_radius, default_dtype, pbc, **argv)->Data:
-
+    """Create a single datapoint from the lattice parameters (`ase` format), positions, symbols and cut-off radius/max_radius."""
     # lattice has to be in 'ase' format:
     # | a_1x a_1y a_1z |
     # | a_2x a_2y a_2z |
@@ -202,3 +203,26 @@ def make_datapoint(lattice, positions, symbols, max_radius, default_dtype, pbc, 
             edge_shift=edge_shift,
             batch = torch.full((len(pos),),0) # I need this in i-PI
         )
+
+def enforce_dependency(X:Data,check:bool=True):
+    """Enforce the dependency of `X.edge_vec` on `X.pos` by recomputing the former."""
+    _edge_vec_old = X.edge_vec.detach()
+    try: lattice = X.lattice
+    except: lattice = None
+    try: edge_shift = X.edge_shift
+    except: edge_shift = None
+    edge_vec = compute_edge_vec(pos=X.pos,\
+                                lattice=lattice,\
+                                edge_src=X.edge_index[0],\
+                                edge_dst=X.edge_index[1],\
+                                edge_shift=edge_shift,\
+                                pbc=X.pbc)
+    if check and not torch.allclose(_edge_vec_old,edge_vec.detach()):
+        raise ValueError("recomputed 'edge_vec' are different from the previously computed ones.")
+    X.edge_vec = edge_vec
+    n_batch = 1 if type(X.Natoms) == int else len(X.Natoms) 
+    X.batch = torch.zeros((n_batch,int(len(X.pos)/n_batch)),dtype=int)
+    for n in range(n_batch):
+        X.batch[n,:] = n
+    X.batch = X.batch.flatten() 
+    return X
