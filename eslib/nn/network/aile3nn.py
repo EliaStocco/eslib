@@ -159,7 +159,7 @@ class aile3nn(SimpleNetwork,iPIinterface):
 class aile3nnOxN(aile3nn):
     """Add a fixed charges (oxidation number) contribution to the dipole to let 'aile3nn' learn only the 'non trivial' behavior."""
 
-    def __init__(self: T,**kwargs) -> None:
+    def __init__(self: T,fixed_charges_only:bool=False,**kwargs) -> None:
         # call the __init__ methods of both parent classes explicitly
         aile3nn.__init__(self, **kwargs)
         if self.output != "D":
@@ -167,6 +167,7 @@ class aile3nnOxN(aile3nn):
         self.Nchem = int(str(self.irreps_in).split("x")[0])
         self.oxidation_numbers = torch.nn.Parameter(torch.rand((self.Nchem))) 
         self._x2index = torch.arange(self.Nchem,requires_grad=False)
+        self.fixed_charges_only = fixed_charges_only
         pass
 
     def get_charges(self,data: Union[Data, Dict[str, torch.Tensor]]) -> torch.Tensor:
@@ -177,7 +178,11 @@ class aile3nnOxN(aile3nn):
 
     def forward(self, data: Union[Data, Dict[str, torch.Tensor]]) -> torch.Tensor:
         # git@github.com:ACEsuit/mace.git
-        y = super().forward(data)
         charges = self.get_charges(data)
         fixed_charges_dipole = data["pos"] * charges.unsqueeze(1)
-        return y + fixed_charges_dipole.sum(axis=0)
+        fixed_charges_dipole = fixed_charges_dipole.sum(axis=0)
+        if self.fixed_charges_only:
+            return fixed_charges_dipole
+        else :
+            y = super().forward(data)
+            return y + fixed_charges_dipole
