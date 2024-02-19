@@ -53,7 +53,7 @@ default_values = {
         "use_shift"        : None,
         "restart"          : False,
         "recompute_loss"   : False,
-        # "pbc"              : False,
+        "fixed_charges_only": False,
         "instructions"     : None,
         "debug"            : False,
         "indices"          : None,
@@ -220,6 +220,9 @@ def main():
     #####################
 
     cls = get_class(parameters["module"],parameters["class"])
+
+    if parameters["class"] == "aile3nnOxN":
+        kwargs["fixed_charges_only"] = parameters["fixed_charges_only"]
 
     instructions = {
             "kwargs"           : copy(kwargs),
