@@ -1,31 +1,22 @@
 #!/usr/bin/env python
 import numpy as np
 import os
-from tqdm import tqdm
 from eslib.nn.functions import get_model
 from eslib.functions import suppress_output
 from eslib.input import str2bool
 from eslib.classes.trajectory import trajectory as Trajectory
+from eslib.formatting import esfmt, warning
+import torch 
+from tqdm import tqdm
+from eslib.nn.dataset import make_dataloader
+from eslib.scripts.nn.dataset2extxyz import Data2Atoms
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Compute the dipole values for a trajectory using a neural network"
-closure = "Job done :)"
-input_arguments = "Input arguments"
+description = "Compute the dipole values for a trajectory using a neural network."
 
 #---------------------------------------#
-# colors
-try :
-    import colorama
-    from colorama import Fore, Style
-    colorama.init(autoreset=True)
-    description     = Fore.GREEN    + Style.BRIGHT + description             + Style.RESET_ALL
-    closure         = Fore.BLUE     + Style.BRIGHT + closure                 + Style.RESET_ALL
-    input_arguments = Fore.GREEN    + Style.NORMAL + input_arguments         + Style.RESET_ALL
-except:
-    pass
-
-def prepare_args():
+def prepare_args(description):
     """Prepare parser of user input arguments."""
     import argparse
     parser = argparse.ArgumentParser(description=description)
@@ -34,42 +25,40 @@ def prepare_args():
     parser.add_argument("-p" , "--parameters"  , type=str     , **argv, help="torch parameters file (default: 'parameters.pth')", default="parameters.pth",)
     parser.add_argument("-t" , "--trajectory"  , type=str     , **argv, help="trajectory file [a.u.]")
     parser.add_argument("-z" , "--compute_BEC" , type=str2bool, **argv, help="whether to compute BECs (default: false)", default=False)
-    parser.add_argument("-d" , "--debug"       , type=str2bool, **argv, help="debug mode (default: false)", default=False)
+    # parser.add_argument("-d" , "--debug"       , type=str2bool, **argv, help="debug mode (default: false)", default=False)
     parser.add_argument("-o" , "--output"      , type=str     , **argv, help="output file with the dipoles (default: 'dipole.nn.txt')", default="dipole.nn.txt")
     parser.add_argument("-oz", "--output_BEC"  , type=str     , **argv, help="output file with the BECs (default: 'bec.nn.txt')", default="bec.nn.txt")
     return parser.parse_args()
 
 #---------------------------------------#
-def main():
+@esfmt(prepare_args,description)
+def main(args):
 
-    #---------------------------------------#
-    # Parse the command-line arguments
-    args = prepare_args()
-
-    # Print the script's description
-    print("\n\t{:s}".format(description))
-
-    print("\n\t{:s}:".format(input_arguments))
-    for k in args.__dict__.keys():
-        print("\t{:>20s}:".format(k),getattr(args,k))
-    print()
+    print("\t{:s}: this script has to be optimized for large trajectories.".format(warning))
 
     #------------------#
     # trajectory
-    print("\tReading atomic structures from file '{:s}' ... ".format(args.trajectory), end="")
-    trajectory = Trajectory(args.trajectory)
-    print("done")
+    use_dataset = False
+    if str(args.trajectory).endswith(".pth"):
+        trajectory = torch.load(args.trajectory)   
+        use_dataset = True
+        # dataloader_train = make_dataloader(train_dataset, batch_size)  
+    else:
+        print("\tReading atomic structures from file '{:s}' ... ".format(args.trajectory), end="")
+        trajectory = Trajectory(args.trajectory)
+        print("done")
 
     N = len(trajectory)
     print("\tn. of atomic structures: {:d}".format(N))
+    example = Data2Atoms(trajectory[0])[0] if use_dataset else trajectory[0]
 
     #------------------#
     print("\tLoading model ... ",end="")
     file_in = os.path.normpath("{:s}".format(args.instructions))
     file_pa = os.path.normpath("{:s}".format(args.parameters))
-    with suppress_output(not args.debug):
+    with suppress_output():
         model = get_model(file_in,file_pa)
-        model.store_chemical_species(atoms=trajectory[0])
+        model.store_chemical_species(atoms=example)
     print("done")
 
     #------------------#
@@ -77,20 +66,31 @@ def main():
     print("\tComputing dipole{:s} ... ".format(line))
     D = np.full((N,3),np.nan)
     if args.compute_BEC:
-        Z = np.full((N,3*len(trajectory[0].positions),3),np.nan)
+        Z = np.full((N,3*len(example.positions),3),np.nan)
 
-    #with tqdm(enumerate(trajectory)) as bar:
-    for n,atoms in enumerate(trajectory):
-        print("\t{:>6d}/{:<d}".format(n+1,N),end="\r")
-        pos = atoms.positions
-        cell = np.asarray(atoms.cell).T if np.all(atoms.get_pbc()) else None
+    if not use_dataset:
+        #with tqdm(enumerate(trajectory)) as bar:
+        for n,atoms in enumerate(list(trajectory)):
+            print("\t{:>6d}/{:<d}".format(n+1,N),end="\r")
+            # pos = atoms.positions
+            # cell = np.asarray(atoms.cell).T if np.all(atoms.get_pbc()) else None
+            if args.compute_BEC:
+                d,z,x = model.get_value_and_jac(pos=atoms.get_positions(),cell=atoms.get_cell())
+                Z[n,:,:] = z.detach().numpy()#.flatten()
+            else:
+                d,x = model.get(pos=atoms.get_positions(),cell=atoms.get_cell())
+            D[n,:] = d.detach().numpy()#.flatten()
+    else:        
         if args.compute_BEC:
-            d,z,x = model.get_value_and_jac(pos=pos.reshape((-1,3)),cell=cell)
-            Z[n,:,:] = z.detach().numpy()#.flatten()
+            for n,X in tqdm(enumerate(trajectory),total=len(trajectory)):
+                d,z,x = model.get_value_and_jac(X=X)
+                Z[n,:,:] = z.detach().numpy()
+                D[n,:] = d.detach().numpy()
         else:
-            d,x = model.get(pos=pos.reshape((-1,3)),cell=cell)
-        D[n,:] = d.detach().numpy()#.flatten()
-        
+            X = next(iter(make_dataloader(dataset=trajectory,batch_size=len(trajectory),shuffle=False,drop_last=False)))
+            d,x = model.get(X=X)
+            D = d.detach().numpy()
+
     #------------------#
     print("\tSaving dipoles to file '{:s}' ... ".format(args.output),end="")
     np.savetxt(args.output,D)
@@ -103,15 +103,6 @@ def main():
             for n in range(N):
                 np.savetxt(f,Z[n,:,:],header="step: {:d}".format(n))
         print("done")
-    
-
-    #------------------#
-    # Script completion message
-    print("\n\t{:s}\n".format(closure))
 
 if __name__ == "__main__":
     main()
-
-
-
-print()
