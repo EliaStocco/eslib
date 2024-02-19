@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import os
-from eslib.nn.functions import get_model
+from eslib.nn.user import get_model
 from ase.io import read
 from e3nn.o3 import rand_matrix
 from eslib.formatting import esfmt
@@ -40,6 +40,11 @@ def main(args):
     file_pa = os.path.normpath("{:s}".format(args.parameters)) if args.parameters is not None else None
     model = get_model(file_in,file_pa)
     print("done")
+
+    #------------------#
+    from eslib.nn.network import iPIinterface
+    if not isinstance(model,iPIinterface):
+        raise ValueError("'model' should be 'iPIinterface'.")
 
     #------------------#
     pbc = np.all(atoms.get_pbc())

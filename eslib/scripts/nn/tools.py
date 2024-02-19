@@ -1,7 +1,7 @@
 import numpy as np
 import os
 from ase.io import read
-from eslib.nn.functions import get_model
+from eslib.nn.user import get_model
 
 def get_tools(args):
     #------------------#

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import os
-from eslib.nn.functions import get_model
+from eslib.nn.user import get_model
 from eslib.functions import suppress_output
 from ase.io import read
 from e3nn.o3 import rand_matrix
@@ -38,7 +38,7 @@ def main(args):
     file_pa = os.path.normpath("{:s}".format(args.parameters)) if args.parameters is not None else None
     with suppress_output(n):
         model = get_model(file_in,file_pa)
-        model.store_chemical_species(atoms=atoms)
+        model.store_chemical_species(atoms)
     # print("done")
 
     #------------------#

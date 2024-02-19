@@ -1,0 +1,19 @@
+{
+    "kwargs": {
+        "output": "D",
+        "irreps_in": "2x0e",
+        "irreps_out": "1x1o",
+        "max_radius": 5,
+        "num_neighbors": 2,
+        "pool_nodes": true,
+        "number_of_basis": 10,
+        "mul": 1,
+        "layers": 2,
+        "lmax": 1,
+        "dropout_probability": 0.0,
+        "use_shift": null
+    },
+    "class": "aile3nnOxN",
+    "module": "eslib.nn.network",
+    "chemical-symbols" : ["O","H","H"]
+}

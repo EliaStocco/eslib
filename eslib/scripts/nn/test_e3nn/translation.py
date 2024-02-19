@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import os
-from eslib.nn.functions import get_model
+from eslib.nn.user import get_model
 from ase.io import read
 from ase.geometry import wrap_positions
 from eslib.formatting import esfmt
@@ -41,7 +41,11 @@ def main(args):
     print("done")
 
     #------------------#
-    
+    from eslib.nn.network import iPIinterface
+    if not isinstance(model,iPIinterface):
+        raise ValueError("'model' should be 'iPIinterface'.")
+
+    #------------------#    
     pos = atoms.positions.reshape((-1,3))
     # in i-PI format
     pbc = np.all(atoms.get_pbc())

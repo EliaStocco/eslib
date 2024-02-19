@@ -5,7 +5,7 @@ import os
 import sys
 from ase.io import read
 # from elia.classes import MicroState
-from eslib.nn.functions import get_model
+from eslib.nn.user import get_model
 from eslib.formatting import esfmt
 
 #####################
@@ -71,7 +71,7 @@ def main(args):
         atoms = read(args.positions,index=0)
     sys.stdout = original_stdout
 
-    model.store_chemical_species(atoms=atoms)
+    model.store_chemical_species(atoms)
 
     # if not model.pbc :
     #     atoms.cells = [None]*len(atoms.positions)    

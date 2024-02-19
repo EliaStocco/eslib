@@ -56,9 +56,9 @@ def main(args):
     #------------------#
     best_parameters = os.path.normpath("{:s}/{:s}".format(par_folder,best_parameters))
     print("\n\tlowest loss:")
-    print("\t\t{:6s}: {:e}".format("value",minloss))
-    print("\t\t{:6s}: {:d}".format("epoch",epoch))
-    print("\t\t{:6s}: {:s}".format("file",best_parameters))
+    print("\t{:>10s}: {:e}".format("value",minloss))
+    print("\t{:>10s}: {:d}".format("epoch",epoch))
+    print("\t{:>10s}: {:s}".format("file",best_parameters))
 
 #---------------------------------------#
 if __name__ == "__main__":

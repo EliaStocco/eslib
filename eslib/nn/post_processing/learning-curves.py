@@ -10,7 +10,7 @@ import numpy as np
 # from copy import deepcopy
 import time
 import matplotlib.pyplot as plt
-from eslib.nn.functions.functions import get_model
+from eslib.nn.user import get_model
 # from elia.functions import plot_bisector
 from eslib.nn.dataset import make_dataloader
 

@@ -1,2 +1,4 @@
 # from .aile3nn import aile3nn as aile3nn
-from eslib.nn.network.aile3nn import aile3nn, aile3nnOxN
+from .aile3nn import aile3nn as aile3nn
+from .aile3nn import aile3nnOxN as aile3nnOxN
+from .iPIinterface import iPIinterface as iPIinterface

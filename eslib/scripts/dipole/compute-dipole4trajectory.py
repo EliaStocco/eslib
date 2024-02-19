@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import os
-from eslib.nn.functions import get_model
+from eslib.nn.user import get_model
 from eslib.functions import suppress_output
 from eslib.input import str2bool
 from eslib.classes.trajectory import trajectory as Trajectory
@@ -58,7 +58,7 @@ def main(args):
     file_pa = os.path.normpath("{:s}".format(args.parameters))
     with suppress_output():
         model = get_model(file_in,file_pa)
-        model.store_chemical_species(atoms=example)
+        model.store_chemical_species(example)
     print("done")
 
     #------------------#

@@ -36,12 +36,21 @@ class iPIinterface(ABC):
                   "pbc": lattice is not None and np.linalg.det(lattice) != np.inf }
         return make_datapoint(**other,**argv) 
         
-    def store_chemical_species(self,file:str=None,atoms:Atoms=None,**argv):
-        if file is not None:
-            atoms = read(file,**argv)
-        elif atoms is None:
-            raise ValueError("'file' or 'atoms' can not be both None.")
-        self._symbols = atoms.get_chemical_symbols()
+    def store_chemical_species(self,x,**argv):
+        """Save the chemical symbols of an atomic structure into an object attribute. 
+        You can provide a file (whoch will be read using `ase.io.read`), an `ase.Atoms` object or a `list` of `str` with the symbols."""
+        if isinstance(x,str):
+            atoms = read(x,**argv)
+            self.store_chemical_species(atoms)
+        elif isinstance(x,Atoms):
+            symbols = x.get_chemical_symbols()
+            self.store_chemical_species(symbols)
+        elif isinstance(x,list):
+            if not all(isinstance(elem, str) for elem in x):
+                raise TypeError("the provided list should contain 'str' elements.")
+            self._symbols = x
+        else:
+            raise TypeError("type not implemented")
     
     def correct_cell(self,cell=None,check:bool=True):
         """Set the cell to a cube with infinite lattice vectors or check that it is upper triangular."""

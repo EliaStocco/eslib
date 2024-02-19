@@ -58,7 +58,8 @@ def main():
     #---------------------------------------#
     print("\tCompute interatormic distances ... ")
     max_distances = np.zeros(len(trajectory))
-    out = np.zeros(3)
+    Natoms = len(trajectory[0])
+    out = np.full(int(Natoms*(Natoms-1)/2),np.nan)
     N = len(trajectory)
     with tqdm(enumerate(trajectory),bar_format='\t{l_bar}{bar:10}{r_bar}{bar:-10b}') as bar:
         for k,atoms in bar:
