@@ -23,6 +23,8 @@ closure         = Fore.BLUE   + Style.BRIGHT + closure                 + Style.R
 input_arguments = Fore.GREEN  + Style.NORMAL + input_arguments         + Style.RESET_ALL
 warning         = Fore.MAGENTA    + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
 
+def line():
+    print("-"*30)
 
 def esfmt(prepare_parser:callable, description:str=None):
     """Decorator for the 'main' function of many scripts."""
@@ -41,13 +43,13 @@ def esfmt(prepare_parser:callable, description:str=None):
     @contextmanager
     def print_header(args:dict,main:callable):
         
+        line()
         try: print("script file: {:s}".format(inspect.getfile(main))) #main.__file__))
-        except: pass
-        # try: print("script module: {:s}".format(inspect.getmodule(main.__name__)))
-        # except: pass
+        except: pass        
         print("working directory: {:s}".format(os.getcwd()))
         print("start date: {:s}".format(start_date))
-        print("starttime: {:s}".format(start_time))
+        print("start time: {:s}".format(start_time))
+        line()
 
         print("\n\t{:s}".format(description))
         print("\n\t{:s}:".format(input_arguments))
@@ -76,11 +78,12 @@ def esfmt(prepare_parser:callable, description:str=None):
         # hours   = int(elapsed_seconds // 3600)
         # minutes = int(elapsed_seconds % 3600 // 60)
         # seconds = int(elapsed_seconds % 60)
-
+        line()
         print("end date: {:s}".format(end_date))
         print("end time: {:s}".format(end_time))
         print("elapsed time: {:s}".format(format_seconds_to_hhmmss(elapsed_seconds)))
         print("elapsed seconds: {:d}".format(elapsed_seconds))
+        line()
 
     def wrapper(main: callable):
         def wrapped_main(args=dict()):
