@@ -5,18 +5,19 @@ import pandas as pd
 from eslib.formatting import esfmt
 
 #---------------------------------------#
-description = "post-process a 'e3nn' model training"
+description = "Returns the file path of the torch parameters with the lowest validation loss."
 
 #---------------------------------------#
 def prepare_args(description):
     """Prepare parser of user input arguments."""
     import argparse
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("-t","--training",  type=str,help="training input file (default: 'input.json')", default="input.json")
-    parser.add_argument("-i","--instructions",  type=str,help="model input file (default: 'instructions.json')", default="instructions.json")
-    parser.add_argument("-f","--folder",  type=str,help="folder (default: '.')", default=".")
-    parser.add_argument("-bs","--batch_size",  type=int,help="batch size")
-    parser.add_argument("-lr","--learning_rate",  type=float, help="learning rate")
+    argv = {"metavar" : "\b",}
+    parser.add_argument("-t" ,"--training"     ,  **argv, type=str  , help="training input file (default: 'input.json')", default="input.json")
+    parser.add_argument("-i" ,"--instructions" ,  **argv, type=str  , help="model input file (default: 'instructions.json')", default="instructions.json")
+    parser.add_argument("-f" ,"--folder"       ,  **argv, type=str  , help="folder where the previous files are stored (default: '.')", default=".")
+    parser.add_argument("-bs","--batch_size"   ,  **argv, type=int  , help="batch size")
+    parser.add_argument("-lr","--learning_rate",  **argv, type=float, help="learning rate")
     return parser.parse_args()
 
 #---------------------------------------#
@@ -37,6 +38,7 @@ def main(args):
     loss = pd.read_csv(file)
 
     epoch = loss["val"].argmin()
+    minloss = loss["val"].min()
 
     #------------------#
     tmp = args.folder, parameters["output_folder"], parameters["name"], args.batch_size, args.learning_rate
@@ -53,7 +55,10 @@ def main(args):
 
     #------------------#
     best_parameters = os.path.normpath("{:s}/{:s}".format(par_folder,best_parameters))
-    print("\n\tlowest loss file: {:s}\n".format(best_parameters))
+    print("\n\tlowest loss:")
+    print("\t\t{:6s}: {:s}\n".format("value",minloss))
+    print("\t\t{:6s}: {:d}\n".format("epoch",epoch))
+    print("\t\t{:6s}: {:e}\n".format("file",best_parameters))
 
 #---------------------------------------#
 if __name__ == "__main__":
