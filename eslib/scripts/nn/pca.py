@@ -111,6 +111,7 @@ def main(args):
     print("done")
 
     #------------------#
+    user_par = None
     if args.parameters is not None :
         print("\n\tReading parameters from file '{:s}' ... ".format(args.parameters),end="")
         with open(args.parameters, 'r') as file:
@@ -145,7 +146,7 @@ def main(args):
     print("done")
 
     tmp = np.concatenate([T, features], axis=1)
-    print("\tSaving analysis results to file '{:s}'".format(args.output),end="")
+    print("\tSaving analysis results to file '{:s}' ... ".format(args.output),end="")
     np.savetxt(args.output,tmp,fmt='%24.18e')
     print("done")
 
