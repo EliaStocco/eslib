@@ -5,26 +5,17 @@ import os
 import torch
 import numpy as np
 from copy import copy
-import argparse
 from eslib.functions import str2bool
 from eslib.nn.dataset import make_dataset
 from eslib.input import size_type
+from eslib.formatting import esfmt
 
+#---------------------------------------#
 description = "Build a dataset from an 'extxyz' file, readable by 'train-e3nn-model.py'."
 
-
-# def size_type(s):
-#     s = s.split("[")[1].split("]")[0].split(",")
-#     match len(s):
-#         case 3:
-#             return np.asarray([ int(k) for k in s ])
-#         case _:
-#             raise ValueError("You should provide 3 integers") 
-
-
-def prepare_args():
-
-    # Define the command-line argument parser with a description
+#---------------------------------------#
+def prepare_args(description):
+    import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b"}
     parser.add_argument("-i", "--input"  , type=str, **argv, help="input 'extxyz' file with the atomic structures")
@@ -34,15 +25,14 @@ def prepare_args():
     parser.add_argument("-s", "--seed", type=int, **argv, default=None, help="seed of the random numbers generator (default: None)")
     parser.add_argument("-pbc", "--pbc"  ,  type=str2bool, **argv, default=True, help="whether the system is periodic (default: True)")
     parser.add_argument("-rc", "--cutoff_radius",  type=float, **argv, help="cutoff radius in atomic unit")
-    
     return parser.parse_args()
 
-def main():
-
-    args = prepare_args()
+#---------------------------------------#
+@esfmt(prepare_args,description)
+def main(args):
 
     args.size = np.asarray(args.size)    
-    if np.any( args.size < 0 ):
+    if np.any( args.size[1:] < 0 ):
         raise ValueError("The size of the datasets should be non-negative.")
     if args.cutoff_radius <= 0 :
         raise ValueError("The cutoff radius (-rc,--cutoff_radius) has to be positive.")
@@ -55,6 +45,7 @@ def main():
     atoms = read(args.input,format="extxyz",index=":")
     print("done")
 
+    #------------------#
     if args.random:
         if args.seed is not None:
             print("\tSetting the seed of the random numbers generator equal to {:d} ... ".format(args.seed), end="")
@@ -64,6 +55,9 @@ def main():
         random.shuffle(atoms)
         print("done")
 
+    #------------------#
+    if args.size[0] == -1:
+        args.size = np.asarray([len(atoms),0,0])
     N = args.size.sum()
     print("\tExtracting {:d} atomic structures ... ".format(N), end="")
     atoms = atoms[:N]
@@ -76,12 +70,23 @@ def main():
         "test"  : copy(atoms[n+i:n+i+j]),
     }
 
+    #------------------#
     print()
     for k in dataset.keys():
         print("\tBuilding the '{:s}' dataset ({:d} atomic structures) ... ".format(k,len(dataset[k])), end="")
         dataset[k] = make_dataset(systems=dataset[k],max_radius=args.cutoff_radius,disable=True)   
         print("done")
 
+    #------------------#
+    example = dataset['train'][0].to_dict()
+    keys = example.keys()
+    print("\n\tStored information:")
+    for k in keys:
+        try: shape = list(example[k].shape)
+        except: shape = str(type(example[k]))
+        print("\t\t{:20s}: ".format(k),shape)        
+
+    #------------------#
     print()
     for k in dataset.keys():
         file = "{:s}.{:s}.pth".format(args.output,k)
@@ -91,8 +96,6 @@ def main():
         torch.save(d,file)
         print("done")
 
-    # Script completion message
-    print("\n\tJob done :)\n")
-
+#---------------------------------------#
 if __name__ == "__main__":
     main()
