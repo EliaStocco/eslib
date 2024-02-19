@@ -33,7 +33,7 @@ def Data2Atoms(entry:Data,warnings:dict={}):
                     atoms.arrays[key] = value.detach().numpy().reshape((Natoms,-1))
                 else:
                     warnings.update({key:list(value.shape)})
-        return atoms,warnings
+    return atoms,warnings
 
 #---------------------------------------#
 def prepare_args(description):
@@ -63,9 +63,10 @@ def main(args):
     for n,entry in enumerate(dataset):
         print("\tConverting dataset: structure {:d}/{:d}".format(n+1,N),end="\r")
         atoms[n], warnings = Data2Atoms(entry,warnings)
-                
-    print("\t{:s}: it was not possible to save this information to file due to their shape:".format(warning))
-    show_dict(warnings,string="\t\t",width=10)
+
+    if len(warnings.keys()) > 0 :        
+        print("\t{:s}: it was not possible to save this information to file due to their shape:".format(warning))
+        show_dict(warnings,string="\t\t",width=10)
 
     #------------------#
     print("\n\tWriting atomic structure to file file '{:s}' ... ".format(args.output), end="")
