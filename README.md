@@ -12,6 +12,7 @@ conda install pytorch torchvision torchaudio -c pytorch
 CUDA=cpu
 pip install torch-scatter -f https://data.pyg.org/whl/torch-2.2.0+${CUDA}.html
 pip install torch-geometric
+pip install e3nn
 conda install anaconda::pandas
 ```
 
