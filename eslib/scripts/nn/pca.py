@@ -122,19 +122,18 @@ def main(args):
         show_dict(user_par,string="\t")
 
     print("\tApplying {:s} ... ".format(args.method),end="")
-    match args.method:
-        case "pca":
-            default_par = {}
-            parameters = add_default(user_par,default_par)
-            T = PCA(n_components=args.number,**parameters).fit_transform(X)
-        case "tsne":
-            default_par = {'learning_rate':'auto', 'init':'random', 'perplexity':40}
-            parameters = add_default(user_par,default_par)
-            T = TSNE(n_components=args.number,**parameters).fit_transform(X)
-        case "mds":
-            default_par = {}
-            parameters = add_default(user_par,default_par)
-            T = MDS(n_components=args.number,**parameters).fit_transform(X)
+    if args.method == "pca":
+        default_par = {}
+        parameters = add_default(user_par,default_par)
+        T = PCA(n_components=args.number,**parameters).fit_transform(X)
+    elif args.method == "tsne":
+        default_par = {'learning_rate':'auto', 'init':'random', 'perplexity':40}
+        parameters = add_default(user_par,default_par)
+        T = TSNE(n_components=args.number,**parameters).fit_transform(X)
+    elif args.method == "mds":
+        default_par = {}
+        parameters = add_default(user_par,default_par)
+        T = MDS(n_components=args.number,**parameters).fit_transform(X)
     print("done")
 
     #------------------#

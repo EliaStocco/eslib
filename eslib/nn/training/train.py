@@ -118,6 +118,8 @@ def train(
             if k == "loss":
                 if type(parameters["loss"]) == str:
                     print("\tloss: ", parameters["loss"])
+            else:
+                pass
 
     ##########################################
     # default values
@@ -156,12 +158,11 @@ def train(
     ##########################################
     # set the loss function
     if type(parameters["loss"]) == str:
-        match parameters["loss"].lower():
-            case "mse":
-                from torch.nn import MSELoss
-                loss_fn = MSELoss()
-            case _:
-                raise ValueError("loss function not known")
+        if parameters["loss"].lower() == "mse":
+            from torch.nn import MSELoss
+            loss_fn = MSELoss()
+        else:
+            raise ValueError("loss function not known")
     else :
         loss_fn = parameters["loss"]
         print("\n\tprovided loss function will be supposed to be 'callable'")
@@ -171,8 +172,7 @@ def train(
     match parameters["optimizer"].lower():
         case "adam":
             from torch.optim import Adam
-            optimizer = Adam(   params=model.parameters(), 
-                                lr=parameters["lr"])
+            optimizer = Adam(   params=model.parameters(), lr=parameters["lr"])
         case "adamw":
             from torch.optim import AdamW
             optimizer = AdamW(  params=model.parameters(), 
@@ -186,14 +186,15 @@ def train(
     movingaverage = None
     scheduler = None
     movingaverageLR = None
-    match parameters["scheduler"].lower():
-        case "" :
-            scheduler = None
-        case "none" :
-            scheduler = None
-        case "plateau":
-            from torch.optim.lr_scheduler import ReduceLROnPlateau
-            scheduler = ReduceLROnPlateau(optimizer,factor=parameters["scheduler-factor"],patience=parameters["scheduler-patience"])
+    tmp = parameters["scheduler"].lower()
+    if tmp == "" :
+        scheduler = None
+    elif tmp == "none" :
+        scheduler = None
+    elif tmp == "plateau":
+        from torch.optim.lr_scheduler import ReduceLROnPlateau
+        scheduler = ReduceLROnPlateau(optimizer,factor=parameters["scheduler-factor"],patience=parameters["scheduler-patience"])
+    
         # case "ma":
         #     from eslib.nn.functions import MovingAverage
         #     movingaverage = MovingAverage(parameters["scheduler-window"])
@@ -208,8 +209,8 @@ def train(
         #             movingaverageLR.update(new)
         #             return movingaverageLR.get_ma()
         #     scheduler = LambdaLR(optimizer,lr_lambda=myscheduler)
-        case _:
-            raise ValueError("scheduler not known")
+    else:
+        raise ValueError("scheduler not known")
         
     ##########################################
     # prepare the dataloaders for the train and validation datasets

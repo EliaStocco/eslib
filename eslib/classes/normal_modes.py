@@ -511,13 +511,12 @@ class NormalModes(pickleIO):
         return remove_unit(dZdN)[0]
 
     def sort(self,criterion="value"):
-        match criterion:
-            case "value":
-                sorted_indices = np.argsort(self.eigval)
-            case "absolute":
-                sorted_indices = np.argsort(np.absolute(self.eigval))
-            case _:
-                raise ValueError("not implemented yet")
+        if criterion == "value":
+            sorted_indices = np.argsort(self.eigval)
+        elif criterion == "absolute":
+            sorted_indices = np.argsort(np.absolute(self.eigval))
+        else:
+            raise ValueError("not implemented yet")
         for attr_name, attr_value in vars(self).items():
             if isinstance(attr_value, (np.ndarray, xr.DataArray)):
                 if len(attr_value.shape) == 1:

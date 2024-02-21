@@ -62,27 +62,25 @@ class dipoleLM(pickleIO):
         return out
         
     def _evaluate(self,pos:np.ndarray,frame:str):
-        match frame:
-            case "eckart" :
-                from copy import copy
-                newx, com, rotmat, euler_angles = self.eckart(pos)            
-                # compute the model in the Eckart frame
-                model, _ = self._evaluate(newx,frame="global")
-                # 'rotmat' is supposed to be right-multiplied:
-                # vrot = v @ rotmat
-                return model, (com, rotmat, euler_angles)
+        if frame == "eckart" :
+            newx, com, rotmat, euler_angles = self.eckart(pos)          
+            # compute the model in the Eckart frame
+            model, _ = self._evaluate(newx,frame="global")
+            # 'rotmat' is supposed to be right-multiplied:
+            # vrot = v @ rotmat
+            return model, (com, rotmat, euler_angles)
 
-            case "global" :
-                N = len(pos)
-                model  = np.full((N,3),np.nan)
-                for n in range(N):
-                    R = pos[n]#.reshape((-1,3))
-                    dD = self.bec.T @ np.asarray(R - self.ref.positions).reshape(3*self.Natoms)
-                    model[n,:] = dD + self.dipole
-                return model, (None, None, None)
+        elif frame == "global" :
+            N = len(pos)
+            model  = np.full((N,3),np.nan)
+            for n in range(N):
+                R = pos[n]#.reshape((-1,3))
+                dD = self.bec.T @ np.asarray(R - self.ref.positions).reshape(3*self.Natoms)
+                model[n,:] = dD + self.dipole
+            return model, (None, None, None)
         
-            case _ :
-                raise ValueError(f"Invalid value for 'frame'. Expected 'global' or 'eckart', got {frame}")
+        else:
+            raise ValueError(f"Invalid value for 'frame'. Expected 'global' or 'eckart', got {frame}")
             
     def eckart(self,positions:np.ndarray,inplace=False):
         from eslib.classes.eckart import EckartFrame

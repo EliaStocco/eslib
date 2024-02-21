@@ -29,13 +29,12 @@ except:
 
 #---------------------------------------#
 def correct(unit):
-    match unit:
-        case "ang":
-            return "angstrom"
-        case "au":
-            return "atomic_unit"
-        case _:
-            return unit
+    if unit == "ang":
+        return "angstrom"
+    elif unit == "au":
+        return "atomic_unit"
+    else:
+        return unit
     
 #---------------------------------------#
 def prepare_args():
