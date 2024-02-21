@@ -169,17 +169,17 @@ def train(
 
     ##########################################
     # set the optimizer
-    match parameters["optimizer"].lower():
-        case "adam":
-            from torch.optim import Adam
-            optimizer = Adam(   params=model.parameters(), lr=parameters["lr"])
-        case "adamw":
-            from torch.optim import AdamW
-            optimizer = AdamW(  params=model.parameters(), 
-                                lr=parameters["lr"],
-                                weight_decay=parameters["weight_decay"])
-        case _:
-            raise ValueError("optimizer not known")
+    tmp = parameters["optimizer"].lower()
+    if tmp == "adam":
+        from torch.optim import Adam
+        optimizer = Adam(   params=model.parameters(), lr=parameters["lr"])
+    elif tmp == "adamw":
+        from torch.optim import AdamW
+        optimizer = AdamW(  params=model.parameters(), 
+                            lr=parameters["lr"],
+                            weight_decay=parameters["weight_decay"])
+    else:
+        raise ValueError("optimizer not known")
             
     ##########################################
     # set the learning rate scheduler

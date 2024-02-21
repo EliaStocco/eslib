@@ -45,13 +45,12 @@ def main(args):
     # reshape
     print("\tChanging the name of '{:s}' to '{:s}'... ".format(args.name,args.renamed), end="")
     N = len(atoms)
-    match what:
-        case "info":
-            for n in range(N):
-                atoms[n].info[args.renamed] = atoms[n].info.pop(args.name)
-        case "array":
-            for n in range(N):
-                atoms[n].arrays[args.renamed] = atoms[n].arrays.pop(args.name)
+    if what == "info":
+        for n in range(N):
+            atoms[n].info[args.renamed] = atoms[n].info.pop(args.name)
+    elif what == "array":
+        for n in range(N):
+            atoms[n].arrays[args.renamed] = atoms[n].arrays.pop(args.name)
     print("done")
 
     #---------------------------------------#
