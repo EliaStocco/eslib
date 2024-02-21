@@ -32,19 +32,19 @@ torun = {
 def functions(request):
     return request.param
 
-# @pytest.mark.parametrize("name, tests", generate_all_torun(torun).items())
-# def test_check_e3nn_equivariance(name, tests, functions):
-#     function, function_name = functions
-#     print("Running '{:s}' test for '{:s}'.".format(function_name,name))    
-#     with suppress_output():
-#         result = function(tests)
-#     if isinstance(result, np.ndarray):
-#         comparison = np.zeros(result.shape)
-#     elif isinstance(result, (float, int)):
-#         comparison = 0.0
-#     else:
-#         comparison = None
-#     output = np.allclose(result, comparison)
-#     if not output:
-#         pass # just for debugging
-#     assert output
+@pytest.mark.parametrize("name, tests", generate_all_torun(torun).items())
+def test_check_e3nn_equivariance(name, tests, functions):
+    function, function_name = functions
+    print("Running '{:s}' test for '{:s}'.".format(function_name,name))    
+    with suppress_output():
+        result = function(tests)
+    if isinstance(result, np.ndarray):
+        comparison = np.zeros(result.shape)
+    elif isinstance(result, (float, int)):
+        comparison = 0.0
+    else:
+        comparison = None
+    output = np.allclose(result, comparison)
+    if not output:
+        pass # just for debugging
+    assert output
