@@ -11,11 +11,19 @@ torun = {
     {
         "training"  : "tests/test_train/training/training.json",
         "network"   : "tests/test_train/network/aile3nn.json",
+        "datasets"  : {
+            "train" : "tests/datasets/dataset.train.pth",
+            "val"   : "tests/datasets/dataset.val.pth"
+        },
     },
     "aile3nnOxN" :
     {
         "training"  : "tests/test_train/training/training.json",
         "network"   : "tests/test_train/network/aile3nnOxN.json",
+        "datasets"  : {
+            "train" : "tests/datasets/dataset.train.pth",
+            "val"   : "tests/datasets/dataset.val.pth"
+        },
     }
 }
 

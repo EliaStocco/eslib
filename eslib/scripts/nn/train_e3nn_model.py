@@ -33,36 +33,36 @@ default_values = {
         "name"             : "untitled",
         # "output"           : "D",
         # "max_radius"       : 6.0,
-        "datasets"         : {
-            "train" : "data/dataset.train.pth",
-            "val"   : "data/dataset.val.pth",
-        },
-        "output_folder"    : "LiNbO3/results",
+        # "datasets"         : {
+        #     "train" : "data/dataset.train.pth",
+        #     "val"   : "data/dataset.val.pth",
+        # },
+        "output_folder"     : "output",
         "checkpoint_folder" : "checkpoints",
-        "info-file"        : "info.csv",
+        "info-file"         : "info.csv",
         # "Natoms"           : None,
-        "random"           : False,
-        "epochs"           : 10,
-        "bs"               : [1],
-        "lr"               : [1e-3],
-        "weight_decay"     : 1e-2,
-        "optimizer"        : "adam",
-        "grid"             : True,
-        "max_time"         : -1,
-        "task_time"        : -1,
-        "dropout"          : 0.01,
+        "random"            : False,
+        "epochs"            : 10,
+        "bs"                : [1],
+        "lr"                : [1e-3],
+        "weight_decay"      : 1e-2,
+        "optimizer"         : "adam",
+        "grid"              : True,
+        "max_time"          : -1,
+        "task_time"         : -1,
+        "dropout"           : 0.01,
         # "batchnorm"        : True,
         # "use_shift"        : None,
-        "restart"          : False,
-        "recompute_loss"   : False,
+        "restart"           : True,
+        "recompute_loss"    : False,
         # "fixed_charges_only": False,
         # "instructions"     : None,
-        "debug"            : False,
+        "debug"             : False,
         # "indices"          : None,
-        "options"          : None,
-        "scheduler"        : "",
-        "scheduler-factor" : 1e-2,
-        "init-parameters"  : None,
+        "options"           : None,
+        "scheduler"         : "",
+        "scheduler-factor"  : 1e-2,
+        "init-parameters"   : None,
     }
 
 #---------------------------------------#
@@ -71,14 +71,15 @@ def get_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     # parser.add_argument("-i", "--input", type=str, help="json file with the input parameters")
-    parser.add_argument("-n", "--network" , type=str, help="JSON file with the parameters to allocate the network")
-    parser.add_argument("-t", "--training", type=str, help="JSON file with the parameters for the training")
+    parser.add_argument("-n", "--network" , type=str, required=True, help="JSON file with the parameters to allocate the network")
+    parser.add_argument("-t", "--training", type=str, required=True, help="JSON file with the parameters for the training")
+    parser.add_argument("-d", "--datasets", type=str, required=True, help="JSON file with the path to the train and validation datasets (*.pth files)")
     return parser.parse_args()
 
 #---------------------------------------#
 def check_parameters(parameters):
     
-    str2bool_keys = ["random","grid","pbc","recompute_loss","debug"]
+    str2bool_keys = ["random","grid","recompute_loss","debug"]
     for k in str2bool_keys : 
         parameters[k] = str2bool(parameters[k])
     
@@ -130,9 +131,17 @@ def get_parameters(args):
     # print("\n\tNetwork parameters:")
     # for k in network.keys():
     #     print("\t\t{:20s}: ".format(k),network[k])
+    #------------------#
+    if isinstance(args.datasets,str):
+        with open(args.datasets, 'r') as file:
+            datasets = json.load(file)
+    elif isinstance(args.datasets,dict):
+        datasets = args.datasets
+    else:
+        raise TypeError("'datasets' can be 'dict' or 'str' only.")
 
     #------------------#
-    return network, parameters
+    return network, parameters, datasets
 
 #---------------------------------------#
 # read datasets
@@ -148,7 +157,7 @@ def main(args):
 
     #------------------#
     # get user parameters
-    network, parameters = get_parameters(args)    
+    network, parameters, datasets = get_parameters(args)    
 
     #------------------#
     if not parameters["random"] :
@@ -159,9 +168,10 @@ def main(args):
         random.seed(0)
         np.random.seed(0)
    
-    if "datasets" not in parameters:
-        raise ValueError("please provide a dict in the input file to specify where to find the datasets.")
-    datasets = read_datasets(parameters["datasets"])
+    # if "datasets" not in parameters:
+    #     raise ValueError("please provide a dict in the input file to specify where to find the datasets.")
+    # datasets = read_datasets(parameters["datasets"])
+    datasets = read_datasets(datasets)
 
     #------------------#
     # test
