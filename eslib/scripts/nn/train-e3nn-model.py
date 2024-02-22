@@ -4,7 +4,6 @@ start_time = time.time()
 import numpy as np
 import random
 import json
-import argparse
 from copy import copy
 import torch
 default_dtype = torch.float64
@@ -13,17 +12,17 @@ from eslib.nn.training import hyper_train_at_fixed_model
 # from elia.nn.network import aile3nn
 from eslib.functions import add_default, str2bool
 from eslib.nn.user import get_class
+from eslib.formatting import esfmt
 
-#----------------------------------------------------------------#
+#---------------------------------------#
 # Documentation
 # - https://pytorch.org/docs/stablfe/autograd.html
 # - https://towardsdatascience.com/introduction-to-functional-pytorch-b5bf739e1e6e
 
-#----------------------------------------------------------------#
-
+#---------------------------------------#
 description = "train a 'e3nn' model"
 
-#--------------------------------#
+#---------------------------------------#
 default_values = {
         "class"            : "aile3nn",
         "module"           : "elia.nn.network",
@@ -63,17 +62,15 @@ default_values = {
         "init-parameters"  : None,
     }
 
-#--------------------------------#
-def get_args():
+#---------------------------------------#
+def get_args(description):
     """Prepare parser of user input arguments."""
-
+    import argparse
     parser = argparse.ArgumentParser(description=description)
-
     parser.add_argument("-i", "--input",action="store", type=str, help="json file with the input parameters")
-
     return parser.parse_args()
 
-#--------------------------------#
+#---------------------------------------#
 def check_parameters(parameters):
     
     str2bool_keys = ["random","grid","pbc","recompute_loss","debug"]
@@ -91,11 +88,9 @@ def check_parameters(parameters):
             or len(parameters["chemical-species"]) == 0 :
         raise ValueError("Please specify a list of the chemical species that compose the provided atomic structures.")
 
-#--------------------------------#
-def get_parameters():
+#---------------------------------------#
+def get_parameters(args):
     """get user parameters"""
-
-    args = get_args()
 
     parameters = None
     if args.input is not None :
@@ -122,7 +117,7 @@ def get_parameters():
     
     return parameters
 
-#--------------------------------#
+#---------------------------------------#
 # read datasets
 def read_datasets(files:dict):
     dataset = dict()
@@ -130,18 +125,15 @@ def read_datasets(files:dict):
         dataset[k] = torch.load(file)
     return dataset
 
-#--------------------------------#
-def main():
+#---------------------------------------#
+@esfmt(get_args,description)
+def main(args):
 
-    ##########################################
-    # print description
-    print("\n\t{:s}".format(description))
-
-    ##########################################
+    #------------------#
     # get user parameters
-    parameters = get_parameters()    
+    parameters = get_parameters(args)    
 
-    ##########################################
+    #------------------#
     if not parameters["random"] :
         # Set the seeds of the random numbers generators.
         # This is important for reproducitbility:
@@ -154,7 +146,7 @@ def main():
         raise ValueError("please provide a dict in the input file to specify where to find the datasets.")
     datasets = read_datasets(parameters["datasets"])
 
-    ##########################################
+    #------------------#
     # test
     # # Let's do a simple test!
     # # If your NN is not working, let's focus only on one datapoint!
@@ -198,8 +190,7 @@ def main():
     elif parameters["output"] == "D":
         irreps_out = "1x1o"
     
-    #####################
-
+    #------------------#
     kwargs = {
         "output"              : parameters["output"],
         "irreps_in"           : irreps_in,                  
@@ -217,8 +208,7 @@ def main():
         "use_shift"           : parameters["use_shift"]
     }
 
-    #####################
-
+    #------------------#
     cls = get_class(parameters["module"],parameters["class"])
 
     if parameters["class"] == "aile3nnOxN":
@@ -237,7 +227,7 @@ def main():
     N = net.n_parameters()
     print("Tot. number of parameters: ",N)
 
-    ##########################################
+    #------------------#
     # initialize the parameters if a file is provided
     pfile = parameters["init-parameters"]
     if pfile is not None:
@@ -247,14 +237,14 @@ def main():
         except:
             print("Problems reading '{:s}'".format(pfile))
 
-    ##########################################
+    #------------------#
     # choose the loss function
     if parameters["output"] in ["D","E"] :
         loss = net.loss(Natoms=parameters["Natoms"] if "Natoms" in parameters else None)
     elif parameters["output"] == "EF" :
         raise ValueError("not implemented yet")
     
-    ##########################################
+    #------------------#
     # optional settings
     opts = {
             "plot":{
@@ -285,7 +275,7 @@ def main():
         # it should not be needed ...
         opts = add_default(options,opts)
 
-    ##########################################
+    #------------------#
     # hyper-train the model
     hyper_train_at_fixed_model( net        = net,
                                 all_bs     = parameters["bs"],
@@ -297,9 +287,6 @@ def main():
                                 parameters = parameters
                             )
 
-    print("\nJob done :)")
-
-#####################
-
+#---------------------------------------#
 if __name__ == "__main__":
     main()
