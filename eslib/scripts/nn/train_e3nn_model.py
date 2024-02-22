@@ -25,14 +25,14 @@ description = "train a 'e3nn' model"
 
 #---------------------------------------#
 default_values = {
-        "class"            : "aile3nn",
-        "module"           : "elia.nn.network",
-        "mul"              : 2,
-        "layers"           : 6,
-        "lmax"             : 2,
+        # "class"            : "aile3nn",
+        # "module"           : "elia.nn.network",
+        # "mul"              : 2,
+        # "layers"           : 6,
+        # "lmax"             : 2,
         "name"             : "untitled",
-        "output"           : "D",
-        "max_radius"       : 6.0,
+        # "output"           : "D",
+        # "max_radius"       : 6.0,
         "datasets"         : {
             "train" : "data/dataset.train.pth",
             "val"   : "data/dataset.val.pth",
@@ -40,7 +40,7 @@ default_values = {
         "output_folder"    : "LiNbO3/results",
         "checkpoint_folder" : "checkpoints",
         "info-file"        : "info.csv",
-        "Natoms"           : None,
+        # "Natoms"           : None,
         "random"           : False,
         "epochs"           : 10,
         "bs"               : [1],
@@ -52,13 +52,13 @@ default_values = {
         "task_time"        : -1,
         "dropout"          : 0.01,
         # "batchnorm"        : True,
-        "use_shift"        : None,
+        # "use_shift"        : None,
         "restart"          : False,
         "recompute_loss"   : False,
-        "fixed_charges_only": False,
-        "instructions"     : None,
+        # "fixed_charges_only": False,
+        # "instructions"     : None,
         "debug"            : False,
-        "indices"          : None,
+        # "indices"          : None,
         "options"          : None,
         "scheduler"        : "",
         "scheduler-factor" : 1e-2,
@@ -123,13 +123,13 @@ def get_parameters(args):
                 network = json.load(file)
         except :
             raise ValueError(f'error reading \'{args.network}\' file')
-        network = add_default(network,default_values)
+        # network = add_default(network,default_values)
     else :
         raise ValueError("no file for network parameters provided (--network)")
 
-    print("\n\tNetwork parameters:")
-    for k in network.keys():
-        print("\t\t{:20s}: ".format(k),network[k])
+    # print("\n\tNetwork parameters:")
+    # for k in network.keys():
+    #     print("\t\t{:20s}: ".format(k),network[k])
 
     #------------------#
     return network, parameters

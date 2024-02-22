@@ -7,17 +7,22 @@ from eslib.scripts.nn.train_e3nn_model import main
 DELETE = True
 
 torun = {
-    "aile3nnOxN-water-light" :
+    "aile3nn" :
     {
-        "training"  : "tests/test_train/aile3nnOxN-water-light/training.json",
-        "network"   : "tests/test_train/aile3nnOxN-water-light/network.json",
+        "training"  : "tests/test_train/training/training.json",
+        "network"   : "tests/test_train/network/aile3nn.json",
+    },
+    "aile3nnOxN" :
+    {
+        "training"  : "tests/test_train/training/training.json",
+        "network"   : "tests/test_train/network/aile3nnOxN.json",
     }
 }
 
 
 @pytest.mark.parametrize("name, test", torun.items())
 def test_train(name, test):
-    
+
     print("Running '{:s}' test.".format(name))   
     main(test) 
 
