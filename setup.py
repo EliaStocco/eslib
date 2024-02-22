@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-with open("README.md", "r") as f:
+with open("README.md", 'r',encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
@@ -24,5 +24,5 @@ setup(
     # extras_require={
     #     "dev": ["pytest>=7.0", "twine>=4.0.2"],
     # },
-    python_requires=">=3.10",
+    python_requires=">=3.9",
 )
