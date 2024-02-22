@@ -1,0 +1,5 @@
+output/
+checkpoint/
+./*/output/
+./*/checkpoint/
+
