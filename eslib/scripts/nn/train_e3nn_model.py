@@ -13,6 +13,7 @@ from eslib.nn.training import hyper_train_at_fixed_model
 from eslib.functions import add_default, str2bool
 from eslib.nn.user import get_class
 from eslib.formatting import esfmt
+from warnings import warn
 
 #---------------------------------------#
 # Documentation
@@ -37,6 +38,8 @@ default_values = {
             "val"   : "data/dataset.val.pth",
         },
         "output_folder"    : "LiNbO3/results",
+        "checkpoint_folder" : "checkpoints",
+        "info-file"        : "info.csv",
         "Natoms"           : None,
         "random"           : False,
         "epochs"           : 10,
@@ -67,7 +70,9 @@ def get_args(description):
     """Prepare parser of user input arguments."""
     import argparse
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("-i", "--input",action="store", type=str, help="json file with the input parameters")
+    # parser.add_argument("-i", "--input", type=str, help="json file with the input parameters")
+    parser.add_argument("-n", "--network" , type=str, help="JSON file with the parameters to allocate the network")
+    parser.add_argument("-t", "--training", type=str, help="JSON file with the parameters for the training")
     return parser.parse_args()
 
 #---------------------------------------#
@@ -83,39 +88,51 @@ def check_parameters(parameters):
     if parameters["max_time"] <= 0 :
         parameters["max_time"] = -1
 
-    if "chemical-species" not in parameters \
-        or parameters["chemical-species"] is None \
-            or len(parameters["chemical-species"]) == 0 :
-        raise ValueError("Please specify a list of the chemical species that compose the provided atomic structures.")
+    # if "chemical-species" not in parameters \
+    #     or parameters["chemical-species"] is None \
+    #         or len(parameters["chemical-species"]) == 0 :
+    #     raise ValueError("Please specify a list of the chemical species that compose the provided atomic structures.")
 
 #---------------------------------------#
 def get_parameters(args):
-    """get user parameters"""
+    """Returns the training parameters and the parameters to allocate the network."""
 
+    #------------------#
     parameters = None
-    if args.input is not None :
-        # read parameters from file
+    if args.training is not None :
         try :
-            with open(args.input, 'r') as file:
+            with open(args.training, 'r') as file:
                 parameters = json.load(file)
-
         except :
-            raise ValueError("error reading input file")
-        # it should not be needed ...
+            raise ValueError(f'error reading \'{args.training}\' file')
         parameters = add_default(parameters,default_values)
     else :
-        raise ValueError("no input file provided (--input)")
-        # parameters = args_to_dict(args)
-
-    # check that the arguments are okay
+        raise ValueError("no file for training parameters provided (--training)")
     check_parameters(parameters)
 
     # print parameters
-    print("\n\tParameters:")
+    print("\n\tTraining parameters:")
     for k in parameters.keys():
         print("\t\t{:20s}: ".format(k),parameters[k])
-    
-    return parameters
+
+    #------------------#
+    network = None
+    if args.network is not None :
+        try :
+            with open(args.network, 'r') as file:
+                network = json.load(file)
+        except :
+            raise ValueError(f'error reading \'{args.network}\' file')
+        network = add_default(network,default_values)
+    else :
+        raise ValueError("no file for network parameters provided (--network)")
+
+    print("\n\tNetwork parameters:")
+    for k in network.keys():
+        print("\t\t{:20s}: ".format(k),network[k])
+
+    #------------------#
+    return network, parameters
 
 #---------------------------------------#
 # read datasets
@@ -131,7 +148,7 @@ def main(args):
 
     #------------------#
     # get user parameters
-    parameters = get_parameters(args)    
+    network, parameters = get_parameters(args)    
 
     #------------------#
     if not parameters["random"] :
@@ -180,52 +197,62 @@ def main(args):
 
     ##########################################
     # construct the model
-    types = parameters["chemical-species"]
-    irreps_in = "{:d}x0e".format(len(types))
+    # types = parameters["chemical-species"]
+    # irreps_in = "{:d}x0e".format(len(types))
 
-    if parameters["output"] in ["E","EF"]:
-        irreps_out = "1x0e"
-    elif parameters["output"] in ["ED","EDF"]:
-        irreps_out = "1x0e + 1x1o"
-    elif parameters["output"] == "D":
-        irreps_out = "1x1o"
+    # if parameters["output"] in ["E","EF"]:
+    #     irreps_out = "1x0e"
+    # elif parameters["output"] in ["ED","EDF"]:
+    #     irreps_out = "1x0e + 1x1o"
+    # elif parameters["output"] == "D":
+    #     irreps_out = "1x1o"
     
-    #------------------#
-    kwargs = {
-        "output"              : parameters["output"],
-        "irreps_in"           : irreps_in,                  
-        "irreps_out"          : irreps_out,                
-        "max_radius"          : parameters["max_radius"],  
-        "num_neighbors"       : 2,                      
-        "pool_nodes"          : True,                      
-        # "num_nodes"           : 2,
-        "number_of_basis"     : 10,
-        "mul"                 : parameters["mul"],
-        "layers"              : parameters["layers"],
-        "lmax"                : parameters["lmax"],
-        "dropout_probability" : parameters["dropout"],
-        # "pbc"                 : parameters["pbc"],
-        "use_shift"           : parameters["use_shift"]
-    }
+    # #------------------#
+    # kwargs = {
+    #     "output"              : parameters["output"],
+    #     "irreps_in"           : irreps_in,                  
+    #     "irreps_out"          : irreps_out,                
+    #     "max_radius"          : parameters["max_radius"],  
+    #     "num_neighbors"       : 2,                      
+    #     "pool_nodes"          : True,                      
+    #     # "num_nodes"           : 2,
+    #     "number_of_basis"     : 10,
+    #     "mul"                 : parameters["mul"],
+    #     "layers"              : parameters["layers"],
+    #     "lmax"                : parameters["lmax"],
+    #     "dropout_probability" : parameters["dropout"],
+    #     # "pbc"                 : parameters["pbc"],
+    #     "use_shift"           : parameters["use_shift"]
+    # }
 
     #------------------#
-    cls = get_class(parameters["module"],parameters["class"])
-
-    if parameters["class"] == "aile3nnOxN":
-        kwargs["fixed_charges_only"] = parameters["fixed_charges_only"]
-
-    instructions = {
-            "kwargs"           : copy(kwargs),
-            "class"            : parameters["class"],
-            "module"           : parameters["module"],
-        }
+    to_check = {"module","class","kwargs"}
+    for s in to_check:
+        if s not in network:
+            raise ValueError(f'\'network\' does not have \'{s}\' key.')
+    if set(network.keys()) != to_check:
+        warn(f'keys in \'network\' different from \'module\', \'class\', and \'kwargs\' will be ignored.')
     
-    with open("instructions.json", "w") as json_file:
-        json.dump(instructions, json_file, indent=4)
+    cls = get_class(network["module"],network["class"])
 
-    net = cls(**kwargs)
-    N = net.n_parameters()
-    print("Tot. number of parameters: ",N)
+    # if parameters["class"] == "aile3nnOxN":
+    #     kwargs["fixed_charges_only"] = parameters["fixed_charges_only"]
+
+    # instructions = {
+    #         "kwargs"           : copy(kwargs),
+    #         "class"            : parameters["class"],
+    #         "module"           : parameters["module"],
+    #     }
+    
+    # with open("instructions.json", "w") as json_file:
+    #     json.dump(instructions, json_file, indent=4)
+
+    net = cls(**network["kwargs"])
+    try:
+        N = net.n_parameters()
+        print("Tot. number of parameters: ",N)
+    except:
+        pass
 
     #------------------#
     # initialize the parameters if a file is provided
@@ -239,10 +266,10 @@ def main(args):
 
     #------------------#
     # choose the loss function
-    if parameters["output"] in ["D","E"] :
-        loss = net.loss(Natoms=parameters["Natoms"] if "Natoms" in parameters else None)
-    elif parameters["output"] == "EF" :
-        raise ValueError("not implemented yet")
+    # if parameters["output"] in ["D","E"] :
+    loss = net.loss(Natoms=parameters["Natoms"] if "Natoms" in parameters else None)
+    # elif parameters["output"] == "EF" :
+    #     raise ValueError("not implemented yet")
     
     #------------------#
     # optional settings
