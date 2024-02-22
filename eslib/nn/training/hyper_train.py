@@ -108,7 +108,11 @@ def hyper_train_at_fixed_model( net:torch.nn.Module,\
         df.at[n,"file"] = df.at[n,"file"] + ".pdf"
         n += 1
 
-        df[:n].to_csv("temp-info.csv",index=False)
+        directory, filename = os.path.split(parameters["info-file"])
+        new_filename = 'tmp-' + filename
+        tmp_info_file = os.path.join(directory, new_filename)
+
+        df[:n].to_csv(tmp_info_file,index=False)
 
         n += 1
         if info == "exit file detected":
@@ -124,10 +128,12 @@ def hyper_train_at_fixed_model( net:torch.nn.Module,\
     # finish
     try : 
         # write information to file 'info.csv'
-        df.to_csv("info.csv",index=False)
+        df.to_csv(parameters["info-file"],index=False)
 
         # remove 'temp-info.csv'
-        file_path = "temp-info.csv"  # Replace with the path to your file
+        directory, filename = os.path.split(parameters["info-file"])
+        new_filename = 'tmp-' + filename
+        file_path = os.path.join(directory, new_filename)
         try:
             os.remove(file_path)
             print("File '{:s}' deleted successfully.".format(file_path))

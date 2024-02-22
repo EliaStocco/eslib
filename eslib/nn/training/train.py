@@ -279,7 +279,7 @@ def train(
 
     start_epoch = 0
 
-    checkpoint_folder = "checkpoint"
+    checkpoint_folder = parameters["checkpoint_folder"] # "checkpoint"
     if not os.path.exists(checkpoint_folder):
         os.mkdir(checkpoint_folder)
 
