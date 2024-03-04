@@ -6,7 +6,7 @@ from eslib.functions import get_one_file_in_folder, nparray2list_in_dict
 from .io import pickleIO
 from warnings import warn
 from eslib.units import *
-import pickle
+from eslib.tools import convert
 from ase import Atoms
 import warnings
 # Disable all UserWarnings
@@ -91,20 +91,32 @@ class NormalModes(pickleIO):
         self.masses = xr.DataArray(np.full(self.Ndof,np.nan), dims=('dof'))
 
         
-        if ref is not None:
-            self.set_reference(ref)
-        else:
-            self.reference = Atoms()
+        # if ref is not None:
+        #     self.set_reference(ref)
+        # else:
+        #     self.reference = Atoms()
+        #     self.masses = None
+
+        self.set_reference(ref)
 
         pass
 
     def set_reference(self,ref:Atoms):
-        # print("setting reference")
-        self.reference = Atoms( positions=ref.get_positions(),\
-                                cell=ref.get_cell(),\
-                                symbols=ref.get_chemical_symbols(),\
-                                pbc=ref.get_pbc())
-    
+        if ref is None:
+            self.reference = Atoms()
+            # self.masses = xr.DataArray(np.full(self.Ndof,np.nan), dims=('dof'))
+        else:
+            # print("setting reference")
+            self.reference = Atoms( positions=ref.get_positions(),\
+                                    cell=ref.get_cell(),\
+                                    symbols=ref.get_chemical_symbols(),\
+                                    pbc=ref.get_pbc())
+            # masses  = [mass for mass in ref.get_masses() for _ in range(3)]
+            # masses  = np.asarray(masses)
+            # masses *= convert(1,"mass","dalton","atomic_unit")
+            # self.masses = xr.DataArray(masses, dims=('dof'))
+            
+        
     # def __repr__(self) -> str:
     #     line = "" 
     #     line += "{:<10s}: {:<10d}\n".format("# modes",self.Nmodes)  
@@ -116,7 +128,7 @@ class NormalModes(pickleIO):
         return nparray2list_in_dict(vars(self))
 
     @classmethod
-    def from_folder(cls,folder=None):    
+    def from_folder(cls,folder=None,ref=None):    
 
         file = get_one_file_in_folder(folder=folder,ext=".mode")
         tmp = np.loadtxt(file)
@@ -148,6 +160,9 @@ class NormalModes(pickleIO):
         # I should remove this. it's useless
         file = get_one_file_in_folder(folder=folder,ext=".dynmat")
         self.dynmat[:,:] = np.loadtxt(file)
+
+        if ref is not None:
+            self.set_reference(ref)
 
         # mode
         # self.mode[:,:] = diag_matrix(self.masses,"-1/2") @ self.eigvec
