@@ -24,7 +24,7 @@ def Data2Atoms(entry:Data,warnings:dict={}):
         if key in ["pos","lattice","pbc","symbols"]:
             continue
         if type(value) in [float,int,str]:
-            atoms.info["key"] = value
+            atoms.info[key] = value
         else:
             if value.ndim == 1:
                 atoms.info[key] = value.detach().numpy().reshape((-1,))
