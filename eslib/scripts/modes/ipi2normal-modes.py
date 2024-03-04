@@ -72,11 +72,11 @@ def main():
     # phonon modes
     print("\n\tReading normal modes from folder '{:s}' ... ".format(args.folder),end="")
     # pm = pd.DataFrame(index=[gamma],columns=["q","freq","modes"])
-    nm = NormalModes.from_folder(args.folder)
+    nm = NormalModes.from_folder(folder=args.folder,ref=reference)
     # pm.at[gamma,"q"]     = gamma
     # pm.at[gamma,"modes"] = nm 
-    if reference is not None:
-        nm.set_reference(reference)
+    # if reference is not None:
+    #     nm.set_reference(reference)
     print("done")
 
     #---------------------------------------#
