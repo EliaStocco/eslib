@@ -5,7 +5,7 @@ from copy import copy
 from eslib.tools import cart2lattice, lattice2cart
 from eslib.tools import frac2cart, cart2frac
 from eslib.input import flist, str2bool
-from eslib.formatting import esfmt
+from eslib.formatting import esfmt, warning
 
 #---------------------------------------#
 description = "Fix the dipole jumps and shift the values of some multitples of the dipole quantum.\n"
@@ -21,6 +21,7 @@ def prepare_args(description):
     parser.add_argument("-j", "--jumps"   , type=str     , **argv, required=False, help="output txt file with jumps indeces (default: 'None')", default=None)
     parser.add_argument("-a", "--average_shift", type=str2bool   , **argv, required=False, help="whether to shift the dipole quanta by their average value (default: true)", default=True)
     parser.add_argument("-s", "--shift"   , type=flist   , **argv, required=False, help="additional (negative) shift (default: [0,0,0])", default=None)
+    parser.add_argument("-q", "--quanta"  , type=str   , **argv, required=False, help="keyword for the dipole quanta (default: 'quanta')", default='quanta')
     parser.add_argument("-o", "--output"  , type=str     , **argv, required=True , help="output 'extxyz' file")
     return parser.parse_args()
 
@@ -61,7 +62,7 @@ def main(args):
 
     shift = np.zeros(3)
     if args.average_shift:
-        shift = np.asarray([ int(i) for i in phases.mean(axis=0) ]).astype(float)
+        shift = np.asarray([ i.round(0) for i in phases.mean(axis=0) ]).astype(float)
         print("\tThe dipole quanta will be shifted by the average value: ",shift)
         
     if args.shift is not None:        
@@ -78,6 +79,14 @@ def main(args):
     for n in range(N):
         atoms[n].info[args.name] = frac2cart(cell=atoms[n].get_cell(),v=phases[n,:]).reshape((3,))
     print("done")
+
+    if args.quanta is not None:
+        if args.quanta in atoms[0].info:
+            print("\t{:s}: info '{:s}' will be overwritten.".format(warning,args.quanta))
+        print("\tAdding dipole quanta as info 'quanta' to atomic structures ... ", end="")
+        for n in range(N):
+            atoms[n].info[args.quanta] = phases[n,:]
+        print("done")
 
     ###
     # writing
