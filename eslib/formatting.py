@@ -15,13 +15,15 @@ error           = "***Error***"
 warning         = "***Warning***"
 closure         = "Job done :)"
 input_arguments = "Input arguments"
+everythingok    = "Everything ok!"
 
 #---------------------------------------#
 # colors
-error           = Fore.RED      + Style.BRIGHT + error.replace("*","")   + Style.RESET_ALL
-closure         = Fore.BLUE   + Style.BRIGHT + closure                 + Style.RESET_ALL
-input_arguments = Fore.GREEN  + Style.NORMAL + input_arguments         + Style.RESET_ALL
-warning         = Fore.MAGENTA    + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
+error           = Fore.RED     + Style.BRIGHT + error.replace("*","")   + Style.RESET_ALL
+closure         = Fore.BLUE    + Style.BRIGHT + closure                 + Style.RESET_ALL
+input_arguments = Fore.GREEN   + Style.NORMAL + input_arguments         + Style.RESET_ALL
+warning         = Fore.MAGENTA + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
+everythingok    = Fore.BLUE    + Style.BRIGHT + everythingok            + Style.RESET_ALL
 
 def line():
     print("-"*30)
