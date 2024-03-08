@@ -5,6 +5,7 @@ from eslib.functions import read_comments_xyz
 import re
 import ipi.utils.mathtools as mt
 import numpy as np
+from eslib.formatting import warning
 
 deg2rad = np.pi / 180.0
 abcABC      = re.compile(r"CELL[\(\[\{]abcABC[\)\]\}]: ([-+0-9\.Ee ]*)\s*")
@@ -22,10 +23,11 @@ def info(t,name):
 def array(t,name):
     return t.call(lambda e:e.arrays[name])
     
-def trajectory(file,format:str=None,check:bool=True,index=":",pbc=True):
+def trajectory(file,format:str=None,check:bool=True,index=":",pbc=True,remove_replicas:bool=False):
 
     format = format.lower() if format is not None else None
     f = "xyz" if format in ["i-pi","ipi"] else format
+    remove_replicas = False if format not in ["i-pi","ipi"] else remove_replicas
 
     atoms = read(file,index=index,format=f)
     if type(atoms) != list:
@@ -48,12 +50,14 @@ def trajectory(file,format:str=None,check:bool=True,index=":",pbc=True):
             alpha, beta, gamma = [float(x) * deg2rad for x in cell.group(1).split()[3:6]]
             cells[n] = mt.abc2h(a, b, c, alpha, beta, gamma)
 
-        if check:
+        if remove_replicas:
             strings = [ step.search(comment).group(1) for comment in comments ]
             steps = np.asarray([int(i) for i in strings],dtype=int)
-            _, indices = np.unique(steps, return_index=True)
-            if len(indices) != len(steps):
-                pass
+            test, indices = np.unique(steps, return_index=True)
+            if steps != test:
+                print("\t{:s}: there could be replicas. Specify '-rr/--remove_replicas true' to remove them.".format(warning))
+            # if len(indices) != len(steps):
+            #     pass
             atoms = [atoms[index] for index in indices]
             # for n in range(len(atoms)):
             #     atoms[n].info["step"] = indices[n]
