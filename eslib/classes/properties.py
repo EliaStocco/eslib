@@ -2,8 +2,9 @@ import pandas as pd
 import numpy as np
 from copy import copy
 from .functions import getproperty, get_property_header
+from eslib.classes.io import pickleIO
 
-class properties:
+class properties(pickleIO):
 
     def __init__(self,info:dict=None):
 
@@ -17,6 +18,11 @@ class properties:
             self.properties = info["properties"]
             self.units      = info["units"]
 
+        self.set_length()
+        
+        pass
+
+    def set_length(self):
         length = None
         for k in self.header:
             if k not in self.properties:
@@ -28,8 +34,6 @@ class properties:
             elif length != N:
                 raise ValueError("All the properties should have the same length.")
         self.length = length
-        
-        pass
     
     @classmethod
     def load(cls,file):
@@ -85,3 +89,12 @@ class properties:
         df["unit"] = [ self.units[k] for k in keys ]
         df["shape"] = size
         return df
+    
+    def remove_replicas(self,keyword="step"):
+        out = copy(self)
+        steps = self.properties[keyword]
+        _, indices = np.unique(steps, return_index=True)
+        for k in self.properties.keys():
+            self.properties[k] = self.properties[k][indices]
+        out.set_length()
+        return out
