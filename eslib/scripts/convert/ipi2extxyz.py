@@ -9,9 +9,9 @@ from eslib.classes.properties import properties as Properties
 from eslib.functions import suppress_output, get_one_file_in_folder, str2bool
 from eslib.input import size_type
 from eslib.classes.trajectory import trajectory
+from eslib.formatting import esfmt, error, warning
 
-
-DEBUG=False
+#---------------------------------------#
 # example:
 # python ipi2extxyz.py -p i-pi -f data -aa forces,data/i-pi.forces_0.xyz -ap dipole,potential -o test.extxyz
 
@@ -19,32 +19,11 @@ DEBUG=False
 # - add a long description with some example how to use the script
 
 #---------------------------------------#
-
 # Description of the script's purpose
 description = "Convert the i-PI output files to an extxyz file with the specified properties and arrays.\n"
-warning = "***Warning***"
-error = "***Error***"
-closure = "Job done :)"
-information = "You should provide the positions as printed by i-PI."
-input_arguments = "Input arguments"
-
 
 #---------------------------------------#
-# colors
-try :
-    import colorama
-    from colorama import Fore, Style
-    colorama.init(autoreset=True)
-    description     = Fore.GREEN    + Style.BRIGHT + description             + Style.RESET_ALL
-    warning         = Fore.MAGENTA  + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
-    error           = Fore.RED      + Style.BRIGHT + error.replace("*","")   + Style.RESET_ALL
-    closure         = Fore.BLUE     + Style.BRIGHT + closure                 + Style.RESET_ALL
-    information     = Fore.YELLOW   + Style.NORMAL + information             + Style.RESET_ALL
-    input_arguments = Fore.GREEN    + Style.NORMAL + input_arguments         + Style.RESET_ALL
-except:
-    pass
-
-def prepare_args():
+def prepare_args(description):
 
     parser = argparse.ArgumentParser(description=description)
 
@@ -79,22 +58,9 @@ def prepare_args():
 
     return parser.parse_args()
 
-def main():
-
-    # Parse the command-line arguments
-    args = prepare_args()
-
-    # Print the script's description
-    print("\n\t{:s}".format(description))
-
-    print("\n\t{:s}:".format(input_arguments))
-    for k in args.__dict__.keys():
-        print("\t{:>20s}:".format(k),getattr(args,k))
-    print()
-
-    ###
-    # atomic structures
-    # if args.format == "i-pi" :
+#---------------------------------------#
+@esfmt(prepare_args,description)
+def main(args):
 
     if args.positions_file is None:
         if args.prefix is None or args.prefix == "":
@@ -110,7 +76,7 @@ def main():
         raise ValueError("File '{:s}' does not exist.".format(args.positions_file))
 
     print("\tReading atomic structures from file '{:s}' ... ".format(args.positions_file), end="")
-    with suppress_output(not DEBUG):
+    with suppress_output():
         atoms = trajectory(args.positions_file,format=args.format,check=True)
     print("done")
     # else :
@@ -168,7 +134,7 @@ def main():
         # instructions = {
         #     "properties" : args.properties_file, 
         # }
-        with suppress_output(not DEBUG):
+        with suppress_output():
             allproperties = Properties.load(file=args.properties_file)
         print("done")
 
@@ -179,6 +145,12 @@ def main():
         if len(allproperties) != len(atoms):
             print("\n\t{:s}: n. of atomic structures and n. of properties differ.".format(warning))
             if len(allproperties) == len(atoms)+1 :
+                information = "You should provide the positions as printed by i-PI."
+                try:
+                    from colorama import Fore, Style
+                    information = Fore.YELLOW   + Style.NORMAL + information + Style.RESET_ALL
+                except:
+                    pass
                 print("\t{:s}\n\tMaybe you provided a 'replay' input file --> discarding the first properties raw.".format(information))
                 allproperties = allproperties[1:]
             else:
@@ -228,9 +200,6 @@ def main():
         print("done")
     except Exception as e:
         print(f"\n\t{error}: {e}")
-
-    # Script completion message
-    print("\n\t{:s}\n".format(closure))
 
 if __name__ == "__main__":
     main()
