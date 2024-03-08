@@ -30,8 +30,8 @@ def prepare_args():
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
-    parser.add_argument("-i", "--input", type=str, help='input txt file')
-    parser.add_argument("-o","--output", type=str, help='output file for the plot')
+    parser.add_argument("-i", "--input", type=str, **argv, required=True, help='input txt file')
+    parser.add_argument("-o","--output", type=str, **argv, required=True, help='output file for the plot')
     return parser.parse_args()
 
 #---------------------------------------#
@@ -48,7 +48,7 @@ def plot_array(input_file, output_file):
     # Create a plot for each row in the array
     fig,ax = plt.subplots(figsize=(15,5))
     for n in range(cols):
-        ax.plot(data[:,n], label=str(n+1))
+        ax.plot(data[:,n], label=str(n+1),marker='o')
 
     # Add labels and legend
     plt.xlabel('time/row index')
