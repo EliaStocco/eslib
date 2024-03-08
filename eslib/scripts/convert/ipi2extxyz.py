@@ -4,7 +4,6 @@ import os
 import numpy as np
 from copy import copy
 from ase.io import write, read
-from ase import Atoms
 from eslib.classes.properties import properties as Properties
 from eslib.functions import suppress_output, get_one_file_in_folder, str2bool
 from eslib.input import size_type
@@ -131,11 +130,11 @@ def main(args):
             raise ValueError("File '{:s}' does not exist.".format(args.properties_file))
                 
         print("\tReading properties from file '{:s}' ... ".format(args.properties_file), end="")
-        # instructions = {
-        #     "properties" : args.properties_file, 
-        # }
         with suppress_output():
-            allproperties = Properties.load(file=args.properties_file)
+            if str(args.properties_file).endswith(".pickle"):
+                allproperties = Properties.from_pickle(file_path=args.properties_file)
+            else:
+                allproperties = Properties.load(file=args.properties_file)
         print("done")
 
         print("\n\tSummary:")
