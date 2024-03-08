@@ -12,7 +12,7 @@ from eslib.formatting import esfmt
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Process atomic structures and select a diverse subset using the Farthest Point Sampling (FPS) algorithm."
+description = "Compute the SOAP descriptors for a bunch of atomic structures."
 
 #---------------------------------------#
 def prepare_parser(description):
