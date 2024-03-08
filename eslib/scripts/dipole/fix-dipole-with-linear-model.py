@@ -5,8 +5,9 @@ from eslib.plot import plot_bisector
 from eslib.classes.dipole import dipoleLM
 from eslib.classes.trajectory import info
 from eslib.classes.trajectory import trajectory as Trajectory
-from eslib.tools import cart2lattice, lattice2cart, frac2cart
+from eslib.tools import cart2lattice, cart2frac, frac2cart
 from eslib.output import output_folder
+from ase.io import write
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -204,10 +205,28 @@ def main():
     print("done")
 
     #------------------#
-    # output
-    print("\tSaving the fixed dipoles to file '{:s}' ... ".format(args.output), end="")
-    np.savetxt(args.output,fixed_dipole,fmt='%24.18e')
+    # set info
+    print("\tAdding fixed dipole as info 'dipole' and quanta as 'quanta' to atomic structures ... ", end="")
+    for n in range(N):
+        trajectory[n].info["dipole"] = fixed_dipole[n,:]
+        quanta = cart2frac(cell=trajectory[n].get_cell(),v=fixed_dipole[n,:])
+        trajectory[n].info["quanta"] = quanta.flatten()
     print("done")
+
+    #------------------#
+    # writing
+    print("\n\tWriting output to file '{:s}' ... ".format(args.output), end="")
+    try:
+        write(args.output, list(trajectory), format="extxyz") # fmt)
+        print("done")
+    except Exception as e:
+        print(f"\n\t{error}: {e}")
+
+    # #------------------#
+    # # output
+    # print("\tSaving the fixed dipoles to file '{:s}' ... ".format(args.output), end="")
+    # np.savetxt(args.output,fixed_dipole,fmt='%24.18e')
+    # print("done")
 
     if args.folder is not None:
         print()
