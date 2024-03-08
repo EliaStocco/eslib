@@ -8,9 +8,9 @@ from eslib.functions import phonopy2atoms
 import argparse
 import numpy as np
 import yaml
-import pandas as pd
-from icecream import ic
-import os
+# import pandas as pd
+# from icecream import ic
+# import os
 # import warnings
 # warnings.filterwarnings("error")
 #---------------------------------------#

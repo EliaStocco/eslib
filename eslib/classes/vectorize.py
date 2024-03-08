@@ -1,6 +1,6 @@
 from typing import List
 import numpy as np
-from icecream import ic
+# from icecream import ic
 
 class easyvectorize():
 

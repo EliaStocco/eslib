@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import argparse
-import numpy as np
+# import numpy as np
 from ase.io import read
 from ase import Atoms
 import pandas as pd
-from icecream import ic
+# from icecream import ic
 from eslib.classes.vectorize import easyvectorize
 from eslib.classes.normal_modes import NormalModes
 # import warnings

@@ -86,8 +86,8 @@ def main():
         indices_A.append(index_A)
     print("done")
 
-    from icecream import ic
-    ic(indices_A)
+    # from icecream import ic
+    # ic(indices_A)
 
     #-------------------#
     print("\n\t{:s}\n".format(closure))
