@@ -39,6 +39,7 @@ def prepare_args(description):
     parser.add_argument("-n"  , "--index" ,          **argv,required=False, type=lambda x: int(x) if x.isdigit() else x     , help="index to be read from input file (default: ':')", default=':')
     parser.add_argument("-o"  , "--output"       ,   **argv,required=True , type=str     , help="output file")
     parser.add_argument("-of" , "--output_format",   **argv,required=False,type=str     , help="output file format (default: 'None')", default=None)
+    parser.add_argument("-f"  , "--folder"       ,   **argv,required=False,type=str     , help="folder of the output files if each structure has to be saved in a different file (default: None)", default=None)
     # Parse the command-line arguments
     return parser.parse_args()
 
@@ -158,12 +159,26 @@ def main(args):
 
     #------------------#
     # Write the data to the specified output file with the specified format
-    print("\n\tWriting data to file '{:s}' ... ".format(args.output), end="")
-    try:
-        write(images=atoms,filename=args.output, format=args.output_format) # fmt)
+    if args.folder is None:
+        print("\n\tWriting data to file '{:s}' ... ".format(args.output), end="")
+        try:
+            write(images=atoms,filename=args.output, format=args.output_format) # fmt)
+            print("done")
+        except Exception as e:
+            print("\n\tError: {:s}".format(e))
+    else:
+        print("\n\tWriting each atomic structure to a different file in folder '{:s}' ... ".format(args.folder), end="")
+        if not os.path.exists(args.folder):
+            os.mkdir(args.folder)
+        for n,structure in enumerate(atoms):
+            file_name, file_extension  = os.path.splitext(args.output)
+            file = f"{args.folder}/{file_name}.n={n}{file_extension}"
+            file = os.path.normpath(file)
+            try:
+                write(images=structure,filename=file, format=args.output_format) # fmt)
+            except Exception as e:
+                print("\n\tError: {:s}".format(e))
         print("done")
-    except Exception as e:
-        print("\n\tError: {:s}".format(e))
 
 if __name__ == "__main__":
     main()
