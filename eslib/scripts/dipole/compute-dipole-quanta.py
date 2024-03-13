@@ -4,6 +4,7 @@ import numpy as np
 from eslib.tools import cart2frac
 from ase.io import read
 from eslib.formatting import esfmt
+from eslib.physics import compute_dipole_quanta
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -51,21 +52,22 @@ def main(args):
     #---------------------------------------#
     # quanta
     print("\tComputing the dipole quanta ... ", end="")
-    N = len(atoms)
-    quanta = np.zeros((N,3))
+    _, quanta = compute_dipole_quanta(atoms,args.keyword)
+    # N = len(atoms)
+    # quanta = np.zeros((N,3))
+    # # for n in range(N):
+    # #     cell = lattices[n].T
+    # #     R = cart2lattice(lattices[n])
+    # #     lenght = np.linalg.norm(cell,axis=0)
+    # #     quanta[n,:] = R @ dipole[n] / lenght
     # for n in range(N):
-    #     cell = lattices[n].T
-    #     R = cart2lattice(lattices[n])
-    #     lenght = np.linalg.norm(cell,axis=0)
-    #     quanta[n,:] = R @ dipole[n] / lenght
-    for n in range(N):
-        # atoms[n].set_calculator(None)
-        # cell = np.asarray(atoms[n].cell.array).T
-        # lenght[n,:] = np.linalg.norm(cell,axis=0)
-        # R = cart2lattice(cell)
-        # dipole = R @ atoms[n].info[args.name]
-        # phases[n,:] = dipole / lenght[n,:]
-        quanta[n,:] = cart2frac(cell=atoms[n].get_cell(),v=atoms[n].info[args.keyword])
+    #     # atoms[n].set_calculator(None)
+    #     # cell = np.asarray(atoms[n].cell.array).T
+    #     # lenght[n,:] = np.linalg.norm(cell,axis=0)
+    #     # R = cart2lattice(cell)
+    #     # dipole = R @ atoms[n].info[args.name]
+    #     # phases[n,:] = dipole / lenght[n,:]
+    #     quanta[n,:] = cart2frac(cell=atoms[n].get_cell(),v=atoms[n].info[args.keyword])
     print("done")
 
     #---------------------------------------#
