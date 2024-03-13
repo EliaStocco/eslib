@@ -19,7 +19,7 @@ from eslib.formatting import esfmt, error, warning
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Convert the i-PI output files to an extxyz file with the specified properties and arrays.\n"
+description = "Convert the i-PI output files to an extxyz file with the specified properties and arrays."
 
 #---------------------------------------#
 def prepare_args(description):
