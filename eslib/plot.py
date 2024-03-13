@@ -1,5 +1,11 @@
 from eslib.functions import add_default
 import numpy as np
+import matplotlib.pyplot as plt
+
+def generate_colors(N,map='tab10'):
+    cmap = plt.get_cmap(map)  # You can choose other colormaps as well
+    colors = [cmap(i) for i in np.linspace(0, 1, N)]
+    return colors
 
 def straigh_line(ax,shift,get_lim,func,set_lim,**argv):
 
@@ -44,7 +50,7 @@ def square_plot(ax,lims:tuple=None):
     return ax
 
 
-def plot_bisector(ax, shiftx=0, shifty=0, **argv):
+def plot_bisector(ax, shiftx=0, shifty=0, argv:dict=None):
     default = {"color": "black", "alpha": 0.5, "linestyle": "dashed"}
     argv = add_default(argv,default)
 

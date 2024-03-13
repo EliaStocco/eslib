@@ -4,6 +4,9 @@ import numpy as np
 from ase import Atoms
 from eslib.tools import convert
 from typing import List
+from eslib.tools import cart2frac
+from eslib.physics import compute_dipole_quanta
+from copy import copy
 
 @dataclass
 class dipoleLM(pickleIO):
@@ -75,7 +78,9 @@ class dipoleLM(pickleIO):
             model  = np.full((N,3),np.nan)
             for n in range(N):
                 R = pos[n]#.reshape((-1,3))
-                dD = self.bec.T @ np.asarray(R - self.ref.positions).reshape(3*self.Natoms)
+                delta = np.asarray(R - self.ref.positions)
+                delta -= delta.mean(axis=0)
+                dD = self.bec.T @ delta.reshape(3*self.Natoms)
                 model[n,:] = dD + self.dipole
             return model, (None, None, None)
         
@@ -103,4 +108,25 @@ class dipoleLM(pickleIO):
             angles = r.as_euler("xyz",degrees=True)
             euler_angles[n,:] = angles
         return newx, com, rotmat, euler_angles
+
+    def control_periodicity(self,traj:List[Atoms])->np.ndarray:
+        """Returns the indices of the atomic structures that could be 'too far' from the reference configuration"""
+        N = len(traj)
+        snapshots = np.arange(N).astype(float)
+        for n in range(N):
+            pos = traj[n].get_positions()
+            delta = np.asarray(pos - self.ref.positions)
+            # recenter
+            frac = cart2frac(self.ref.get_cell(),delta-delta.mean(axis=0))
+            if not np.any(abs(frac) > 0.5):
+                snapshots[n] = np.nan
+        return snapshots[~np.isnan(snapshots)].astype(int)
+    
+    def get_dipole(self)->np.ndarray:
+        return self.dipole
+    
+    def get_quanta(self)->np.ndarray:
+        tmp = copy(self.ref)
+        tmp.info["dipole"] = self.dipole
+        return np.asarray(compute_dipole_quanta([tmp],in_keyword="dipole")[1][0]).astype(int)
 

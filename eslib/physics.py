@@ -1,8 +1,10 @@
-from typing import List
+from typing import List, Tuple
 import re
 import numpy as np
 from ase import Atoms
 from eslib.classes.bec import bec as BEC
+from copy import copy
+from eslib.tools import cart2frac
 
 def oxidation_number(molecule: List[str], numbers: dict = None):
     default_oxidation_numbers = {
@@ -69,3 +71,12 @@ def bec_from_oxidation_number(atoms:Atoms,on:List[str])->BEC:
         bec[n,:,:] = on[n] * np.eye(3)
     bec = bec.reshape((1,-1,3))
     return BEC.from_numpy(bec)
+
+def compute_dipole_quanta(trajectory:List[Atoms],in_keyword:str="dipole",out_keyword:str="quanta")->Tuple[List[Atoms],np.ndarray]:
+    out = copy(trajectory)
+    quanta = np.full((len(trajectory),3),np.full)
+    for n,atoms in enumerate(trajectory):
+        quanta[n,:] = cart2frac(cell=atoms.get_cell(),v=atoms.info[in_keyword])
+        out[n].info[out_keyword] = quanta[n,:]
+    return out, quanta
+    
