@@ -16,11 +16,12 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i" , "--input"       , **argv, required=False, type=str, help="input file with the displaced atomic structures [au] (default: 'replay.xyz')", default='replay.xyz')
-    parser.add_argument("-if", "--input_format", **argv, required=False, type=str, help="input file format (default: 'None')" , default=None)
-    parser.add_argument("-d" , "--dipoles"     , **argv, required=True , type=str, help="file with the dipoles")
-    parser.add_argument("-u" , "--unit"        , **argv, required=False, type=str, help="dipole unit (default: 'atomic_unit')", default='atomic_unit')
-    parser.add_argument("-o" , "--output"      , **argv, required=False, type=str, help="output file with the BEC tensors (default: 'bec.txt')", default='bec.txt')
+    parser.add_argument("-i" , "--input"       , **argv, required=False, type=str  , help="input file with the displaced atomic structures [au] (default: 'replay.xyz')", default='replay.xyz')
+    parser.add_argument("-if", "--input_format", **argv, required=False, type=str  , help="input file format (default: 'None')" , default=None)
+    parser.add_argument("-d" , "--dipoles"     , **argv, required=True , type=str  , help="file with the dipoles")
+    parser.add_argument("-s" , "--displacement", **argv, required=True , type=float, help="displacement")
+    parser.add_argument("-u" , "--unit"        , **argv, required=False, type=str  , help="dipole unit (default: 'atomic_unit')", default='atomic_unit')
+    parser.add_argument("-o" , "--output"      , **argv, required=False, type=str  , help="output file with the BEC tensors (default: 'bec.txt')", default='bec.txt')
     return parser.parse_args()
 
 #---------------------------------------#
@@ -93,14 +94,15 @@ def main(args):
     left  = np.asarray([ a.get_positions().flatten() for a in left  ])
     right = np.asarray([ a.get_positions().flatten() for a in right ])
 
-    displacements = np.absolute(left-right).diagonal()
-    if not np.allclose(displacements,displacements[0]):
-        raise ValueError("The displacements should be all the same.")
-    if not check_off_diagonal(left-right):
-        raise ValueError("coding error: off diagonal displacements")
+    # displacements = np.absolute(left-right).diagonal()
+    # if not np.allclose(displacements,displacements[0]):
+    #     raise ValueError("The displacements should be all the same.")
+    # if not check_off_diagonal(left-right):
+    #     raise ValueError("coding error: off diagonal displacements")
 
     # they are all the same
-    displacement = abs(displacements[0]/2.)
+    # displacement = abs(displacements[0]/2.)
+    displacement = args.displacement
     print("\tThe provided structures have all been displaced by {:f} atomic unit".format(displacement))
 
     #------------------#
