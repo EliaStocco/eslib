@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from eslib.formatting import esfmt
 from eslib.classes.trajectory import trajectory, info
+from eslib.plot import generate_colors
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -32,11 +33,12 @@ def plot_array(data, output_file, time=None):
 
     # Create a plot for each row in the array
     fig,ax = plt.subplots(figsize=(15,5))
+    colors = generate_colors(cols,"viridis")
     for n in range(cols):
         if time is None:
-            ax.plot(data[:,n], label=str(n+1),marker='o')
+            ax.plot(data[:,n], label=str(n+1),marker='o',color=colors[n])
         else:
-            ax.plot(time,data[:,n], label=str(n+1),marker='o')
+            ax.plot(time,data[:,n], label=str(n+1),marker='o',color=colors[n])
 
     # Add labels and legend
     plt.xlabel('time/row index')
