@@ -55,7 +55,7 @@ def main(args):
     if bec is None:
         try: bec = np.asarray(ref.arrays["bec"]) 
         except: pass
-    if dipole is None:
+    if args.dipole is None:
         try: dipole = np.asarray(ref.info[args.keyword])
         except: pass
     # del reference
