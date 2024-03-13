@@ -8,6 +8,7 @@ from eslib.classes.trajectory import trajectory as Trajectory
 from eslib.tools import cart2lattice, cart2frac, frac2cart
 from eslib.output import output_folder
 from ase.io import write
+from eslib.formatting import everythingok,warning
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -43,7 +44,7 @@ def correlation_plot(A,B,nameA,nameB,file):
         ax.grid()
         xlims = ax.get_xlim()
         ylims = ax.get_ylim()
-        for n in range(-10,10):
+        for n in range(-20,20):
             plot_bisector(ax,n)
         ax.set_xlim(*xlims)
         ax.set_ylim(*ylims)
@@ -86,6 +87,7 @@ def main():
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
     trajectory = Trajectory(args.input)
     print("done")
+    print("\tn. of atomic structures: ",len(trajectory))
 
     #------------------#
     # dipole
@@ -108,8 +110,18 @@ def main():
     print("done")
 
     #------------------#
+    print("\tCheck the distances w.r.t. the reference configuration ... ", end="")
+    indices = model.control_periodicity(list(trajectory))
+    print("done")
+    if indices is None or len(indices) == 0:
+        print("\t{:s}".format(everythingok))
+    else:
+        print("\t{:s}: found {:d} structures that could be wrong.".format(warning,len(indices)))
+        # print("\tatomic structures indices: ", indices.tolist())
+
+    #------------------#
     # dipole
-    print("\tComputing the dipoles using the linear model ... ", end="")
+    print("\n\tComputing the dipoles using the linear model ... ", end="")
     linear = model.get(list(trajectory))
     print("done")
 
@@ -209,8 +221,8 @@ def main():
     print("\tAdding fixed dipole as info 'dipole' and quanta as 'quanta' to atomic structures ... ", end="")
     for n in range(N):
         trajectory[n].info["dipole"] = fixed_dipole[n,:]
-        quanta = cart2frac(cell=trajectory[n].get_cell(),v=fixed_dipole[n,:])
-        trajectory[n].info["quanta"] = quanta.flatten()
+        _quanta = cart2frac(cell=trajectory[n].get_cell(),v=fixed_dipole[n,:])
+        trajectory[n].info["quanta"] = _quanta.flatten()
     print("done")
 
     #------------------#
@@ -246,10 +258,10 @@ def main():
         correlation_plot(fixed_quanta,quanta["LM"],"DFT","LM",file)
         print("done")
 
-        file = "{:s}/dipole-fixed.correlation.pdf".format(args.folder)
-        print("\tSaving correlation plot between fixed DFT and LM dipole to file '{:s}' ... ".format(file), end="")        
-        correlation_plot(fixed_dipole,linear,"DFT","LM",file)
-        print("done")
+        # file = "{:s}/dipole-fixed.correlation.pdf".format(args.folder)
+        # print("\tSaving correlation plot between fixed DFT and LM dipole to file '{:s}' ... ".format(file), end="")        
+        # correlation_plot(fixed_dipole,linear,"DFT","LM",file)
+        # print("done")
 
     #------------------#
     # Script completion message
