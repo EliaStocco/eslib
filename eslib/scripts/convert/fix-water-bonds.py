@@ -5,6 +5,8 @@ from ase import Atoms
 import numpy as np
 from ase.io import read, write
 from eslib.tools import cart2frac, frac2cart
+from eslib.input import slist
+from typing import List
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -18,6 +20,7 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"        , **argv, required=True , type=str  , help="file with the atomic structures")
     parser.add_argument("-if", "--input_format" , **argv, required=False, type=str  , help="input file format (default: 'None')" , default=None)
     parser.add_argument("-rc", "--cutoff"       , **argv, required=False, type=float, help="cutoff/bond lenght(default: 3)" , default=3)
+    parser.add_argument("-s" , "--species"      , **argv, required=True , type=slist, help="atomic species of the bonds to be fixed (default: ['O','H'])", default=['O','H'])
     parser.add_argument("-o" , "--output"       , **argv, required=True , type=str  , help="output file with the oxidation numbers (default: 'wrapped.extxyz')", default="wrapped.extxyz")
     parser.add_argument("-of", "--output_format", **argv, required=False, type=str  , help="output file format (default: None)", default=None)
     return parser.parse_args()
@@ -25,58 +28,69 @@ def prepare_args(description):
 #---------------------------------------#
 @esfmt(prepare_args,description)
 def main(args):
+
+    #------------------#
+    if len(args.species) != 2:
+        raise ValueError("-s,--species has to be of lenght 2.")
+    print("\tFixing bonds between {:s} and {:s}".format(args.species[0],args.species[1]))
     
     #------------------#
-    print("\tReading the first atomic structure from file '{:s}' ... ".format(args.input), end="")
-    atoms:Atoms = read(args.input,format=args.input_format,index=0)
+    print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
+    trajectory:List[Atoms] = read(args.input,format=args.input_format,index=":")
     print("done")
+    print("\tNumber atomic structures: ",len(trajectory))
 
     #------------------#
     # Select oxygen and hydrogen atoms
-    oxygens   = [ n for n,a in enumerate(atoms) if a.symbol == 'O']
-    hydrogens = [ n for n,a in enumerate(atoms) if a.symbol == 'H']
+    oxygens   = [ n for n,a in enumerate(trajectory[0]) if a.symbol == args.species[0]]
+    hydrogens = [ n for n,a in enumerate(trajectory[0]) if a.symbol == args.species[1]]
     print()
-    print("\t  Number of oxygen atoms: ",len(oxygens))
-    print("\tNumber of hydrigen atoms: ",len(hydrogens))
+    print("\tNumber of {:s} atoms: {:d}".format(args.species[0],len(oxygens)))
+    print("\tNumber of {:s} atoms: {:d}".format(args.species[1],len(hydrogens)))
 
 
     #------------------#
-    print("\tWrapping hydrogen atoms:")
+    print("\tFixing bonds:")
     zeros = np.zeros(3)
-    wrapped = []
-    for o_index in oxygens:
-        # Find neighbors of the current oxygen atom within the cutoff distance
-        
-        distances = atoms.get_distances(o_index,hydrogens,mic=True,vector=False)
+    for n,atoms in enumerate(trajectory):
+        print("\t - atomic structure {:d}".format(n))
+        oxygens   = [ n for n,a in enumerate(trajectory[0]) if a.symbol == args.species[0]]
+        hydrogens = [ n for n,a in enumerate(trajectory[0]) if a.symbol == args.species[1]]
 
-        for n,d in zip(hydrogens,distances):
-            if d > args.cutoff:
-                continue
-            delta = atoms.positions[n] - atoms.positions[o_index] 
-            delta:np.ndarray = cart2frac(atoms.get_cell(),delta)[0]
-            # delta = (2*delta).round(0)/2.
-            delta = delta.round(0).astype(int)
-            if not np.allclose(delta,zeros):
-                print("\t - wrapping hydrogen {:3d} by [{:>2d},{:>2d},{:>2d}]".format(n,*delta.tolist()),\
-                      "(frac. coor.) so that it will be closer to oxygen {:d}".format(o_index))
-                delta = frac2cart(atoms.get_cell(),delta)[0]
-                atoms.positions[n,:] -= delta
-                wrapped.append(n)
-                # print(n," ",delta)
-        
+        wrapped = []
+        for o_index in oxygens:
+            # Find neighbors of the current oxygen atom within the cutoff distance
+            
+            distances = atoms.get_distances(o_index,hydrogens,mic=True,vector=False)
 
-    Nwrapping = len(wrapped)
-    Nwrapped  = len(np.unique(wrapped))
-    print("\n\tNumber of wrapping: ",Nwrapping)
-    print("\tNumber of wrapped hydrogens: ",Nwrapped)
+            for n,d in zip(hydrogens,distances):
+                if d > args.cutoff:
+                    continue
+                delta = atoms.positions[n] - atoms.positions[o_index] 
+                delta:np.ndarray = cart2frac(atoms.get_cell(),delta)[0]
+                # delta = (2*delta).round(0)/2.
+                delta = delta.round(0).astype(int)
+                if not np.allclose(delta,zeros):
+                    # print("\t - wrapping hydrogen {:3d} by [{:>2d},{:>2d},{:>2d}]".format(n,*delta.tolist()),\
+                    #     "(frac. coor.) so that it will be closer to oxygen {:d}".format(o_index))
+                    delta = frac2cart(atoms.get_cell(),delta)[0]
+                    atoms.positions[n,:] -= delta
+                    wrapped.append(n)
+                    # print(n," ",delta)
+            
 
-    if Nwrapping != Nwrapped:
-        print("\t{:s}: the previous two numbers are expected to be the same. Carefully check your input and output files.".format(warning))
+        Nwrapping = len(wrapped)
+        Nwrapped  = len(np.unique(wrapped))
+        # print("\n\tNumber of wrapping: ",Nwrapping)
+        # print("\tNumber of wrapped hydrogens: ",Nwrapped)
+
+        if Nwrapping != Nwrapped:
+            print("\t{:s}: the previous two numbers are expected to be the same. Carefully check your input and output files.".format(warning))
 
 
     print("\n\tWriting (un)wrapped atomic structure to file '{:s}' ... ".format(args.output), end="")
     try:
-        write(images=atoms,filename=args.output,format=args.output_format) # fmt)
+        write(images=trajectory,filename=args.output,format=args.output_format) # fmt)
         print("done")
     except Exception as e:
         print("\n\tError: {:s}".format(e))
