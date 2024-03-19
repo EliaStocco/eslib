@@ -130,3 +130,5 @@ class dipoleLM(pickleIO):
         tmp.info["dipole"] = self.dipole
         return np.asarray(compute_dipole_quanta([tmp],in_keyword="dipole")[1][0]).astype(int)
 
+    def get_reference(self):
+        return self.ref.copy()
