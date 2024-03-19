@@ -64,7 +64,7 @@ def compute(Ef,data,options):
 
 def FFT_plot(Ef,data,options):
 
-    from eslib.fourier import FourierAnalyzer
+    from classes.fourier import FourierAnalyzer
 
     t,E,En,f= compute(Ef,data,options)
     result = np.column_stack((E, f)).shape
