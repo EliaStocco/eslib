@@ -63,7 +63,7 @@ def prepare_args():
     parser.add_argument("-i", "--input"    , **argv, type=str, help="extxyz file with the atomic configurations [a.u]")
     parser.add_argument("-k", "--keyword"  , **argv, type=str, help="keyword related to dipole to be fixed in the extxyz file (default: 'dipole')", default='dipole')
     parser.add_argument("-m", "--model"    , **argv, type=str, help="pickle file with the dipole linear model (default: 'dipoleLM.pickle')", default='dipoleLM.pickle')
-    parser.add_argument("-o", "--output"   , **argv, type=str, help="output file with the dipole values (default: 'dipole.fixed.txt')", default="dipole.fixed.txt")
+    parser.add_argument("-o", "--output"   , **argv, type=str, help="output file with the fixed trajectory (default: 'trajectory.fixed.extxyz')", default="trajectory.fixed.extxyz")
     parser.add_argument("-f", "--folder"   , **argv, type=str, help="output folder with additional output files (default: None)", default=None)
     return parser.parse_args()
 
