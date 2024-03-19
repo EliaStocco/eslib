@@ -1,0 +1,5 @@
+convert-file.py -i raw/i-pi.positions_0.xyz -o positions.extxyz -if ipi -rr  true
+check-properties.py -i raw/i-pi.properties.out -o properties.pickle
+ipi2extxyz.py -qf positions.extxyz -pf properties.pickle -o trajectory.extxyz -if extxyz
+rm properties.pickle 
+rm positions.extxyz
