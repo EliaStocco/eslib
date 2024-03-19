@@ -37,24 +37,27 @@ def trajectory(file,format:str=None,check:bool=True,index=":",pbc=True,remove_re
         atoms[n].set_calculator(None)
 
     pbc = pbc if pbc is not None else True
-    if format in ["i-pi","ipi"] and pbc:
+    if format in ["i-pi","ipi"]:
         for n in range(len(atoms)):
             atoms[n].info = dict()
 
         # try : 
+        
         comments = read_comments_xyz(file,Nread=len(atoms))
-        strings = [ abcABC.search(comment) for comment in comments ]
-        cells = np.zeros((len(strings),3,3))
-        for n,cell in enumerate(strings):
-            a, b, c = [float(x) for x in cell.group(1).split()[:3]]
-            alpha, beta, gamma = [float(x) * deg2rad for x in cell.group(1).split()[3:6]]
-            cells[n] = mt.abc2h(a, b, c, alpha, beta, gamma)
+
+        if pbc:
+            strings = [ abcABC.search(comment) for comment in comments ]
+            cells = np.zeros((len(strings),3,3))
+            for n,cell in enumerate(strings):
+                a, b, c = [float(x) for x in cell.group(1).split()[:3]]
+                alpha, beta, gamma = [float(x) * deg2rad for x in cell.group(1).split()[3:6]]
+                cells[n] = mt.abc2h(a, b, c, alpha, beta, gamma)
 
         if remove_replicas:
             strings = [ step.search(comment).group(1) for comment in comments ]
             steps = np.asarray([int(i) for i in strings],dtype=int)
             test, indices = np.unique(steps, return_index=True)
-            if steps != test:
+            if steps.shape != test.shape:
                 print("\t{:s}: there could be replicas. Specify '-rr/--remove_replicas true' to remove them.".format(warning))
             # if len(indices) != len(steps):
             #     pass
@@ -70,10 +73,10 @@ def trajectory(file,format:str=None,check:bool=True,index=":",pbc=True,remove_re
         #         "positions" : matches[0],
         #         "cell" : matches[1]
         #     }
-
-        for n in range(len(atoms)):
-            atoms[n].set_cell(cells[n].T)
-            atoms[n].set_pbc(True)
+        if pbc:
+            for n in range(len(atoms)):
+                atoms[n].set_cell(cells[n].T)
+                atoms[n].set_pbc(True)
 
         # except:
         #     pass
