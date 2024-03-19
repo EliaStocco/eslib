@@ -150,15 +150,22 @@ def main(args):
     print("done")
 
     print()
+    extension = ".json.gz"
+    base_name = str(args.chemiscope).split(extension)[0]
     if args.component == -1:
         for n in range(features.shape[1]):
-            extension = ".json.gz"
-            base_name = str(args.chemiscope).split(extension)[0]
             file = f"{base_name}.{n}{extension}"
             print("\tSaving results (component {:d}) for chemiscope to file '{:s}' ... ".format(n,file),end="")
             save_feature_to_chemiscope(features[:,n],args.feature,frames,T,file)
             print("done")
+    elif args.component == -2:
+        file = f"{base_name}{extension}"
+        print("\tSaving results (modulus) for chemiscope to file '{:s}' ... ".format(file),end="")
+        features = np.linalg.norm(features,axis=1)
+        save_feature_to_chemiscope(features,args.feature,frames,T,file)
+        print("done")
     else:
+        file = f"{base_name}{extension}"
         print("\tSaving results for chemiscope to file '{:s}' ... ".format(file),end="")
         save_feature_to_chemiscope(features,args.feature,frames,T,args.output)
         print("done")
