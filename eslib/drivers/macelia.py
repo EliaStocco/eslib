@@ -21,7 +21,7 @@ def prepare_args(description):
     parser.add_argument("-f", "--format"    , **argv, required=False, type=str     , help="file format of the atomic structure (default: 'None')" , default=None)
     parser.add_argument("-m", "--model"     , **argv, required=False, type=str     , help="file with the MACE model")
     parser.add_argument("-t", "--model_type", **argv, required=True , type=str     , help="MACE model data type (default: None)", default=None)
-    parser.add_argument("-p", "--port"      , **argv, required=False, type=str     , help="TCP/IP port number. Ignored when using UNIX domain sockets.")
+    parser.add_argument("-p", "--port"      , **argv, required=False, type=int     , help="TCP/IP port number. Ignored when using UNIX domain sockets.")
     parser.add_argument("-a", "--address"   , **argv, required=True , type=str     , help="Host name (for INET sockets) or name of the UNIX domain socket to connect to.")
     parser.add_argument("-u", "--unix"      , **argv, required=False, type=str2bool, help="Use a UNIX domain socket (default: false)", default=False)
     parser.add_argument("-d", "--device"    , **argv, required=False, type=str     , help="device (default: 'cpu')", choices=['cpu','gpu','cuda'], default='cpu')
