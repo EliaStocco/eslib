@@ -1,4 +1,4 @@
-import os
+import os, sys
 from contextlib import contextmanager
 from eslib.functions import Dict2Obj, args_to_dict
 from eslib.functions import add_default
@@ -25,6 +25,20 @@ input_arguments = Fore.GREEN   + Style.NORMAL + input_arguments         + Style.
 warning         = Fore.MAGENTA + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
 everythingok    = Fore.BLUE    + Style.BRIGHT + everythingok            + Style.RESET_ALL
 
+def print_python_info():
+    # Print Python version
+    print("Python Version:", sys.version)
+
+    # Print Python executable path
+    print("Python Executable Path:", sys.executable)
+
+    # Print Conda environment
+    conda_env = os.environ.get('CONDA_DEFAULT_ENV')
+    if conda_env:
+        print("Conda Environment:", conda_env)
+    else:
+        print("Not using Conda environment.")
+
 def line():
     print("-"*30)
 
@@ -49,6 +63,17 @@ def esfmt(prepare_parser:callable, description:str=None):
         try: print("script file: {:s}".format(inspect.getfile(main))) #main.__file__))
         except: pass        
         print("working directory: {:s}".format(os.getcwd()))
+        print("python --version:", sys.version)
+        print("which python:", sys.executable)
+        conda_env = os.environ.get('CONDA_DEFAULT_ENV')
+        if conda_env:
+            print("conda env:", conda_env)
+            index_bin = sys.executable.find('/bin')
+            _conda_env = sys.executable[:index_bin].split('/')[-1]
+            if _conda_env != conda_env:
+                print("{:s}: possible discrepancy between conda environment and python executable.".format(warning))
+        else:
+            print("not using conda env")
         print("start date: {:s}".format(start_date))
         print("start time: {:s}".format(start_time))
         line()
