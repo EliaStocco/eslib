@@ -104,9 +104,10 @@ def return_transformed_components(func):
         if v is None:
             return matrix
         else:
+            shape = v.shape
             v = np.asarray(v).reshape((-1,3))
             out = (matrix @ v.T).T
-            return out.reshape(v.shape)
+            return out.reshape(shape)
     return wrapper
 
 #---------------------------------------#
