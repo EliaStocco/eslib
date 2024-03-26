@@ -226,6 +226,17 @@ def main():
     print("done")
 
     #------------------#
+    print("\tLooking for outliers ... ", end="")
+    for n in range(N):
+        fd = trajectory[n].info["dipole"]
+        fd_quanta  = cart2frac(cell=trajectory[n].get_cell(),v=fd)
+        lm_quanta = cart2frac(cell=trajectory[n].get_cell(),v=linear[n])
+        norm = np.sqrt(np.square(fd_quanta-lm_quanta).sum())
+        # norm = np.linalg.norm(fd-linear[n])
+        print(norm)
+    print("done")
+
+    #------------------#
     # writing
     print("\n\tWriting output to file '{:s}' ... ".format(args.output), end="")
     try:
