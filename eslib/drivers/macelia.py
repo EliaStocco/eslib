@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-from mace.calculators import MACECalculator, MACEliaCalculator
+# from mace.calculators import MACECalculator
+from mace.calculators import MACEliaCalculator
 from ase.io import read
 from eslib.formatting import esfmt
 from eslib.functions import suppress_output
 from eslib.drivers.socketextras import SocketClientExtras
-from ase.calculators.socketio import SocketClient
+# from ase.calculators.socketio import SocketClient
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -15,14 +16,14 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-s", "--structure" , **argv, required=True , type=str, help="file with the atomic structure")
-    parser.add_argument("-f", "--format"    , **argv, required=False, type=str, help="file format of the atomic structure (default: 'None')" , default=None)
-    parser.add_argument("-m", "--model"     , **argv, required=False , type=str, help="file with the MACE model")
-    parser.add_argument("-t", "--model_type", **argv, required=True, type=str, help="MACE model data type (default: None)", default=None)
-    parser.add_argument("-p", "--port"      , **argv, required=False , type=str, help="TCP/IP port number. Ignored when using UNIX domain sockets.")
-    parser.add_argument("-a", "--address"   , **argv, required=True , type=str, help="Host name (for INET sockets) or name of the UNIX domain socket to connect to.")
-    parser.add_argument("-u", "--unix"      , required=False, action="store_true", help="Use a UNIX domain socket (default: true)", default=True)
-    parser.add_argument("-d", "--device"    , **argv, required=False , type=str, help="device (default: 'cpu')", choices=['cpu','gpu','cuda'], default='cpu')
+    parser.add_argument("-s", "--structure" , **argv             , required=True , type=str, help="file with the atomic structure")
+    parser.add_argument("-f", "--format"    , **argv             , required=False, type=str, help="file format of the atomic structure (default: 'None')" , default=None)
+    parser.add_argument("-m", "--model"     , **argv             , required=False, type=str, help="file with the MACE model")
+    parser.add_argument("-t", "--model_type", **argv             , required=True , type=str, help="MACE model data type (default: None)", default=None)
+    parser.add_argument("-p", "--port"      , **argv             , required=False, type=str, help="TCP/IP port number. Ignored when using UNIX domain sockets.")
+    parser.add_argument("-a", "--address"   , **argv             , required=True , type=str, help="Host name (for INET sockets) or name of the UNIX domain socket to connect to.")
+    parser.add_argument("-u", "--unix"      , action="store_true", required=False,           help="Use a UNIX domain socket (default: true)", default=True)
+    parser.add_argument("-d", "--device"    , **argv             , required=False, type=str, help="device (default: 'cpu')", choices=['cpu','gpu','cuda'], default='cpu')
     return parser.parse_args()
 
 #---------------------------------------#
@@ -35,6 +36,7 @@ def main(args):
     print("done")
 
     #------------------#
+    # I don't know if I actually need this line
     atoms.info = {}
 
     #------------------#
@@ -50,14 +52,14 @@ def main(args):
                                  **kwargv)
     else:
         print("\tCreating the MACECalculator ... ", end="")
-        try:
-            calculator = MACECalculator(model_paths=args.model,\
-                                        model_type=args.model_type,\
-                                        **kwargv)
-        except:
-            calculator = MACEliaCalculator(model_paths=args.model,\
-                                        model_type=args.model_type,\
-                                        **kwargv)         
+        # try:
+        #     calculator = MACECalculator(model_paths=args.model,\
+        #                                 model_type=args.model_type,\
+        #                                 **kwargv)
+        # except:
+        calculator = MACEliaCalculator(model_paths=args.model,\
+                                    model_type=args.model_type,\
+                                    **kwargv)         
     print("done")
 
     atoms.set_calculator(calculator)
