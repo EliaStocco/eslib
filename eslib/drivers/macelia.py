@@ -44,12 +44,20 @@ def main(args):
         "device" : args.device,
         "default_dtype" : 'float64'
     }
-    if args.model_type == "foundation_mp":
+    args.model_type = str(args.model_type).lower()
+    if args.model_type in ["foundation_mp","mp","mace_mp"]:
         print("\tLoading the MACECalculator with a pretrained model based on the Materials Project ... ", end="")
         from mace.calculators import mace_mp
         with suppress_output():
-            calculator = mace_mp(model=args.model,\
-                                 **kwargv)
+            calculator = mace_mp(model=args.model,**kwargv)
+    elif args.model_type in ["foundation_anicc","anicc","mace_anicc"]:
+        from mace.calculators import mace_anicc
+        with suppress_output():
+            calculator = mace_anicc(model=args.model,**kwargv)
+    elif args.model_type in ["foundation_off","off","mace_off"]:
+        from mace.calculators import mace_off
+        with suppress_output():
+            calculator = mace_off(model=args.model,**kwargv)
     else:
         print("\tCreating the MACECalculator ... ", end="")
         # try:
