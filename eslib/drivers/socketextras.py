@@ -4,7 +4,26 @@ import json
 import ase.units as units
 from ase.calculators.socketio import SocketClient, SocketClosed
 
-class Dummy:
+class FormatExtras:
+    """Class to properly format extras string such that they will be compatible with i-PI."""
+
+    @staticmethod
+    def format(name:str,array:np.ndarray,atoms:Atoms)->np.ndarray:
+        if name.lower() in ["bec","dipole_dr"]:
+            return FormatExtras.format_bec(name,array,atoms)
+        return name, array
+    
+    @staticmethod
+    def format_bec(name:str,array:np.ndarray,atoms:Atoms)->np.ndarray:
+        """Format Born Effective Charge Tensors."""
+        array = np.asarray(array)        # (natoms,3,3)  -->  (atom index   ,pos. coord.   ,dipole coord.)
+        array = np.moveaxis(array, 2, 0) # (3,natoms,3)  -->  (dipole coord., atom index   , pos. coord. )
+        array = np.moveaxis(array, 1, 2) # (3,3,natoms)  -->  (dipole coord., pos. coord.  , atom index  )
+        array = array.reshape((3,-1))    # (3,3xnatoms)  -->  (dipole coord., all coord.                 ) with R1x R1y R1z R2x R2y R2z ....
+        array = array.T                  # (3xnatoms,3)  -->  (all coord.   , dipole coord.              )
+        return "BEC",array
+
+class ProtocolExtras:
 
     def ipi_sendforce(self, energy, forces, virial,morebytes=np.zeros(1, dtype=np.byte)):
         assert np.array([energy]).size == 1
@@ -27,14 +46,11 @@ class Dummy:
         self.socket.send(morebytes.encode("utf-8"))
         return
 
-
-
 class SocketClientExtras(SocketClient):
 
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
-        # self.protocol.send = lambda a, dtype: Dummy.ipi_send(self.protocol, a, dtype)
-        self.protocol.sendforce = lambda  energy, forces, virial, morebytes : Dummy.ipi_sendforce(self.protocol, energy, forces, virial,morebytes)
+        self.protocol.sendforce = lambda  energy, forces, virial, morebytes : ProtocolExtras.ipi_sendforce(self.protocol, energy, forces, virial,morebytes)
 
     def calculate(self, atoms:Atoms, use_stress:bool):
         # We should also broadcast the bead index, once we support doing
@@ -42,36 +58,22 @@ class SocketClientExtras(SocketClient):
         self.comm.broadcast(atoms.positions, 0)
         self.comm.broadcast(np.ascontiguousarray(atoms.cell), 0)
 
-        # for property in atoms.calc.implemented_properties:
-        #     if property in ["energy","forces","stress"]: 
-        #         continue
-        #     extras[property] = atoms.calc.get_property(property)
-
-        # try: 
         energy = atoms.get_potential_energy()
-        # except:
-        #     energy = 0.
-
-        # try: 
         forces = atoms.get_forces()
-        # except:
-        #     forces = np.zeros(atoms.get_positions().shape)
-       
         if use_stress:
             stress = atoms.get_stress(voigt=False)
             virial = -atoms.get_volume() * stress
         else:
             virial = np.zeros((3, 3))
-    
-        # extras = {'dipole':[0,0,0]}
+
         extras = {}
-        for prop in atoms.calc.implemented_properties:
-            if prop in ['energy', 'free_energy', 'node_energy', 'forces', 'stress']: continue
-            tmp:np.ndarray = atoms.calc.get_property(name=prop)
-            extras[prop] = tmp.tolist()
-            
-        extras = json.dumps(extras)# .encode()
-        # extras = np.asarray(extras)
+        for name in atoms.calc.implemented_properties:
+            if name in ['energy', 'free_energy', 'node_energy', 'forces', 'stress']: continue
+            array:np.ndarray = atoms.calc.get_property(name=name)
+            name,array = FormatExtras.format(name,array,atoms)
+            extras[name] = array.tolist()            
+        extras = json.dumps(extras)
+
         return energy, forces, virial, extras
     
     def irun_rank0(self, atoms, use_stress=True):
