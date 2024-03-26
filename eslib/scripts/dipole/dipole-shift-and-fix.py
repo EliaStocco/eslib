@@ -8,7 +8,7 @@ from eslib.input import flist, str2bool
 from eslib.formatting import esfmt, warning
 
 #---------------------------------------#
-description = "Fix the dipole jumps and shift the values of some multitples of the dipole quantum.\n"
+description = "Fix the dipole jumps and shift the values of some multitples of the dipole quantum."
 
 #---------------------------------------#
 def prepare_args(description):

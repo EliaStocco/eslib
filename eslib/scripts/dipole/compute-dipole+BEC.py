@@ -10,7 +10,7 @@ from eslib.formatting import esfmt
 
 #####################
 
-description = "Compute dipole and BEC tensors for a given atomic structure.\n"
+description = "Compute dipole and BEC tensors for a given atomic structure."
 
 def prepare_parser(description):
     """Prepare parser of user input arguments."""
