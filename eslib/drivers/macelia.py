@@ -46,26 +46,27 @@ def main(args):
         "default_dtype" : 'float64'
     }
     args.model_type = str(args.model_type).lower()
+    
     if args.model_type in ["foundation_mp","mp","mace_mp"]:
         print("\tLoading the MACECalculator with a pretrained model based on the Materials Project ... ", end="")
         from mace.calculators import mace_mp
         with suppress_output():
             calculator = mace_mp(model=args.model,**kwargv)
+
     elif args.model_type in ["foundation_anicc","anicc","mace_anicc"]:
+        print("\tLoading the MACECalculator with a pretrained model based on the ANI (H, C, N, O) ... ", end="")
         from mace.calculators import mace_anicc
         with suppress_output():
             calculator = mace_anicc(model=args.model,**kwargv)
+
     elif args.model_type in ["foundation_off","off","mace_off"]:
+        print("\tLoading the MACECalculator with a pretrained model based on the MACE-OFF23 models ... ", end="")
         from mace.calculators import mace_off
         with suppress_output():
             calculator = mace_off(model=args.model,**kwargv)
+
     else:
-        print("\tCreating the MACECalculator ... ", end="")
-        # try:
-        #     calculator = MACECalculator(model_paths=args.model,\
-        #                                 model_type=args.model_type,\
-        #                                 **kwargv)
-        # except:
+        print("\tLoading a MACEliaCalculator based on the model that you provided ... ", end="")
         calculator = MACEliaCalculator(model_paths=args.model,\
                                     model_type=args.model_type,\
                                     **kwargv)         
