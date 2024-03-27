@@ -1,14 +1,19 @@
-pip install -e .
+#!/bin/bash
 
-ESLIB="/home/stoccoel/google-personal/codes/eslib"
+# Determine the directory of the script
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+
+# Set ESLIB to the script directory
+ESLIB="$SCRIPT_DIR"
 export PATH="$PATH:${ESLIB}/eslib"
 export PYTHONPATH="$PYTHONPATH:${ESLIB}/eslib"
 export PATH="$PATH:${ESLIB}"
 export PYTHONPATH="$PYTHONPATH:${ESLIB}"
+
+# Add script subdirectories to PATH
 for dir in "${ESLIB}"/eslib/scripts/*; do
     if [ -d "$dir" ]; then
         export PATH="$PATH:$dir"
-        # echo ${dir}
         # Make Python files executable in each subdirectory
         find "$dir" -name "*.py" -type f -exec chmod +x {} \;
     fi
