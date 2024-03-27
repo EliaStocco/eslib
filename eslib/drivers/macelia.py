@@ -46,7 +46,7 @@ def main(args):
         "default_dtype" : 'float64'
     }
     args.model_type = str(args.model_type).lower()
-    
+
     if args.model_type in ["foundation_mp","mp","mace_mp"]:
         print("\tLoading the MACECalculator with a pretrained model based on the Materials Project ... ", end="")
         from mace.calculators import mace_mp
@@ -57,7 +57,7 @@ def main(args):
         print("\tLoading the MACECalculator with a pretrained model based on the ANI (H, C, N, O) ... ", end="")
         from mace.calculators import mace_anicc
         with suppress_output():
-            calculator = mace_anicc(model=args.model,**kwargv)
+            calculator = mace_anicc(device=args.device)
 
     elif args.model_type in ["foundation_off","off","mace_off"]:
         print("\tLoading the MACECalculator with a pretrained model based on the MACE-OFF23 models ... ", end="")
