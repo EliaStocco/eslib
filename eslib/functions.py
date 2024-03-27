@@ -543,8 +543,10 @@ class Dict2Obj(object):
 
 
 def args_to_dict(args):
-    arg_dict = vars(args)
-    return arg_dict
+    if isinstance(args, dict):
+        return args
+    else:
+        return vars(args)
 
 
 def get_attributes(obj):
