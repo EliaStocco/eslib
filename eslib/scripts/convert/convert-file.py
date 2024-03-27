@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-from ase.io import read, write
+from ase.io import write
 from ase.cell import Cell
 # from elia.functions import str2bool, suppress_output, convert
 from eslib.classes.trajectory import trajectory
 import numpy as np
-import contextlib
-import sys
 import os
 from eslib.formatting import esfmt, warning, error
 from eslib.input import str2bool
 from eslib.functions import suppress_output
 from eslib.tools import convert
+from typing import List
+from ase import Atoms
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -20,6 +20,9 @@ keywords = "It's up to you to modify the required keywords."
 # Attention:
 # If the parser used in ASE automatically modify the unit of the cell and/or positions,
 # then you should add this file format to the list at line 55 so that the user will be warned.
+#---------------------------------------#
+def itype(x:str):
+    return int(x) if x.isdigit() else x
 
 #---------------------------------------#
 def prepare_args(description):
@@ -27,19 +30,20 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
-    parser.add_argument("-i"  , "--input"        ,   **argv,required=True , type=str     , help="input file")
-    parser.add_argument("-if" , "--input_format" ,   **argv,required=False, type=str     , help="input file format (default: 'None')" , default=None)
-    parser.add_argument("-rr" , "--remove_replicas", **argv,required=False, type=str2bool, help='whether to remove replicas (default: false)', default=False)
-    parser.add_argument("-pbc", "--pbc"          ,   **argv,required=False, type=str2bool, help="whether pbc should be removed, enforced, or nothig (default: 'None')", default=None)
-    parser.add_argument("-iu" , "--input_unit"   ,   **argv,required=False, type=str     , help="input positions unit (default: atomic_unit)"  , default=None)
-    parser.add_argument("-iuc", "--input_unit_cell", **argv,required=False, type=str, help="input cell unit (default: atomic_unit)"  , default=None)
-    parser.add_argument("-ou" , "--output_unit" ,    **argv,required=False, type=str     , help="output unit (default: atomic_unit)", default=None)
-    parser.add_argument("-s"  , "--scaled"      ,    **argv,required=False, type=str2bool, help="whether to output the scaled positions (default: False)", default=False)
-    parser.add_argument("-r"  , "--rotate" ,         **argv,required=False, type=str2bool     , help="whether to rotate the cell s.t. to be compatible with i-PI (default: False)", default=False)
-    parser.add_argument("-n"  , "--index" ,          **argv,required=False, type=lambda x: int(x) if x.isdigit() else x     , help="index to be read from input file (default: ':')", default=':')
-    parser.add_argument("-o"  , "--output"       ,   **argv,required=True , type=str     , help="output file")
-    parser.add_argument("-of" , "--output_format",   **argv,required=False,type=str     , help="output file format (default: 'None')", default=None)
-    parser.add_argument("-f"  , "--folder"       ,   **argv,required=False,type=str     , help="folder of the output files if each structure has to be saved in a different file (default: None)", default=None)
+    parser.add_argument("-i"  , "--input"            , **argv,required=True , type=str     , help="input file")
+    parser.add_argument("-if" , "--input_format"     , **argv,required=False, type=str     , help="input file format (default: 'None')" , default=None)
+    parser.add_argument("-rr" , "--remove_replicas"  , **argv,required=False, type=str2bool, help='whether to remove replicas (default: false)', default=False)
+    parser.add_argument("-rp" , "--remove_properties", **argv,required=False, type=str2bool, help='whether to remove properties/info (default: false)', default=False)
+    parser.add_argument("-pbc", "--pbc"              , **argv,required=False, type=str2bool, help="whether pbc should be removed, enforced, or nothig (default: 'None')", default=None)
+    parser.add_argument("-iu" , "--input_unit"       , **argv,required=False, type=str     , help="input positions unit (default: atomic_unit)"  , default=None)
+    parser.add_argument("-iuc", "--input_unit_cell"  , **argv,required=False, type=str     , help="input cell unit (default: atomic_unit)"  , default=None)
+    parser.add_argument("-ou" , "--output_unit"      , **argv,required=False, type=str     , help="output unit (default: atomic_unit)", default=None)
+    parser.add_argument("-s"  , "--scaled"           , **argv,required=False, type=str2bool, help="whether to output the scaled positions (default: False)", default=False)
+    parser.add_argument("-r"  , "--rotate"           , **argv,required=False, type=str2bool, help="whether to rotate the cell s.t. to be compatible with i-PI (default: False)", default=False)
+    parser.add_argument("-n"  , "--index"            , **argv,required=False, type=itype   , help="index to be read from input file (default: ':')", default=':')
+    parser.add_argument("-o"  , "--output"           , **argv,required=True , type=str     , help="output file")
+    parser.add_argument("-of" , "--output_format"    , **argv,required=False, type=str     , help="output file format (default: 'None')", default=None)
+    parser.add_argument("-f"  , "--folder"           , **argv,required=False, type=str     , help="folder of the output files if each structure has to be saved in a different file (default: None)", default=None)
     # Parse the command-line arguments
     return parser.parse_args()
 
@@ -70,7 +74,7 @@ def main(args):
     with suppress_output():
         # Try to determine the format by checking each supported format
         atoms = trajectory(args.input,format=args.input_format,index=args.index,pbc=args.pbc,remove_replicas=args.remove_replicas)
-        atoms = list(atoms)
+        atoms:List[Atoms] = list(atoms)
     print("done")
     print("\tn. of atomic structures: {:d}".format(len(atoms)))
 
@@ -156,6 +160,17 @@ def main(args):
         print("done")
         print("\n\t{:s}: in the output file the positions will be indicated as 'cartesian'.".format(warning) + \
               "\n\t{:s}".format(keywords))
+        
+    #------------------#
+    # remove properties
+    if args.remove_properties:
+        properties = []
+        print("\tRemoving the following info: ",properties)  
+        print("\tRemoving the following arrays: ",['initial_magnoms'])
+        for n in range(len(atoms)):
+            atoms[n].info = {}
+            del atoms[n].arrays['initial_magmoms']
+
 
     #------------------#
     # Write the data to the specified output file with the specified format
