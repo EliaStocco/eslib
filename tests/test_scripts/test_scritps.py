@@ -1,5 +1,6 @@
 import pytest
 import os
+import shutil
 from contextlib import contextmanager
 
 def import_from(module, name):
@@ -31,14 +32,33 @@ def change_directory():
         # Restore the original working directory
         os.chdir(old_directory)
     
+tmp_folder = "tmp"
 
 torun = {
-    "get-iPI-cell" :
+    # "get-iPI-cell" :
+    # {
+    #     "folder"  : "inspect",
+    #     "file"   : "get-iPI-cell",
+    #     "kwargs"  : {
+    #         "input" : "tests/structures/bulk-water/bulk-water.au.extxyz",            
+    #     },
+    # },
+    # "convert-file" :
+    # {
+    #     "folder"  : "convert",
+    #     "file"   : "convert-file",
+    #     "kwargs"  : {
+    #         "input"              : "tests/structures/bulk-water/bulk-water.au.extxyz",   
+    #         "remove_properties"  : "true",   
+    #         "output"             : "{:s}/output.extxyz".format(tmp_folder),     
+    #     },
+    # },
+    "information-and-primitive.py" :
     {
         "folder"  : "inspect",
-        "file"   : "get-iPI-cell",
+        "file"   : "information-and-primitive.py",
         "kwargs"  : {
-            "input" : "tests/structures/bulk-water/bulk-water.au.extxyz",            
+            "input"  : "tests/structures/bulk-water/bulk-water.au.extxyz",   
         },
     },
 }
@@ -50,8 +70,12 @@ def test_scripts(name, test):
     print("Running '{:s}' test.".format(name))   
     main = get_main_function(test["folder"],test["file"])
     with change_directory():
+        if not os.path.exists(tmp_folder):
+            os.mkdir(tmp_folder)
         main(test["kwargs"])
+        shutil.rmtree(tmp_folder)
 
+    pass
     
 
 if __name__ == "__main__":
