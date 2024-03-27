@@ -49,7 +49,7 @@ def main(args):
     exp = "e" if args.exponential else "f" 
     num_format = f'{{:>{args.digits+6}.{args.digits}{exp}}}'
     text_format =   "\t<cell mode='manual' units=' ... ' > \n" + \
-                    ( "\t\t" + (num_format+", ")*3 + "\n")*2  + "\t\t" + (num_format+", ")*2  + num_format + \
+                    ( "\t\t[" + (num_format+", ")*3 + "\n")*2  + "\t\t" + (num_format+", ")*2  + num_format + "]" + \
                     "\n\t</cell>"
     text =  text_format.format(*cell.flatten().tolist())
     print(text)
@@ -60,7 +60,7 @@ def main(args):
     exp = "e" if args.exponential else "f" 
     num_format = f'{{:>{args.digits+6}.{args.digits}{exp}}}'
     text_format =   "\t<cell mode='abcABC' units=' ... ' > \n" + \
-                    "\t\t" + (num_format+", ")*3 + "\n"  + "\t\t" + (num_format+", ")*2  + num_format + \
+                    "\t\t[" + (num_format+", ")*3 + "\n"  + "\t\t" + (num_format+", ")*2  + num_format +  "]" + \
                     "\n\t</cell>"
     text =  text_format.format(*atoms.get_cell().cellpar().tolist())
     print(text)
