@@ -25,6 +25,17 @@ input_arguments = Fore.GREEN   + Style.NORMAL + input_arguments         + Style.
 warning         = Fore.MAGENTA + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
 everythingok    = Fore.BLUE    + Style.BRIGHT + everythingok            + Style.RESET_ALL
 
+#---------------------------------------#
+def dict_to_string(d:dict):
+    return ' '.join([f'--{key} {value}' for key, value in d.items()])
+
+def dict_to_list(d:dict):
+    result = []
+    for key, value in d.items():
+        result.extend([f'--{key}', value])
+    return result
+
+#---------------------------------------#
 def print_python_info():
     # Print Python version
     print("Python Version:", sys.version)
@@ -116,6 +127,10 @@ def esfmt(prepare_parser:callable, description:str=None):
         def wrapped_main(args=dict()):
             # Call the specified prepare_parser function
             args_script = dict()
+            if len(sys.argv) == 1:
+                argv1 = dict_to_list(args)
+                sys.argv.extend(argv1)
+            
             if prepare_parser is not None:
                 args_script = prepare_parser(description)
             if type(args) == dict:
