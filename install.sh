@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Determine the directory of the script
-SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+SCRIPT_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 
 # Set ESLIB to the script directory
 ESLIB="$SCRIPT_DIR"
