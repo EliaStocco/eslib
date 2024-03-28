@@ -3,11 +3,16 @@ from ase.io import read
 import matplotlib.pyplot as plt
 from eslib.input import slist
 from eslib.formatting import esfmt
-from eslib.classes.dipole import DipoleModel
+from eslib.classes.dipole import DipoleModel, DipoleLinearModel
 from eslib.plot import plot_bisector
 from eslib.physics import compute_dipole_quanta
 from copy import copy
 from eslib.plot import generate_colors
+
+#---------------------------------------#
+# To Do:
+# - add keyword for the dipole
+# - add possibility to directly read the quanta from info
 
 #---------------------------------------#
 description = "Plot the branches of the dipoles for different datasets."
@@ -31,8 +36,9 @@ def main(args):
     print("\tLoading the dipole linear model from file '{:s}' ... ".format(args.model), end="")
     model = DipoleModel.from_pickle(args.model)
     print("done")
-    print("\tLinear model dipole: ",model.get_dipole())
-    print("\tLinear model quanta: ",model.get_quanta())
+    if isinstance(model,DipoleLinearModel):
+        print("\tLinear model dipole: ",model.get_dipole())
+        print("\tLinear model quanta: ",model.get_quanta())
 
     #------------------#
     # read
@@ -75,7 +81,7 @@ def main(args):
 
     #------------------#
     # plot
-    print("\n\tCreating the correlation plot ... ",end="")
+    print("\n\tCreating the correlation plot ... ")
     fig,axes = plt.subplots(ncols=3,figsize=(15,5))
     colors = generate_colors(len(args.input),"viridis")
     
@@ -111,3 +117,22 @@ def main(args):
 #---------------------------------------#
 if __name__ == "__main__":
     main()
+
+# { 
+#     // Use IntelliSense to learn about possible attributes.
+#     // Hover to view descriptions of existing attributes.
+#     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+#     "version": "0.2.0",
+#     "configurations": [
+#         {
+#             "name": "Python: Current File",
+#             "type": "debugpy",
+#             "request": "launch",
+#             "program": "/home/stoccoel/google-personal/codes/eslib/eslib/scripts/dipole/check-branch.py",
+#             "cwd" : "/home/stoccoel/google-personal/works/LiNbO3",
+#             "console": "integratedTerminal",
+#             "justMyCode": false,
+#             "args" : ["-i", "z-1x1x1@2000K/trajectory.fixed.extxyz", "-m", "vib/PC.pickle","-o","test.pdf"]
+#         }
+#     ]
+# }

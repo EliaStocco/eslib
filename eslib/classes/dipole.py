@@ -11,16 +11,32 @@ from copy import copy
 class DipoleModel(pickleIO):
     def get(self,traj:List[Atoms],**argv):
         pass
-
-class DipolePointCharges(DipoleModel):
+@dataclass
+class DipolePartialCharges(DipoleModel):
 
     charges: Dict[str,float]
 
     def check_charge_neutrality(self,structure:Atoms)->bool:
+        charges = [ self.charges[s] for s in structure.get_chemical_symbols() ]
+        if np.sum(charges) > 1e-12:
+            return False
         return True
 
     def get(self,traj:List[Atoms],**argv):
-        pass
+        dipole = np.zeros((len(traj),3))
+        for n,structure in enumerate(traj):
+            if not self.check_charge_neutrality(structure):
+                raise ValueError("structure {:d} is not charge neutral.".format(n))
+            charges = [ self.charges[s] for s in structure.get_chemical_symbols() ]
+            charges = np.asarray(charges).reshape((30,1))
+            positions:np.ndarray = structure.get_positions()
+            atomic_dipoles = charges * positions
+            dipole[n] = atomic_dipoles.sum(axis=0)
+            # # little test
+            # test  = ( charges * ( positions + np.random.rand(3) )).sum(axis=0)
+            # if not np.allclose(test,dipole[n]):
+            #     raise ValueError("coding error")
+        return dipole
 
 @dataclass
 class DipoleLinearModel(DipoleModel):

@@ -27,16 +27,16 @@ def main(args):
     print("done")
 
     #------------------#
-    print("\tPartial charges: ")
-    show_dict(charges,"\t",2)
+    print("\n\tPartial charges: ")
+    show_dict(charges,"\t\t",2)
 
     #------------------#
-    print("\tCreating dipole model based on the partial charges ... ",end="")
+    print("\n\tCreating dipole model based on the partial charges ... ",end="")
     model = DipolePartialCharges(charges)
     print("done")
 
     #------------------#
-    print("\tSaving the dipole model to file '{:s}' ... ".format(args.output),end="")
+    print("\n\tSaving the dipole model to file '{:s}' ... ".format(args.output),end="")
     model.to_pickle(args.output)
     print("done") 
 

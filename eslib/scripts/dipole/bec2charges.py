@@ -59,8 +59,23 @@ def main(args):
     print("done")
 
     #------------------#
-    print("\tPartial charges: ")
-    show_dict(charges,"\t",2)
+    print("\n\tPartial charges: ")
+    show_dict(charges,"\t\t",2)
+
+    #------------------#
+    all_charges = [ charges[s] for s in reference.get_chemical_symbols() ]
+    print("\n\tTotal charge: ",np.sum(all_charges))
+    mean = np.mean(all_charges)
+    for k in charges.keys():
+        charges[k] -= mean
+
+    #------------------#
+    print("\n\tPartial charges (corrected): ")
+    show_dict(charges,"\t\t",2)
+
+    all_charges = [ charges[s] for s in reference.get_chemical_symbols() ]
+    if np.sum(all_charges) > 1e-12:
+        raise ValueError("coding error")
 
     # #------------------#
     # print("\tCreating dipole model based on the partial charges ... ",end="")
@@ -74,7 +89,7 @@ def main(args):
 
     #------------------#
     if args.output is not None:
-        print("\tWriting partial charges to file '{:s}' ... ".format(args.output), end="")
+        print("\n\tWriting partial charges to file '{:s}' ... ".format(args.output), end="")
         with open(args.output, 'w') as json_file:
             json.dump(charges, json_file, indent=4)
         print("done")    
@@ -93,11 +108,11 @@ if __name__ == "__main__":
 #             "name": "Python: Current File",
 #             "type": "debugpy",
 #             "request": "launch",
-#             "program": "/home/stoccoel/google-personal/codes/eslib/eslib/scripts/convert/convert-file.py",
-#             "cwd" : "/home/stoccoel/Downloads",
+#             "program": "/home/stoccoel/google-personal/codes/eslib/eslib/scripts/dipole/bec2charges.py",
+#             "cwd" : "/home/stoccoel/google-personal/works/LiNbO3",
 #             "console": "integratedTerminal",
 #             "justMyCode": false,
-#             "args" : ["-i", "i-pi.positions_0.xyz", "-if", "ipi", "-o", "water.extxyz","-sc","true"]
+#             "args" : ["-r", "vib/start.au.xyz", "-o", "vib/partial-charges.json","-z","vib/BEC.txt"]
 #         }
 #     ]
 # }
