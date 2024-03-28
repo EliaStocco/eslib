@@ -28,6 +28,7 @@ torun = {
 }
 
 
+@pytest.mark.skip(reason="This test function is not meant to be run by pytest.")
 @pytest.mark.parametrize("name, test", torun.items())
 def test_train(name, test):
 
