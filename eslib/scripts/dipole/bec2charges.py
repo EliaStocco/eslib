@@ -5,23 +5,20 @@ from ase import Atoms
 from eslib.classes.trajectory import trajectory as Trajectory
 from eslib.formatting import esfmt
 from eslib.show import show_dict
-from eslib.classes.dipole import DipolePartialCharges
 
 #---------------------------------------#
-# Description of the script's purpose
-description = "Create a Partial Charges model for the dipole from a BEC tensor."
+description = "Compute the partial charges from a BEC tensor."
 
 #---------------------------------------#
 def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-r", "--reference"      , **argv, type=str, required=True , help="file with a reference configuration [xyz]")
-    parser.add_argument("-f", "--format"         , **argv, type=str, required=False, help="reference configuration format (default: 'None')" , default=None)
-    parser.add_argument("-z", "--bec"            , **argv, type=str, required=True , help="file with a BEC tensor [txt]")
-    parser.add_argument("-oc", "--output_charges", **argv, type=str, required=False, help="JSON output file with the partial charges (default: None)", default=None)
-    parser.add_argument("-o" , "--output"        , **argv, type=str, required=False, help="pickle output file with the dipole model (default: 'DipolePC.pickle')", default="DipolePC.pickle")
-    return parser# .parse_args()
+    parser.add_argument("-r", "--reference", **argv, type=str, required=True , help="file with a reference configuration [xyz]")
+    parser.add_argument("-f", "--format"   , **argv, type=str, required=False, help="reference configuration format (default: 'None')" , default=None)
+    parser.add_argument("-z", "--bec"      , **argv, type=str, required=True , help="file with a BEC tensor [txt]")
+    parser.add_argument("-o", "--output"   , **argv, type=str, required=False, help="JSON output file with the partial charges (default: None)", default=None)
+    return parser
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
@@ -65,20 +62,20 @@ def main(args):
     print("\tPartial charges: ")
     show_dict(charges,"\t",2)
 
-    #------------------#
-    print("\tCreating dipole model based on the partial charges ... ",end="")
-    model = DipolePartialCharges(charges)
-    print("done")
+    # #------------------#
+    # print("\tCreating dipole model based on the partial charges ... ",end="")
+    # model = DipolePartialCharges(charges)
+    # print("done")
+
+    # #------------------#
+    # print("\tSaving the dipole model to file '{:s}' ... ".format(args.output),end="")
+    # model.to_pickle(args.output)
+    # print("done")
 
     #------------------#
-    print("\tSaving the dipole model to file '{:s}' ... ".format(args.output),end="")
-    model.to_pickle(args.output)
-    print("done")
-
-    #------------------#
-    if args.output_charges is not None:
-        print("\tWriting partial charges to file '{:s}' ... ".format(args.output_charges), end="")
-        with open(args.output_charges, 'w') as json_file:
+    if args.output is not None:
+        print("\tWriting partial charges to file '{:s}' ... ".format(args.output), end="")
+        with open(args.output, 'w') as json_file:
             json.dump(charges, json_file, indent=4)
         print("done")    
 
