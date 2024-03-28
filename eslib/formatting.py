@@ -6,6 +6,7 @@ from datetime import datetime
 import inspect
 import colorama
 from colorama import Fore, Style
+# from icecream import ic
 colorama.init(autoreset=True)
 
 float_format = '%24.12e' # Elia Stocco float format
@@ -30,6 +31,8 @@ def dict_to_string(d:dict):
     return ' '.join([f'--{key} {value}' for key, value in d.items()])
 
 def dict_to_list(d:dict):
+    if d == {} or d is None:
+        return None
     result = []
     for key, value in d.items():
         result.extend([f'--{key}', value])

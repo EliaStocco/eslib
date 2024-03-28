@@ -13,6 +13,7 @@ import itertools
 import numpy as np
 import re
 import os
+from io import TextIOWrapper
 from itertools import product
 
 # import fnmatch
@@ -559,33 +560,27 @@ def merge_attributes(A, B):
         setattr(A, a, getattr(B, a))
     return A
 
-
-def read_comments_xyz(file,Nmax=1000000,Nread=None):
+def read_comments_xyz(file, Nmax=1000000, Nread=None, snapshot_slice=None):
     from ase import io
 
     first = io.read(file)
     Natoms = len(first)
 
     okay = 1
-    result = [None] * Nmax
+    result = []
     restart = False
     i = 0
     k = 0
 
-    with open(file, "r+") as fp:
-        # access each line
+    with open(file, "r") as fp:
         line = fp.readline()
-
-        # # skip lines
-        # for n in range(skip):
-        #     line = fp.readline()
-        #     i += 1
-        #     if i == okay:
-        #         okay += Natoms+2
 
         while line:
             if i == okay:
-                result[k] = line
+                if snapshot_slice is None or (snapshot_slice.start is None or k >= snapshot_slice.start) and \
+                        (snapshot_slice.stop is None or k < snapshot_slice.stop and \
+                        (snapshot_slice.step is None or (k - snapshot_slice.start) % snapshot_slice.step == 0)):
+                    result.append(line)
                 okay += Natoms + 2
                 k += 1
 
@@ -599,9 +594,107 @@ def read_comments_xyz(file,Nmax=1000000,Nread=None):
             i += 1
 
     if restart:
-        return read_comments_xyz(file, Nmax * 2, Nread=Nread)
+        return read_comments_xyz(file, Nmax * 2, Nread=Nread, snapshot_slice=snapshot_slice)
 
-    return result[:k]
+    return result
+
+def get_offset(file:TextIOWrapper,
+               Nmax:int=1000000,
+               line_offset_old:list=None,
+               index:slice=None):
+    # Read in the file once and build a list of line offsets
+    n = 0 
+    line_offset = [None]*Nmax
+    if line_offset_old is not None:
+        line_offset[:len(line_offset_old)] = line_offset_old
+        n = len(line_offset_old)
+        del line_offset_old
+    offset = 0
+    restart = False
+    if n == 0 : file.seek(0) # start from the beginning of the file
+    for line in file: # cycle over all lines
+        if n >= Nmax: # create a bigger list
+            restart = True
+            break
+        if line.replace(" ","").startswith("#"): # check if the line contains a comment
+            line_offset[n] = offset 
+            n += 1
+        if index is not None and index.stop is not None and n >= index.stop: # stop
+            break
+        offset += len(line)        
+    if restart: return get_offset(file, Nmax=Nmax * 2, line_offset_old=line_offset, index=index)
+    file.seek(0)
+    return line_offset[:n]
+
+def read_comments_xyz(file:TextIOWrapper,
+                      index:slice=None):
+    offset = get_offset(file=file,index=index)
+    if index is not None:
+        offset = offset[index]
+    comments = [None]*len(offset)
+    for n,l in enumerate(offset):
+        file.seek(l)
+        comments[n] = file.readline()
+    return comments
+
+    # while True:
+    #     # Read the number of atoms for the next structure
+    #     line = file.readline()
+    #     if not line:  # Check for EOF
+    #         break
+    #     num_atoms = int(line.strip())
+        
+    #     # Skip lines containing atomic coordinates
+    #     file.seek(num_atoms * len(file.readline()) + len(file.readline()), 1)
+        
+    #     # Read the comments for the structure
+    #     comments_line = file.readline()
+    #     comments.append(comments_line.strip())
+    
+    # return comments
+
+# def read_comments_xyz(file,Nmax=1000000,Nread=None):
+#     from ase import io
+
+#     first = io.read(file)
+#     Natoms = len(first)
+
+#     okay = 1
+#     result = [None] * Nmax
+#     restart = False
+#     i = 0
+#     k = 0
+
+#     with open(file, "r+") as fp:
+#         # access each line
+#         line = fp.readline()
+
+#         # # skip lines
+#         # for n in range(skip):
+#         #     line = fp.readline()
+#         #     i += 1
+#         #     if i == okay:
+#         #         okay += Natoms+2
+
+#         while line:
+#             if i == okay:
+#                 result[k] = line
+#                 okay += Natoms + 2
+#                 k += 1
+
+#             if k >= Nmax:
+#                 restart = True
+#                 break
+#             if k >= Nread and Nread is not None:
+#                 break 
+
+#             line = fp.readline()
+#             i += 1
+
+#     if restart:
+#         return read_comments_xyz(file, Nmax * 2, Nread=Nread)
+
+#     return result[:k]
 
 
 # def segment(A, B, N, start=0, end=1):

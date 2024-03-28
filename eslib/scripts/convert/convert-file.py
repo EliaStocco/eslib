@@ -38,14 +38,14 @@ def prepare_args(description):
     parser.add_argument("-iu" , "--input_unit"       , **argv,required=False, type=str     , help="input positions unit (default: atomic_unit)"  , default=None)
     parser.add_argument("-iuc", "--input_unit_cell"  , **argv,required=False, type=str     , help="input cell unit (default: atomic_unit)"  , default=None)
     parser.add_argument("-ou" , "--output_unit"      , **argv,required=False, type=str     , help="output unit (default: atomic_unit)", default=None)
+    parser.add_argument("-sc" , "--same_cell"        , **argv,required=False, type=str2bool, help="whether the atomic structures have all the same cell (default: False)", default=False)
     parser.add_argument("-s"  , "--scaled"           , **argv,required=False, type=str2bool, help="whether to output the scaled positions (default: False)", default=False)
     parser.add_argument("-r"  , "--rotate"           , **argv,required=False, type=str2bool, help="whether to rotate the cell s.t. to be compatible with i-PI (default: False)", default=False)
     parser.add_argument("-n"  , "--index"            , **argv,required=False, type=itype   , help="index to be read from input file (default: ':')", default=':')
     parser.add_argument("-o"  , "--output"           , **argv,required=True , type=str     , help="output file")
     parser.add_argument("-of" , "--output_format"    , **argv,required=False, type=str     , help="output file format (default: 'None')", default=None)
     parser.add_argument("-f"  , "--folder"           , **argv,required=False, type=str     , help="folder of the output files if each structure has to be saved in a different file (default: None)", default=None)
-    # Parse the command-line arguments
-    return parser# .parse_args()
+    return parser
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
@@ -73,7 +73,12 @@ def main(args):
     print("\tReading data from input file '{:s}' ... ".format(args.input), end="")
     with suppress_output():
         # Try to determine the format by checking each supported format
-        atoms = trajectory(args.input,format=args.input_format,index=args.index,pbc=args.pbc,remove_replicas=args.remove_replicas)
+        atoms = trajectory(file=args.input,
+                           format=args.input_format,
+                           index=args.index,
+                           pbc=args.pbc,
+                           same_cell=args.same_cell,
+                           remove_replicas=args.remove_replicas)
         atoms:List[Atoms] = list(atoms)
     print("done")
     print("\tn. of atomic structures: {:d}".format(len(atoms)))
