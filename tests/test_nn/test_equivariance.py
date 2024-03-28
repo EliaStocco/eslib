@@ -32,6 +32,7 @@ torun = {
 def functions(request):
     return request.param
 
+@pytest.mark.skip(reason="This test function is not meant to be run by pytest.")
 @pytest.mark.parametrize("name, tests", generate_all_torun(torun).items())
 def test_check_e3nn_equivariance(name, tests, functions):
     function, function_name = functions

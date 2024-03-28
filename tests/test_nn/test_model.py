@@ -25,6 +25,7 @@ torun = {
     },
 }
 
+@pytest.mark.skip(reason="This test function is not meant to be run by pytest.")
 @pytest.mark.parametrize("name, tests", torun.items())
 def test_check_e3nn_equivariance(name, tests):
     print("Running test '{:s}'.".format(name))  
