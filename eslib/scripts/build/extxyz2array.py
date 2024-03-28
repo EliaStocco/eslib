@@ -34,7 +34,7 @@ def prepare_args():
     parser.add_argument("-w" , "--what"  , **argv,type=str, help="what the data is: 'i' (info) or 'a' (arrays)")
     parser.add_argument("-o" , "--output", **argv,type=str, help="output file (default: '[name].txt')", default=None)
     parser.add_argument("-of", "--output_format", **argv,type=str, help="output format for np.savetxt (default: '%%24.18f')", default='%24.18f')
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 def main():

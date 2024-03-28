@@ -92,7 +92,7 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-f", "--folders"     , **argv, type=slist   , help="folders to search for Python files in", default=None)
     parser.add_argument("-d", "--descriptions", **argv, type=str2bool, help="whether to print descriptions", default=True)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 @esfmt(prepare_args,description)
 def main(args):

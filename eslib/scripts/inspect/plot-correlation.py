@@ -17,7 +17,7 @@ def prepare_args(description):
     parser.add_argument("-a" , "--keyword_A", type=str, **argv, required=True , help="property A keyword")
     parser.add_argument("-b" , "--keyword_B", type=str, **argv, required=True , help="property B keyword")
     parser.add_argument("-o", "--output"    , type=str, **argv, required=False, help="output file (default: 'corr.pdf')", default='corr.pdf')
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

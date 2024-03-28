@@ -17,7 +17,7 @@ def prepare_args(description):
     parser.add_argument("-i", "--input"          , type=str     , **argv, required=True , help='txt input file')
     parser.add_argument("-r", "--remove_replicas", type=str2bool, **argv, required=False, help='whether to remove replicas (default: false)', default=False)
     parser.add_argument("-o", "--output"         , type=str     , **argv, required=False, help='output pickle file (default: None)', default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

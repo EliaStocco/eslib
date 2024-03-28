@@ -23,7 +23,7 @@ def prepare_args(description):
     parser.add_argument("-oi" , "--output_indices"  , type=str     , required=False, **argv, help="output file with indices of the selected structures (default: 'None')", default=None)
     parser.add_argument("-o"  , "--output"          , type=str     , required=True , **argv, help="output file with the selected structures")
     parser.add_argument("-of" , "--output_format"   , type=str     , required=False, **argv, help="output file format (default: 'None')", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args, description)

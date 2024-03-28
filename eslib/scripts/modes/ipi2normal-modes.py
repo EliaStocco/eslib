@@ -44,7 +44,7 @@ def prepare_args():
                         help="folder with the output files of the i-PI normal analysis (default: 'vib')", default="vib")
     parser.add_argument("-o",  "--output",        type=str, **argv, 
                         help="output file (default: 'normal-modes.pickle')", default="normal-modes.pickle")
-    return parser.parse_args()
+    return parser# .parse_args()
 #---------------------------------------#
 def main():
 

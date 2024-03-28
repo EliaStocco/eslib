@@ -17,7 +17,7 @@ def prepare_args(description):
     parser.add_argument("-r" , "--renamed"      , **argv, required=True , type=str, help="new name for the new info/array")
     parser.add_argument("-o" , "--output"       , **argv, required=True , type=str, help="output file")
     parser.add_argument("-of", "--output_format", **argv, required=False, type=str, help="output file format", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

@@ -73,7 +73,7 @@ def get_args():
         default="output.pdf",
     )
 
-    return parser.parse_args()
+    return parser# .parse_args()
 
 
 def main():

@@ -38,7 +38,7 @@ def get_args():
         help="learning rate"
     )
 
-    return parser.parse_args()
+    return parser# .parse_args()
 
 def main():
     

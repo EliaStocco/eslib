@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from eslib.plot import plot_bisector
-from eslib.classes.dipole import dipoleLM
+from eslib.classes.dipole import DipoleModel
 from eslib.classes.trajectory import info
 from eslib.classes.trajectory import trajectory as Trajectory
 from eslib.tools import cart2lattice, cart2frac, frac2cart
@@ -62,10 +62,10 @@ def prepare_args():
     argv = {"metavar" : "\b",}
     parser.add_argument("-i", "--input"    , **argv, type=str, help="extxyz file with the atomic configurations [a.u]")
     parser.add_argument("-k", "--keyword"  , **argv, type=str, help="keyword related to dipole to be fixed in the extxyz file (default: 'dipole')", default='dipole')
-    parser.add_argument("-m", "--model"    , **argv, type=str, help="pickle file with the dipole linear model (default: 'dipoleLM.pickle')", default='dipoleLM.pickle')
+    parser.add_argument("-m", "--model"    , **argv, type=str, help="pickle file with the dipole linear model (default: 'DipoleModel.pickle')", default='DipoleModel.pickle')
     parser.add_argument("-o", "--output"   , **argv, type=str, help="output file with the fixed trajectory (default: 'trajectory.fixed.extxyz')", default="trajectory.fixed.extxyz")
     parser.add_argument("-f", "--folder"   , **argv, type=str, help="output folder with additional output files (default: None)", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 def main():
@@ -106,7 +106,7 @@ def main():
     #------------------#
     # linear model
     print("\tLoading the dipole linear model from file '{:s}' ... ".format(args.model), end="")
-    model = dipoleLM.from_pickle(args.model)
+    model = DipoleModel.from_pickle(args.model)
     print("done")
 
     #------------------#

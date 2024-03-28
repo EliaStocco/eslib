@@ -33,7 +33,7 @@ def prepare_args():
 
 
 
-    return parser.parse_args()
+    return parser# .parse_args()
 
 def main():
    
@@ -60,7 +60,7 @@ def main():
     print("\tSubsampling atomic structures ... ".format(args.indices), end="")
     new_atoms = [None]*len(indices)
     for n,i in enumerate(indices):
-        atoms[i].set_calculator(None)
+        atoms[i].calc = None # atoms[i].set_calculator(None)
         new_atoms[n] = copy(atoms[i])
     # atoms = list(np.array(atoms,dtype=object)[indices])
     print("done")

@@ -2,7 +2,7 @@
 from ase.io import read
 import numpy as np
 from ase import Atoms
-from eslib.classes.dipole import dipoleLM
+from eslib.classes.dipole import DipoleLinearModel
 from eslib.classes.trajectory import trajectory as Trajectory
 from eslib.input import flist
 from eslib.tools import lattice2cart, frac2cart
@@ -23,8 +23,8 @@ def prepare_args(description):
     parser.add_argument("-d", "--dipole"   , **argv,type=flist, help="dipole (quanta) of the reference configuration (default: None)",default=None)
     parser.add_argument("-k", "--keyword"  , **argv,type=str, help="keyword for the dipole (default: 'dipole')", default='dipole')
     parser.add_argument("-z", "--bec"      , **argv,type=str, help="file with the BEC tensors of the reference configuration [txt] (default: None --> specify -n,--index)",default=None)
-    parser.add_argument("-o", "--output"   , **argv,type=str, help="output file with the dipole linear model (default: 'dipoleLM.pickle')", default="dipoleLM.pickle")
-    return parser.parse_args()
+    parser.add_argument("-o", "--output"   , **argv,type=str, help="output file with the dipole linear model (default: 'DipoleModel.pickle')", default="DipoleModel.pickle")
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
@@ -78,7 +78,7 @@ def main(args):
         print("\t{:10s}: ".format("dipole"),dipole)
     #------------------#
     print("\n\tCreating the linear model for the dipole ... ", end="")
-    model = dipoleLM(ref=ref,dipole=dipole.reshape((3,)),bec=bec)
+    model = DipoleLinearModel(ref=ref,dipole=dipole.reshape((3,)),bec=bec)
     print("done")
 
     #------------------#

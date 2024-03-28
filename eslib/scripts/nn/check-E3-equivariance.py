@@ -20,7 +20,7 @@ def prepare_args(description):
     parser.add_argument("-p" , "--parameters"  , type=str, **argv, help="torch parameters file (default: 'parameters.pth')", default=None)
     parser.add_argument("-s" , "--structure"   , type=str, **argv, help="file with an atomic structure [a.u.]")
     parser.add_argument("-n" , "--number"      , type=int, **argv, help="number of test to perform", default=100)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

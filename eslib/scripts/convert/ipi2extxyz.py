@@ -55,7 +55,7 @@ def prepare_args(description):
     parser.add_argument("-o", "--output",  type=str, default='output.extxyz', **argv,
                         help="output file in extxyz format (default: 'output.extxyz')")
 
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

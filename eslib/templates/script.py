@@ -17,7 +17,7 @@ def prepare_args(description):
     parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: 'None')" , default=None)
     parser.add_argument("-o" , "--output"        , **argv, required=False, type=str, help="output file with the oxidation numbers (default: 'oxidation-numbers.extxyz')", default="oxidation-numbers.extxyz")
     parser.add_argument("-of" , "--output_format", **argv, required=False, type=str, help="output file format (default: 'None')", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

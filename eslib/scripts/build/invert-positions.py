@@ -34,7 +34,7 @@ def prepare_args():
     parser.add_argument("-s" , "--sort"   , type=str2bool                        , **argv, help="whether to sort the second structure (dafault: true)", default=True)
     parser.add_argument("-oo", "--output_original" , type=str                    , **argv, help="output file for the original structure with wrapper atoms (default: 'original.extxyz')", default="original.xyz")
     parser.add_argument("-o" , "--output" , type=str                             , **argv, help="output file for the inverted structure (default: 'inverted.extxyz')", default="inverted.xyz")
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 def main():

@@ -29,7 +29,7 @@ def prepare_parser(description):
     # parser.add_argument("-oi" , "--output_indices"    , type=str  , **argv, help="output file with indices of the selected structures (default: 'indices.txt')",default='indices.txt')
     parser.add_argument("-o"  , "--output"            , type=str  , **argv, help="output file with SOAP descriptors.")
     # parser.add_argument("-of" , "--output_format"     , type=str  , **argv, help="output file format (default: 'None')", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_parser, description)

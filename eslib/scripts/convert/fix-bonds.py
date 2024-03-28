@@ -23,7 +23,7 @@ def prepare_args(description):
     parser.add_argument("-s" , "--species"      , **argv, required=True , type=slist, help="atomic species of the bonds to be fixed (default: ['O','H'])", default=['O','H'])
     parser.add_argument("-o" , "--output"       , **argv, required=True , type=str  , help="output file with the oxidation numbers (default: 'wrapped.extxyz')", default="wrapped.extxyz")
     parser.add_argument("-of", "--output_format", **argv, required=False, type=str  , help="output file format (default: None)", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

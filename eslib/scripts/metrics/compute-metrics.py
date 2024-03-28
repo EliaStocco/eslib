@@ -38,7 +38,7 @@ def prepare_args():
     parser.add_argument("-e", "--expected" , **argv,type=str, help="txt file with the expected values (default: 'exp.txt')", default="exp.txt")
     parser.add_argument("-m", "--metrics"  , **argv,type=lambda s: size_type(s,dtype=str), help="list of regression metrics (default: ['RMSE','MAE'])" , default=["RMSE","MAE"])
     parser.add_argument("-o", "--output"   , **argv,type=str, help="JSON output file with the computed metrics (default: None)", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 def main():
 

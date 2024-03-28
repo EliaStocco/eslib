@@ -20,7 +20,7 @@ def prepare_args(description):
     parser.add_argument("-if", "--input_format", **argv, required=False, type=str, help="input file format (default: 'None')" , default=None)
     parser.add_argument("-k" , "--keyword"     , **argv, required=False, type=str, help="keyword for BEC tensors (default: 'bec')", default="bec")
     parser.add_argument("-o" , "--output"      , **argv, required=False, type=str, help="output file with the BEC tensors (default: 'bec.txt')", default='bec.txt')
-    return parser.parse_args()
+    return parser# .parse_args()
             
 #---------------------------------------#
 @esfmt(prepare_args,description)

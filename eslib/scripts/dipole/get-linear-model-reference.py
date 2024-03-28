@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from ase.io import write
-from eslib.classes.dipole import dipoleLM
+from eslib.classes.dipole import DipoleModel
 from eslib.formatting import esfmt
 
 #---------------------------------------#
@@ -12,10 +12,10 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i", "--input"          , **argv, type=str, help="pickle file with the dipole linear model (default: 'dipoleLM.pickle')", default='dipoleLM.pickle')
+    parser.add_argument("-i", "--input"          , **argv, type=str, help="pickle file with the dipole linear model (default: 'DipoleModel.pickle')", default='DipoleModel.pickle')
     parser.add_argument("-o" , "--output"        , **argv, required=False, type=str, help="output file with the reference structure (default: 'reference.extxyz')", default="reference.extxyz")
     parser.add_argument("-of" , "--output_format", **argv, required=False, type=str, help="output file format (default: 'None')", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
@@ -24,7 +24,7 @@ def main(args):
     #------------------#
     # linear model
     print("\tLoading the dipole linear model from file '{:s}' ... ".format(args.input), end="")
-    model = dipoleLM.from_pickle(args.input)
+    model = DipoleModel.from_pickle(args.input)
     print("done")
 
     #------------------#

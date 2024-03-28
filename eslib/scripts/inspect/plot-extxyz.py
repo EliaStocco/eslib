@@ -18,7 +18,7 @@ def prepare_args(description):
     parser.add_argument("-n", "--name"  , type=str, **argv, required=True , help="info keyword to be plotted")
     parser.add_argument("-t", "--time"  , type=str, **argv, required=False, help="time keyword (default: None)", default=None)
     parser.add_argument("-o", "--output", type=str, **argv, required=False, help="output file (default: '[name].txt')", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 def plot_array(data, output_file, time=None):

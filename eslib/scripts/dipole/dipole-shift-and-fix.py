@@ -23,7 +23,7 @@ def prepare_args(description):
     parser.add_argument("-s", "--shift"   , type=flist   , **argv, required=False, help="additional (negative) shift (default: [0,0,0])", default=None)
     parser.add_argument("-q", "--quanta"  , type=str   , **argv, required=False, help="keyword for the dipole quanta (default: 'quanta')", default='quanta')
     parser.add_argument("-o", "--output"  , type=str     , **argv, required=True , help="output 'extxyz' file")
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
@@ -41,7 +41,7 @@ def main(args):
     phases = np.full((N,3),np.nan)
     for n in range(N):
         # for some strange reason I need the following line .... ???
-        atoms[n].set_calculator(None)
+        atoms[n].calc = None # atoms[n].set_calculator(None)
         phases[n,:] = cart2frac(cell=atoms[n].get_cell(),v=atoms[n].info[args.name])
     print("done\n")
 

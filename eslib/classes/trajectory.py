@@ -34,7 +34,7 @@ def trajectory(file,format:str=None,check:bool=True,index=":",pbc=True,remove_re
         atoms = [atoms]
     for n in range(len(atoms)):
         # atoms[n].info = dict()
-        atoms[n].set_calculator(None)
+        atoms[n].calc = None # atoms[n].set_calculator(None)
 
     pbc = pbc if pbc is not None else True
     if format in ["i-pi","ipi"]:

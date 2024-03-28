@@ -43,7 +43,7 @@ def prepare_args():
     parser.add_argument("-u" , "--unit"         , type=str  , required=False, **argv, help="displacements units (default: 'atomic_unit')",  default='atomic_unit')
     parser.add_argument("-o" , "--output"       , type=str  , required=False, **argv, help="output file [a.u.] (default: 'displaced-structures.extxyz')", default='displaced-structures.extxyz')
     parser.add_argument("-of", "--output_format", type=str  , required=False, **argv, help="ormat of the output file (default: None)", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 def main():
 

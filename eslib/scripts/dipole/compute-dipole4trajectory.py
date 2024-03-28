@@ -28,7 +28,7 @@ def prepare_args(description):
     # parser.add_argument("-d" , "--debug"       , type=str2bool, **argv, help="debug mode (default: false)", default=False)
     parser.add_argument("-o" , "--output"      , type=str     , **argv, help="output file with the dipoles (default: 'dipole.nn.txt')", default="dipole.nn.txt")
     parser.add_argument("-oz", "--output_BEC"  , type=str     , **argv, help="output file with the BECs (default: 'bec.nn.txt')", default="bec.nn.txt")
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

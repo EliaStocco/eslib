@@ -20,7 +20,7 @@ def prepare_args(description):
     parser.add_argument("-cf", "--cell_format"   , **argv, required=False, type=str, help="input cell file format (default: 'None')" , default=None)
     parser.add_argument("-o" , "--output"        , **argv, required=True , type=str, help="output file with the modified atomic structures")
     parser.add_argument("-of" , "--output_format", **argv, required=False, type=str, help="output file format (default: 'None')", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
@@ -44,7 +44,7 @@ def main(args):
     # replace
     print("\tReplace cell ... ", end="")
     for atoms in trajectory:
-        atoms.set_calculator(None)
+        atoms.calc = None # atoms.set_calculator(None)
         atoms.cell = cell
         atoms.pbc = pbc
     print("done")

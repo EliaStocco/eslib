@@ -11,7 +11,7 @@ trajectory = Trajectory("trajectory.extxyz")
 time = info(trajectory,"time") * convert(1,"time","atomic_unit","femtosecond")
 dipole = {
     "DFT" : info(trajectory,"dipoleDFT"),
-     "LM" : info(trajectory,"dipoleLM"),
+     "LM" : info(trajectory,"DipoleModel"),
      "NN" : info(trajectory,"dipole")
 }
 

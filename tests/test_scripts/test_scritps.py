@@ -35,24 +35,24 @@ def change_directory():
 tmp_folder = "tmp"
 
 torun = {
-    # "get-iPI-cell" :
-    # {
-    #     "folder"  : "inspect",
-    #     "file"   : "get-iPI-cell",
-    #     "kwargs"  : {
-    #         "input" : "tests/structures/bulk-water/bulk-water.au.extxyz",            
-    #     },
-    # },
-    # "convert-file" :
-    # {
-    #     "folder"  : "convert",
-    #     "file"   : "convert-file",
-    #     "kwargs"  : {
-    #         "input"              : "tests/structures/bulk-water/bulk-water.au.extxyz",   
-    #         "remove_properties"  : "true",   
-    #         "output"             : "{:s}/output.extxyz".format(tmp_folder),     
-    #     },
-    # },
+    "get-iPI-cell" :
+    {
+        "folder"  : "inspect",
+        "file"   : "get-iPI-cell",
+        "kwargs"  : {
+            "input" : "tests/structures/bulk-water/bulk-water.au.extxyz",            
+        },
+    },
+    "convert-file" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : "tests/structures/bulk-water/bulk-water.au.extxyz",   
+            "remove_properties"  : "true",   
+            "output"             : "{:s}/output.extxyz".format(tmp_folder),     
+        },
+    },
     "information-and-primitive.py" :
     {
         "folder"  : "inspect",

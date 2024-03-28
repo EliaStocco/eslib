@@ -19,7 +19,7 @@ def prepare_args(description):
     parser.add_argument("-d" , "--displacement" , **argv, required=False, type=float, help="displacement [au] (default: 0.001)" , default=0.001)
     parser.add_argument("-o" , "--output"       , **argv, required=False, type=str  , help="output file with the displaced atomic structures (default: 'replay.xyz')", default='replay.xyz')
     parser.add_argument("-of", "--output_format", **argv, required=False, type=str  , help="output file format (default: 'None')", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

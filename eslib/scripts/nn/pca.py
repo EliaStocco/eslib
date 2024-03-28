@@ -41,7 +41,7 @@ def prepare_args(description):
     parser.add_argument("-f", "--feature"   , type=str  , **argv, help="feature to be analysed using PCA (default: 'dipole')", default="dipole")
     parser.add_argument("-o", "--output"    , type=str  , **argv, help="output file for PCA (default: 'pca.txt')", default="pca.txt")
     parser.add_argument("-c", "--chemiscope", type=str  , **argv, help="output file for chemiscope (default: 'chemiscope.json.gz')", default="chemiscope.json.gz")
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 def save_feature_to_chemiscope(features,name,frames,T,file):

@@ -22,7 +22,7 @@ def prepare_args(description):
     parser.add_argument("-n", "--sizes"        , type=ilist   , **argv, required=True , help="list with the sizes of the subsamples")
     parser.add_argument("-s", "--shuffle"      , type=str2bool, **argv, required=False, help="whether to shuffle (default: true)", default=True)
     parser.add_argument("-o", "--output"       , type=slist   , **argv, required=True , help="output files")
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

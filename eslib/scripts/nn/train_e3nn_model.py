@@ -74,7 +74,7 @@ def get_args(description):
     parser.add_argument("-n", "--network" , type=str, required=True, help="JSON file with the parameters to allocate the network")
     parser.add_argument("-t", "--training", type=str, required=True, help="JSON file with the parameters for the training")
     parser.add_argument("-d", "--datasets", type=str, required=True, help="JSON file with the path to the train and validation datasets (*.pth files)")
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 def check_parameters(parameters):

@@ -44,7 +44,7 @@ def prepare_parser(description):
     #     help="folder", default='%-.10f'
     # )
 
-    return parser.parse_args()
+    return parser# .parse_args()
 
 @esfmt(prepare_parser, description)
 def main(args):

@@ -16,7 +16,7 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"       , **argv, type=str  , required=True , help="input file [au]")
     parser.add_argument("-if", "--input_format", **argv, type=str  , required=False, help="input file format (default: 'None')", default=None)
     parser.add_argument("-s" , "--shift"       , **argv, type=flist, required=True , help="additional arrays to be added to the output file (default: [0,0,0])", default=None,)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

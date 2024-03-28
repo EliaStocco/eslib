@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 from ase.io import read
-from eslib.classes.dipole import dipoleLM
+from eslib.classes.dipole import DipoleModel
 # from elia.classes.trajectory import trajectory as Trajectory
 
 #---------------------------------------#
@@ -34,10 +34,10 @@ def prepare_args():
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i", "--input"    , **argv,type=str, help="file with the atomic configurations [a.u]")
-    parser.add_argument("-m", "--model"    , **argv,type=str, help="pickle file with the dipole linear model (default: 'dipoleLM.pickle')", default='dipoleLM.pickle')
+    parser.add_argument("-m", "--model"    , **argv,type=str, help="pickle file with the dipole linear model (default: 'DipoleModel.pickle')", default='DipoleModel.pickle')
     parser.add_argument("-f", "--frame"    , **argv,type=str, help="frame type [eckart,global] (default: global)", default="global", choices=["eckart", "global"])
     parser.add_argument("-o", "--output"   , **argv,type=str, help="output file with the dipole values (default: 'dipole.linear-model.txt')", default="dipole.linear-model.txt")
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 def main():
@@ -63,7 +63,7 @@ def main():
     #------------------#
     # linear model
     print("\tLoading the dipole linear model from file '{:s}' ... ".format(args.model), end="")
-    model = dipoleLM.from_pickle(args.model)
+    model = DipoleModel.from_pickle(args.model)
     print("done")
 
     #------------------#

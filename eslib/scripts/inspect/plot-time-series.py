@@ -32,7 +32,7 @@ def prepare_args():
     argv = {"metavar":"\b"}
     parser.add_argument("-i", "--input", type=str, **argv, required=True, help='input txt file')
     parser.add_argument("-o","--output", type=str, **argv, required=True, help='output file for the plot')
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 def plot_array(input_file, output_file):

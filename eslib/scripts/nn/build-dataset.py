@@ -25,7 +25,7 @@ def prepare_args(description):
     parser.add_argument("-s", "--seed", type=int, **argv, default=None, help="seed of the random numbers generator (default: None)")
     parser.add_argument("-pbc", "--pbc"  ,  type=str2bool, **argv, default=True, help="whether the system is periodic (default: True)")
     parser.add_argument("-rc", "--cutoff_radius",  type=float, **argv, help="cutoff radius in atomic unit")
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

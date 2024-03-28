@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from ase.io import read
 import numpy as np
-from eslib.classes.dipole import dipoleLM
+from eslib.classes.dipole import DipoleModel
 from eslib.classes.trajectory import trajectory as Trajectory
 from eslib.classes.trajectory import info
 from eslib.formatting import esfmt, float_format, warning
@@ -21,9 +21,9 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i", "--input"    , **argv,type=str, help="file with the atomic configurations [a.u]")
     parser.add_argument("-k"  , "--keyword"     , **argv,type=str, help="keyword (default: 'dipole')" , default="dipole")
-    parser.add_argument("-o", "--output"   , **argv,type=str, help="output file with the dipole linear model (default: 'dipoleLM.pickle')", default="dipoleLM.pickle")
+    parser.add_argument("-o", "--output"   , **argv,type=str, help="output file with the dipole linear model (default: 'DipoleModel.pickle')", default="DipoleModel.pickle")
     parser.add_argument("-z", "--born_charges"   , **argv,type=str, help="output file with the Born Effective Charges (default: 'bec.oxn.txt')", default='bec.oxn.txt')
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
@@ -45,7 +45,7 @@ def main(args):
     symbols = reference.get_chemical_symbols()
     species = np.unique(symbols)
     input_oxn = np.random.rand(len(species))
-    model = dipoleLM(ref=reference,dipole=dipole,bec=None)
+    model = DipoleModel(ref=reference,dipole=dipole,bec=None)
 
 
     def bec_OxN(input_oxn):

@@ -18,7 +18,7 @@ def prepare_args(description):
     parser.add_argument("-f" ,"--folder"       ,  **argv, type=str  , help="folder where the previous files are stored (default: '.')", default=".")
     parser.add_argument("-bs","--batch_size"   ,  **argv, type=int  , help="batch size")
     parser.add_argument("-lr","--learning_rate",  **argv, type=float, help="learning rate")
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

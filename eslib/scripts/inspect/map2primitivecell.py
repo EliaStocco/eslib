@@ -6,7 +6,7 @@ import numpy as np
 
 # Create a primitive cell
 primitive_atoms = bulk("Si", cubic=True)
-primitive_atoms.set_calculator(EMT())
+primitive_atoms.calc = EMT() # primitive_atoms.set_calculator(EMT())
 primitive_atoms.positions += [0.1, 0.2, 0.3]  # Offset for demonstration
 
 # Create a supercell

@@ -41,7 +41,7 @@ def prepare_parser():
     parser.add_argument("-a", "--structure_A",  type=str    ,**argv,help="atomic structure A [au]")
     parser.add_argument("-b", "--structure_B",  type=str     ,**argv,help="atomic structure B [au]")
     parser.add_argument("-s", "--sort"       ,  type=str2bool,**argv,help="whether to sort the second structure (dafault: false)", default=False)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 def main():

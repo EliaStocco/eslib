@@ -22,7 +22,7 @@ def prepare_args(description):
     parser.add_argument("-s" , "--displacement", **argv, required=True , type=float, help="displacement")
     parser.add_argument("-u" , "--unit"        , **argv, required=False, type=str  , help="dipole unit (default: 'atomic_unit')", default='atomic_unit')
     parser.add_argument("-o" , "--output"      , **argv, required=False, type=str  , help="output file with the BEC tensors (default: 'bec.txt')", default='bec.txt')
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 def split_list(lst:List[Atoms])->Tuple[List[Atoms],List[Atoms]]:

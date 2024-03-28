@@ -36,7 +36,7 @@ def prepare_args():
     parser.add_argument("-n", "--number"  , type=int                             , **argv, help="number of inner structures (default: 10)", default=10)
     #parser.add_argument("-oo", "--output_original" , type=str                    , **argv, help="output file for the original structure with wrapper atoms (default: 'original.extxyz')", default="original.xyz")
     parser.add_argument("-o" , "--output" , type=str                             , **argv, help="output extxyz file for the path (default: 'path.extxyz')", default="path.extxyz")
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 def main():

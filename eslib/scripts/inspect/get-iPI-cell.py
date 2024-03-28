@@ -19,7 +19,7 @@ def prepare_parser(description):
     parser.add_argument("-m", "--mode"  ,  type=int,**argv,help="mode (default: None)", default=None)
     parser.add_argument("-e", "--exponential",  type=bool,**argv,help="exponential notation (default: False)", default=False)
     parser.add_argument("-o", "--output",  type=str,**argv,help="output file (default: None)", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_parser,description)

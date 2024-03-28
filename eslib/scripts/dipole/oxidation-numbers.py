@@ -23,7 +23,7 @@ def prepare_args(description):
     parser.add_argument("-k" , "--keyword"       , **argv, required=False, type=str, help="keyword for the oxidation numbers (default: 'oxidation-numbers')", default='oxidation-numbers')
     parser.add_argument("-o" , "--output"        , **argv, required=False, type=str, help="output file with the oxidation numbers (default: 'oxidation-numbers.extxyz')", default="oxidation-numbers.extxyz")
     parser.add_argument("-of" , "--output_format", **argv, required=False, type=str, help="output file format (default: 'None')", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

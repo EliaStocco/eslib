@@ -116,7 +116,7 @@ def prepare_args():
     parser.add_argument("-k"  , "--keyword"     , **argv,type=str      , help="keyword")
     parser.add_argument("-s"  , "--shape"       , **argv,type=size_type, help="shape of the array (default: 'None')", default=None)
     parser.add_argument("-o"  , "--output"      , **argv,type=str      , help="txt output file (default: '[keyword].txt')", default=None)
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 def main():

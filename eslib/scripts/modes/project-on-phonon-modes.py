@@ -37,7 +37,7 @@ def prepare_args():
     parser.add_argument("-t",  "--trajectory",   type=str, **argv, help="input extxyz file [a.u.] (default: 'trajectory.extxyz')", default="trajectory.extxyz")
     parser.add_argument("-pm", "--phonon_modes", type=str, **argv, help="phonon modes file computed by 'post-process-phonopy.py' (default: 'phonon-modes.pickle')", default="phonon-modes.pickle")
     parser.add_argument("-o",  "--output",       type=str, **argv, help="output file (default: 'trajectory.phonon-modes.pickle')", default="trajectory.phonon-modes.pickle")
-    return parser.parse_args()
+    return parser# .parse_args()
 
 def main():
 

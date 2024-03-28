@@ -51,7 +51,7 @@ def prepare_args():
                         help="conversion factor to THz for the frequencies ω", default=None)
     parser.add_argument("-m",  "--matrices",      type=lambda x: size_type(x,str), **argv, 
                         help="matrices/vectors to print (default: ['eigval','eigvec','mode'])", default=['eigval','eigvec','mode'])
-    return parser.parse_args()
+    return parser# .parse_args()
 #---------------------------------------#
 def main():
 

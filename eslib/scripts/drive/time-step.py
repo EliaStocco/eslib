@@ -29,7 +29,7 @@ def prepare_args():
     parser.add_argument("-u" , "--unit"        , type=str     , **argv, help="unit of the angular frequency (default: 'THz')", default="thz")
     parser.add_argument("-n" , "--number"      , type=int     , **argv, help="number of integration steps within one period (default: 10)", default=10)
     parser.add_argument("-o" , "--output_unit" , type=str     , **argv, help="output unit for the time step (default: 'femtosecond')", default="femtosecond")
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 def main():

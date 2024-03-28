@@ -48,7 +48,7 @@ def prepare_args():
     parser.add_argument("-s" , "--seed"        , type=int     , **argv, help="seed of the random number generator: specify a number for reproducibility (default: None)", default=None)
     parser.add_argument("-a" , "--absolute"    , type=str2bool, **argv, help="consider the absolute value of the eigenvalues (default: false)", default=False)
     parser.add_argument("-o" , "--output"      , type=str     , **argv, help="output file (default: 'output.xyz')", default='output.xyz')
-    return parser.parse_args()
+    return parser# .parse_args()
 
 def main():
 

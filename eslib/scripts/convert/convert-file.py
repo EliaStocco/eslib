@@ -45,7 +45,7 @@ def prepare_args(description):
     parser.add_argument("-of" , "--output_format"    , **argv,required=False, type=str     , help="output file format (default: 'None')", default=None)
     parser.add_argument("-f"  , "--folder"           , **argv,required=False, type=str     , help="folder of the output files if each structure has to be saved in a different file (default: None)", default=None)
     # Parse the command-line arguments
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
@@ -132,7 +132,7 @@ def main(args):
 
         print("\tConverting positions {:s}from '{:s}' to '{:s}' ... ".format(extra,args.input_unit,args.output_unit),end="")
         for n in range(len(atoms)):
-            atoms[n].set_calculator(None)
+            atoms[n].calc = None # atoms[n].set_calculator(None)
             atoms[n].positions *= factor_pos
             if np.all(atoms[n].get_pbc()):
                 atoms[n].cell *= factor_cell
@@ -169,7 +169,8 @@ def main(args):
         print("\tRemoving the following arrays: ",['initial_magnoms'])
         for n in range(len(atoms)):
             atoms[n].info = {}
-            del atoms[n].arrays['initial_magmoms']
+            if 'initial_magmoms' in atoms[n].arrays:
+                del atoms[n].arrays['initial_magmoms']
 
 
     #------------------#

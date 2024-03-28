@@ -19,7 +19,7 @@ def prepare_args(description):
     parser.add_argument("-k"  , "--keyword"     , **argv,type=str, help="keyword (default: 'dipole')" , default="dipole")
     parser.add_argument("-o" , "--output"       , **argv,type=str, help="txt output file (default: 'quanta.txt')", default="quanta.txt")
     parser.add_argument("-of", "--output_format", **argv,type=str, help="output format for np.savetxt (default: '%%24.18e')", default='%24.18e')
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

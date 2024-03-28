@@ -3,7 +3,7 @@ from ase.io import read
 import matplotlib.pyplot as plt
 from eslib.input import slist
 from eslib.formatting import esfmt
-from eslib.classes.dipole import dipoleLM
+from eslib.classes.dipole import DipoleModel
 from eslib.plot import plot_bisector
 from eslib.physics import compute_dipole_quanta
 from copy import copy
@@ -18,9 +18,9 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i", "--input"  , **argv, type=slist, required=True , help="input 'extxyz' files")
-    parser.add_argument("-m", "--model"  , **argv, type=str,   required=False, help="pickle file with the dipole linear model (default: 'dipoleLM.pickle')", default='dipoleLM.pickle')
+    parser.add_argument("-m", "--model"  , **argv, type=str,   required=False, help="pickle file with the dipole linear model (default: 'DipoleModel.pickle')", default='DipoleModel.pickle')
     parser.add_argument("-o", "--output" , **argv, type=str,   required=False, help="file with the branches plot (default: 'branch.pdf')", default="branch.pdf")
-    return parser.parse_args()
+    return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
@@ -29,7 +29,7 @@ def main(args):
     #------------------#
     # linear model
     print("\tLoading the dipole linear model from file '{:s}' ... ".format(args.model), end="")
-    model = dipoleLM.from_pickle(args.model)
+    model = DipoleModel.from_pickle(args.model)
     print("done")
     print("\tLinear model dipole: ",model.get_dipole())
     print("\tLinear model quanta: ",model.get_quanta())
