@@ -3,13 +3,27 @@ from dataclasses import dataclass, field
 import numpy as np
 from ase import Atoms
 from eslib.tools import convert
-from typing import List
+from typing import List, Dict
 from eslib.tools import cart2frac
 from eslib.physics import compute_dipole_quanta
 from copy import copy
 
+class DipoleModel(pickleIO):
+    def get(self,traj:List[Atoms],**argv):
+        pass
+
+class DipolePointCharges(DipoleModel):
+
+    charges: Dict[str,float]
+
+    def check_charge_neutrality(self,structure:Atoms)->bool:
+        return True
+
+    def get(self,traj:List[Atoms],**argv):
+        pass
+
 @dataclass
-class dipoleLM(pickleIO):
+class DipoleLinearModel(DipoleModel):
 
     ref: Atoms
     bec: np.ndarray
