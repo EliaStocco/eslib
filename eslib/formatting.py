@@ -127,12 +127,13 @@ def esfmt(prepare_parser:callable, description:str=None):
         def wrapped_main(args=dict()):
             # Call the specified prepare_parser function
             args_script = dict()
-            if len(sys.argv) == 1:
-                argv1 = dict_to_list(args)
-                sys.argv.extend(argv1)
+            # if len(sys.argv) == 1:
+            #     argv1 = dict_to_list(args)
+            #     sys.argv.extend(argv1)
             
             if prepare_parser is not None:
-                args_script = prepare_parser(description)
+                parser = prepare_parser(description)
+                args_script = parser.parse_args(args=dict_to_list(args))
             if type(args) == dict:
                 args = add_default(args,args_to_dict(args_script))
                 args = Dict2Obj(args)
