@@ -203,3 +203,22 @@ def main(args):
 
 if __name__ == "__main__":
     main()
+
+# { 
+#     // Use IntelliSense to learn about possible attributes.
+#     // Hover to view descriptions of existing attributes.
+#     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+#     "version": "0.2.0",
+#     "configurations": [
+#         {
+#             "name": "Python: Current File",
+#             "type": "debugpy",
+#             "request": "launch",
+#             "program": "/home/stoccoel/google-personal/codes/eslib/eslib/scripts/convert/convert-file.py",
+#             "cwd" : "/home/stoccoel/Downloads",
+#             "console": "integratedTerminal",
+#             "justMyCode": false,
+#             "args" : ["-i", "aims.out","-o","test.extxyz","-if","aims-output"]
+#         }
+#     ]
+# }
