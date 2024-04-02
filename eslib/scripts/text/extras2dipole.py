@@ -44,7 +44,8 @@ def main(args):
         # Check if the line contains dipole data
         if '"dipole"' in line:
             # Extract the dipole values from the line
-            dipole_data = json.loads(line.strip().split('dipole": ')[1][:-1])
+            json_data = json.loads(line.replace("\n",""))
+            dipole_data = json_data["dipole"] #json.loads(line.strip().split('"dipole":')[1][:-1])
             # Append the dipole values to the list
             dipoles.append(dipole_data)
     print("done")
