@@ -111,6 +111,8 @@ def main(args):
 
     #
     print("\tExtracting structures using the FPS algorithm:")
+    if args.number == -1:
+        args.number = len(frames)
     struct_idx = FPS(n_to_select=args.number, progress_bar = True, initialize = 'random').fit(X.T).selected_idx_
     X_fps = X[struct_idx]
 
