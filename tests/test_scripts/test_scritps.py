@@ -35,6 +35,14 @@ def change_directory():
 tmp_folder = "tmp"
 
 torun = {
+    "extras2dipole" :
+    {
+        "folder"  : "text",
+        "file"   : "extras2dipole",
+        "kwargs"  : {
+            "input"  : "tests/data/i-pi.extras_0",   
+        },
+    },
     "get-iPI-cell" :
     {
         "folder"  : "inspect",
