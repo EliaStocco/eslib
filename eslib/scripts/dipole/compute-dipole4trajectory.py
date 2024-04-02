@@ -4,7 +4,7 @@ import os
 from eslib.nn.user import get_model
 from eslib.functions import suppress_output
 from eslib.input import str2bool
-from eslib.classes.trajectory import trajectory as Trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt, warning
 import torch 
 from tqdm import tqdm
@@ -45,7 +45,7 @@ def main(args):
         # dataloader_train = make_dataloader(train_dataset, batch_size)  
     else:
         print("\tReading atomic structures from file '{:s}' ... ".format(args.trajectory), end="")
-        trajectory = Trajectory(args.trajectory)
+        trajectory = AtomicStructures.from_file(args.trajectory)
         print("done")
 
     N = len(trajectory)

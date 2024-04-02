@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from eslib.formatting import esfmt
-from eslib.classes.trajectory import trajectory, info
+from eslib.classes.trajectory import AtomicStructures, info
 from eslib.plot import generate_colors
 
 #---------------------------------------#
@@ -59,7 +59,7 @@ def main(args):
     #------------------#
     # atomic structures
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms = trajectory(args.input)
+    atoms = AtomicStructures.from_file(args.input)
     print("done")
 
     #------------------#

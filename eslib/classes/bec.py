@@ -7,8 +7,8 @@ class bec(xr.DataArray,pickleIO):
 
     @classmethod
     def from_extxyz(cls,file:str,name:str="bec"):
-        from .trajectory import trajectory, array
-        atoms = trajectory(file)
+        from .trajectory import AtomicStructures, array
+        atoms = AtomicStructures.from_file(file)
         becs = array(atoms,name)
         return cls.from_numpy(becs)
 

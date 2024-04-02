@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 from ase.io import write
-from eslib.classes.trajectory import trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import warning, error, esfmt
 
 #---------------------------------------#
@@ -27,7 +27,7 @@ def main(args):
     #---------------------------------------#
     # atomic structures
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms = trajectory(args.input)
+    atoms = AtomicStructures.from_file(args.input)
     print("done")
     N = len(atoms) 
     print("\tn. of atomic structures: ",N)

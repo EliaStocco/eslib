@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from ase.io import write
 from ase import Atoms
-from eslib.classes.trajectory import trajectory as Trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt, warning, float_format
 from eslib.tools import convert
 import numpy as np
@@ -29,7 +29,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    trajectory:List[Atoms] = list(Trajectory(args.input,format=args.input_format,index=":"))
+    trajectory:List[Atoms] = AtomicStructures.from_file(args.input,format=args.input_format,index=":")
     print("done")
 
     #------------------#

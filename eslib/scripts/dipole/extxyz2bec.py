@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from eslib.classes.bec import bec as BEC
 from eslib.classes.trajectory import array
-from eslib.classes.trajectory import trajectory as Trajectory 
+from eslib.classes.trajectory import AtomicStructures 
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -51,7 +51,7 @@ def main():
 
     #------------------#
     print("\n\tReading positions from file '{:s}' ... ".format(args.input),end="")
-    trajectory = Trajectory(args.input, format=args.input_format)  #eV
+    trajectory = AtomicStructures.from_file(args.input, format=args.input_format)  #eV
     print("done")
 
     #------------------#

@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from eslib.classes.trajectory import trajectory as Trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.tools import convert
 from eslib.classes.trajectory import info, array
 
-trajectory = Trajectory("trajectory.extxyz")
+trajectory = AtomicStructures.from_file("trajectory.extxyz")
 time = info(trajectory,"time") * convert(1,"time","atomic_unit","femtosecond")
 
 dipole = {

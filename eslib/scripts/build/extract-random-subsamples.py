@@ -2,7 +2,7 @@
 import numpy as np
 import random
 from eslib.formatting import esfmt, error
-from eslib.classes.trajectory import trajectory as Trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.input import ilist, slist, str2bool
 from typing import List
 from ase import Atoms
@@ -31,7 +31,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    trajectory:List[Atoms] = list(Trajectory(args.input,format=args.input_format,index=":"))
+    trajectory:List[Atoms] = list(AtomicStructures.from_file(args.input,format=args.input_format,index=":"))
     print("done")
 
     #------------------#

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from ase.io import write
-from eslib.classes.trajectory import trajectory, info, array
+from eslib.classes.trajectory import AtomicStructures, info, array
 from eslib.formatting import esfmt, error
 
 #---------------------------------------#
@@ -26,7 +26,7 @@ def main(args):
     #---------------------------------------#
     # atomic structures
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms = trajectory(args.input)
+    atoms = AtomicStructures.from_file(args.input)
     print("done")
 
     #---------------------------------------#

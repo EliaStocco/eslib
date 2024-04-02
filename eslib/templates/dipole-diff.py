@@ -2,12 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.pyplot as plt
 import numpy as np
-from eslib.classes.trajectory import trajectory as Trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.classes.trajectory import info, array
 from eslib.functions import plot_bisector
 from eslib.tools import convert
 
-trajectory = Trajectory("trajectory.extxyz")
+trajectory = AtomicStructures.from_file("trajectory.extxyz")
 time = info(trajectory,"time") * convert(1,"time","atomic_unit","femtosecond")
 dipole = {
     "DFT" : info(trajectory,"dipoleDFT"),

@@ -3,7 +3,7 @@ from ase.io import read
 import numpy as np
 from ase import Atoms
 from eslib.classes.dipole import DipoleLinearModel
-from eslib.classes.trajectory import trajectory as Trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.input import flist
 from eslib.tools import lattice2cart, frac2cart
 from eslib.formatting import esfmt, warning, error
@@ -33,7 +33,7 @@ def main(args):
     # #------------------#
     # # trajectory
     # print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    # trajectory = Trajectory(args.input)
+    # trajectory = AtomicStructures.from_file(args.input)
     # print("done")
 
     #------------------#

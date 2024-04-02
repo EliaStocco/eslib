@@ -7,7 +7,7 @@ from ase.io import write, read
 from eslib.classes.properties import properties as Properties
 from eslib.functions import suppress_output, get_one_file_in_folder, str2bool
 from eslib.input import size_type
-from eslib.classes.trajectory import trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt, error, warning
 
 #---------------------------------------#
@@ -76,7 +76,7 @@ def main(args):
 
     print("\tReading atomic structures from file '{:s}' ... ".format(args.positions_file), end="")
     with suppress_output():
-        atoms = trajectory(args.positions_file,format=args.format)
+        atoms = AtomicStructures.from_file(args.positions_file,format=args.format)
     print("done")
     # else :
     #     raise ValueError("to be implemented yet")

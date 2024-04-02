@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from ase import Atoms
-from eslib.classes.trajectory import trajectory as Trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt, float_format
 import numpy as np
 from ipi.utils.units import Elements
@@ -27,7 +27,7 @@ def main(args):
     #------------------#
     # atomic structure
     print("\tReading the first atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms:Atoms = Trajectory(args.input,format=args.input_format,index=0)[0]
+    atoms:Atoms = AtomicStructures.from_file(args.input,format=args.input_format,index=0)[0]
     print("done")
 
     #------------------#

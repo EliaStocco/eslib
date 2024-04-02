@@ -2,7 +2,7 @@
 import numpy as np
 import json
 from ase import Atoms
-from eslib.classes.trajectory import trajectory as Trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.show import show_dict
 
@@ -26,7 +26,7 @@ def main(args):
 
     #------------------#
     print("\tReading the first atomic structures from file '{:s}' ... ".format(args.reference), end="")
-    reference:Atoms = Trajectory(args.reference,format=args.format,index=0)[0]
+    reference:Atoms = AtomicStructures.from_file(args.reference,format=args.format,index=0)[0]
     print("done")
 
     #------------------#

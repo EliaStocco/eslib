@@ -6,6 +6,7 @@ import re
 import ipi.utils.mathtools as mt
 import numpy as np
 from eslib.formatting import warning
+from eslib.classes.io import pickleIO
 
 deg2rad     = np.pi / 180.0
 abcABC      = re.compile(r"CELL[\(\[\{]abcABC[\)\]\}]: ([-+0-9\.Ee ]*)\s*")
@@ -13,10 +14,14 @@ abcABCunits = re.compile(r'\{([^}]+)\}')
 step        = re.compile(r"Step:\s+(\d+)")
 
 # Example
-# trajectory = Trajectory(file)
+# trajectory = AtomicStructures.from_file(file)
 # structure  = trajectory[0]                               # --> ase.Atoms
 # positions  = trajectory.positions                        # --> (N,3,3)
 # dipole     = trajectory.call(lambda e: e.info["dipole"]) # --> (N,3)
+
+
+
+
 
 def info(t,name):
     return t.call(lambda e:e.info[name])
@@ -54,7 +59,7 @@ class FakeList:
         else:
             raise IndexError("FakeList index out of range")
     
-def trajectory(file:str,
+def read_trajectory(file:str,
                format:str=None,
                index:str=":",
                pbc:bool=True,
@@ -140,10 +145,23 @@ def trajectory(file:str,
 
             # except:
             #     pass
-        
-    return easyvectorize(Atoms)(atoms)
+    return atoms
+    # return easyvectorize(Atoms)(atoms)
 
 
-
-
-
+class AtomicStructures(list,pickleIO):
+    """Class to handle atomic structures:
+        - read from and write to big files (using `ase`)
+        - serialization using `pickle`
+        - automatic extraction of `info` and `array` from the list of structures
+    """
+    @classmethod
+    def from_file(cls,**argv):
+        if 'file' in argv and isinstance(argv['file'], str) and argv['file'].endswith('.pickle'):
+            return AtomicStructures.from_pickle(argv['file'])
+        else:
+            traj = read_trajectory(**argv)
+            return cls(traj)
+    
+    def to_list(self):
+        return list(self)

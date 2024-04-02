@@ -40,7 +40,8 @@ torun = {
         "folder"  : "text",
         "file"   : "extras2dipole",
         "kwargs"  : {
-            "input"  : "tests/data/i-pi.extras_0",   
+            "input"  : "tests/data/i-pi.extras_0",  
+            "output" :  "tests/dipoles.txt",  
         },
     },
     "get-iPI-cell" :

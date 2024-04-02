@@ -4,7 +4,7 @@ import pickle
 import xarray as xr
 from eslib.output import output_folder
 from eslib.classes.normal_modes import NormalModes
-from eslib.classes.trajectory import trajectory as Trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.units import remove_unit
 
 # import warnings
@@ -65,7 +65,7 @@ def main():
     # del atoms
     # print("done")
     print("\tReading trajectory from file '{:s}' ... ".format(args.trajectory), end="")
-    trajectory = Trajectory(args.trajectory)
+    trajectory = AtomicStructures.from_file(args.trajectory)
     print("done")
 
     #---------------------------------------#

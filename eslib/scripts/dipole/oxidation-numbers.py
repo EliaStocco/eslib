@@ -3,7 +3,7 @@ from ase.io import write
 import numpy as np
 import json
 from ase import Atoms
-from eslib.classes.trajectory import trajectory as Trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt, warning
 from eslib.formatting import matrix2str
 from eslib.physics import oxidation_number
@@ -32,7 +32,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading the first atomic structure from file '{:s}' ... ".format(args.input), end="")
-    atoms:Atoms = Trajectory(args.input,format=args.input_format,index=0)[0]
+    atoms:Atoms = AtomicStructures.from_file(args.input,format=args.input_format,index=0)[0]
     print("done")
 
     symbols = atoms.get_chemical_symbols()

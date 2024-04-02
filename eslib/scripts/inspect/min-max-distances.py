@@ -3,7 +3,7 @@ from ase.io import read
 from scipy.spatial.distance import pdist, squareform
 import numpy as np
 import argparse
-from eslib.classes.trajectory import trajectory as Trajectory
+from eslib.classes.trajectory import AtomicStructures
 from tqdm import tqdm
 
 #---------------------------------------#
@@ -52,7 +52,7 @@ def main():
     #---------------------------------------#
     # Read the XYZ file
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    trajectory = Trajectory(args.input,format=args.input_format)
+    trajectory = AtomicStructures.from_file(args.input,format=args.input_format)
     print("done\n")
 
     #---------------------------------------#

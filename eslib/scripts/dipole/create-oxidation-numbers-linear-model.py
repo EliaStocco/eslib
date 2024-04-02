@@ -2,7 +2,7 @@
 from ase.io import read
 import numpy as np
 from eslib.classes.dipole import DipoleModel
-from eslib.classes.trajectory import trajectory as Trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.classes.trajectory import info
 from eslib.formatting import esfmt, float_format, warning
 from eslib.physics import oxidation_number
@@ -34,7 +34,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    trajectory = Trajectory(args.input)
+    trajectory = AtomicStructures.from_file(args.input)
     print("done")
 
     reference = trajectory[0].copy()

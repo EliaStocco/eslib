@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from eslib.plot import plot_bisector
 from eslib.classes.dipole import DipoleModel, DipoleLinearModel
 from eslib.classes.trajectory import info
-from eslib.classes.trajectory import trajectory as Trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.tools import cart2lattice, cart2frac, frac2cart
 from eslib.output import output_folder
 from ase.io import write
@@ -54,7 +54,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    trajectory = Trajectory(args.input)
+    trajectory = AtomicStructures.from_file(args.input)
     print("done")
     print("\tn. of atomic structures: ",len(trajectory))
 

@@ -73,7 +73,7 @@ def main(args):
     print("\tReading data from input file '{:s}' ... ".format(args.input), end="")
     with suppress_output():
         # Try to determine the format by checking each supported format
-        atoms = trajectory(file=args.input,
+        atoms = trajectory.from_file(file=args.input,
                            format=args.input_format,
                            index=args.index,
                            pbc=args.pbc,
