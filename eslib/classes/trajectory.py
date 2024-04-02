@@ -65,18 +65,20 @@ def trajectory(file:str,
     f = "extxyz" if format in ["i-pi","ipi"] else format
     remove_replicas = False if format not in ["i-pi","ipi"] else remove_replicas
 
+    # with open(file,"r") as ffile:
+
+    atoms = read(file,index=index,format=f)
+
+    index = integer_to_slice_string(index)
+
+    # comment = reconstruct_comment(atoms[0].info)
+    if not isinstance(atoms,list):
+        atoms = [atoms]
+    for n in range(len(atoms)):
+        # atoms[n].info = dict()
+        atoms[n].calc = None # atoms[n].set_calculator(None)
+
     with open(file,"r") as ffile:
-
-        atoms = read(ffile,index=index,format=f)
-
-        index = integer_to_slice_string(index)
-
-        # comment = reconstruct_comment(atoms[0].info)
-        if not isinstance(atoms,list):
-            atoms = [atoms]
-        for n in range(len(atoms)):
-            # atoms[n].info = dict()
-            atoms[n].calc = None # atoms[n].set_calculator(None)
 
         pbc = pbc if pbc is not None else True
         if format in ["i-pi","ipi"]:
@@ -126,9 +128,15 @@ def trajectory(file:str,
             #         "cell" : matches[1]
             #     }
             if pbc:
-                for n in range(len(atoms)):
-                    atoms[n].set_cell(cells[n].T)
-                    atoms[n].set_pbc(True)
+                for a in atoms:
+                    a.set_cell(cells[n].T)
+                    # a.set_pbc(True)
+
+        if pbc:
+            for a in atoms:
+                # atoms[n].set_cell(cells[n].T)
+                a.set_pbc(True)
+
 
             # except:
             #     pass
