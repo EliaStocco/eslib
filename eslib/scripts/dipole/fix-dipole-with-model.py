@@ -2,37 +2,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from eslib.plot import plot_bisector
-from eslib.classes.dipole import DipoleModel
+from eslib.classes.dipole import DipoleModel, DipoleLinearModel
 from eslib.classes.trajectory import info
 from eslib.classes.trajectory import trajectory as Trajectory
 from eslib.tools import cart2lattice, cart2frac, frac2cart
 from eslib.output import output_folder
 from ase.io import write
-from eslib.formatting import everythingok,warning
+from eslib.formatting import esfmt, everythingok, warning, error
 
 #---------------------------------------#
 # Description of the script's purpose
 description = "Fix the dipole jumps using a (previously created) linear model."
-warning = "***Warning***"
-error = "***Error***"
-closure = "Job done :)"
-information = "You should provide the positions as printed by i-PI."
-input_arguments = "Input arguments"
-
-#---------------------------------------#
-# colors
-try :
-    import colorama
-    from colorama import Fore, Style
-    colorama.init(autoreset=True)
-    description     = Fore.GREEN    + Style.BRIGHT + description             + Style.RESET_ALL
-    warning         = Fore.MAGENTA  + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
-    error           = Fore.RED      + Style.BRIGHT + error.replace("*","")   + Style.RESET_ALL
-    closure         = Fore.BLUE     + Style.BRIGHT + closure                 + Style.RESET_ALL
-    information     = Fore.YELLOW   + Style.NORMAL + information             + Style.RESET_ALL
-    input_arguments = Fore.GREEN    + Style.NORMAL + input_arguments         + Style.RESET_ALL
-except:
-    pass
 
 #---------------------------------------#
 def correlation_plot(A,B,nameA,nameB,file):
@@ -56,7 +36,7 @@ def correlation_plot(A,B,nameA,nameB,file):
     plt.savefig(file)
 
 #---------------------------------------#
-def prepare_args():
+def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
@@ -68,19 +48,8 @@ def prepare_args():
     return parser# .parse_args()
 
 #---------------------------------------#
-def main():
-
-    #------------------#
-    # Parse the command-line arguments
-    args = prepare_args()
-
-    # Print the script's description
-    print("\n\t{:s}".format(description))
-
-    print("\n\t{:s}:".format(input_arguments))
-    for k in args.__dict__.keys():
-        print("\t{:>20s}:".format(k),getattr(args,k))
-    print()
+@esfmt(prepare_args,description)
+def main(args):
 
     #------------------#
     # trajectory
@@ -111,13 +80,14 @@ def main():
 
     #------------------#
     print("\tCheck the distances w.r.t. the reference configuration ... ", end="")
-    indices = model.control_periodicity(list(trajectory))
-    print("done")
-    if indices is None or len(indices) == 0:
-        print("\t{:s}".format(everythingok))
-    else:
-        print("\t{:s}: found {:d} structures that could be wrong.".format(warning,len(indices)))
-        # print("\tatomic structures indices: ", indices.tolist())
+    if isinstance(model,DipoleLinearModel): 
+        indices = model.control_periodicity(list(trajectory))
+        print("done")
+        if indices is None or len(indices) == 0:
+            print("\t{:s}".format(everythingok))
+        else:
+            print("\t{:s}: found {:d} structures that could be wrong.".format(warning,len(indices)))
+            # print("\tatomic structures indices: ", indices.tolist())
 
     #------------------#
     # dipole
@@ -141,10 +111,10 @@ def main():
         np.savetxt(file,dft)
         print("done")
 
-        file = "{:s}/dipole.correlation.pdf".format(args.folder)
-        print("\tSaving correlation plot between DFT and LM dipole to file '{:s}' ... ".format(file), end="")        
-        correlation_plot(dft,linear,"DFT","LM",file)
-        print("done")
+        # file = "{:s}/dipole.correlation.pdf".format(args.folder)
+        # print("\tSaving correlation plot between DFT and LM dipole to file '{:s}' ... ".format(file), end="")        
+        # correlation_plot(dft,linear,"DFT","LM",file)
+        # print("done")
 
     #------------------#
     # quanta
@@ -225,16 +195,16 @@ def main():
         trajectory[n].info["quanta"] = _quanta.flatten()
     print("done")
 
-    #------------------#
-    print("\tLooking for outliers ... ", end="")
-    for n in range(N):
-        fd = trajectory[n].info["dipole"]
-        fd_quanta  = cart2frac(cell=trajectory[n].get_cell(),v=fd)
-        lm_quanta = cart2frac(cell=trajectory[n].get_cell(),v=linear[n])
-        norm = np.sqrt(np.square(fd_quanta-lm_quanta).sum())
-        # norm = np.linalg.norm(fd-linear[n])
-        print(norm)
-    print("done")
+    # #------------------#
+    # print("\tLooking for outliers ... ", end="")
+    # for n in range(N):
+    #     fd = trajectory[n].info["dipole"]
+    #     fd_quanta  = cart2frac(cell=trajectory[n].get_cell(),v=fd)
+    #     lm_quanta = cart2frac(cell=trajectory[n].get_cell(),v=linear[n])
+    #     # norm = np.sqrt(np.square(fd_quanta-lm_quanta).sum())
+    #     # norm = np.linalg.norm(fd-linear[n])
+    #     # print(norm)
+    # print("done")
 
     #------------------#
     # writing
@@ -273,10 +243,6 @@ def main():
         # print("\tSaving correlation plot between fixed DFT and LM dipole to file '{:s}' ... ".format(file), end="")        
         # correlation_plot(fixed_dipole,linear,"DFT","LM",file)
         # print("done")
-
-    #------------------#
-    # Script completion message
-    print("\n\t{:s}\n".format(closure))
 
 #---------------------------------------#
 if __name__ == "__main__":
