@@ -76,7 +76,7 @@ def main(args):
 
     print("\tReading atomic structures from file '{:s}' ... ".format(args.positions_file), end="")
     with suppress_output():
-        atoms = trajectory(args.positions_file,format=args.format,check=True)
+        atoms = trajectory(args.positions_file,format=args.format)
     print("done")
     # else :
     #     raise ValueError("to be implemented yet")
