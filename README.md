@@ -1,7 +1,7 @@
 # `eslib`
 Elia Stocco's personal repository.
 
-# Installation, or kind of
+# Installation
 Add this line in your `.bashrc` file.
 ```bash
 pip install black
@@ -25,3 +25,14 @@ and make all the scripts executable:
 source install.sh
 ```
 In case add `source eslib_path/install.sh` to `~/.bashrc`.
+
+## Help
+You don't find a script? Just type:
+```bash
+eslib-help.py 
+```
+and you'll see all the script contained in this repository with a short description for each of them.
+If you know in which folder the script that you are looking for is (e.g. `inspect`), you can type:
+```bash
+eslib-help.py -f inspect
+```
