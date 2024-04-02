@@ -29,7 +29,7 @@ def main(args):
     #------------------#
     # cell
     print("\tReading the first atomic structure from file '{:s}' ... ".format(args.cell), end="")
-    periodic:Atoms = list(AtomicStructures.from_file(args.cell,format=args.cell_format,index=0))[0]
+    periodic:Atoms = list(AtomicStructures.from_file(file=args.cell,format=args.cell_format,index=0))[0]
     cell = periodic.get_cell()
     pbc = periodic.get_pbc()
     print("done")
@@ -37,7 +37,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    trajectory:List[Atoms] = list(AtomicStructures.from_file(args.input,format=args.input_format,index=":"))
+    trajectory:List[Atoms] = list(AtomicStructures.from_file(file=args.input,format=args.input_format,index=":"))
     print("done")
     
     #------------------#

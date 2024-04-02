@@ -53,7 +53,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading the displaced atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms:List[Atoms] = list(AtomicStructures.from_file(args.input,format=args.input_format,index=":"))
+    atoms:List[Atoms] = list(AtomicStructures.from_file(file=args.input,format=args.input_format,index=":"))
     print("done")
 
     N = len(atoms)

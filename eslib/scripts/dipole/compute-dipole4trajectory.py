@@ -45,7 +45,7 @@ def main(args):
         # dataloader_train = make_dataloader(train_dataset, batch_size)  
     else:
         print("\tReading atomic structures from file '{:s}' ... ".format(args.trajectory), end="")
-        trajectory = AtomicStructures.from_file(args.trajectory)
+        trajectory = AtomicStructures.from_file(file=args.trajectory)
         print("done")
 
     N = len(trajectory)

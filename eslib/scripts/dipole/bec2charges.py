@@ -26,7 +26,7 @@ def main(args):
 
     #------------------#
     print("\tReading the first atomic structures from file '{:s}' ... ".format(args.reference), end="")
-    reference:Atoms = AtomicStructures.from_file(args.reference,format=args.format,index=0)[0]
+    reference:Atoms = AtomicStructures.from_file(file=args.reference,format=args.format,index=0)[0]
     print("done")
 
     #------------------#

@@ -65,7 +65,7 @@ def main():
     # del atoms
     # print("done")
     print("\tReading trajectory from file '{:s}' ... ".format(args.trajectory), end="")
-    trajectory = AtomicStructures.from_file(args.trajectory)
+    trajectory = AtomicStructures.from_file(file=args.trajectory)
     print("done")
 
     #---------------------------------------#

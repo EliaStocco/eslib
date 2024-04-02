@@ -31,7 +31,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    trajectory:List[Atoms] = list(AtomicStructures.from_file(args.input,format=args.input_format,index=":"))
+    trajectory:List[Atoms] = list(AtomicStructures.from_file(file=args.input,format=args.input_format,index=":"))
     print("done")
 
     #------------------#

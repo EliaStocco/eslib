@@ -76,7 +76,7 @@ def main(args):
 
     print("\tReading atomic structures from file '{:s}' ... ".format(args.positions_file), end="")
     with suppress_output():
-        atoms = AtomicStructures.from_file(args.positions_file,format=args.format)
+        atoms = AtomicStructures.from_file(file=args.positions_file,format=args.format)
     print("done")
     # else :
     #     raise ValueError("to be implemented yet")

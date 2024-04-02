@@ -51,7 +51,7 @@ def main():
 
     #------------------#
     print("\n\tReading positions from file '{:s}' ... ".format(args.input),end="")
-    trajectory = AtomicStructures.from_file(args.input, format=args.input_format)  #eV
+    trajectory = AtomicStructures.from_file(file=args.input, format=args.input_format)  #eV
     print("done")
 
     #------------------#

@@ -26,7 +26,7 @@ def main(args):
     #------------------#
     # atomic structures
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms = AtomicStructures.from_file(args.input,format="extxyz")
+    atoms = AtomicStructures.from_file(file=args.input,format="extxyz")
     print("done")
 
     #------------------#

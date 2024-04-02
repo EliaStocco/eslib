@@ -52,7 +52,7 @@ def main():
     #---------------------------------------#
     # Read the XYZ file
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    trajectory = AtomicStructures.from_file(args.input,format=args.input_format)
+    trajectory = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done\n")
 
     #---------------------------------------#

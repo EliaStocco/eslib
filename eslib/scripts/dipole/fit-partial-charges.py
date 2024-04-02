@@ -36,7 +36,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    trajectory:List[Atoms] = list(AtomicStructures.from_file(args.input))
+    trajectory:List[Atoms] = list(AtomicStructures.from_file(file=args.input))
     print("done")
 
     yreal = np.zeros((len(trajectory),3))

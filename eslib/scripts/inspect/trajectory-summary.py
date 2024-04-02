@@ -22,7 +22,7 @@ def main(args):
     #---------------------------------------#
     # atomic structures
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms = AtomicStructures.from_file(args.input,format=args.input_format)
+    atoms = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done\n")
 
     print("\tn. of atomic structures: {:d}".format(len(atoms)))
@@ -37,7 +37,7 @@ def main(args):
         print("\tperiodic along axis x,y,z: ",[ str(a) for a in np.all(pbc,axis=0) == ~ np.all(~pbc,axis=0) ])
 
     #---------------------------------------#
-    keys = atoms.info[0].keys()
+    keys = atoms[0].info.keys()
     check = dict()
     
     for k in keys:

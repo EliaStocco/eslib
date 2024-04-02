@@ -7,6 +7,7 @@ import ipi.utils.mathtools as mt
 import numpy as np
 from eslib.formatting import warning
 from eslib.classes.io import pickleIO
+from typing import List
 
 deg2rad     = np.pi / 180.0
 abcABC      = re.compile(r"CELL[\(\[\{]abcABC[\)\]\}]: ([-+0-9\.Ee ]*)\s*")
@@ -20,13 +21,10 @@ step        = re.compile(r"Step:\s+(\d+)")
 # dipole     = trajectory.call(lambda e: e.info["dipole"]) # --> (N,3)
 
 
-
-
-
-def info(t,name):
-    return t.call(lambda e:e.info[name])
-def array(t,name):
-    return t.call(lambda e:e.arrays[name])
+# def info(t,name):
+#     return t.call(lambda e:e.info[name])
+# def array(t,name):
+#     return t.call(lambda e:e.arrays[name])
 
 def integer_to_slice_string(index):
     if isinstance(index, int):
@@ -64,7 +62,7 @@ def read_trajectory(file:str,
                index:str=":",
                pbc:bool=True,
                same_cell:bool=False,
-               remove_replicas:bool=False):
+               remove_replicas:bool=False)->List[Atoms]:
 
     format = format.lower() if format is not None else None
     f = "extxyz" if format in ["i-pi","ipi"] else format
@@ -156,7 +154,7 @@ class AtomicStructures(list,pickleIO):
         - automatic extraction of `info` and `array` from the list of structures
     """
     @classmethod
-    def from_file(cls,**argv):
+    def from_file(cls,**argv)->List[Atoms]:
         if 'file' in argv and isinstance(argv['file'], str) and argv['file'].endswith('.pickle'):
             return AtomicStructures.from_pickle(argv['file'])
         else:
@@ -165,3 +163,15 @@ class AtomicStructures(list,pickleIO):
     
     def to_list(self):
         return list(self)
+    
+    def call(self,func):
+        t = easyvectorize(Atoms)(self)
+        return t.call(func)
+
+def info(t:AtomicStructures,name:str):
+    t = easyvectorize(Atoms)(t)
+    return t.call(lambda e:e.info[name])
+    
+def array(t:AtomicStructures,name:str):
+    t = easyvectorize(Atoms)(t)
+    return t.call(lambda e:e.arrays[name])
