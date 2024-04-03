@@ -2,26 +2,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from eslib.plot import plot_bisector
+from eslib.formatting import esfmt
 
 #---------------------------------------#
 # Description of the script's purpose
 description = "Create a correlation plot of the dipole components from two datasets."
-closure = "Job done :)"
-input_arguments = "Input arguments"
 
-#---------------------------------------#
-# colors
-try :
-    import colorama
-    from colorama import Fore, Style
-    colorama.init(autoreset=True)
-    description     = Fore.GREEN    + Style.BRIGHT + description             + Style.RESET_ALL
-    closure         = Fore.BLUE     + Style.BRIGHT + closure                 + Style.RESET_ALL
-    input_arguments = Fore.GREEN    + Style.NORMAL + input_arguments         + Style.RESET_ALL
-except:
-    pass
-
-def prepare_args():
+def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
 
@@ -34,18 +21,8 @@ def prepare_args():
     return parser# .parse_args()
 
 #---------------------------------------#
-def main():
-
-    # Parse the command-line arguments
-    args = prepare_args()
-
-    # Print the script's description
-    print("\n\t{:s}".format(description))
-
-    print("\n\t{:s}:".format(input_arguments))
-    for k in args.__dict__.keys():
-        print("\t{:>20s}:".format(k),getattr(args,k))
-    print()
+@esfmt(prepare_args,description)
+def main(args):
 
     print("\tReading dataset A ... ",end="")
     A = np.loadtxt(args.dataset_A)
@@ -73,13 +50,6 @@ def main():
     plt.savefig(args.output)
     print("done")
 
-    #---------------------------------------#
-    # Script completion message
-    print("\n\t{:s}\n".format(closure))
-
+#---------------------------------------#
 if __name__ == "__main__":
     main()
-
-
-
-print()

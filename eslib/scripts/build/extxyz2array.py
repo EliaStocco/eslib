@@ -1,32 +1,17 @@
 #!/usr/bin/env python
-import argparse
 import numpy as np
 from ase.io import write
 from eslib.classes.trajectory import AtomicStructures, info, array
-
+from eslib.formatting import esfmt
 
 #---------------------------------------#
 # Description of the script's purpose
 description = "Save an 'array' or 'info' from an extxyz file to a txt file."
-error = "***Error***"
-closure = "Job done :)"
-input_arguments = "Input arguments"
+
 
 #---------------------------------------#
-# colors
-try :
-    import colorama
-    from colorama import Fore, Style
-    colorama.init(autoreset=True)
-    description     = Fore.GREEN    + Style.BRIGHT + description             + Style.RESET_ALL
-    error           = Fore.RED      + Style.BRIGHT + error.replace("*","")   + Style.RESET_ALL
-    closure         = Fore.BLUE     + Style.BRIGHT + closure                 + Style.RESET_ALL
-    input_arguments = Fore.GREEN    + Style.NORMAL + input_arguments         + Style.RESET_ALL
-except:
-    pass
-
-#---------------------------------------#
-def prepare_args():
+def prepare_args(description):
+    import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input" , **argv,type=str, help="input file [extxyz]")
@@ -37,19 +22,8 @@ def prepare_args():
     return parser# .parse_args()
 
 #---------------------------------------#
-def main():
-
-    #------------------#
-    # Parse the command-line arguments
-    args = prepare_args()
-
-    # Print the script's description
-    print("\n\t{:s}".format(description))
-
-    print("\n\t{:s}:".format(input_arguments))
-    for k in args.__dict__.keys():
-        print("\t{:>20s}:".format(k),getattr(args,k))
-    print()
+@esfmt(prepare_args,description)
+def main(args):
 
     #---------------------------------------#
     # atomic structures
@@ -83,10 +57,7 @@ def main():
     np.savetxt(file,data,fmt=args.output_format) # fmt)
     print("done")
 
-    #------------------#
-    # Script completion message
-    print("\n\t{:s}\n".format(closure))
-
+#---------------------------------------#
 if __name__ == "__main__":
     main()
 
