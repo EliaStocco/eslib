@@ -2,7 +2,7 @@
 from ase.io import write
 from ase.cell import Cell
 # from elia.functions import str2bool, suppress_output, convert
-from eslib.classes.trajectory import trajectory
+from eslib.classes.trajectory import AtomicStructures
 import numpy as np
 import os
 from eslib.formatting import esfmt, warning, error
@@ -73,7 +73,7 @@ def main(args):
     print("\tReading data from input file '{:s}' ... ".format(args.input), end="")
     with suppress_output():
         # Try to determine the format by checking each supported format
-        atoms = trajectory.from_file(file=args.input,
+        atoms = AtomicStructures.from_file(file=args.input,
                            format=args.input_format,
                            index=args.index,
                            pbc=args.pbc,

@@ -169,9 +169,9 @@ class AtomicStructures(list,pickleIO):
         return t.call(func)
 
 def info(t:AtomicStructures,name:str):
-    t = easyvectorize(Atoms)(t)
+    # t = easyvectorize(Atoms)(t)
     return t.call(lambda e:e.info[name])
     
 def array(t:AtomicStructures,name:str):
-    t = easyvectorize(Atoms)(t)
+    # t = easyvectorize(Atoms)(t)
     return t.call(lambda e:e.arrays[name])
