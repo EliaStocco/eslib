@@ -5,6 +5,7 @@ from ase.geometry import distance
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
 from typing import Union
+from eslib.ipi_units import unit_to_internal, unit_to_user
 
 #---------------------------------------#
 def find_transformation(A: Atoms, B: Atoms):
@@ -74,7 +75,7 @@ def convert(what:Union[np.ndarray,float], family:str=None, _from:str="atomic_uni
     Example: 
     arr = convert([1,3,4],'length','angstrom','atomic_unit')
     arr = convert([1,3,4],'energy','atomic_unit','millielectronvolt')"""
-    from ipi.utils.units import unit_to_internal, unit_to_user
+    # from ipi.utils.units import unit_to_internal, unit_to_user
     if family is not None:
         factor = unit_to_internal(family, _from, 1)
         factor *= unit_to_user(family, _to, 1)
