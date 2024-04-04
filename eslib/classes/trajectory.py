@@ -1,18 +1,46 @@
-from ase.io import read, string2index
+from ase.io import read, write, string2index
 from ase import Atoms
 from .vectorize import easyvectorize
 from eslib.functions import read_comments_xyz
 import re
-import ipi.utils.mathtools as mt
+# import ipi.utils.mathtools as mt
+import math
 import numpy as np
 from eslib.formatting import warning
 from eslib.classes.io import pickleIO
-from typing import List
+from typing import List, Union, Type, TypeVar
+
+T = TypeVar('T', bound='AtomicStructures')
 
 deg2rad     = np.pi / 180.0
 abcABC      = re.compile(r"CELL[\(\[\{]abcABC[\)\]\}]: ([-+0-9\.Ee ]*)\s*")
 abcABCunits = re.compile(r'\{([^}]+)\}')
 step        = re.compile(r"Step:\s+(\d+)")
+
+def abc2h(a, b, c, alpha, beta, gamma):
+    """Returns a lattice vector matrix given a description in terms of the
+    lattice vector lengths and the angles in between.
+
+    Args:
+       a: First cell vector length.
+       b: Second cell vector length.
+       c: Third cell vector length.
+       alpha: Angle between sides b and c in radians.
+       beta: Angle between sides a and c in radians.
+       gamma: Angle between sides b and a in radians.
+
+    Returns:
+       An array giving the lattice vector matrix in upper triangular form.
+    """
+
+    h = np.zeros((3, 3), float)
+    h[0, 0] = a
+    h[0, 1] = b * math.cos(gamma)
+    h[0, 2] = c * math.cos(beta)
+    h[1, 1] = b * math.sin(gamma)
+    h[1, 2] = (b * c * math.cos(alpha) - h[0, 1] * h[0, 2]) / h[1, 1]
+    h[2, 2] = math.sqrt(c**2 - h[0, 2] ** 2 - h[1, 2] ** 2)
+    return h
 
 # Example
 # trajectory = AtomicStructures.from_file(file)
@@ -20,43 +48,46 @@ step        = re.compile(r"Step:\s+(\d+)")
 # positions  = trajectory.positions                        # --> (N,3,3)
 # dipole     = trajectory.call(lambda e: e.info["dipole"]) # --> (N,3)
 
-
-# def info(t,name):
-#     return t.call(lambda e:e.info[name])
-# def array(t,name):
-#     return t.call(lambda e:e.arrays[name])
-
-def integer_to_slice_string(index):
-    if isinstance(index, int):
-        return string2index(f"{index}:{index+1}")
-    elif index is None:
-        return slice(None,None,None)
-    elif isinstance(index, str):
-        try:
-            index = string2index(index)
-        except:
-            raise ValueError("error creating slice from string {:s}".format(index))
-    elif isinstance(index, slice):
-        return index
-    else:
-        raise ValueError("`index` can be int, str, or slice, not {}".format(index))
-class FakeList:
-    def __init__(self, value, length):
-        self.value = value
-        self.length = length
-
-    def __len__(self):
-        return self.length
-
-    def __getitem__(self, index):
-        if isinstance(index, slice):
-            start, stop, step = index.indices(self.length)
-            return [self.value] * ((stop - start + step - 1) // step)
-        elif 0 <= index < self.length:
-            return self.value
+class AtomicStructures(List[Atoms], pickleIO):
+    """Class to handle atomic structures:
+        - read from and write to big files (using `ase`)
+        - serialization using `pickle`
+        - automatic extraction of `info` and `array` from the list of structures
+    """
+    @classmethod
+    def from_file(cls, **argv) -> T:
+        if 'file' in argv and isinstance(argv['file'], str) and argv['file'].endswith('.pickle'):
+            return cls.from_pickle(argv['file'])
         else:
-            raise IndexError("FakeList index out of range")
+            traj = read_trajectory(**argv)
+            return cls(traj)
+        
+    def to_file(self: T, file: str, format: Union[str, None] = None):
+        if file.endswith('.pickle'):
+            self.to_pickle(file)
+        else:
+            write(images=self, filename=file, format=format)
     
+    def to_list(self: T) -> List[Atoms]:
+        return list(self)
+    
+    def call(self: T, func) -> np.ndarray:
+        t = easyvectorize(Atoms)(self)
+        return t.call(func)
+    
+#------------------------------------#
+
+def info(t:AtomicStructures,name:str)->np.ndarray:
+    # t = easyvectorize(Atoms)(t)
+    return t.call(lambda e:e.info[name])
+    
+def array(t:AtomicStructures,name:str)->np.ndarray:
+    # t = easyvectorize(Atoms)(t)
+    return t.call(lambda e:e.arrays[name])
+
+#------------------------------------#
+# function to efficiently read atomic structure from a huge file
+
 def read_trajectory(file:str,
                format:str=None,
                index:str=":",
@@ -106,7 +137,7 @@ def read_trajectory(file:str,
                 for n,cell in enumerate(strings):
                     a, b, c = [float(x) for x in cell.group(1).split()[:3]]
                     alpha, beta, gamma = [float(x) * deg2rad for x in cell.group(1).split()[3:6]]
-                    cells[n] = mt.abc2h(a, b, c, alpha, beta, gamma)
+                    cells[n] = abc2h(a, b, c, alpha, beta, gamma)
 
             if remove_replicas:
                 if same_cell:
@@ -146,32 +177,36 @@ def read_trajectory(file:str,
     return atoms
     # return easyvectorize(Atoms)(atoms)
 
+#------------------------------------#
+def integer_to_slice_string(index):
+    if isinstance(index, int):
+        return string2index(f"{index}:{index+1}")
+    elif index is None:
+        return slice(None,None,None)
+    elif isinstance(index, str):
+        try:
+            index = string2index(index)
+        except:
+            raise ValueError("error creating slice from string {:s}".format(index))
+    elif isinstance(index, slice):
+        return index
+    else:
+        raise ValueError("`index` can be int, str, or slice, not {}".format(index))
+    
+#------------------------------------#
+class FakeList:
+    def __init__(self, value, length):
+        self.value = value
+        self.length = length
 
-class AtomicStructures(list,pickleIO):
-    """Class to handle atomic structures:
-        - read from and write to big files (using `ase`)
-        - serialization using `pickle`
-        - automatic extraction of `info` and `array` from the list of structures
-    """
-    @classmethod
-    def from_file(cls,**argv)->List[Atoms]:
-        if 'file' in argv and isinstance(argv['file'], str) and argv['file'].endswith('.pickle'):
-            return AtomicStructures.from_pickle(argv['file'])
+    def __len__(self):
+        return self.length
+
+    def __getitem__(self, index):
+        if isinstance(index, slice):
+            start, stop, step = index.indices(self.length)
+            return [self.value] * ((stop - start + step - 1) // step)
+        elif 0 <= index < self.length:
+            return self.value
         else:
-            traj = read_trajectory(**argv)
-            return cls(traj)
-    
-    def to_list(self):
-        return list(self)
-    
-    def call(self,func):
-        t = easyvectorize(Atoms)(self)
-        return t.call(func)
-
-def info(t:AtomicStructures,name:str):
-    # t = easyvectorize(Atoms)(t)
-    return t.call(lambda e:e.info[name])
-    
-def array(t:AtomicStructures,name:str):
-    # t = easyvectorize(Atoms)(t)
-    return t.call(lambda e:e.arrays[name])
+            raise IndexError("FakeList index out of range")
