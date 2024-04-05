@@ -19,7 +19,7 @@ class DipolePartialCharges(DipoleModel):
 
     def set_charges(self,charges:dict):
         if self.charges.keys() != charges.keys():
-            raise ValueError("error: different chemcical species specified")
+            raise ValueError("error: different chemical species specified")
         self.charges = charges
 
     def get_all_charges(self,structure:Atoms)->np.ndarray:
