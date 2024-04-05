@@ -258,3 +258,25 @@ def check_cell_format(cell:Union[np.ndarray,Cell]):
                 if cell[i,j] != 0:
                     return False
         return True
+    
+#---------------------------------------#
+def is_integer(num: Union[int, float, str]) -> bool:
+    """
+    Check if a given number is an integer.
+
+    Parameters:
+        num (Union[int, float, str]): The number to check, which can be an int, float, or string representation of a number.
+
+    Returns:
+        bool: True if the number is an integer, False otherwise.
+    """
+    if isinstance(num, int):
+        return True
+    elif isinstance(num, float):
+        return num.is_integer()
+    else:
+        try:
+            float_num = float(num)
+            return float_num.is_integer()
+        except ValueError:
+            return False
