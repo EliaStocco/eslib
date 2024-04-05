@@ -31,7 +31,8 @@ class DipolePartialCharges(DipoleModel):
         return np.sum(charges)
 
     def check_charge_neutrality(self,structure:Atoms)->bool:
-        if self.compute_total_charge(structure) > 1e-12:
+        tot = self.compute_total_charge(structure)
+        if np.abs(tot) > 1e-12:
             return False
         return True
     
