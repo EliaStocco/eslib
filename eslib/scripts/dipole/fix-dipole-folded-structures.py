@@ -70,7 +70,8 @@ def main(args):
     print("\n\tComputing the dipole shifts using the oxidation numbers ... ",end="")
     for n,atoms in enumerate(trajectory):
         oxn = model.get_all_charges(atoms)
-        dipole_shift = oxn @ shift[n]
+        quanta_shift = oxn @ shift[n]
+        dipole_shift = frac2cart(atoms.get_cell(),quanta_shift)
         atoms.info[args.out_dipole] = atoms.info[args.in_dipole] + dipole_shift
     print("done")
 
