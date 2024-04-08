@@ -19,6 +19,6 @@ def fold(trajectory:AtomicStructures)->Tuple[AtomicStructures,np.ndarray]:
         if np.any( [ not is_integer(i) for i in shift[n].flatten()] ):
             raise ValueError("coding error")
         positions = frac2cart(atoms.get_cell(),folded_positions)
-        atoms.positions = positions
+        folded[n].positions = positions
 
     return folded, np.asarray(shift)
