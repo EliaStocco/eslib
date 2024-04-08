@@ -41,7 +41,8 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i", "--input"    , **argv, type=str, help="extxyz file with the atomic configurations [a.u]")
-    parser.add_argument("-k", "--keyword"  , **argv, type=str, help="keyword related to dipole to be fixed in the extxyz file (default: 'dipole')", default='dipole')
+    parser.add_argument("-id", "--in_dipole"  , **argv, type=str, help="name of the input dipoles(default: 'dipole')", default='dipole')
+    parser.add_argument("-od", "--out_dipole"  , **argv, type=str, help="name of the output dipoles(default: 'dipole')", default='dipole')
     parser.add_argument("-m", "--model"    , **argv, type=str, help="pickle file with the dipole linear model (default: 'DipoleModel.pickle')", default='DipoleModel.pickle')
     parser.add_argument("-o", "--output"   , **argv, type=str, help="output file with the fixed trajectory (default: 'trajectory.fixed.extxyz')", default="trajectory.fixed.extxyz")
     parser.add_argument("-f", "--folder"   , **argv, type=str, help="output folder with additional output files (default: None)", default=None)
@@ -60,8 +61,8 @@ def main(args):
 
     #------------------#
     # dipole
-    print("\tExtracting '{:s}' from the provided atomic structures ... ".format(args.keyword), end="")
-    dft = info(trajectory,args.keyword)
+    print("\tExtracting '{:s}' from the provided atomic structures ... ".format(args.in_dipole), end="")
+    dft = info(trajectory,args.in_dipole)
     print("done")
 
     # #---------------------------------------#
@@ -188,9 +189,9 @@ def main(args):
 
     #------------------#
     # set info
-    print("\tAdding fixed dipole as info 'dipole' and quanta as 'quanta' to atomic structures ... ", end="")
+    print("\tAdding fixed dipole as info '{:s}' and quanta as 'quanta' to atomic structures ... ".format(args.out_dipole), end="")
     for n in range(N):
-        trajectory[n].info["dipole"] = fixed_dipole[n,:]
+        trajectory[n].info[args.out_dipole] = fixed_dipole[n,:]
         _quanta = cart2frac(cell=trajectory[n].get_cell(),v=fixed_dipole[n,:])
         trajectory[n].info["quanta"] = _quanta.flatten()
     print("done")
