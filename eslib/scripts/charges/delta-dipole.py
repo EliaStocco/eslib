@@ -61,7 +61,7 @@ def main(args):
     for n,structure in enumerate(atoms):
         if not model.check_charge_neutrality(structure):
             raise ValueError("structure . {:d} is not charge neutral".format(n))
-        pc = model.get([structure])
+        pc = model.get([structure])[0]
         dipole = structure.info[args.in_dipole]
         structure.info[args.out_dipole] = dipole - pc
     print("done")
