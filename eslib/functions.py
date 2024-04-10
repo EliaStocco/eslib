@@ -15,6 +15,7 @@ import re
 import os
 from io import TextIOWrapper
 from itertools import product
+from copy import copy
 
 # import fnmatch
 import contextlib
@@ -544,10 +545,11 @@ class Dict2Obj(object):
 
 
 def args_to_dict(args):
-    if isinstance(args, dict):
-        return args
+    tmp = copy(args)
+    if isinstance(tmp, dict):
+        return tmp
     else:
-        return vars(args)
+        return vars(tmp)
 
 
 def get_attributes(obj):
