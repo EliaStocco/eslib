@@ -74,3 +74,22 @@ def main(args):
 #---------------------------------------#
 if __name__ == "__main__":
     main()
+
+# { 
+#     // Use IntelliSense to learn about possible attributes.
+#     // Hover to view descriptions of existing attributes.
+#     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+#     "version": "0.2.0",
+#     "configurations": [
+#         {
+#             "name": "Python: Current File",
+#             "type": "debugpy",
+#             "request": "launch",
+#             "program": "/home/stoccoel/google-personal/codes/eslib/eslib/scripts/charges/delta-dipole.py",
+#             "cwd" : "/home/stoccoel/google-personal/works/delta-dipole/",
+#             "console": "integratedTerminal",
+#             "args" : ["-i", "unfolded.fixed.extxyz","-o","unfolded.delta.extxyz","-c","charges.json"],
+#             "justMyCode": true,
+#         }
+#     ]
+# }
