@@ -2,6 +2,7 @@ import xarray as xr
 import numpy as np
 from .io import pickleIO
 from typing import Union
+from eslib.formatting import float_format
 class bec(xr.DataArray,pickleIO):
     __slots__ = ('_data', '_dtype', '_file', '_other_attribute')  # Add any additional attributes you may have
 
@@ -25,6 +26,46 @@ class bec(xr.DataArray,pickleIO):
                 array = np.load(file)
         array = array.reshape((-1,3*natoms,3))
         return cls.from_numpy(array)
+    
+    def to_file(self,file:str):
+        if file.endswith("pickle"):
+            self.to_pickle(file)
+        elif file.endswith("txt"):
+            with open(file,"w") as ffile:
+                for n,Z in enumerate(self):
+                    x = np.asarray(Z)
+                    header = "structure {:d}".format(n)
+                    np.savetxt(ffile, x, fmt=float_format,header=header)
+        else:
+            raise ValueError("not implemented yet for file '{:s}'".format(file))
+        
+    def summary(self):
+        structure_mean = self.mean("structure")
+        # structure_atoms_mean = structure_mean
+        output = {
+            "structure-mean" : structure_mean.to_numpy().tolist(),
+            # "structure-atoms-mean" : list(structure_atoms_mean),
+        }
+        return output
+
+    @classmethod
+    def from_components(cls,Zx:np.ndarray,Zy:np.ndarray,Zz:np.ndarray):
+        if Zx.shape != Zy.shape or Zx.shape != Zz.shape:
+            raise ValueError("Zx, Zy, and Zz must have the same shape")
+        Nstructures = Zx.shape[0]
+        Ndof = 3*Zx.shape[1]
+        array = np.zeros((Nstructures,Ndof,3))
+        #
+        Zx = Zx.reshape((Nstructures,-1))
+        Zy = Zy.reshape((Nstructures,-1))
+        Zz = Zz.reshape((Nstructures,-1))
+        # 
+        array[:,:,0] = Zx
+        array[:,:,1] = Zy
+        array[:,:,2] = Zz
+        #
+        obj = xr.DataArray(array.copy(), dims=('structure', 'dof', 'dir'))
+        return cls(obj)
 
     @classmethod
     def from_numpy(cls,array:np.ndarray):
@@ -53,7 +94,7 @@ class bec(xr.DataArray,pickleIO):
 
     @property
     def natoms(self)->int:
-        return self.shape[1]/3
+        return int(self.shape[1]/3)
 
     def norm2(self,reference:Union[xr.DataArray,np.ndarray]):
         """Computes the norm squared per atom of the difference w.r.t. a reference BEC."""
@@ -68,14 +109,29 @@ class bec(xr.DataArray,pickleIO):
     
     def check_asr(self,index:int=None):
         """Check whether a specific BEC satisfies the Acoustic Sum Rule."""
+        tmp = self.expand_with_atoms()
         if index is not None:
-            array = self.isel(structure=index)
-            return np.allclose(array.sum(dim='dof'),np.zeros(3))
+            array = tmp.isel(structure=index)
+            return np.allclose(array.sum(dim='atom'),np.zeros((3,3)))
         else:
-            return np.asarray([ self.isel(structure=i) for i in range(self.shape[0]) ])
+            return np.asarray([ tmp.isel(structure=i) for i in range(tmp.shape[0]) ])
+    
+    # def check_asr(self,index:int=None):
+    #     """Check whether a specific BEC satisfies the Acoustic Sum Rule."""
+    #     if index is not None:
+    #         array = self.isel(structure=index)
+    #         return np.allclose(array.sum(dim='dof'),np.zeros(3))
+    #     else:
+    #         return np.asarray([ self.isel(structure=i) for i in range(self.shape[0]) ])
         
     def force_asr(self,index:int=None):
         """Enforce the Acoustic Sum Rule."""
         mean = self.mean(dim="dof")
         self = self-mean
         return mean
+    
+    def expand_with_atoms(self):
+        array = self.to_numpy()
+        array = array.reshape((array.shape[0],int(array.shape[1]/3),3,3))
+        obj = xr.DataArray(array.copy(), dims=('structure', 'atom', 'xyz', 'dir'))
+        return bec(obj)
