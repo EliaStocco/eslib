@@ -12,6 +12,8 @@ from typing import List, Union, Type, TypeVar
 
 T = TypeVar('T', bound='AtomicStructures')
 
+astype = List[Atoms]
+
 deg2rad     = np.pi / 180.0
 abcABC      = re.compile(r"CELL[\(\[\{]abcABC[\)\]\}]: ([-+0-9\.Ee ]*)\s*")
 abcABCunits = re.compile(r'\{([^}]+)\}')
@@ -55,7 +57,7 @@ class AtomicStructures(List[Atoms], pickleIO):
         - automatic extraction of `info` and `array` from the list of structures
     """
     @classmethod
-    def from_file(cls, **argv) -> T:
+    def from_file(cls, **argv):
         if 'file' in argv and isinstance(argv['file'], str) and argv['file'].endswith('.pickle'):
             return cls.from_pickle(argv['file'])
         else:
@@ -74,6 +76,66 @@ class AtomicStructures(List[Atoms], pickleIO):
     def call(self: T, func) -> np.ndarray:
         t = easyvectorize(Atoms)(self)
         return t.call(func)
+    
+    def get_info(self:T,name:str,default:np.ndarray=None)->np.ndarray:
+        output = None
+        def set_output(output,n,value):
+            if output is None:
+                output = np.zeros((len(self),*value.shape))
+            output[n] = np.asarray(value)
+            return output
+            
+        for n,structure in enumerate(self):
+            if name not in structure.info:
+                if default is None:
+                    raise ValueError("structure n. {:n} does not have '{:s}' in `info`".format(n,name))
+                else:
+                    output = set_output(output,n,default)
+            else:
+                output = set_output(output,n,structure.info[name])
+        return output
+    
+    def get_array(self:T,name:str,default:np.ndarray=None)->np.ndarray:
+        output = None
+        def set_output(output,n,value):
+            if output is None:
+                output = np.zeros((len(self),*value.shape))
+            output[n] = np.asarray(value)
+            return output
+            
+        for n,structure in enumerate(self):
+            if name not in structure.arrays:
+                if default is None:
+                    raise ValueError("structure n. {:n} does not have '{:s}' in `arrays`".format(n,name))
+                else:
+                    output = set_output(output,n,default)
+            else:
+                output = set_output(output,n,structure.arrays[name])
+        return output
+
+    def is_there(self:T,name:str,_all:bool=True,where:str=None)->np.ndarray:
+        if where is None:
+            booleans = [ name in s.info or name in s.arrays for s in self ]
+        elif where in ["i","info"]:
+            booleans = [ name in s.info for s in self ]
+        elif where in ["a","array","arrays"]:
+            booleans = [ name in s.arrays for s in self ]
+        else:
+            raise ValueError("`where` can be only None, ['i', 'info'], or ['a', 'array', 'arrays'] ")
+        return np.all(booleans) if _all else np.any(booleans)
+    
+    def subsample(self:T, indices: List[int]) -> T:
+        """
+        Subsample the AtomicStructures object using the provided indices.
+
+        Parameters:
+        - indices: A list of integers specifying the indices to keep.
+
+        Returns:
+        - AtomicStructures: A new AtomicStructures object containing the subsampled structures.
+        """
+        subsampled_structures = AtomicStructures([self[i] for i in indices])
+        return subsampled_structures
     
 #------------------------------------#
 
@@ -129,7 +191,8 @@ def read_trajectory(file:str,
             else:
                 comments = read_comments_xyz(ffile,index) #,Nread=len(atoms),snapshot_slice=index)
                 if len(comments) != len(atoms):
-                    raise ValueError("coding error: found comments different from atomic structures.")
+                    raise ValueError("coding error: found comments different from atomic structures: {:d} comments != {:d} atoms (using index {})."\
+                                     .format(len(comments),len(atoms),index))
 
             if pbc:
                 strings = [ abcABC.search(comment) for comment in comments ]
@@ -161,15 +224,17 @@ def read_trajectory(file:str,
             #         "positions" : matches[0],
             #         "cell" : matches[1]
             #     }
-            if pbc:
-                for a in atoms:
-                    a.set_cell(cells[n].T)
-                    # a.set_pbc(True)
-
-        if pbc:
+            
             for a in atoms:
-                # atoms[n].set_cell(cells[n].T)
-                a.set_pbc(True)
+                a.set_cell(cells[n].T if pbc else None)
+                a.set_pbc(pbc)
+
+        # if pbc:
+        for a in atoms:
+            # atoms[n].set_cell(cells[n].T)
+            a.set_pbc(pbc)
+            if not pbc:
+                a.set_cell(None)
 
 
             # except:
@@ -185,7 +250,7 @@ def integer_to_slice_string(index):
         return slice(None,None,None)
     elif isinstance(index, str):
         try:
-            index = string2index(index)
+            return string2index(index)
         except:
             raise ValueError("error creating slice from string {:s}".format(index))
     elif isinstance(index, slice):
