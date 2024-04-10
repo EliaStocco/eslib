@@ -7,7 +7,8 @@ from sklearn.metrics import mean_squared_error, \
 # Dictionary of regression metrics
 metrics = {
     "mse"   : mean_squared_error,
-    "rmse"  : lambda x,y : np.sqrt(mean_squared_error(x,y)),
+    "rmse"  : lambda x,y,**argv : mean_squared_error(x,y,squared=False,**argv),
+    "norm"  : lambda x,y,**argv : np.linalg.norm(x-y,**argv),
     "mae"   : mean_absolute_error,
     "r2"    : r2_score,
     "ev"    : explained_variance_score,
