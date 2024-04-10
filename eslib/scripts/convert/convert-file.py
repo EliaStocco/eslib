@@ -12,6 +12,7 @@ from eslib.tools import convert
 from typing import List
 from ase import Atoms
 
+DEBUG = False
 #---------------------------------------#
 # Description of the script's purpose
 description = "Convert the format and unit of a file using 'ASE'"
@@ -71,7 +72,7 @@ def main(args):
         
     #------------------#
     print("\tReading data from input file '{:s}' ... ".format(args.input), end="")
-    with suppress_output():
+    with suppress_output(not DEBUG):
         # Try to determine the format by checking each supported format
         atoms = AtomicStructures.from_file(file=args.input,
                            format=args.input_format,
