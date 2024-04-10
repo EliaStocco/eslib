@@ -40,14 +40,14 @@ def main(args):
     frames = read(args.input, index=':', format=args.input_format)  #eV
     print("done")
 
-    print("\n\tConverting the atomic structures positions and cells from atomic unit to angstrom ... ",end="")
-    factor = convert(1,"length","atomic_unit","angstrom")
-    for n in range(len(frames)):
-        frames[n].positions *= factor
-        if np.any(frames[n].pbc):
-            cell = factor * frames[n].get_cell()
-            frames[n].set_cell(cell)
-    print("done")
+    # print("\n\tConverting the atomic structures positions and cells from atomic unit to angstrom ... ",end="")
+    # factor = convert(1,"length","atomic_unit","angstrom")
+    # for n in range(len(frames)):
+    #     frames[n].positions *= factor
+    #     if np.any(frames[n].pbc):
+    #         cell = factor * frames[n].get_cell()
+    #         frames[n].set_cell(cell)
+    # print("done")
 
     available_structure_properties = list(set([k for frame in frames for k in frame.info.keys()]))
     available_atom_level_properties = list(set([k for frame in frames for k in frame.arrays.keys()]))
