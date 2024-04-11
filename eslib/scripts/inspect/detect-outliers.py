@@ -1,14 +1,8 @@
 #!/usr/bin/env python
 import numpy as np
 import matplotlib.pyplot as plt
-from eslib.plot import plot_bisector
-from eslib.classes.dipole import DipoleModel, DipoleLinearModel
-from eslib.classes.trajectory import info
 from eslib.classes.trajectory import AtomicStructures
-from eslib.tools import cart2lattice, cart2frac, frac2cart
-from eslib.output import output_folder
-from ase.io import write
-from eslib.formatting import esfmt, everythingok, warning, error
+from eslib.formatting import esfmt
 from eslib.sklearn_metrics import metrics
 
 #---------------------------------------#
@@ -20,13 +14,14 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i" , "--input"         , **argv, type=str  , required=True , help="extxyz file with the atomic configurations [a.u]")
-    parser.add_argument("-rn", "--ref_name"      , **argv, type=str  , required=True , help="name of the reference quantity")
-    parser.add_argument("-pn", "--pred_name"     , **argv, type=str  , required=True , help="name of the predicted quantity")
-    parser.add_argument("-t" , "--threshold"     , **argv, type=float, required=False, help="RMSE threshold (default: 1e-1)", default=1e-1)   
-    parser.add_argument("-d" , "--distribution"  , **argv, type=str  , required=False, help="*.pdf file with the distribution of the RMSE values (default: 'rmse.pdf')", default='rmse.pdf')
-    parser.add_argument("-oi", "--output_indices", **argv, type=str  , required=False, help="*.txt output file with the indices of the outliers (default: None)", default=None)
-    parser.add_argument("-o" , "--output"        , **argv, type=str  , required=False, help="*.extxyz output file with the outliers atomic configurations (default: 'outliers.extxyz')", default="outliers.extxyz")
+    parser.add_argument("-i"  , "--input"              , **argv, type=str  , required=True , help="extxyz file with the atomic configurations [a.u]")
+    parser.add_argument("-rn" , "--ref_name"           , **argv, type=str  , required=True , help="name of the reference quantity")
+    parser.add_argument("-pn" , "--pred_name"          , **argv, type=str  , required=True , help="name of the predicted quantity")
+    parser.add_argument("-t"  , "--threshold"          , **argv, type=float, required=False, help="RMSE threshold (default: 1e-1)", default=1e-1)   
+    parser.add_argument("-d"  , "--distribution"       , **argv, type=str  , required=False, help="*.pdf file with the distribution of the RMSE values (default: 'rmse.pdf')", default='rmse.pdf')
+    parser.add_argument("-oi" , "--output_indices"     , **argv, type=str  , required=False, help="*.txt output file with the indices of the outliers (default: None)", default=None)
+    parser.add_argument("-ogi", "--output_good_indices", **argv, type=str  , required=False, help="*.txt output file with the indices of the non-outliers (default: None)", default=None)
+    parser.add_argument("-o"  , "--output"             , **argv, type=str  , required=False, help="*.extxyz output file with the outliers atomic configurations (default: 'outliers.extxyz')", default="outliers.extxyz")
     return parser
 
 #---------------------------------------#
@@ -117,9 +112,16 @@ def main(args):
     print("done")
 
     if args.output_indices is not None:
-        print("\tSaving outliers indices to file '{:s}' ... ".format(args.output_indices), end="")
-        np.savetxt(args.output_indices,indices)
+        print("\tSaving indices of the outlier structures to file '{:s}' ... ".format(args.output_indices), end="")
+        np.savetxt(args.output_indices,indices.astype(int))
         print("done")
+
+    if args.output_good_indices is not None:
+        print("\tSaving indices of the good structures to file '{:s}' ... ".format(args.output_good_indices), end="")
+        good_indices = np.delete(np.arange(len(rmse)), indices)
+        np.savetxt(args.output_good_indices,good_indices.astype(int))
+        print("done")
+
     
 #---------------------------------------#
 if __name__ == "__main__":
