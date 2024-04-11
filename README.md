@@ -2,18 +2,14 @@
 Elia Stocco's personal repository.
 
 # Installation
-Add this line in your `.bashrc` file.
+Using `conda`:
 ```bash
-pip install black
-pip install nbconvert
-pip install sphinx
-pip install matplotlib
+conda create -n eslib python==3.9 -y
+conda activate eslib
 conda install pytorch torchvision torchaudio -c pytorch
-CUDA=cpu
-pip install torch-scatter -f https://data.pyg.org/whl/torch-2.2.0+${CUDA}.html
-pip install torch-geometric
-pip install e3nn
+pip install torch-scatter -f https://data.pyg.org/whl/torch-2.2.0+cpu.html
 conda install anaconda::pandas
+pip install -r requirements.txt
 ```
 
 Install the package in `edit` mode with:
