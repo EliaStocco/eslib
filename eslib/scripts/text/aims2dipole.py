@@ -3,33 +3,14 @@ import re
 import numpy as np
 from eslib.tools import convert
 from eslib.input import str2bool
+from eslib.formatting import esfmt, warning
 
 #---------------------------------------#
 # Description of the script's purpose
 description = "Extract the values of the dipole from a file written by FHI-aims and convert to atomic_unit."
-warning = "***Warning***"
-error = "***Error***"
-closure = "Job done :)"
-information = "You should provide the positions as printed by i-PI."
-input_arguments = "Input arguments"
 
 #---------------------------------------#
-# colors
-try :
-    import colorama
-    from colorama import Fore, Style
-    colorama.init(autoreset=True)
-    description     = Fore.GREEN    + Style.BRIGHT + description             + Style.RESET_ALL
-    warning         = Fore.MAGENTA  + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
-    error           = Fore.RED      + Style.BRIGHT + error.replace("*","")   + Style.RESET_ALL
-    closure         = Fore.BLUE     + Style.BRIGHT + closure                 + Style.RESET_ALL
-    information     = Fore.YELLOW   + Style.NORMAL + information             + Style.RESET_ALL
-    input_arguments = Fore.GREEN    + Style.NORMAL + input_arguments         + Style.RESET_ALL
-except:
-    pass
-
-#---------------------------------------#
-def prepare_args():
+def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
@@ -40,19 +21,8 @@ def prepare_args():
     return parser# .parse_args()
 
 #---------------------------------------#
-def main():
-
-    #------------------#
-    # Parse the command-line arguments
-    args = prepare_args()
-
-    # Print the script's description
-    print("\n\t{:s}".format(description))
-
-    print("\n\t{:s}:".format(input_arguments))
-    for k in args.__dict__.keys():
-        print("\t{:>20s}:".format(k),getattr(args,k))
-    print()
+@esfmt(prepare_args,description)
+def main(args):
 
     #------------------#
     # Open the input file for reading and the output file for writing
@@ -95,13 +65,11 @@ def main():
     if args.remove_replicas:
         dipoles = [dipoles[index] for index in indices]
 
+    print("\n\tWriting dipoles to file '{:s}' ... ".format(args.output),end="")
     with open(args.output, 'w') as output_file:
         dipoles = np.asarray(dipoles).reshape(-1,3)
         np.savetxt(output_file,factor*dipoles,fmt=args.output_format)
-
-    #------------------#
-    # Script completion message
-    print("\n\t{:s}\n".format(closure))
+    print("done")
 
 #---------------------------------------#
 if __name__ == "__main__":
