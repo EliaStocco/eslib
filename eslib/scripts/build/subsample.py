@@ -5,13 +5,14 @@ import numpy as np
 from ase.io import write, read
 from typing import Union, List
 from eslib.input import union_type
+from eslib.formatting import esfmt
 
 
 # Description of the script's purpose
 description = "Subsample an (ASE readable) MD trajectory given a set of indices."
 
 
-def prepare_args():
+def prepare_args(description):
 
     # Define the command-line argument parser with a description
     parser = argparse.ArgumentParser(description=description)
@@ -35,13 +36,9 @@ def prepare_args():
 
     return parser# .parse_args()
 
-def main():
+@esfmt(prepare_args,description)
+def main(args):
    
-    args = prepare_args()
-
-    # Print the script's description
-    print("\n\t{:s}".format(description))
-
     print("\tReading atomic structures from file '{:s}' using the 'ase.io.read' with format '{:s}' ... ".format(args.input,args.format), end="")
     atoms = read(args.input,format=args.format,index=":")
     print("done")
@@ -72,9 +69,6 @@ def main():
         print("done")
     except Exception as e:
         print(f"\n\tError: {e}")
-
-    # Script completion message
-    print("\n\tJob done :)\n")
 
 if __name__ == "__main__":
     main()
