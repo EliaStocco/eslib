@@ -12,6 +12,7 @@ matplotlib
 numpy
 Pint
 scikit-learn
+skmatter
 scipy
 spglib
 tqdm

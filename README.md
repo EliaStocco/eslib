@@ -4,12 +4,16 @@ Elia Stocco's personal repository.
 # Installation
 Using `conda`:
 ```bash
+# create a conda environment
 conda create -n eslib python==3.9 -y
 conda activate eslib
-conda install pytorch torchvision torchaudio -c pytorch
+# install packages
+conda install pytorch torchvision torchaudio -c pytorch -y
 pip install torch-scatter -f https://data.pyg.org/whl/torch-2.2.0+cpu.html
-conda install anaconda::pandas
+conda install anaconda::pandas -y
 pip install -r requirements.txt
+# optional
+pytest 
 ```
 
 Install the package in `edit` mode with:
