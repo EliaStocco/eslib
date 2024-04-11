@@ -80,8 +80,8 @@ def main(args):
     print("done")
 
     #------------------#
-    print("\tCheck the distances w.r.t. the reference configuration ... ", end="")
     if isinstance(model,DipoleLinearModel): 
+        print("\tCheck the distances w.r.t. the reference configuration ... ", end="")
         indices = model.control_periodicity(list(trajectory))
         print("done")
         if indices is None or len(indices) == 0:
