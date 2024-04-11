@@ -3,6 +3,10 @@ import numpy as np
 from .io import pickleIO
 from typing import Union
 from eslib.formatting import float_format
+import warnings
+# Filter out the warning by category and message
+warnings.filterwarnings("ignore", category=FutureWarning, message="xarray subclass bec should explicitly define __slots__")
+
 class bec(xr.DataArray,pickleIO):
     __slots__ = ('_data', '_dtype', '_file', '_other_attribute')  # Add any additional attributes you may have
 
