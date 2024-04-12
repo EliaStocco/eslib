@@ -1,88 +1,12 @@
-from .io import pickleIO
 from dataclasses import dataclass, field
-import numpy as np
 from ase import Atoms
+from typing import List
+import numpy as np
 from eslib.tools import convert
-from typing import List, Dict, Union
-from eslib.tools import cart2frac
 from eslib.physics import compute_dipole_quanta
 from copy import copy
-from collections import Counter
-from mace.calculators import MACEliaCalculator
-
-class DipoleModel(pickleIO):
-    def get(self,traj:List[Atoms],**argv):
-        pass
-@dataclass
-class DipolePartialCharges(DipoleModel):
-
-    charges: Dict[str,float]
-
-    def set_charges(self,charges:dict):
-        if self.charges.keys() != charges.keys():
-            raise ValueError("error: different chemical species specified")
-        self.charges = charges
-
-    def get_all_charges(self,structure:Atoms)->np.ndarray:
-        charges = [ self.charges[s] for s in structure.get_chemical_symbols() ]
-        return np.asarray(charges)
-
-    def compute_total_charge(self,structure:Atoms)->float:
-        charges = self.get_all_charges(structure)
-        return np.sum(charges)
-
-    def check_charge_neutrality(self,structure:Atoms)->bool:
-        tot = self.compute_total_charge(structure)
-        if np.abs(tot) > 1e-12:
-            return False
-        return True
-    
-    def impose_charge_neutrality(self,structure:Atoms,inplace:bool=True)->Dict[str,float]:
-        tot_charge = self.compute_total_charge(structure)
-        Natoms = structure.get_global_number_of_atoms()
-        charges = self.get_all_charges(structure)
-        charges -= tot_charge/Natoms
-
-        symbols = structure.get_chemical_symbols()
-        _, index = np.unique(symbols,return_index=True)
-
-        neutral_charges = {}
-        for s,n in zip(self.charges.keys(),index):
-            neutral_charges[s] = charges[n]
-
-        # shift = tot_charge#  / Natoms
-        # occurrence = dict(Counter(structure.get_chemical_symbols())) 
-        # neutral_charges = {}
-        # for s in self.charges.keys():
-        #     neutral_charges[s] = self.charges[s] - shift/occurrence[s]
-            
-        # test
-        test = DipolePartialCharges(neutral_charges)
-        # test.compute_total_charge(structure)
-        if not test.check_charge_neutrality(structure):
-            raise ValueError("coding error")
-        if inplace:
-            self.set_charges(neutral_charges)
-        return neutral_charges
-            
-
-
-    def get(self,traj:List[Atoms],**argv):
-        dipole = np.zeros((len(traj),3))
-        for n,structure in enumerate(traj):
-            if not self.check_charge_neutrality(structure):
-                raise ValueError("structure {:d} is not charge neutral.".format(n))
-            charges = [ self.charges[s] for s in structure.get_chemical_symbols() ]
-            Natoms = structure.get_global_number_of_atoms()
-            charges = np.asarray(charges).reshape((Natoms,1))
-            positions:np.ndarray = structure.get_positions()
-            atomic_dipoles = charges * positions
-            dipole[n] = atomic_dipoles.sum(axis=0)
-            # # little test
-            # test  = ( charges * ( positions + np.random.rand(3) )).sum(axis=0)
-            # if not np.allclose(test,dipole[n]):
-            #     raise ValueError("coding error")
-        return dipole
+from eslib.tools import cart2frac
+from eslib.classes.dipole.DipoleModel import DipoleModel
 
 @dataclass
 class DipoleLinearModel(DipoleModel):
@@ -209,46 +133,3 @@ class DipoleLinearModel(DipoleModel):
     def get_reference(self):
         return self.ref.copy()
     
-from mace.tools import torch_geometric, torch_tools
-from mace.cli.elia_configs import make_dataloader
-from mace.modules.models import get_model
-@dataclass
-class DipoleMACECalculator(DipoleModel):
-    default_dtype: str
-    device: str
-    model: str
-    model_type: str
-    batch_size: int
-    charges_key: str
-
-    def __post_init__(self):
-        self.initialize()
-
-    def initialize(self):        
-        torch_tools.set_default_dtype(self.default_dtype)
-        self.device = torch_tools.init_device([self.device])
-        self.network = get_model(model_path=self.model,
-                               model_type=self.model_type,
-                               device=self.device)
-        self.network = self.network.to(self.device)  # shouldn't be necessary but seems to help with CUDA problems
-        for param in self.network.parameters():
-            param.requires_grad = False
-        
-    def get(self,traj:List[Atoms],**argv):
-        self.initialize()
-        data_loader:torch_geometric.dataloader.DataLoader = \
-            make_dataloader(atoms_list=traj,
-                            model=self.network,
-                            batch_size=self.batch_size,
-                            charges_key=self.charges_key)
-        k = 0
-        dipoles = np.zeros((len(traj),3))
-        for batch in data_loader:
-            batch = batch.to(self.device)
-            output:dict = self.network(batch.to_dict(), compute_stress=False)
-            output = output["dipole"]
-            N = len(output)
-            dipoles[k:k+N] = torch_tools.to_numpy(output)
-            k += N 
-
-        return dipoles
