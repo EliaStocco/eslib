@@ -10,7 +10,7 @@ class pickleIO:
             with open(file, 'wb') as f:
                 pickle.dump(self, f)
         except Exception as e:
-            print(f"Error saving to pickle file: {e}")
+            raise ValueError(f"Error saving to pickle file: {e}")
 
     @classmethod
     def from_pickle(cls: Type[T], file_path: str) -> T:

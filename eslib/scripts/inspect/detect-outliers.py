@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.sklearn_metrics import metrics
+from eslib.plot import histogram
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -23,37 +24,6 @@ def prepare_args(description):
     parser.add_argument("-ogi", "--output_good_indices", **argv, type=str  , required=False, help="*.txt output file with the indices of the non-outliers (default: None)", default=None)
     parser.add_argument("-o"  , "--output"             , **argv, type=str  , required=False, help="*.extxyz output file with the outliers atomic configurations (default: 'outliers.extxyz')", default="outliers.extxyz")
     return parser
-
-#---------------------------------------#
-def histogram(data,file):
-    # Generate some random data
-
-    # Freedman-Diaconis rule for bin width
-    iqr = np.percentile(data, 75) - np.percentile(data, 25)
-    bin_width = 2 * iqr / (len(data) ** (1/3))
-    num_bins_fd = int(np.ceil((data.max() - data.min()) / bin_width))
-
-    # Scott's rule for bin width
-    # bin_width_scott = 3.5 * np.std(data) / (len(data) ** (1/3))
-    # num_bins_scott = int(np.ceil((data.max() - data.min()) / bin_width_scott))
-
-    # Plot histograms with automatic bin selection
-    plt.figure(figsize=(10, 5))
-
-    # plt.subplot(1, 2, 1)
-    plt.hist(data, bins=num_bins_fd, edgecolor='black')
-    plt.title('Histogram (Freedman-Diaconis)')
-    plt.xlabel('Value')
-    plt.ylabel('Frequency')
-
-    # plt.subplot(1, 2, 2)
-    # plt.hist(data, bins=num_bins_scott, edgecolor='black')
-    # plt.title("Histogram (Scott's Rule)")
-    # plt.xlabel('Value')
-    # plt.ylabel('Frequency')
-
-    plt.tight_layout()
-    plt.savefig(file)
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

@@ -4,8 +4,9 @@ from ase.cell import Cell
 from ase.geometry import distance
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
-from typing import Union
+from typing import Union, Dict, List
 from eslib.ipi_units import unit_to_internal, unit_to_user
+from copy import copy
 
 #---------------------------------------#
 def find_transformation(A: Atoms, B: Atoms):
@@ -280,3 +281,101 @@ def is_integer(num: Union[int, float, str]) -> bool:
             return float_num.is_integer()
         except ValueError:
             return False
+        
+# #---------------------------------------#
+# def add_info_array(traj:List[Atoms],props:Dict[str,np.ndarray],shapes)->List[Atoms]:
+#     new_traj = copy(traj)
+#     # shapes = dict()
+#     N = len(traj)
+#     for k,v in props.items():
+#         dtype = shapes[k][0]
+#         shape = shapes[k][1]
+#         # if 'natoms'
+#         if isinstance(shape,int):
+#             shape = (N,shape)
+#         elif isinstance(shape,tuple):
+#             shape = (N,) + shape
+#         data = np.reshape(v,shape).astype(dtype)
+
+
+#     return new_traj
+        
+#---------------------------------------#
+def reshape_info_array(traj:List[Atoms],props:Dict[str,np.ndarray],shapes)->Dict[str,np.ndarray]:
+
+    Nconf  = len(traj)
+    Natoms = traj[0].get_global_number_of_atoms()
+    # print("N conf.  : {:d}".format(Nconf))
+    # print("N atoms. : {:d}".format(Natoms))
+    whereto = {}
+    for k in props.keys():
+        # print("reshaping '{:s}' from {}".format(k,data[k].shape),end="")
+        if isinstance(shapes[k][1],int) or len(shapes[k][1]) == 1 :
+            # info
+            whereto[k] = "info"
+        elif 'natoms' in shapes[k][1]:
+            # arrays
+            whereto[k] = "arrays"
+        else:
+            raise ValueError("coding error")
+        
+    for k in props.keys():    
+        # print("reshaping '{:s}' from {}".format(k,props[k].shape),end="")
+        if whereto[k] == "info":
+            props[k] = props[k].reshape((Nconf,-1))
+        elif whereto[k] == "arrays":
+            props[k] = props[k].reshape((Nconf,Natoms,-1))
+        else:
+            raise ValueError("`whereto[{k}]` can be either `info` or `arrays`.")
+        # print(" to {}".format(props[k].shape))
+    
+    return props, whereto
+
+#---------------------------------------#
+def add_info_array(traj:List[Atoms],props:Dict[str,np.ndarray],shapes)->List[Atoms]:
+
+    new_traj = copy(traj)
+
+    props, whereto = reshape_info_array(traj,props,shapes)
+    
+    # # data:Dict[str,np.ndarray] = {}
+    # # for k in props.keys():
+    # #     data[k] = np.concatenate(props[k], axis=0)
+
+    # Nconf  = len(traj)
+    # Natoms = traj[0].get_global_number_of_atoms()
+    # # print("N conf.  : {:d}".format(Nconf))
+    # # print("N atoms. : {:d}".format(Natoms))
+    # whereto = {}
+    # for k in props.keys():
+    #     # print("reshaping '{:s}' from {}".format(k,data[k].shape),end="")
+    #     if isinstance(shapes[k][1],int) or len(shapes[k][1]) == 1 :
+    #         # info
+    #         whereto[k] = "info"
+    #     elif 'natoms' in shapes[k][1]:
+    #         # arrays
+    #         whereto[k] = "arrays"
+    #     else:
+    #         raise ValueError("coding error")
+        
+    # for k in props.keys():    
+    #     # print("reshaping '{:s}' from {}".format(k,props[k].shape),end="")
+    #     if whereto[k] == "info":
+    #         props[k] = props[k].reshape((Nconf,-1))
+    #     elif whereto[k] == "arrays":
+    #         props[k] = props[k].reshape((Nconf,Natoms,-1))
+    #     else:
+    #         raise ValueError("`whereto[{k}]` can be either `info` or `arrays`.")
+    #     # print(" to {}".format(props[k].shape))
+
+    # Store data in atoms objects
+    for n,atoms in enumerate(new_traj):
+        atoms.calc = None  # crucial
+        for k in props.keys():
+            if whereto[k] == "info":
+                atoms.info[k] = props[k][n]
+            elif whereto[k] == "arrays":
+                atoms.arrays[k] = props[k][n]
+            else:
+                raise ValueError("`whereto[{k}]` can be either `info` or `arrays`.")
+    return new_traj

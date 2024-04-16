@@ -14,9 +14,9 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
-    parser.add_argument("-i", "--input"          , type=str     , **argv, required=True , help='txt input file')
-    parser.add_argument("-r", "--remove_replicas", type=str2bool, **argv, required=False, help='whether to remove replicas (default: false)', default=False)
-    parser.add_argument("-o", "--output"         , type=str     , **argv, required=False, help='output pickle file (default: None)', default=None)
+    parser.add_argument("-i" , "--input"          , type=str     , **argv, required=True , help='txt input file')
+    parser.add_argument("-rr", "--remove_replicas", type=str2bool, **argv, required=False, help='whether to remove replicas (default: false)', default=False)
+    parser.add_argument("-o" , "--output"         , type=str     , **argv, required=False, help='output pickle file (default: None)', default=None)
     return parser# .parse_args()
 
 #---------------------------------------#
@@ -59,7 +59,7 @@ def main(args):
         # remove replicas
         if args.remove_replicas:
             print("\tRemoving replicas ... ", end="")
-            allproperties = allproperties.remove_replicas(keyword="step")
+            allproperties = allproperties.remove_replicas(keyword="step",ofile="steps-without-replicas.properties.txt")
             print("done")
             print("\tNumber of snapshots : {:d}".format(len(allproperties)))
 

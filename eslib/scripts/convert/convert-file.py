@@ -12,7 +12,7 @@ from eslib.tools import convert
 from typing import List
 from ase import Atoms
 
-DEBUG = False
+DEBUG = True
 #---------------------------------------#
 # Description of the script's purpose
 description = "Convert the format and unit of a file using 'ASE'"

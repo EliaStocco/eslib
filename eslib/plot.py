@@ -98,3 +98,48 @@ def remove_empty_space(ax):
 
     # Set the x-axis limits accordingly
     ax.set_xlim(min_x, max_x)
+
+#---------------------------------------#
+def histogram(data: np.ndarray, file: str):
+    """
+    Plot histograms for each column of the input array.
+
+    Parameters:
+        data (np.ndarray): Input array of shape (N, M).
+        file (str): Output filename for the plot.
+
+    Returns:
+        None
+    """
+    if data.ndim == 1:
+        data = data.reshape((len(data),1))
+    elif data.ndim > 2:
+        data = data.reshape((len(data),-1))
+    num_columns = data.shape[1]
+    figsize = (6 * num_columns, 5)  # Adjust figsize based on the number of columns
+
+    # bin_widths = []   # Store bin widths for each column
+
+    # Plot histograms for each column
+    plt.figure(figsize=figsize)
+
+    for i in range(num_columns):
+        column_data = data[:, i]
+        
+        # Freedman-Diaconis rule for bin width
+        iqr = np.percentile(column_data, 75) - np.percentile(column_data, 25)
+        bin_width = 2 * iqr / (len(column_data) ** (1/3))
+        num_bins_fd = int(np.ceil((column_data.max() - column_data.min()) / bin_width))
+        # bin_widths.append(bin_width)
+
+        # Plot histogram for the current column
+        plt.hist(column_data, bins=num_bins_fd, edgecolor='black', alpha=0.7, label=f'Column {i}')
+
+    # Add legend and labels
+    plt.title('Histograms of Columns')
+    plt.xlabel('Value')
+    plt.ylabel('Frequency')
+    plt.legend()
+
+    plt.tight_layout()
+    plt.savefig(file)

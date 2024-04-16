@@ -208,8 +208,9 @@ def read_trajectory(file:str,
                 strings = [ step.search(comment).group(1) for comment in comments ]
                 steps = np.asarray([int(i) for i in strings],dtype=int)
                 test, indices = np.unique(steps, return_index=True)
-                if steps.shape != test.shape:
-                    print("\t{:s}: there could be replicas. Specify '-rr/--remove_replicas true' to remove them.".format(warning))
+                np.savetxt("steps-without-replicas.positions.txt",test,fmt="%d")
+                # if steps.shape != test.shape:
+                #     print("\t{:s}: there could be replicas. Specify '-rr/--remove_replicas true' to remove them.".format(warning))
                 # if len(indices) != len(steps):
                 #     pass
                 atoms = [atoms[index] for index in indices]

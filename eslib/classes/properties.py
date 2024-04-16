@@ -90,10 +90,11 @@ class properties(pickleIO):
         df["shape"] = size
         return df
     
-    def remove_replicas(self,keyword="step"):
+    def remove_replicas(self,keyword="step",ofile:str=None):
         out = copy(self)
         steps = self.properties[keyword]
-        _, indices = np.unique(steps, return_index=True)
+        usteps, indices = np.unique(steps, return_index=True)
+        if ofile is not None: np.savetxt(ofile,usteps,fmt="%d")
         for k in self.properties.keys():
             self.properties[k] = self.properties[k][indices]
         out.set_length()

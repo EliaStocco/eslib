@@ -11,7 +11,7 @@ from ase import Atoms
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Create a linar model for the dipole of a system given the Born Effective Charges of a reference configuration."
+description = "Add partial charges to atomic structures."
 
 #---------------------------------------#
 def prepare_args(description):
