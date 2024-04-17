@@ -15,12 +15,14 @@ float_format = '%24.12e' # Elia Stocco float format
 error           = "***Error***"
 warning         = "***Warning***"
 closure         = "Job done :)"
+closure_error   = "***An error occurred :(***"
 input_arguments = "Input arguments"
 everythingok    = "Everything ok!"
 
 #---------------------------------------#
 # colors
 error           = Fore.RED     + Style.BRIGHT + error.replace("*","")   + Style.RESET_ALL
+closure_error   = Fore.RED     + Style.BRIGHT + closure_error.replace("*","")   + Style.RESET_ALL
 closure         = Fore.BLUE    + Style.BRIGHT + closure                 + Style.RESET_ALL
 input_arguments = Fore.GREEN   + Style.NORMAL + input_arguments         + Style.RESET_ALL
 warning         = Fore.MAGENTA + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
@@ -98,8 +100,11 @@ def esfmt(prepare_parser:callable, description:str=None):
             print("\t{:>20s}:".format(k), getattr(args, k))
         print()
     
-    def print_end():
-        print("\n\t{:s}\n".format(closure))
+    def print_end(ok:bool):
+        if ok:
+            print("\n\t{:s}\n".format(closure))
+        else:
+            print("\n\t{:s}\n".format(closure_error))
 
         end      = datetime.now()  
         end_date = end.date().strftime("%Y-%m-%d")
@@ -150,8 +155,11 @@ def esfmt(prepare_parser:callable, description:str=None):
             # run the script
             out = main(args)
 
-            # print completion message
-            print_end()
+            if out is None or out == 0 :
+                # print completion message
+                print_end(True)
+            else:
+                print_end(False)
 
             return out
 
