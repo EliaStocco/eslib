@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import json
-from ase.io import write
 from ase import Atoms
 from eslib.classes.trajectory import AtomicStructures
 from eslib.classes.mace_model import MACEModel
@@ -55,7 +54,7 @@ def main(args):
 
     #------------------#
     print("\n\tEvaluating the MACE model ... ", end="")
-    output = model.compute(structures,args.prefix)
+    output:AtomicStructures = model.compute(structures,args.prefix)
     print("done")
 
     #------------------#
