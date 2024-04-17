@@ -6,9 +6,8 @@ import re
 # import ipi.utils.mathtools as mt
 import math
 import numpy as np
-from eslib.formatting import warning
 from eslib.classes.io import pickleIO
-from typing import List, Union, Type, TypeVar
+from typing import List, Union, TypeVar
 
 T = TypeVar('T', bound='AtomicStructures')
 
@@ -112,6 +111,12 @@ class AtomicStructures(List[Atoms], pickleIO):
             else:
                 output = set_output(output,n,structure.arrays[name])
         return output
+
+    def set_info(self:T,name:str,data:np.ndarray)->None:
+        assert len(self) == data.shape[0]
+        for n,atoms in enumerate(self):
+            atoms.info[name] = data[n]
+        pass
 
     def is_there(self:T,name:str,_all:bool=True,where:str=None)->np.ndarray:
         if where is None:
