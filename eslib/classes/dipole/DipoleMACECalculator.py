@@ -1,13 +1,8 @@
 from ase import Atoms
 from typing import List
-from dataclasses import dataclass, field
-import numpy as np
-from mace.tools import torch_geometric, torch_tools
-from mace.cli.elia_configs import make_dataloader
-from mace.modules.models import get_model
+from dataclasses import dataclass
 from eslib.classes.dipole.DipoleModel import DipoleModel
 from eslib.classes.mace_model import MACEModel
-from eslib.classes.trajectory import AtomicStructures
 
 @dataclass
 class DipoleMACECalculator(DipoleModel,MACEModel):
