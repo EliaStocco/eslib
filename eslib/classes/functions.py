@@ -19,20 +19,20 @@ def get_property_header(inputfile, N=1000, search=True):
 
                 nline = nline.split("-->")[0]
                 if "column" in nline:
-                    lenght = 1
+                    length = 1
                 else:
                     nline = nline.split("cols.")[1]
                     nline = nline.split("-")
                     a, b = int(nline[0]), int(nline[1])
-                    lenght = b - a + 1
+                    length = b - a + 1
 
                 if icol < N:
                     if not search:
-                        if lenght == 1:
+                        if length == 1:
                             names[icol] = line
                             icol += 1
                         else:
-                            for i in range(lenght):
+                            for i in range(length):
                                 names[icol] = line + "-" + str(i)
                                 icol += 1
                     else:

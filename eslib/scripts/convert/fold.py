@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-from ase.io import read, write
 import argparse
 import numpy as np
-from eslib.formatting import esfmt, error, warning
+from eslib.formatting import esfmt
+from eslib.tools import cart2frac, frac2cart
 from eslib.classes.trajectory import AtomicStructures
-from typing import List
-from ase import Atoms
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -18,7 +16,7 @@ def prepare_parser(description):
     argv = {"metavar":"\b"}
     parser.add_argument("-i"  , "--input"        ,   **argv,type=str, help="input file")
     parser.add_argument("-if" , "--input_format" ,   **argv,type=str, help="input file format (default: 'None')" , default=None)
-    parser.add_argument("-m"  , "--method"       ,   **argv,type=str, help="method (default: 'ase')", default='ase', choices=['ase','eslib'])
+    parser.add_argument("-m"  , "--method"       ,   **argv,type=str, help="method (default: 'eslib')", default='eslib', choices=['ase','eslib'])
     parser.add_argument("-o"  , "--output"       ,   **argv,type=str, help="output file")
     parser.add_argument("-of" , "--output_format",   **argv,type=str, help="output file format (default: 'None')", default=None)
     # options = parser.parse_args()
@@ -31,7 +29,7 @@ def main(args):
     #------------------#
     print("\tReading atomic structures from input file '{:s}' ... ".format(args.input), end="")
     # atoms = read(args.input,index=":",format=args.input_format)
-    atoms:List[Atoms] = AtomicStructures.from_file(file=args.input,format=args.input_format)
+    atoms:AtomicStructures = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done")
     
     #------------------#
@@ -91,8 +89,6 @@ def main(args):
             
     elif args.method == 'eslib':
 
-        from eslib.tools import cart2frac, frac2cart
-
         print("\n\tComputing fractional/scaled coordinates into the primitive cell ... ", end="")
         
         frac_positions = np.full((N,*shape),np.nan)
@@ -101,8 +97,11 @@ def main(args):
         print("done")
 
         print("\tFolding fractional/scaled coordinates ... ", end="")
+        old_frac = frac_positions.copy()
         frac_positions = np.mod(frac_positions,1)
         print("done")
+        Nfolded = np.any( (frac_positions != old_frac ).reshape((len(atoms),-1)) , axis=1).sum()
+        print("\n\tNumber of structures that have been folded: {:d}".format(Nfolded))
 
         #------------------#
         print("\tSetting unfolded fractional/scaled coordinates ... ", end="")
@@ -118,12 +117,28 @@ def main(args):
 
     #------------------#
     print("\n\tWriting unfolded structures to output file '{:s}' ... ".format(args.output), end="")
-    try:
-        write(args.output, atoms, format=args.output_format)
-        print("done")
-    except Exception as e:
-        print(f"\n\t{error}: {e}")
+    atoms.to_file(args.output,args.output_format)
+    print("done")
 
 #---------------------------------------#
 if __name__ == "__main__":
     main()
+
+# { 
+#     // Use IntelliSense to learn about possible attributes.
+#     // Hover to view descriptions of existing attributes.
+#     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+#     "version": "0.2.0",
+#     "configurations": [
+#         {
+#             "name": "Python: Current File",
+#             "type": "debugpy",
+#             "request": "launch",
+#             "program": "/home/stoccoel/google-personal/codes/eslib/eslib/scripts/dipole/eval-dipole-model.py",
+#             "cwd" : "/home/stoccoel/google-personal/works/BaTiO3/data/elia/pes/",
+#             "console": "integratedTerminal",
+#             "args" : ["-i", "Training_set.xyz", "-o", "structures.extxyz", "-of", "extxyz", "-if", "extxyz"],
+#             "justMyCode": false,
+#         }
+#     ]
+# }

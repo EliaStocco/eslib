@@ -2,31 +2,14 @@
 import numpy as np
 from ase.io import read, write
 from eslib.input import str2bool
+from eslib.formatting import esfmt, warning
 
 
 #---------------------------------------#
-description     = "Replace the cell of a structure with the cell of another one, by keeping the fractional coordinates fixed."
-warning         = "***Warning***"
-closure         = "Job done :)"
-keywords        = "It's up to you to modify the required keywords."
-input_arguments = "Input arguments"
+description = "Replace the cell of a structure with the cell of another one, by keeping the fractional coordinates fixed."
 
 #---------------------------------------#
-# colors
-try :
-    import colorama
-    from colorama import Fore, Style
-    colorama.init(autoreset=True)
-    description     = Fore.GREEN  + Style.BRIGHT + description             + Style.RESET_ALL
-    warning         = Fore.MAGENTA    + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
-    closure         = Fore.BLUE   + Style.BRIGHT + closure                 + Style.RESET_ALL
-    keywords        = Fore.YELLOW + Style.NORMAL + keywords                + Style.RESET_ALL
-    input_arguments = Fore.GREEN  + Style.NORMAL + input_arguments         + Style.RESET_ALL
-except:
-    pass
-
-#---------------------------------------#
-def prepare_parser():
+def prepare_parser(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
@@ -34,22 +17,11 @@ def prepare_parser():
     parser.add_argument("-b", "--structure_B",  type=str,**argv,help="atomic structure B with the replacing cell")
     parser.add_argument("-s", "--scale"      ,  type=str2bool,**argv,help="whether to rescale the positions", default=False)
     parser.add_argument("-o", "--output"     ,  type=str,**argv,help="output file")
-    options = parser.parse_args()
-    return options
+    return parser
 
 #---------------------------------------#
-def main():
-
-    #-------------------#
-    args = prepare_parser()
-
-    # Print the script's description
-    print("\n\t{:s}".format(description))
-    # print("done")
-    print("\n\t{:s}:".format(input_arguments))
-    for k in args.__dict__.keys():
-        print("\t{:>20s}:".format(k),getattr(args,k))
-    print()
+@esfmt(prepare_parser,description)
+def main(args):
 
     #-------------------#
     print("\tReading atomic structure A from file '{:s}' ... ".format(args.structure_A), end="")
@@ -76,6 +48,7 @@ def main():
         cell   = B.get_cell()
         # scale = np.all(A.get_pbc())
         A.set_cell(cell,scale_atoms=args.scale)
+        A.set_pbc(True)
         print("done")
 
         print("\n\tSaving the path to file '{:s}' ... ".format(args.output), end="")
@@ -84,9 +57,6 @@ def main():
         except Exception as e:
             print("\n\tError: {:s}".format(e))
         print("done")
-
-    #-------------------#
-    print("\n\t{:s}\n".format(closure))
 
 #---------------------------------------#
 if __name__ == "__main__":

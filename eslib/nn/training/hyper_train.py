@@ -48,7 +48,7 @@ def hyper_train_at_fixed_model( net:torch.nn.Module,\
         Ntot = len(all_bs)*len(all_lr)
     else :
         if len(all_bs) != len(all_lr) :
-            raise ValueError("batch sizes and learning rates should have the same lenght when 'grid'=True")
+            raise ValueError("batch sizes and learning rates should have the same length when 'grid'=True")
         hyper_pars = list(zip(all_bs, all_lr))
         Ntot = len(all_bs)
 

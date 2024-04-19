@@ -70,7 +70,7 @@ def main(args):
             print("\t{:10s}: ".format("quanta"),args.dipole)
             # dipole = lattice2cart(cell=ref.get_cell(),v=args.dipole)
             # 'args.dipole' is a 3-vectos with numbers in [0,1].
-            # The cartesian components has to be stretched depending on the lattice vectors lenght. 
+            # The cartesian components has to be stretched depending on the lattice vectors length. 
             dipole = frac2cart(cell=ref.get_cell(),v=args.dipole)
         else:
             print("\tThe provided reference configuration is not periodic: the input dipole will be interpreted as cartesian coordinates of the dipole.")

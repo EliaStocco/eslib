@@ -7,10 +7,21 @@ from .io import pickleIO
 from warnings import warn
 from eslib.units import *
 from eslib.tools import convert
+import pandas as pd
 from ase import Atoms
+from eslib.classes.trajectory import AtomicStructures
+from typing import List, Dict
 import warnings
 # Disable all UserWarnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+threshold = 1e-18
+
+def all_positive(x):
+    return np.any(np.logical_and( remove_unit(x)[0] < threshold , np.abs(remove_unit(x)[0]) > threshold ))
+
+def corrected_sqrt(x):
+    return np.sqrt(np.abs(x)) * np.sign(x)
 
 def inv(A:xr.DataArray)->xr.DataArray:
     """Calculate the inverse of a 2D ```xarray.DataArray``` using ```np.linalg.inv``` while preserving the xarray structure."""
@@ -297,7 +308,7 @@ class NormalModes(pickleIO):
         structure.set_positions(structure.get_positions()+displ.get_positions())
         return structure
 
-    def project(self,trajectory,warning="**Warning**"):       
+    def project(self,trajectory:List[Atoms],warning="**Warning**")->Dict[str,xr.DataArray]:       
 
         #-------------------#
         # reference position
@@ -305,17 +316,21 @@ class NormalModes(pickleIO):
 
         #-------------------#
         # positions -> displacements
-        q = trajectory.positions - ref.positions
+        trajectory = AtomicStructures(trajectory)
+        q:np.ndarray = trajectory.get_array("positions") - ref.get_positions()
         q = q.reshape(len(q),-1)
         q *= atomic_unit["length"]
 
         #-------------------#
         # velocities
-        try :
-            v = trajectory.call(lambda e: e.arrays["velocities"])
-            v = v.reshape(len(v),-1)
-        except:
-            warn("velocities not found, setting them to zero.")
+        if trajectory.is_there("velocities"):
+            try :
+                v = trajectory.call(lambda e: e.arrays["velocities"])
+                v = v.reshape(len(v),-1)
+            except:
+                warn("velocities not found, setting them to zero.")
+                v = np.zeros(q.shape)
+        else:
             v = np.zeros(q.shape)
 
         v *= atomic_unit["velocity"]
@@ -426,9 +441,11 @@ class NormalModes(pickleIO):
         if not check_dim(U,'[energy]'):
             raise ValueError("the potential energy has the wrong unit: ",get_unit(U))
 
-        if np.any( U < 0 ):
+        # if np.any( remove_unit(U)[0] < threshold ):
+        if not all_positive(U):
             print("\t{:s}: negative potential energies!".format(warning),end="\n\t")
-        if np.any( K < 0 ):
+        # if np.any( remove_unit(K)[0] < threshold ):
+        if not all_positive(K):
             print("\t*{:s}:negative kinetic energies!".format(warning),end="\n\t")
         
         energy = U + K
@@ -539,3 +556,47 @@ class NormalModes(pickleIO):
                 elif len(attr_value.shape) == 2:
                     setattr(self, attr_name, attr_value[:, sorted_indices])
         return
+    
+    def get_characteristic_spring_constants(self):
+        Nleft  = inv(self.mode.rename({"dof": "dof-a","mode":"mode-a"}))
+        Nright = self.mode.rename({"dof": "dof-b","mode":"mode-b"})
+        D = self.dynmat# .rename({"mode":"mode-a","mode":"mode-b"})
+        M = dot(dot(Nleft,D,"dof-a"),Nright,"dof-b")
+        dM = np.diagonal(M).real
+        return dM
+    
+    def get_characteristic_scales(self):
+        """Returns a `pandas.DataFrame` with the characteristic scales of the normal modes, intended as quantum harmonic oscillators.
+        
+        The scales depend on:
+            - `hbar`: the reduced Planck constant (`hbar`=1 in a.u.)
+            - `w`: the angular frequency of the mode
+            - `m`: the characteristic mass  of the mode
+
+        The provided scales are computed as follows:
+            - frequency: 2pi/w
+            - energy: hw
+            - time: 2pi/w
+            - length: sqrt(h/mw)
+            - spring constant: mw^2
+        """
+        hbar = 1
+        scales = pd.DataFrame(columns=["angular frequency","frequency","energy","time","mass","length","spring constant"],index=np.arange(self.Nmodes))
+        w2 = self.eigval.to_numpy()
+        w = corrected_sqrt(w2)
+        scales["angular frequency"] = w
+        scales["frequency"] = scales["angular frequency"] / (2*np.pi)
+        scales["energy"] = hbar * scales["angular frequency"]
+        scales["time"] = 1. / scales["frequency"]
+        scales["spring constant"]     = self.get_characteristic_spring_constants()
+        scales["mass"] = scales["spring constant"] / (scales["angular frequency"]**2)
+        scales["length"] = corrected_sqrt( hbar / (scales["mass"]*scales["angular frequency"]))
+        
+        return scales
+    
+    def potential_energy(self,structure:List[Atoms]):
+        """Compute the harmonic energy of list of atomic structures."""
+        results = self.project(structure)
+        # assert np.linalg.norm((results['energy'] - results['potential']).to_numpy()) < 1e-8
+        potential = results['potential'].to_numpy()
+        return potential.sum(axis=0)

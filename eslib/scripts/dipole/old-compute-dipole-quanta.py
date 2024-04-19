@@ -58,15 +58,15 @@ def main(args):
     # # for n in range(N):
     # #     cell = lattices[n].T
     # #     R = cart2lattice(lattices[n])
-    # #     lenght = np.linalg.norm(cell,axis=0)
-    # #     quanta[n,:] = R @ dipole[n] / lenght
+    # #     length = np.linalg.norm(cell,axis=0)
+    # #     quanta[n,:] = R @ dipole[n] / length
     # for n in range(N):
     #     # atoms[n].set_calculator(None)
     #     # cell = np.asarray(atoms[n].cell.array).T
-    #     # lenght[n,:] = np.linalg.norm(cell,axis=0)
+    #     # length[n,:] = np.linalg.norm(cell,axis=0)
     #     # R = cart2lattice(cell)
     #     # dipole = R @ atoms[n].info[args.name]
-    #     # phases[n,:] = dipole / lenght[n,:]
+    #     # phases[n,:] = dipole / length[n,:]
     #     quanta[n,:] = cart2frac(cell=atoms[n].get_cell(),v=atoms[n].info[args.keyword])
     print("done")
 

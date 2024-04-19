@@ -11,7 +11,7 @@ from typing import List, Union, TypeVar
 
 T = TypeVar('T', bound='AtomicStructures')
 
-astype = List[Atoms]
+AStype = List[Atoms]
 
 deg2rad     = np.pi / 180.0
 abcABC      = re.compile(r"CELL[\(\[\{]abcABC[\)\]\}]: ([-+0-9\.Ee ]*)\s*")

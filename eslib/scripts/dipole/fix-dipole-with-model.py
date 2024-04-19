@@ -126,11 +126,11 @@ def main(args):
         "LM"  : np.zeros((N,3))
     } 
     cell = trajectory[0].get_cell()#lattices[n]
-    lenght = cell.cellpar()[0:3]
+    length = cell.cellpar()[0:3]
     R = cart2lattice(cell)
     for n in range(N):       
-        quanta["DFT"][n,:] = R @ dft[n]    / lenght
-        quanta["LM"][n,:]  = R @ linear[n] / lenght
+        quanta["DFT"][n,:] = R @ dft[n]    / length
+        quanta["LM"][n,:]  = R @ linear[n] / length
     print("done")
 
     #------------------#
@@ -178,10 +178,10 @@ def main(args):
     N = len(trajectory)
     fixed_dipole = np.full((N,3),np.nan)
     cell = trajectory[0].get_cell()#lattices[n]
-    lenght = cell.cellpar()[0:3]
+    length = cell.cellpar()[0:3]
     
     # R = lattice2cart(cell)
-    # fixed_dipole = ( R @ (quanta["DFT"] -  intfactor).T ).T* lenght
+    # fixed_dipole = ( R @ (quanta["DFT"] -  intfactor).T ).T* length
     
     # The previous code lines should be the same as the following:
     fixed_dipole = frac2cart(cell=trajectory[0].get_cell(),v=(quanta["DFT"] -  intfactor))
@@ -227,7 +227,7 @@ def main(args):
 
         print("\tComputing the quanta of the fixed dipoles ... ", end="")
         R = cart2lattice(cell)
-        fixed_quanta = (R @ fixed_dipole.T).T / lenght
+        fixed_quanta = (R @ fixed_dipole.T).T / length
         print("done")
 
         file = "{:s}/quanta.fixed.txt".format(args.folder)

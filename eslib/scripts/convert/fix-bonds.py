@@ -19,7 +19,7 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , **argv, required=True , type=str  , help="file with the atomic structures")
     parser.add_argument("-if", "--input_format" , **argv, required=False, type=str  , help="input file format (default: 'None')" , default=None)
-    parser.add_argument("-rc", "--cutoff"       , **argv, required=False, type=float, help="cutoff/bond lenght(default: 3)" , default=3)
+    parser.add_argument("-rc", "--cutoff"       , **argv, required=False, type=float, help="cutoff/bond length(default: 3)" , default=3)
     parser.add_argument("-s" , "--species"      , **argv, required=True , type=slist, help="atomic species of the bonds to be fixed (default: ['O','H'])", default=['O','H'])
     parser.add_argument("-o" , "--output"       , **argv, required=True , type=str  , help="output file with the oxidation numbers (default: 'wrapped.extxyz')", default="wrapped.extxyz")
     parser.add_argument("-of", "--output_format", **argv, required=False, type=str  , help="output file format (default: None)", default=None)
@@ -31,7 +31,7 @@ def main(args):
 
     #------------------#
     if len(args.species) != 2:
-        raise ValueError("-s,--species has to be of lenght 2.")
+        raise ValueError("-s,--species has to be of length 2.")
     print("\tFixing bonds between {:s} and {:s}".format(args.species[0],args.species[1]))
     
     #------------------#

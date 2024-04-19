@@ -1,36 +1,19 @@
 #!/usr/bin/env python
-import argparse
 from eslib.classes.normal_modes import NormalModes
 from eslib.tools import convert
 from eslib.show import print_df
 import numpy as np
 import xarray as xr
 import pandas as pd
+from eslib.formatting import esfmt
 
 #---------------------------------------#
 # Description of the script's purpose
 description = "Show a summary of the information of the normal modes of a molecule."
-warning = "***Warning***"
-closure = "Job done :)"
-error = "***Error***"
-keywords = "It's up to you to modify the required keywords."
-input_arguments = "Input arguments"
+
 #---------------------------------------#
-# colors
-try :
-    import colorama
-    from colorama import Fore, Style
-    colorama.init(autoreset=True)
-    description     = Fore.GREEN  + Style.BRIGHT + description             + Style.RESET_ALL
-    warning         = Fore.MAGENTA    + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
-    closure         = Fore.BLUE   + Style.BRIGHT + closure                 + Style.RESET_ALL
-    error           = Fore.RED      + Style.BRIGHT + error.replace("*","")   + Style.RESET_ALL
-    keywords        = Fore.YELLOW + Style.NORMAL + keywords                + Style.RESET_ALL
-    input_arguments = Fore.GREEN  + Style.NORMAL + input_arguments         + Style.RESET_ALL
-except:
-    pass
-#---------------------------------------#
-def prepare_args():
+def prepare_args(description):
+    import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
     # parser.add_argument("-r" , "--reference"   , type=str  , **argv, help="ground-state atomic structure [a.u.] (default: None)", default=None)
@@ -39,19 +22,8 @@ def prepare_args():
     parser.add_argument("-o" , "--output"      , type=str, required=False, **argv, help="output file with the summary as a dataframe (default: None)", default=None)
     return parser# .parse_args()
 
-def main():
-
-    #------------------#
-    # Parse the command-line arguments
-    args = prepare_args()
-
-    # Print the script's description
-    print("\n\t{:s}".format(description))
-
-    print("\n\t{:s}:".format(input_arguments))
-    for k in args.__dict__.keys():
-        print("\t{:>20s}:".format(k),getattr(args,k))
-    print()
+@esfmt(prepare_args,description)
+def main(args):
 
     #---------------------------------------#
     print("\tReading phonon modes from file '{:s}' ... ".format(args.normal_modes), end="")
@@ -87,22 +59,19 @@ def main():
         ir["Z*x"] = np.absolute(zm.loc[0,:])
         ir["Z*y"] = np.absolute(zm.loc[1,:])
         ir["Z*z"] = np.absolute(zm.loc[2,:])
-        ir["|Z|"] = np.absolute(zm.loc[3,:])
+        ir["|Z*|"] = np.absolute(zm.loc[3,:])
 
         df = pd.concat([df,ir],axis=1)
 
         ir["w [THz]"] = df["w [THz]"]
         ir["index"]   = df['index']
-        ir = ir[ ['index',"w [THz]","Z*x","Z*y","Z*z","|Z|"] ]
+        ir = ir[ ['index',"w [THz]","Z*x","Z*y","Z*z","|Z*|"] ]
         print_df(ir)        
 
     #---------------------------------------#
     if args.output is not None:
         df.to_csv(args.output,index=False)
     
-    #---------------------------------------#
-    # Script completion message
-    print("\n\t{:s}\n".format(closure))
 
 if __name__ == "__main__":
     main()
