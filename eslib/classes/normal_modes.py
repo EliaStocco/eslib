@@ -11,6 +11,8 @@ import pandas as pd
 from ase import Atoms
 from eslib.classes.trajectory import AtomicStructures
 from typing import List, Dict
+import pint
+import os
 import warnings
 # Disable all UserWarnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -56,7 +58,8 @@ def dot(A:xr.DataArray,B:xr.DataArray,dim:str):
     _A,ua = remove_unit(A)
     _B,ub = remove_unit(B)
     out = _A.dot(_B,dim=dim)
-    return set_unit(out,ua*ub)
+    newu = ua*ub
+    return set_unit(out,newu)
 
 def norm_by(array,dim):
     tmp = np.linalg.norm(array.data,axis=array.dims.index(dim))
@@ -79,6 +82,17 @@ class NormalModes(pickleIO):
 
     # To DO :
     # - replace ref with as ase.Atoms and then initialize masses with that
+
+    def to_pickle(self, file):
+        pint.get_application_registry()
+        super().to_pickle(file)
+
+    @classmethod
+    def from_pickle(cls, file_path: str):
+        from eslib.units import ureg
+        pint.set_application_registry(ureg)
+        return super().from_pickle(file_path)
+     
 
     def __init__(self,Nmodes:int,Ndof:int=None,ref:Atoms=None):
 
@@ -122,10 +136,10 @@ class NormalModes(pickleIO):
                                     cell=ref.get_cell(),\
                                     symbols=ref.get_chemical_symbols(),\
                                     pbc=ref.get_pbc())
-            # masses  = [mass for mass in ref.get_masses() for _ in range(3)]
-            # masses  = np.asarray(masses)
-            # masses *= convert(1,"mass","dalton","atomic_unit")
-            # self.masses = xr.DataArray(masses, dims=('dof'))
+            masses  = [mass for mass in ref.get_masses() for _ in range(3)]
+            masses  = np.asarray(masses)
+            masses *= convert(1,"mass","dalton","atomic_unit")
+            self.masses = xr.DataArray(masses, dims=('dof'))
             
         
     # def __repr__(self) -> str:
@@ -137,6 +151,40 @@ class NormalModes(pickleIO):
     
     def to_dict(self)->dict:
         return nparray2list_in_dict(vars(self))
+
+    def to_folder(self,folder,prefix):
+
+        outputs = {
+            "dynmat" : {
+                "data" : self.dynmat,
+                "header" : "Dynamical Matrix"
+            },
+            "eigvec" : {
+                "data" : self.eigvec,
+                "header" : "Eigenvectors"
+            },
+            "mode" : {
+                "data" : self.mode,
+                "header" : "Normal Modes"
+            },
+            "eigval" : {
+                "data" : self.eigval,
+                "header" : "Eigenvalues"
+            }
+        }
+        for key,output in outputs.items():
+            # file = output["file"]
+            file = os.path.normpath("{:s}/{:s}.{:s}.txt".format(folder,prefix,key))
+            data:xr.DataArray = output["data"]
+            if 'mode' in data.dims and len(data.dims) == 2:
+                if data.dims[0] ==  'mode':
+                    second_dim = [dim for dim in data.dims if dim != 'mode'][0]
+                    data = data.swap_dims({second_dim: 'mode'})
+            data = remove_unit(data)[0].to_numpy()
+            header = output["header"]
+            with open(file,"w") as ffile:
+                np.savetxt(ffile,data,header=header)
+
 
     @classmethod
     def from_folder(cls,folder=None,ref=None):    
@@ -177,7 +225,7 @@ class NormalModes(pickleIO):
 
         # mode
         # self.mode[:,:] = diag_matrix(self.masses,"-1/2") @ self.eigvec
-        self.eigvec2modes()
+        self.eigvec2modes(_test=False)
 
         # proj
         # self.proj[:,:] = self.eigvec.T @ diag_matrix(self.masses,"1/2")
@@ -200,6 +248,10 @@ class NormalModes(pickleIO):
             raise ValueError("not implemented yet")
         pass
 
+    def set_modes(self,modes):
+        self.mode.values = xr.DataArray(modes, dims=('dof', 'mode'))
+        self.mode /= norm_by(self.mode,"dof")
+        
     def set_eigvec(self,band,mode="phonopy"):
         if mode == "phonopy":
             N = self.Nmodes
@@ -217,17 +269,35 @@ class NormalModes(pickleIO):
     def set_eigval(self,eigval):
         self.eigval[:] = xr.DataArray(eigval, dims=('mode'))
     
-    def eigvec2modes(self):
+    def set_force_constants(self,force_constant):
+        Msqrt = diag_matrix(self.masses,exp="-1/2")
+        MsqrtLeft  = xr.DataArray(Msqrt, dims=('dof-A','dof-a'))
+        MsqrtRight = xr.DataArray(Msqrt, dims=('dof-B','dof-b'))
+        Phi = xr.DataArray(force_constant, dims=('dof-a', 'dof-b'))
+        self.dynmat = dot(dot(MsqrtLeft,Phi,'dof-A'),MsqrtRight,'dof-B')
+        pass
+
+    def diagonalize(self):
+        dm = remove_unit(self.dynmat)[0]
+        dm = 0.50 * (dm + dm.T)
+        eigval,eigvec = np.linalg.eigh(dm)
+        self.eigvec.values = eigvec
+        self.eigval.values = eigval
+        self.eigvec2modes(_test=False)
+        self.sort()
+
+    def eigvec2modes(self,_test:bool=True):
         self.non_ortho_mode = self.eigvec.copy()
         for i in range(self.non_ortho_mode.sizes['dof']):
             index = {'dof': i}
             self.non_ortho_mode[index] = self.eigvec[index] / np.sqrt(self.masses[index])
-        test = self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof")
-        if not np.allclose(test.data,self.mode.data):
-            raise ValueError('some coding error')
+        if _test:
+            test = self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof")
+            if not np.allclose(test.data,self.mode.data):
+                raise ValueError('some coding error')
         # self.old_mode = self.mode.copy()
-        # self.mode = self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof")
-        # pass
+        self.mode = self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof")
+        pass
     
     def build_supercell_displacement(self,size,q):
 
@@ -537,7 +607,14 @@ class NormalModes(pickleIO):
     
     def Zmodes(self,Z:xr.DataArray)->xr.DataArray:
         """Compute the Born Effective Charges of each Normal Mode."""
-        dZdN = dot(Z,self.mode,dim="dof").real
+        correction = Z.data.reshape((-1,3,3)).mean(axis=0)
+        Z -= np.tile(correction,int(Z.shape[0]/3)).T
+        INV = False
+        if INV:
+            invmode = inv(self.mode)
+            dZdN = dot(Z,invmode,dim="dof").real
+        else:
+            dZdN = dot(Z,self.mode,dim="dof").real
         norm = norm_by(dZdN,"dir")
         dZdN = xr.concat([dZdN, xr.DataArray(norm, dims='mode')], dim='dir')
         return remove_unit(dZdN)[0]
@@ -600,3 +677,7 @@ class NormalModes(pickleIO):
         # assert np.linalg.norm((results['energy'] - results['potential']).to_numpy()) < 1e-8
         potential = results['potential'].to_numpy()
         return potential.sum(axis=0)
+    
+    def get(self,name):
+        data = getattr(self,name)
+        return remove_unit(data)[0].to_numpy()

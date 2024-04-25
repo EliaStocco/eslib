@@ -4,6 +4,27 @@ import numpy as np
 from copy import copy
 from eslib.tools import is_integer
 from typing import Tuple
+from typing import List
+
+def angle_between_vectors(array1: List[float], array2: List[float]) -> float:
+    """
+    Compute the angle in radians between two vectors of the same length.
+
+    Parameters:
+    array1 (List[float]): First vector.
+    array2 (List[float]): Second vector.
+
+    Returns:
+    float: Angle in radians between the two vectors.
+    """
+    dot_product = np.dot(array1, array2)
+    norm1 = np.linalg.norm(array1)
+    norm2 = np.linalg.norm(array2)
+    cosine_similarity = dot_product / (norm1 * norm2)
+    angle_radians = np.arccos(cosine_similarity)
+    return angle_radians
+
+
 
 def fold(trajectory:AtomicStructures)->Tuple[AtomicStructures,np.ndarray]:
     """Fold a trajectory onto the primitive unit cell."""

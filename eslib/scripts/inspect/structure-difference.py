@@ -10,51 +10,23 @@ from eslib.formatting import matrix2str
 from eslib.tools import find_transformation
 from eslib.input import str2bool
 from eslib.tools import sort_atoms
+from eslib.formatting import esfmt
 
 #---------------------------------------#
 description     = "Compute the difference between two atomic structures. "
-warning         = "***Warning***"
-closure         = "Job done :)"
-keywords        = "It's up to you to modify the required keywords."
-input_arguments = "Input arguments"
-divisor         = "-"*100
 
 #---------------------------------------#
-# colors
-try :
-    import colorama
-    from colorama import Fore, Style
-    colorama.init(autoreset=True)
-    description     = Fore.GREEN  + Style.BRIGHT + description             + Style.RESET_ALL
-    warning         = Fore.MAGENTA    + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
-    closure         = Fore.BLUE   + Style.BRIGHT + closure                 + Style.RESET_ALL
-    keywords        = Fore.YELLOW + Style.NORMAL + keywords                + Style.RESET_ALL
-    input_arguments = Fore.GREEN  + Style.NORMAL + input_arguments         + Style.RESET_ALL
-    divisor         = Fore.CYAN   + Style.NORMAL + divisor         + Style.RESET_ALL
-except:
-    pass
-    
-#---------------------------------------#
-def prepare_parser():
+def prepare_parser(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
     parser.add_argument("-a", "--structure_A",  type=str    ,**argv,help="atomic structure A [au]")
     parser.add_argument("-b", "--structure_B",  type=str     ,**argv,help="atomic structure B [au]")
     parser.add_argument("-s", "--sort"       ,  type=str2bool,**argv,help="whether to sort the second structure (dafault: false)", default=False)
-    return parser# .parse_args()
+    return parser
 
 #---------------------------------------#
-def main():
-
-    #-------------------#
-    args = prepare_parser()
-
-    # Print the script's description
-    print("\n\t{:s}".format(description))
-    # print("done")
-    print("\n\t{:s}:".format(input_arguments))
-    for k in args.__dict__.keys():
-        print("\t{:>20s}:".format(k),getattr(args,k))
+@esfmt(prepare_parser,description)
+def main(args):
 
     #-------------------#
     print("\tReading atomic structure A from file '{:s}' ... ".format(args.structure_A), end="")
@@ -103,10 +75,8 @@ def main():
         #M = np.concatenate(A.positions - B.positions],
     line = matrix2str(M,digits=3,col_names=col_names,cols_align="^",width=8,row_names=A.get_chemical_symbols())
     print(line)
-    
-    #-------------------#
-    print("\n\t{:s}\n".format(closure))
-    return
+
+    return 0
 
 if __name__ == "__main__":
     main()

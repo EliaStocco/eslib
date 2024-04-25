@@ -6,6 +6,7 @@ import numpy as np
 __all__ = ["atomic_unit","ureg","remove_unit","set_unit","get_unit","check_dim"]
 
 ureg = pint.UnitRegistry()
+pint.set_application_registry(ureg)
 
 atomic_unit = {
     "energy"        : ureg.hartree , # if use_pint else 1,

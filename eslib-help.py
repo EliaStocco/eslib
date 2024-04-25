@@ -90,8 +90,9 @@ def extract_description_from_files(filepaths):
 def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-f", "--folders"     , **argv, type=slist   , help="folders to search for Python files in", default=None)
-    parser.add_argument("-d", "--descriptions", **argv, type=str2bool, help="whether to print descriptions", default=True)
+    parser.add_argument("-f", "--folders"     , **argv,type=slist   , help="folders to search for Python files in (default: None)", default=None)
+    parser.add_argument("-s", "--show_folders"     , action='store_true', help="show folders only")
+    parser.add_argument("-d", "--descriptions", **argv, type=str2bool, help="whether to print descriptions (default: true)", default=True)
     return parser# .parse_args()
 
 @esfmt(prepare_args,description)
@@ -129,15 +130,16 @@ def main(args):
     for folder, file_descriptions in folder_dict.items():
         # Print the folder name in bold blue
         print("\t{:s}{:s}:{:s}".format(BOLD_BLUE, folder, RESET))
-        max_filename_length = max(len(filename) for filename, _ in file_descriptions)
-        for filename, description in file_descriptions:
-            if args.descriptions:
-                # Only print the filename
-                print("\t - {:s}{:{}s}{:s}: {:s}".format(GREEN, filename, max_filename_length + 1, RESET, description if description else "No description found"))
-            else:
-                # Print filename and description
-                print("\t - {:s}{:s}{:s}".format(GREEN, filename, RESET))
-        print()
+        if not args.show_folders:
+            max_filename_length = max(len(filename) for filename, _ in file_descriptions)
+            for filename, description in file_descriptions:
+                if args.descriptions:
+                    # Only print the filename
+                    print("\t - {:s}{:{}s}{:s}: {:s}".format(GREEN, filename, max_filename_length + 1, RESET, description if description else "No description found"))
+                else:
+                    # Print filename and description
+                    print("\t - {:s}{:s}{:s}".format(GREEN, filename, RESET))
+            print()
 
 
 if __name__ == "__main__":

@@ -70,8 +70,30 @@ def main(args):
 
     #---------------------------------------#
     if args.output is not None:
+        print("\n\tWriting summary to file '{:s}' ... ".format(args.output), end="")
         df.to_csv(args.output,index=False)
-    
+        print("done")
 
 if __name__ == "__main__":
     main()
+
+
+# { 
+#     // Use IntelliSense to learn about possible attributes.
+#     // Hover to view descriptions of existing attributes.
+#     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+#     "version": "0.2.0",
+#     "configurations": [
+#         {
+#             "name": "Python: Current File",
+#             "type": "debugpy",
+#             "request": "launch",
+#             "program": "/home/stoccoel/google-personal/codes/eslib/eslib/scripts/modes/vibrational-summary.py",
+#             "cwd" : "/home/stoccoel/google-personal/works/LiNbO3-primitive",
+#             "console": "integratedTerminal",
+#             //"args" : ["-p", "i-pi.positions_0.xyz", "-f", "i-pi.forces_0.xyz","-s","0.001"],
+#             "args" : ["-nm","vibrations.pickle","-z","bec.txt"],
+#             "justMyCode": false,
+#         }
+#     ]
+# }

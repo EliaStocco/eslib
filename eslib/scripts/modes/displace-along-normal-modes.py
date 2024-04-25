@@ -14,6 +14,12 @@ from itertools import product
 from eslib.classes.trajectory import AtomicStructures
 
 #---------------------------------------#
+# example of file for --displacements
+# mode, start, end,  N
+#    8,    -1,   1, 20
+#   80,    -1,   1, 20
+
+#---------------------------------------#
 # Description of the script's purpose
 description = "Displace an atomic structure along a normal mode with different amplitudes."
 
@@ -39,8 +45,8 @@ def main(args):
     nm = NormalModes.from_pickle(args.normal_modes)
     print("done")
 
-    # if args.relative:
-    scales = nm.get_characteristic_scales()
+    if args.relative:
+        scales = nm.get_characteristic_scales()
     
     #---------------------------------------#
     # read reference atomic structure
@@ -65,8 +71,8 @@ def main(args):
     print("\tPreparing displacement along single modes:")
     lists = [None]*len(instructions)
     for n,row in instructions.iterrows():
-        print("\t\tmode {:3d}: ".format(row['mode']),end="")
-        lists[n]= np.linspace(row['start'],row['end'],row['N']+1,endpoint=True)
+        print("\t\tmode {:3d}: ".format(int(row['mode'])),end="")
+        lists[n]= np.linspace(row['start'],row['end'],int(row['N']+1),endpoint=True)
         print(lists[n])
 
     displacements = np.asarray(list(product(*lists)))
@@ -81,7 +87,7 @@ def main(args):
     for n,d in enumerate(displacements):
         disp = xr.DataArray(np.zeros(nm.Nmodes), dims=("mode"))
         for m in range(displacements.shape[1]):
-            mode = instructions.at[m,"mode"]
+            mode = int(instructions.at[m,"mode"])
             disp.loc[mode] = d[m]
             if args.relative:
                 disp.loc[mode] *= scales.at[mode,"length"]
@@ -90,12 +96,15 @@ def main(args):
     print("done")    
 
     #---------------------------------------#
-    print("\n\tComputing the harmonic potential energy ... ",end="")
-    atoms = AtomicStructures(atoms)
-    potential_energy = nm.potential_energy(atoms)
-    atoms.set_info("harmonic-potential-energy",potential_energy)
-    atoms.set_info("displacements",displacements)
-    print("done")   
+    try : 
+        print("\n\tComputing the harmonic potential energy ... ",end="")
+        atoms = AtomicStructures(atoms)
+        potential_energy = nm.potential_energy(atoms)
+        atoms.set_info("harmonic-potential-energy",potential_energy)
+        atoms.set_info("displacements",displacements)
+        print("done")   
+    except:
+        print("\n\tAn error occurred.")
 
     #---------------------------------------#
     # Write the data to the specified output file with the specified format
