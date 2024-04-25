@@ -4,31 +4,13 @@ from ase.io import read, write
 from eslib.formatting import matrix2str
 from ase.build import make_supercell
 from scipy.spatial.transform import Rotation
-
+from eslib.formatting import esfmt
 
 #---------------------------------------#
 description     = "Create a path bridgin two atomic structures (useful for NEB calculations)."
-warning         = "***Warning***"
-closure         = "Job done :)"
-keywords        = "It's up to you to modify the required keywords."
-input_arguments = "Input arguments"
 
 #---------------------------------------#
-# colors
-try :
-    import colorama
-    from colorama import Fore, Style
-    colorama.init(autoreset=True)
-    description     = Fore.GREEN  + Style.BRIGHT + description             + Style.RESET_ALL
-    warning         = Fore.MAGENTA    + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
-    closure         = Fore.BLUE   + Style.BRIGHT + closure                 + Style.RESET_ALL
-    keywords        = Fore.YELLOW + Style.NORMAL + keywords                + Style.RESET_ALL
-    input_arguments = Fore.GREEN  + Style.NORMAL + input_arguments         + Style.RESET_ALL
-except:
-    pass
-
-#---------------------------------------#
-def prepare_parser():
+def prepare_parser(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
@@ -37,22 +19,11 @@ def prepare_parser():
     parser.add_argument("-m" , "--matrix"       , **argv, type=str, help="txt file with the 3x3 transformation matrix")
     parser.add_argument("-o" , "--output"       , **argv, type=str, help="output file")
     parser.add_argument("-of", "--output_format", **argv, type=str, help="output file format (default: 'None')", default=None)
-    options = parser.parse_args()
-    return options
+    return  parser
 
 #---------------------------------------#
-def main():
-
-    #-------------------#
-    args = prepare_parser()
-
-    # Print the script's description
-    print("\n\t{:s}".format(description))
-    # print("done")
-    print("\n\t{:s}:".format(input_arguments))
-    for k in args.__dict__.keys():
-        print("\t{:>20s}:".format(k),getattr(args,k))
-    print()
+@esfmt(prepare_parser,description)
+def main(args):
 
     #-------------------#
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
@@ -120,9 +91,6 @@ def main():
         print("done")
     except Exception as e:
         print("\n\tError: {:s}".format(e))
-
-    #-------------------#
-    print("\n\t{:s}\n".format(closure))
 
 #---------------------------------------#
 if __name__ == "__main__":
