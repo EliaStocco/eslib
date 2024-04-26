@@ -100,7 +100,7 @@ def remove_empty_space(ax):
     ax.set_xlim(min_x, max_x)
 
 #---------------------------------------#
-def histogram(data: np.ndarray, file: str):
+def histogram(data: np.ndarray, file: str=None):
     """
     Plot histograms for each column of the input array.
 
@@ -111,6 +111,7 @@ def histogram(data: np.ndarray, file: str):
     Returns:
         None
     """
+    data = np.asarray(data)
     if data.ndim == 1:
         data = data.reshape((len(data),1))
     elif data.ndim > 2:
@@ -142,4 +143,7 @@ def histogram(data: np.ndarray, file: str):
     plt.legend()
 
     plt.tight_layout()
-    plt.savefig(file)
+    if file is not None:
+        plt.savefig(file)
+    else :
+        plt.show()

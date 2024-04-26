@@ -7,6 +7,7 @@ from scipy.optimize import linear_sum_assignment
 from typing import Union, Dict, List
 from eslib.ipi_units import unit_to_internal, unit_to_user
 from copy import copy
+import pandas as pd
 
 #---------------------------------------#
 def find_transformation(A: Atoms, B: Atoms):
@@ -168,6 +169,69 @@ def cart2frac(cell:Union[np.ndarray,Cell],v:np.ndarray=None)->np.ndarray:
     matrix = frac2cart(cell)
     matrix = np.linalg.inv(matrix)
     return matrix
+
+@ase_cell_to_np_transpose
+def max_pbc_distance(cell:Union[np.ndarray,Cell])->float:
+    vec = frac2cart(cell,np.asarray([0.5,0.5,0.5]))
+    return np.linalg.norm(vec)
+
+def relative_vectors(structure:Atoms,_all=False):
+    columns = ["i","j","Si","Sj", # indices and symbols
+               "uwdx","uwdy","uwdz","uwf1","uwf2","uwf3", # unwrapped vectors and unwrapped fractional vectors
+               "wdx","wdy","wdz","wf1","wf2","wf3", # wrapped vectors and wrapped fractional vectors
+               "uwd","uwf","wd","wf"]  # unwrapped and wrapped distances and fractional distances
+    df = pd.DataFrame(columns=columns)
+    
+    N = structure.get_global_number_of_atoms()  # Example value of N
+    a = np.arange(N)
+    # Generate all pairs (i, j) where i ranges from 0 to N-1 and j ranges from i+1 to N-1
+    i, j = np.meshgrid(np.arange(N), np.arange(N))
+    mask = i < j
+    pairs = np.column_stack((i[mask], j[mask]))
+    assert pairs.shape[0] == int(N*(N-1)/2)
+
+    df["i"] = pairs[:,0]
+    df["j"] = pairs[:,1]
+
+    symbols = structure.get_chemical_symbols()
+    df["Si"] = [ symbols[i] for i in df["i"] ]
+    df["Sj"] = [ symbols[i] for i in df["j"] ]
+
+    from icecream import ic
+
+    pos = structure.get_positions()
+    vec = np.asarray([ pos[i,:] - pos[j,:]  for i,j in zip(df["i"],df["j"]) ])
+    df["uwdx"] = vec[:,0]
+    df["uwdy"] = vec[:,1]
+    df["uwdz"] = vec[:,2]
+    df["uwd"]  = np.linalg.norm(vec,axis=1)
+
+    fvec = cart2frac(structure.get_cell(),vec)
+    df["uwfx"] = fvec[:,0]
+    df["uwfy"] = fvec[:,1]
+    df["uwfz"] = fvec[:,2]
+    df["uwf"]  = np.linalg.norm(fvec,axis=1)
+
+    wfvec = np.mod(fvec,1) - 0.5
+    df["wfx"] = wfvec[:,0]
+    df["wfy"] = wfvec[:,1]
+    df["wfz"] = wfvec[:,2]
+    df["wf"]  = np.linalg.norm(wfvec,axis=1)
+
+    wvec = frac2cart(structure.get_cell(),wfvec)
+    df["wdx"] = wvec[:,0]
+    df["wdy"] = wvec[:,1]
+    df["wdz"] = wvec[:,2]
+    df["wd"]  = np.linalg.norm(wvec,axis=1)
+
+    if _all:
+        return df
+    else:
+        newdf = df[["i","j","Si","Sj","wdx","wdy","wdz","wd"]]
+        new_column_names = {'wdx': 'x', 'wdy': 'y', 'wdz': 'z', 'wd':'d'}
+        return newdf.rename(columns=new_column_names)
+
+
 
 #---------------------------------------#
 def string2function(input_string:str)->callable:
