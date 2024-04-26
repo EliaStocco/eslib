@@ -20,16 +20,11 @@ def prepare_parser(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b"}
-    parser.add_argument("-i"  , "--input"             , type=str  , **argv, help="input file [au]")
-    parser.add_argument("-if" , "--input_format"      , type=str  , **argv, help="input file format (default: 'None')" , default=None)
-    # parser.add_argument("-n"  , "--number"            , type=int  , **argv, help="number of desired structure (default: '100')", default=100)
-    # parser.add_argument("-s"  , "--sort"              , type=str2bool , **argv, help="whether to sort the indices (default: true)", default=True)
-    # parser.add_argument("-rc" , "--cutoff_radius"     , type=float, **argv, help="cutoff radius [au] (default: 6)", default=6)
-    parser.add_argument("-sh" , "--soap_hyper"        , type=str  , **argv, help="JSON file with the SOAP hyperparameters (default: 'None')", default=None)
-    # parser.add_argument("-oi" , "--output_indices"    , type=str  , **argv, help="output file with indices of the selected structures (default: 'indices.txt')",default='indices.txt')
-    parser.add_argument("-o"  , "--output"            , type=str  , **argv, help="output file with SOAP descriptors.")
-    # parser.add_argument("-of" , "--output_format"     , type=str  , **argv, help="output file format (default: 'None')", default=None)
-    return parser# .parse_args()
+    parser.add_argument("-i"  , "--input"       , type=str, required=True , **argv, help="input file [au]")
+    parser.add_argument("-if" , "--input_format", type=str, required=False, **argv, help="input file format (default: 'None')", default=None)
+    parser.add_argument("-sh" , "--soap_hyper"  , type=str, required=False, **argv, help="JSON file with the SOAP hyperparameters (default: 'None')", default=None)
+    parser.add_argument("-o"  , "--output"      , type=str, required=False, **argv, help="output file with SOAP descriptors (default: 'soap.npy')", default=None)
+    return parser
 
 #---------------------------------------#
 @esfmt(prepare_parser, description)
