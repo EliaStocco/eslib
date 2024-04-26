@@ -1,31 +1,27 @@
 #!/usr/bin/env python
-# from mace.calculators import MACECalculator
-from mace.calculators import MACEliaCalculator
 from ase.io import read
 from eslib.formatting import esfmt
-from eslib.functions import suppress_output
 from eslib.input import str2bool
-from eslib.drivers.socketextras import SocketClientExtras
-# from ase.calculators.socketio import SocketClient
+from ase.calculators.socketio import SocketClient
+from eslib.drivers.LJwall_calculator import LennerdJonesWall
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "MACE socket driver."
+description = "LennerdJonesWall socket driver."
 
 #---------------------------------------#
 def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-s", "--structure" , **argv, required=True , type=str     , help="file with the atomic structure")
-    parser.add_argument("-f", "--format"    , **argv, required=False, type=str     , help="file format of the atomic structure (default: 'None')" , default=None)
-    parser.add_argument("-m", "--model"     , **argv, required=False, type=str     , help="file with the MACE model")
-    parser.add_argument("-t", "--model_type", **argv, required=True , type=str     , help="MACE model data type (default: None)", default=None)
-    parser.add_argument("-p", "--port"      , **argv, required=False, type=int     , help="TCP/IP port number. Ignored when using UNIX domain sockets.")
-    parser.add_argument("-a", "--address"   , **argv, required=True , type=str     , help="Host name (for INET sockets) or name of the UNIX domain socket to connect to.")
-    parser.add_argument("-u", "--unix"      , **argv, required=False, type=str2bool, help="Use a UNIX domain socket (default: false)", default=False)
-    parser.add_argument("-d", "--device"    , **argv, required=False, type=str     , help="device (default: 'cpu')", choices=['cpu','gpu','cuda'], default='cpu')
-    return parser# .parse_args()
+    parser.add_argument("-s" , "--structure"   , **argv, required=True , type=str     , help="file with the atomic structure")
+    parser.add_argument("-f" , "--format"      , **argv, required=False, type=str     , help="file format of the atomic structure (default: 'None')" , default=None)
+    parser.add_argument("-i" , "--instructions", **argv, required=True , type=str     , help="file with the instuctions for the calulator")
+    parser.add_argument("-l" , "--logger"     , **argv, required=False, type=str     , help="logging file (default: None)", default=None)
+    parser.add_argument("-p" , "--port"        , **argv, required=False, type=int     , help="TCP/IP port number. Ignored when using UNIX domain sockets.")
+    parser.add_argument("-a" , "--address"     , **argv, required=True , type=str     , help="Host name (for INET sockets) or name of the UNIX domain socket to connect to.")
+    parser.add_argument("-u" , "--unix"        , **argv, required=False, type=str2bool, help="Use a UNIX domain socket (default: false)", default=False)
+    return parser
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
@@ -40,43 +36,16 @@ def main(args):
     # I don't know if I actually need this line
     atoms.info = {}
 
-    #------------------#
-    kwargv = {
-        "device" : args.device,
-        "default_dtype" : 'float64'
-    }
-    args.model_type = str(args.model_type).lower()
-
-    if args.model_type in ["foundation_mp","mp","mace_mp"]:
-        print("\tLoading the MACECalculator with a pretrained model based on the Materials Project ... ", end="")
-        from mace.calculators import mace_mp
-        with suppress_output():
-            calculator = mace_mp(model=args.model,**kwargv)
-
-    elif args.model_type in ["foundation_anicc","anicc","mace_anicc"]:
-        print("\tLoading the MACECalculator with a pretrained model based on the ANI (H, C, N, O) ... ", end="")
-        from mace.calculators import mace_anicc
-        with suppress_output():
-            calculator = mace_anicc(device=args.device)
-
-    elif args.model_type in ["foundation_off","off","mace_off"]:
-        print("\tLoading the MACECalculator with a pretrained model based on the MACE-OFF23 models ... ", end="")
-        from mace.calculators import mace_off
-        with suppress_output():
-            calculator = mace_off(model=args.model,**kwargv)
-
-    else:
-        print("\tLoading a MACEliaCalculator based on the model that you provided ... ", end="")
-        calculator = MACEliaCalculator(model_paths=args.model,\
-                                    model_type=args.model_type,\
-                                    **kwargv)         
+    
+    print("\tLoading the LennerdJonesWall calculator ... ", end="")
+    calculator = LennerdJonesWall(instructions=args.instructions,log_file=args.logger)         
     print("done")
 
-    atoms.calc = calculator # atoms.set_calculator(calculator)
+    atoms.calc = calculator
 
     #------------------#
     print("\tPreparing the socket communication ... ", end="")
-    client = SocketClientExtras(host=args.address,\
+    client = SocketClient(host=args.address,\
                           port=args.port,\
                           unixsocket=args.address if args.unix else None)
     print("done")

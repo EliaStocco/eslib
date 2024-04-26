@@ -6,6 +6,7 @@ import json
 import torch
 from eslib.tools import convert
 from dataclasses import dataclass
+from ase.io import write
 
 @dataclass
 class LJPotential:
@@ -82,6 +83,7 @@ class LennerdJonesWall(Calculator):
     def __init__(
         self,
         instructions: Union[str, Dict],
+        log_file:str=None,
         **kwargs,
     ):
         """
@@ -119,6 +121,8 @@ class LennerdJonesWall(Calculator):
 
         # Initialize LJPotential engine
         self.engine = LJPotential(**instructions)
+        self.logger = log_file
+        self.save = None
 
     def calculate(self, atoms: Atoms = None, properties=None, system_changes=all_changes):
         """
@@ -144,6 +148,26 @@ class LennerdJonesWall(Calculator):
         self.results["forces"] = f
         self.results["stress"] = np.zeros((3, 3))
 
+        # Log results
+        if self.logger is not None:
+            kwargs = {
+                "symbols" : atoms.get_chemical_symbols(),
+                "positions" : atoms.get_positions(),
+                "cell" : atoms.get_cell(),
+                "pbc" : atoms.get_pbc(),
+            }
+            self.save = Atoms(**kwargs)
+            self.info = {
+                "energy" : self.results["energy"],
+                "free_energy" : self.results["energy"],
+                "stress" : self.results["stress"]
+            }
+            self.arrays["forces"] = self.results["forces"]
+
+            with open(self.logger,'a') as ff:
+                write(ff,self.save)
+        pass
+        
 
 def random_water_structure(num_molecules=1):
     symbols = ['H', 'H', 'O']  # Atomic symbols for water molecule
