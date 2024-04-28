@@ -4,10 +4,11 @@ from ase.io import read, write
 from eslib.formatting import matrix2str
 from ase.build import make_supercell
 from scipy.spatial.transform import Rotation
+from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt
 
 #---------------------------------------#
-description     = "Create a path bridgin two atomic structures (useful for NEB calculations)."
+description = "Create a supercell for the given atomic structures."
 
 #---------------------------------------#
 def prepare_parser(description):
@@ -27,7 +28,7 @@ def main(args):
 
     #-------------------#
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms = read(args.input,format=args.input_format,index=":")
+    structures:AtomicStructures = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done")
 
     #-------------------#
@@ -35,63 +36,20 @@ def main(args):
     matrix = np.loadtxt(args.matrix)
     print("done")
 
-    # #-------------------#
-    # print("\n\tDiagonalizing transformation matrix ... ", end="")
-    # w,f = np.linalg.eig(matrix)
-    # print("done")
-
-    # print("\t eigenvalues: ",w)
-    # print("\teigenvectors: ")
-    # line = matrix2str(f.round(4),col_names=["1","2","3"],cols_align="^",width=6)
-    # print(line)
-
-    # #-------------------#
-    # print("\n\tExact decomposition of the transformation matrix:")
-    # # Compute eigenvalues and eigenvectors
-    # w, f = np.linalg.eig(matrix)
-    # # compute D
-    # s = np.absolute(w)
-    # D = np.diag(s)
-    # # compute R
-    # R = np.linalg.inv(D) @ matrix
-    # # Euler angles
-    # rotation = Rotation.from_matrix(R)
-    # # get Euler angles in radians
-    # euler_angles_radians = rotation.as_euler('zyx')  # Order of rotation: 'zyx' (or any other order)
-    # # convert radians to degrees if needed
-    # euler_angles_degrees = np.degrees(euler_angles_radians)
-    # print("\t\tstretching factors:", s)
-    # print("\t\tEuler angles (deg):", euler_angles_degrees)
-
-    # R = Rotation.from_euler('zyx', euler_angles_radians).as_matrix()
-
-    # #-------------------#
-    # print("\n\tRotating the atomic structures along the eigenvectors ... ", end="")
-    # Rcell = [None] * len(atoms)
-    # for n in range(len(atoms)):
-    #     # Rpos  = (f @ atoms[n].get_positions().T).T
-    #     Rcell[n] = (R @ atoms[n].get_cell()).T
-    #     atoms[n].set_cell(Rcell[n].T,scale_atoms=True)
-    #     #atoms[n].rotate(f,rotate_cell=True)
-    # print("done")
-
     #-------------------#
     print("\n\tCreating the supercells ... ", end="")
-    supercell = [None] * len(atoms)
-    for n in range(len(atoms)):
-        supercell[n] = make_supercell(atoms[n],matrix)
-        # supercell[n].set_cell((matrix@Rcell[n].T).T)
+    supercell = [None] * len(structures)
+    for n,atoms in enumerate(structures):
+        supercell[n] = make_supercell(atoms,matrix,wrap=False)
+    supercell = AtomicStructures(supercell)
     print("done")
 
     #-------------------#
     # Write the data to the specified output file with the specified format
     print("\n\tWriting data to file '{:s}' ... ".format(args.output), end="")
-    try:
-        write(images=supercell,filename=args.output, format=args.output_format) # fmt)
-        print("done")
-    except Exception as e:
-        print("\n\tError: {:s}".format(e))
-
+    supercell.to_file(args.output,args.output_format)
+    print("done")
+    
 #---------------------------------------#
 if __name__ == "__main__":
     main()
