@@ -11,7 +11,7 @@ export PATH="$PATH:${ESLIB}"
 export PYTHONPATH="$PYTHONPATH:${ESLIB}"
 
 # Add script subdirectories to PATH
-for dir in "${ESLIB}"/eslib/scripts/*; do
+for dir in "${ESLIB}"/eslib/scripts/* "${ESLIB}"/eslib/* ; do
     if [ -d "$dir" ]; then
         export PATH="$PATH:$dir"
         # Make Python files executable in each subdirectory
