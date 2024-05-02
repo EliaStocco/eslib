@@ -3,11 +3,11 @@ from ase.io import read
 from eslib.formatting import esfmt
 from eslib.input import str2bool
 from ase.calculators.socketio import SocketClient
-from eslib.drivers.LJwall_calculator import LennerdJonesWall
+from eslib.drivers.LJwall_calculator import LennardJonesWall
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "LennerdJonesWall socket driver."
+description = "LennardJonesWall socket driver."
 
 #---------------------------------------#
 def prepare_args(description):
@@ -37,8 +37,8 @@ def main(args):
     atoms.info = {}
 
     
-    print("\tLoading the LennerdJonesWall calculator ... ", end="")
-    calculator = LennerdJonesWall(instructions=args.instructions,log_file=args.logger)         
+    print("\tLoading the LennardJonesWall calculator ... ", end="")
+    calculator = LennardJonesWall(instructions=args.instructions,log_file=args.logger)         
     print("done")
 
     atoms.calc = calculator

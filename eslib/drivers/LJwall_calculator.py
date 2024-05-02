@@ -75,7 +75,7 @@ class LJPotential:
         return lj_energy, lj_forces
 
 
-class LennerdJonesWall(Calculator):
+class LennardJonesWall(Calculator):
     """
     Custom ASE Calculator for Lennard-Jones potential calculations.
     """
@@ -93,7 +93,7 @@ class LennerdJonesWall(Calculator):
         **kwargs,
     ):
         """
-        Initialize the LennerdJonesWall calculator.
+        Initialize the LennardJonesWall calculator.
 
         Parameters:
             instructions (str or dict): Either a JSON file path or a dictionary containing instructions for the LJ potential.
@@ -205,8 +205,8 @@ def main():
         "second_power": 3
     }
 
-    # Initialize LennerdJonesWall calculator
-    LJW = LennerdJonesWall(instructions)
+    # Initialize LennardJonesWall calculator
+    LJW = LennardJonesWall(instructions)
 
     # Perform calculation
     LJW.calculate(bulk_water)
