@@ -86,6 +86,17 @@ class LennardJonesWall(Calculator):
         "stress"      : None
     }
 
+    dimensions = {
+        "zplane"  : "length",
+        "sigma"   : "length",
+        "epsilon" : "energy"
+    }
+
+    units = {
+        "length" : "angstrom",
+        "energy" : "electronvolt"
+    }
+
     def __init__(
         self,
         instructions: Union[str, Dict],
@@ -112,18 +123,32 @@ class LennardJonesWall(Calculator):
             raise ValueError("`instructions` can be `str` or `dict` only.")
 
         # Convert units if specified
-        if "sigma_unit" in instructions and instructions["sigma_unit"] is not None:
-            factor = convert(1, "length", _from=instructions["sigma_unit"], _to="atomic_unit")
-            instructions["sigma"] *= factor
-        if "epsilon_unit" in instructions and instructions["epsilon_unit"] is not None:
-            factor = convert(1, "energy", _from=instructions["epsilon_unit"], _to="atomic_unit")
-            instructions["epsilon"] *= factor
+        # if "zplane_unit" in instructions and instructions["zplane_unit"] is not None:
+        #     factor = convert(1, "length", _from=instructions["zplane_unit"], _to="angstrom")
+        #     instructions["zplane"] *= factor
+        # if "sigma_unit" in instructions and instructions["sigma_unit"] is not None:
+        #     factor = convert(1, "length", _from=instructions["sigma_unit"], _to="angstrom")
+        #     instructions["sigma"] *= factor
+        # if "epsilon_unit" in instructions and instructions["epsilon_unit"] is not None:
+        #     factor = convert(1, "energy", _from=instructions["epsilon_unit"], _to="electronvolt")
+        #     instructions["epsilon"] *= factor
 
-        # Remove unit keys from instructions
-        if "sigma_unit" in instructions:
-            del instructions["sigma_unit"]
-        if "epsilon_unit" in instructions:
-            del instructions["epsilon_unit"]
+        to_delete = list()
+        for k,dimension in self.dimensions.items():
+            variable = f'{k}_unit'
+            if variable in instructions:
+                to_delete.append(variable)
+                if instructions[variable] is not None:
+                    factor = convert(1, dimension, _from=instructions[variable], _to=self.units[dimension])
+                    instructions[k] *= factor
+        for k in to_delete:
+            del instructions[k]
+
+        # # Remove unit keys from instructions
+        # if "sigma_unit" in instructions:
+        #     del instructions["sigma_unit"]
+        # if "epsilon_unit" in instructions:
+        #     del instructions["epsilon_unit"]
 
         # Initialize LJPotential engine
         self.engine = LJPotential(**instructions)
@@ -198,6 +223,7 @@ def main():
         "zplane": 0,
         "sigma": 2.569,
         "epsilon": 2.754,
+        "zplane_unit": "angstrom",
         "sigma_unit": "angstrom",
         "epsilon_unit": "kilocal/mol",
         "symbols": ['O'],
