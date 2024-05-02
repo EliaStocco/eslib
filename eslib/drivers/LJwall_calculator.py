@@ -79,6 +79,12 @@ class LennerdJonesWall(Calculator):
     """
     Custom ASE Calculator for Lennard-Jones potential calculations.
     """
+    implemented_properties = {
+        "energy"      : None,
+        "free_energy" : None,
+        "forces"      : None,
+        "stress"      : None
+    }
 
     def __init__(
         self,
