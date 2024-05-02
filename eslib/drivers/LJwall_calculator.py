@@ -163,12 +163,12 @@ class LennerdJonesWall(Calculator):
                 "pbc" : atoms.get_pbc(),
             }
             self.save = Atoms(**kwargs)
-            self.info = {
+            self.save.info = {
                 "energy" : self.results["energy"],
                 "free_energy" : self.results["energy"],
                 "stress" : self.results["stress"]
             }
-            self.arrays["forces"] = self.results["forces"]
+            self.save.arrays["forces"] = self.results["forces"]
 
             with open(self.logger,'a') as ff:
                 write(ff,self.save)
