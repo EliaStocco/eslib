@@ -37,7 +37,7 @@ tmp_folder = "tmp"
 torun = {
     "extras2dipole" :
     {
-        "folder"  : "text",
+        "folder"  : "dipole",
         "file"   : "extras2dipole",
         "kwargs"  : {
             "input"  : "tests/data/i-pi.extras_0",  
@@ -70,19 +70,45 @@ torun = {
             "input"  : "tests/structures/bulk-water/bulk-water.au.extxyz",   
         },
     },
+    "extxyz2pickle" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "clean"  : False,
+        "kwargs"  : {
+            "input"              : "tests/structures/bulk-water/bulk-water.au.extxyz",   
+            "remove_properties"  : "true",   
+            "output"             : "{:s}/output.pickle".format(tmp_folder),     
+        },
+    },
+    "pickle2extxyz" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : "{:s}/output.pickle".format(tmp_folder) ,   
+            "remove_properties"  : "true",   
+            "output"             : "{:s}/output.extxyz".format(tmp_folder),    
+        },
+    },
 }
 
 
 @pytest.mark.parametrize("name, test", torun.items())
 def test_scripts(name, test):
 
-    print("Running '{:s}' test.".format(name))   
+    print("Running test '{:s}'.".format(name))   
     main = get_main_function(test["folder"],test["file"])
     with change_directory():
         if not os.path.exists(tmp_folder):
             os.mkdir(tmp_folder)
         main(test["kwargs"])
-        shutil.rmtree(tmp_folder)
+        if 'clean' in test and not test['clean']:
+            pass
+        else:
+            shutil.rmtree(tmp_folder)
+
+    pass
 
     pass
     
