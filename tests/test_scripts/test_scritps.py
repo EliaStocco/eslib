@@ -74,7 +74,6 @@ torun = {
     {
         "folder"  : "convert",
         "file"   : "convert-file",
-        "clean"  : False,
         "kwargs"  : {
             "input"              : "tests/structures/bulk-water/bulk-water.au.extxyz",   
             "remove_properties"  : "true",   
@@ -86,9 +85,25 @@ torun = {
         "folder"  : "convert",
         "file"   : "convert-file",
         "kwargs"  : {
-            "input"              : "{:s}/output.pickle".format(tmp_folder) ,   
+            "input"              : "tests/structures/bulk-water/bulk-water.au.pickle" ,   
             "remove_properties"  : "true",   
             "output"             : "{:s}/output.extxyz".format(tmp_folder),    
+        },
+    },
+    "trajectory-summary" :
+    {
+        "folder"  : "inspect",
+        "file"   : "trajectory-summary.py",
+        "kwargs"  : {
+            "input" : "tests/structures/bulk-water/bulk-water.au.extxyz" ,   
+        },
+    },
+    "trajectory-summary-empty" :
+    {
+        "folder"  : "inspect",
+        "file"   : "trajectory-summary.py",
+        "kwargs"  : {
+            "input" : "tests/structures/bulk-water/bulk-water.au.empty.extxyz" ,   
         },
     },
 }
