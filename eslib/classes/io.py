@@ -14,6 +14,7 @@ class pickleIO:
 
     @classmethod
     def from_pickle(cls: Type[T], file_path: str) -> T:
+        """Load an object from a *.pickle file."""
         try:
             with open(file_path, 'rb') as file:
                 obj = pickle.load(file)
@@ -25,3 +26,23 @@ class pickleIO:
             print(f"Error loading from pickle file: File not found - {file_path}")
         except Exception as e:
             print(f"Error loading from pickle file: {e}")
+
+    @staticmethod
+    def correct_extension_out(func):
+        """Decorator to redirect the decorated method to `pickleIO.to_pickle` if the file extension is `.pickle`."""
+        def wrapper(self:Type[T],**argv):
+            if 'file' in argv and isinstance(argv['file'], str) and argv['file'].endswith('.pickle'):
+                return self.to_pickle(argv['file'])
+            else:
+                return func(self,**argv)
+        return wrapper
+    
+    @staticmethod
+    def correct_extension_in(func):
+        """Decorator to redirect the decorated method to `pickleIO.from_pickle` if the file extension is `.pickle`."""
+        def wrapper(cls: Type[T],**argv):
+            if 'file' in argv and isinstance(argv['file'], str) and argv['file'].endswith('.pickle'):
+                return cls.from_pickle(argv['file'])
+            else:
+                return func(cls,**argv)
+        return wrapper
