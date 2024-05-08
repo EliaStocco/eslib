@@ -80,7 +80,7 @@ def main(args):
                            pbc=args.pbc,
                            same_cell=args.same_cell,
                            remove_replicas=args.remove_replicas)
-        atoms:List[Atoms] = list(atoms)
+        # atoms:List[Atoms] = list(atoms)
     print("done")
     print("\tn. of atomic structures: {:d}".format(len(atoms)))
 
@@ -183,11 +183,13 @@ def main(args):
     # Write the data to the specified output file with the specified format
     if args.folder is None:
         print("\n\tWriting data to file '{:s}' ... ".format(args.output), end="")
-        try:
-            write(images=atoms,filename=args.output, format=args.output_format) # fmt)
-            print("done")
-        except Exception as e:
-            print("\n\tError: {:s}".format(e))
+        atoms.to_file(file=args.output,format=args.output_format)
+        print("done")
+        # try:
+        #     write(images=atoms,filename=args.output, format=args.output_format) # fmt)
+        #     print("done")
+        # except Exception as e:
+        #     print("\n\tError: {:s}".format(e))
     else:
         print("\n\tWriting each atomic structure to a different file in folder '{:s}' ... ".format(args.folder), end="")
         if not os.path.exists(args.folder):
@@ -196,10 +198,12 @@ def main(args):
             file_name, file_extension  = os.path.splitext(args.output)
             file = f"{args.folder}/{file_name}.n={n}{file_extension}"
             file = os.path.normpath(file)
-            try:
-                write(images=structure,filename=file, format=args.output_format) # fmt)
-            except Exception as e:
-                print("\n\tError: {:s}".format(e))
+            structure = AtomicStructures([structure])
+            structure.to_file(file=file,format=args.output_format)
+            # try:
+            #     write(images=structure,filename=file, format=args.output_format) # fmt)
+            # except Exception as e:
+            #     print("\n\tError: {:s}".format(e))
         print("done")
 
 if __name__ == "__main__":
