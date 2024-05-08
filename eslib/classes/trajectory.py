@@ -59,18 +59,16 @@ class AtomicStructures(List[Atoms], pickleIO):
         - automatic extraction of `info` and `array` from the list of structures
     """
     @classmethod
+    @pickleIO.correct_extension_in
     def from_file(cls, **argv):
-        if 'file' in argv and isinstance(argv['file'], str) and argv['file'].endswith('.pickle'):
-            return cls.from_pickle(argv['file'])
-        else:
-            traj = read_trajectory(**argv)
-            return cls(traj)
+        """Load atomic structures from a file."""
+        traj = read_trajectory(**argv)
+        return cls(traj)
         
+    @pickleIO.correct_extension_out
     def to_file(self: T, file: str, format: Union[str, None] = None):
-        if file.endswith('.pickle'):
-            self.to_pickle(file)
-        else:
-            write(images=self, filename=file, format=format)
+        """Write atomic structures to a file."""
+        write(images=self, filename=file, format=format)
     
     def to_list(self: T) -> List[Atoms]:
         return list(self)
