@@ -1,7 +1,7 @@
 import numpy as np
 from copy import copy
 from itertools import product
-import xarray as xr
+# import xarray as xr
 from eslib.functions import get_one_file_in_folder, nparray2list_in_dict
 from .io import pickleIO
 from warnings import warn
@@ -10,73 +10,13 @@ from eslib.tools import convert
 import pandas as pd
 from ase import Atoms
 from eslib.classes.trajectory import AtomicStructures
+from eslib.classes.physical_tensor import *
 from typing import List, Dict
 import pint
 import os
 import warnings
 # Disable all UserWarnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
-
-threshold = 1e-18
-
-def all_positive(x):
-    return np.any(np.logical_and( remove_unit(x)[0] < threshold , np.abs(remove_unit(x)[0]) > threshold ))
-
-def corrected_sqrt(x):
-    return np.sqrt(np.abs(x)) * np.sign(x)
-
-def inv(A:xr.DataArray)->xr.DataArray:
-    """Calculate the inverse of a 2D ```xarray.DataArray``` using ```np.linalg.inv``` while preserving the xarray structure."""
-    _A, unit = remove_unit(A)    
-    if _A.ndim != 2:
-        raise ValueError("Input DataArray must be 2D.")
-    # Calculate the inverse of the 2D array
-    inv_data = np.linalg.inv(_A)
-    # Create a new DataArray with the inverted values and the original coordinates
-    inv_da = xr.DataArray(inv_data.T, dims=_A.dims, coords=_A.coords)
-    return set_unit(inv_da,1/unit) 
-
-def rbc(A:xr.DataArray,B:xr.DataArray,dim:str):
-    """Row by column multiplication between two ```xarray.DataArray``` ```A``` and ```B``` along the specified dimension ```dim```"""
-    # Check if A and B have at least two dimensions with the same name, and one of them is 'dim'
-    common_dims = set(A.dims).intersection(B.dims)
-    if len(common_dims) < 2 or dim not in common_dims:
-        raise ValueError("Both input arrays must have at least two dimensions with the same name, and one of them must be the specified 'dim'.")
-    # Determine the common dimension that is not 'dim'
-    other_common_dim = next(d for d in common_dims if d != dim)
-    # Rename the common dimension for A and B
-    _A = A.rename({other_common_dim: f'{other_common_dim}-left'})
-    _B = B.rename({other_common_dim: f'{other_common_dim}-right'})
-    # compute
-    _A_,ua = remove_unit(_A)
-    _B_,ub = remove_unit(_B)
-    out = dot(_A_,_B_,dim=dim)
-    return set_unit(out,ua*ub)
-
-def dot(A:xr.DataArray,B:xr.DataArray,dim:str):
-    """Dot product (contraction) between two ```xarray.DataArray``` ```A``` and ```B``` along the specified dimension ```dim```"""
-    _A,ua = remove_unit(A)
-    _B,ub = remove_unit(B)
-    out = _A.dot(_B,dim=dim)
-    newu = ua*ub
-    return set_unit(out,newu)
-
-def norm_by(array,dim):
-    tmp = np.linalg.norm(array.data,axis=array.dims.index(dim))
-    tmp, _ = remove_unit(tmp)
-    return tmp * get_unit(array)
-
-def diag_matrix(M,exp):
-    out = np.eye(len(M))        
-    if exp == "-1":
-        np.fill_diagonal(out,1.0/M)
-    elif exp == "1/2":
-        np.fill_diagonal(out,np.sqrt(M))
-    elif exp == "-1/2":
-        np.fill_diagonal(out,1.0/np.sqrt(M))
-    else :
-        raise ValueError("'exp' value not allowed")
-    return out  
 
 class NormalModes(pickleIO):
 
@@ -105,15 +45,15 @@ class NormalModes(pickleIO):
         # Natoms
         self.Natoms = int(self.Ndof / 3)
 
-        self.dynmat = xr.DataArray(np.full((self.Ndof,self.Ndof),np.nan), dims=('dof-a', 'dof-b'))
+        self.dynmat = PhysicalTensor(np.full((self.Ndof,self.Ndof),np.nan), dims=('dof-a', 'dof-b'))
 
-        empty = xr.DataArray(np.full((self.Ndof,self.Nmodes),np.nan,dtype=np.complex128), dims=('dof', 'mode'))
+        empty = PhysicalTensor(np.full((self.Ndof,self.Nmodes),np.nan,dtype=np.complex128), dims=('dof', 'mode'))
         self.eigvec = empty.copy()
         self.mode   = empty.copy()
         # self.non_ortho_modes = empty.copy()
 
-        self.eigval = xr.DataArray(np.full(self.Nmodes,np.nan), dims=('mode')) 
-        self.masses = xr.DataArray(np.full(self.Ndof,np.nan), dims=('dof'))
+        self.eigval = PhysicalTensor(np.full(self.Nmodes,np.nan), dims=('mode')) 
+        self.masses = PhysicalTensor(np.full(self.Ndof,np.nan), dims=('dof'))
 
         
         # if ref is not None:
@@ -129,7 +69,7 @@ class NormalModes(pickleIO):
     def set_reference(self,ref:Atoms):
         if ref is None:
             self.reference = Atoms()
-            # self.masses = xr.DataArray(np.full(self.Ndof,np.nan), dims=('dof'))
+            # self.masses = PhysicalTensor(np.full(self.Ndof,np.nan), dims=('dof'))
         else:
             # print("setting reference")
             self.reference = Atoms( positions=ref.get_positions(),\
@@ -139,7 +79,7 @@ class NormalModes(pickleIO):
             masses  = [mass for mass in ref.get_masses() for _ in range(3)]
             masses  = np.asarray(masses)
             masses *= convert(1,"mass","dalton","atomic_unit")
-            self.masses = xr.DataArray(masses, dims=('dof'))
+            self.masses = PhysicalTensor(masses, dims=('dof'))
             
         
     # def __repr__(self) -> str:
@@ -175,7 +115,7 @@ class NormalModes(pickleIO):
         for key,output in outputs.items():
             # file = output["file"]
             file = os.path.normpath("{:s}/{:s}.{:s}.txt".format(folder,prefix,key))
-            data:xr.DataArray = output["data"]
+            data:PhysicalTensor = output["data"]
             if 'mode' in data.dims and len(data.dims) == 2:
                 if data.dims[0] ==  'mode':
                     second_dim = [dim for dim in data.dims if dim != 'mode'][0]
@@ -243,13 +183,13 @@ class NormalModes(pickleIO):
             for n in range(N):
                 row = np.reshape(_dynmat[n,:], (-1, 2))
                 dynmat[n,:] = row[:, 0] + row[:, 1] * 1j
-            self.dynmat = xr.DataArray(dynmat, dims=('dof-a', 'dof-b'))
+            self.dynmat = PhysicalTensor(dynmat, dims=('dof-a', 'dof-b'))
         else:
             raise ValueError("not implemented yet")
         pass
 
     def set_modes(self,modes):
-        self.mode.values = xr.DataArray(modes, dims=('dof', 'mode'))
+        self.mode.values = PhysicalTensor(modes, dims=('dof', 'mode'))
         self.mode /= norm_by(self.mode,"dof")
         
     def set_eigvec(self,band,mode="phonopy"):
@@ -261,19 +201,19 @@ class NormalModes(pickleIO):
                 f = np.asarray(f)
                 f = f[:,:,0] + 1j * f[:,:,1]
                 eigvec[:,n] = f.flatten()
-            self.eigvec[:,:] = xr.DataArray(eigvec, dims=('dof', 'mode'))
+            self.eigvec[:,:] = PhysicalTensor(eigvec, dims=('dof', 'mode'))
         else:
             raise ValueError("not implemented yet")
         pass
 
     def set_eigval(self,eigval):
-        self.eigval[:] = xr.DataArray(eigval, dims=('mode'))
+        self.eigval[:] = PhysicalTensor(eigval, dims=('mode'))
     
     def set_force_constants(self,force_constant):
         Msqrt = diag_matrix(self.masses,exp="-1/2")
-        MsqrtLeft  = xr.DataArray(Msqrt, dims=('dof-A','dof-a'))
-        MsqrtRight = xr.DataArray(Msqrt, dims=('dof-B','dof-b'))
-        Phi = xr.DataArray(force_constant, dims=('dof-a', 'dof-b'))
+        MsqrtLeft  = PhysicalTensor(Msqrt, dims=('dof-A','dof-a'))
+        MsqrtRight = PhysicalTensor(Msqrt, dims=('dof-B','dof-b'))
+        Phi = PhysicalTensor(force_constant, dims=('dof-a', 'dof-b'))
         self.dynmat = dot(dot(MsqrtLeft,Phi,'dof-A'),MsqrtRight,'dof-B')
         pass
 
@@ -332,19 +272,19 @@ class NormalModes(pickleIO):
 
         return supercell
     
-    def nmd2cp(self,A:xr.DataArray)->Atoms:
+    def nmd2cp(self,A:PhysicalTensor)->Atoms:
         """Normal Modes Displacements to Cartesian Positions (nmd2cp)."""
         D = self.nmd2cd(A)
         P = self.cd2cp(D)
         return P
     
-    def ed2cp(self,A:xr.DataArray)->Atoms:
+    def ed2cp(self,A:PhysicalTensor)->Atoms:
         """eigenvector displacements to cartesian positions (ed2cp)."""
         B = self.ed2nmd(A)
         D = self.nmd2cd(B)
         return self.cd2cp(D)
         
-    def ed2nmd(self,A:xr.DataArray)->xr.DataArray:
+    def ed2nmd(self,A:PhysicalTensor)->PhysicalTensor:
         """eigenvector displacements to normal modes displacements (ed2nd).
         Convert the coeffients ```A``` [length x mass^{-1/2}] of the ```eigvec``` into the coeffients ```B``` [length] of the ```modes```."""
         invmode = inv(self.mode)
@@ -354,12 +294,12 @@ class NormalModes(pickleIO):
                 warn("'test' matrix should be real.")
             if not np.allclose(test.to_numpy(),np.eye(len(test))):
                 warn("problem with inverting 'mode' matrix.")
-        M = self.masses * atomic_unit["mass"] # xr.DataArray(self.masses,dims=("dof")) * atomic_unit["mass"]
+        M = self.masses * atomic_unit["mass"] # PhysicalTensor(self.masses,dims=("dof")) * atomic_unit["mass"]
         Msqrt = np.sqrt(M)
         B = dot(invmode,1./Msqrt * dot(self.eigvec,A,"mode"),"dof")
         return remove_unit(B)[0]
     
-    def nmd2cd(self,coeff:xr.DataArray)->Atoms:
+    def nmd2cd(self,coeff:PhysicalTensor)->Atoms:
         """Normal Modes Displacements to Cartesian Displacements (nmd2cd).
         Return the cartesian displacements as an ```ase.Atoms``` object given the displacement [length] of the normal modes"""
         displ = dot(self.mode,coeff,"mode")
@@ -378,7 +318,7 @@ class NormalModes(pickleIO):
         structure.set_positions(structure.get_positions()+displ.get_positions())
         return structure
 
-    def project(self,trajectory:List[Atoms],warning="**Warning**")->Dict[str,xr.DataArray]:       
+    def project(self,trajectory:List[Atoms],warning="**Warning**")->Dict[str,PhysicalTensor]:       
 
         #-------------------#
         # reference position
@@ -407,8 +347,8 @@ class NormalModes(pickleIO):
 
         #-------------------#
         # building xarrays
-        q = xr.DataArray(q, dims=('time','dof')) 
-        v = xr.DataArray(v, dims=('time','dof')) 
+        q = PhysicalTensor(q, dims=('time','dof')) 
+        v = PhysicalTensor(v, dims=('time','dof')) 
 
         #-------------------#
         # eigvec
@@ -428,7 +368,7 @@ class NormalModes(pickleIO):
         
         #-------------------#
         # masses
-        M = self.masses * atomic_unit["mass"] # xr.DataArray(self.masses,dims=("dof")) * atomic_unit["mass"]
+        M = self.masses * atomic_unit["mass"] # PhysicalTensor(self.masses,dims=("dof")) * atomic_unit["mass"]
         Msqrt = np.sqrt(M)
 
         #-------------------#
@@ -492,7 +432,7 @@ class NormalModes(pickleIO):
 
         #-------------------#
         # vib. modes eigenvalues
-        w2 = xr.DataArray(self.eigval, dims=('mode')) 
+        w2 = PhysicalTensor(self.eigval, dims=('mode')) 
         w2 = set_unit(w2,atomic_unit["frequency"]**2)
         
         #-------------------#
@@ -605,7 +545,7 @@ class NormalModes(pickleIO):
 
         return out
     
-    def Zmodes(self,Z:xr.DataArray)->xr.DataArray:
+    def Zmodes(self,Z:PhysicalTensor)->PhysicalTensor:
         """Compute the Born Effective Charges of each Normal Mode."""
         correction = Z.data.reshape((-1,3,3)).mean(axis=0)
         Z -= np.tile(correction,int(Z.shape[0]/3)).T
@@ -616,7 +556,7 @@ class NormalModes(pickleIO):
         else:
             dZdN = dot(Z,self.mode,dim="dof").real
         norm = norm_by(dZdN,"dir")
-        dZdN = xr.concat([dZdN, xr.DataArray(norm, dims='mode')], dim='dir')
+        dZdN = xr.concat([dZdN, PhysicalTensor(norm, dims='mode')], dim='dir')
         return remove_unit(dZdN)[0]
 
     def sort(self,criterion="value"):
@@ -627,7 +567,7 @@ class NormalModes(pickleIO):
         else:
             raise ValueError("not implemented yet")
         for attr_name, attr_value in vars(self).items():
-            if isinstance(attr_value, (np.ndarray, xr.DataArray)):
+            if isinstance(attr_value, (np.ndarray, PhysicalTensor)):
                 if len(attr_value.shape) == 1:
                     setattr(self, attr_name, attr_value[sorted_indices])
                 elif len(attr_value.shape) == 2:

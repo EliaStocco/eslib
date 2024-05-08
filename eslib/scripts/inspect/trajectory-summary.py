@@ -40,45 +40,47 @@ def main(args):
     keys = atoms[0].info.keys()
     check = dict()
     
-    for k in keys:
-        for n in range(len(atoms)):
-            if k not in atoms[n].info.keys():
-                check[k] = False
-                break
-        check[k] = True
+    if len(keys) > 0 :
+        for k in keys:
+            for n in range(len(atoms)):
+                if k not in atoms[n].info.keys():
+                    check[k] = False
+                    break
+            check[k] = True
 
-    print("\n\tInfo/properties shapes:")
-    line = "\t\t"+"-"*21
-    print(line)
-    for k in keys:
-        print("\t\t|{:^12s}|{:^6s}|".format(k,str(atoms[0].info[k].shape)),end="")
-        if not check[k]:
-            print(" not present in all the structures")
-        else:
-            print()
-    print(line)
+        print("\n\tInfo/properties shapes:")
+        line = "\t\t"+"-"*21
+        print(line)
+        for k in keys:
+            print("\t\t|{:^12s}|{:^6s}|".format(k,str(atoms[0].info[k].shape)),end="")
+            if not check[k]:
+                print(" not present in all the structures")
+            else:
+                print()
+        print(line)
 
     #---------------------------------------#
     keys = atoms[0].arrays.keys()
-    check = dict()
-    
-    for k in keys:
-        for n in range(len(atoms)):
-            if k not in atoms[n].info.keys():
-                check[k] = False
-                break
-        check[k] = True
+    if len(keys) > 0 :
+        check = dict()
+        
+        for k in keys:
+            for n in range(len(atoms)):
+                if k not in atoms[n].info.keys():
+                    check[k] = False
+                    break
+            check[k] = True
 
-    print("\n\tArrays shapes:")
-    line = "\t\t"+"-"*27
-    print(line)
-    for k in keys:
-        print("\t\t|{:^12s}|{:^12s}|".format(k,str(atoms[0].arrays[k].shape)),end="")
-        if not check[k]:
-            print(" not present in all the structures")
-        else:
-            print()
-    print(line)   
+        print("\n\tArrays shapes:")
+        line = "\t\t"+"-"*27
+        print(line)
+        for k in keys:
+            print("\t\t|{:^12s}|{:^12s}|".format(k,str(atoms[0].arrays[k].shape)),end="")
+            if not check[k]:
+                print(" not present in all the structures")
+            else:
+                print()
+        print(line)   
         
 #---------------------------------------#
 if __name__ == "__main__":

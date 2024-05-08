@@ -108,10 +108,7 @@ def test_scripts(name, test):
         else:
             shutil.rmtree(tmp_folder)
 
-    pass
-
-    pass
-    
+    pass    
 
 if __name__ == "__main__":
     for name, test in torun.items():

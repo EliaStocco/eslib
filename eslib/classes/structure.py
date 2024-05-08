@@ -4,9 +4,7 @@ import json
 import os
 import numpy as np
 from ase import Atoms
-from ase.constraints import FixAtoms
 from ase.io import read as ase_read
-from ase.atoms import Atoms
 import spglib as spg
 
 class StructureInfo:
@@ -42,6 +40,7 @@ class StructureInfo:
             self.add_info(
                 "bravais", "{} {}".format(bravais.longname, bravais), "Bravais Lattice"
             )
+            
             dataset = spg.get_symmetry_dataset(spg_cell, symprec=sym_thresh)
             if dataset:
                 prim_lattice, prim_scaled_positions, prim_numbers = spg.find_primitive(
@@ -134,6 +133,7 @@ class Structure(Atoms):
             charges = [p["charge"] for p in struct_dict[atoms_name]]
 
         if any(constraints):
+            from ase.constraints import FixAtoms
             c = FixAtoms(mask=constraints)
         # print(positions,cell,species)
 

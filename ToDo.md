@@ -4,3 +4,8 @@
 - add automatic tests with `pytest`
 - implement script to compute vibrational modes from a `replay` trajectory
 - implement finite difference methods for vibrational modes exploiting symmetries (as done in `phononpy`) using `spglib`
+- clean `convert-file.py` script
+- create "backup file" for `soap.py`
+- find a way to restart `fps.py` from an interrupted script
+- find a way to "standardize" `DipoleModel`, `MACEModel` and `Calculator`
+- set up scripts to compute time autocorrelation functions
