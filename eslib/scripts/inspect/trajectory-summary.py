@@ -52,7 +52,10 @@ def main(args):
         line = "\t\t"+"-"*21
         print(line)
         for k in keys:
-            print("\t\t|{:^12s}|{:^6s}|".format(k,str(atoms[0].info[k].shape)),end="")
+            try:
+                print("\t\t|{:^12s}|{:^6s}|".format(k,str(atoms[0].info[k].shape)),end="")
+            except:
+                print("\t\t|{:^12s}|{:^6s}|".format(k,str(type(atoms[0].info[k]))),end="")
             if not check[k]:
                 print(" not present in all the structures")
             else:
