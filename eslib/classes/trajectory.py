@@ -1,15 +1,7 @@
-from ase.io import read, write, string2index
-from ase import Atoms
-# from .vectorize import easyvectorize
-from io import TextIOWrapper
-import re
-# import ipi.utils.mathtools as mt
-import math
+
 import numpy as np
-# from deprecated import deprecated
 from eslib.tools import convert
 from eslib.functional import deprecated
-from eslib.classes.io import pickleIO
 from eslib.classes.aseio import aseio, integer_to_slice_string
 from typing import List, Union, TypeVar
 
