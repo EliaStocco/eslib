@@ -9,8 +9,8 @@ from eslib.formatting import esfmt, warning, error
 from eslib.input import str2bool
 from eslib.functions import suppress_output
 from eslib.tools import convert
+from eslib.classes.aseio import integer_to_slice_string
 from typing import List
-from ase import Atoms
 
 DEBUG = True
 #---------------------------------------#
@@ -80,6 +80,9 @@ def main(args):
                            pbc=args.pbc,
                            same_cell=args.same_cell,
                            remove_replicas=args.remove_replicas)
+        if args.input_format == "pickle":
+            index = integer_to_slice_string(args.index)
+            atoms = atoms[index]
         # atoms:List[Atoms] = list(atoms)
     print("done")
     print("\tn. of atomic structures: {:d}".format(len(atoms)))
