@@ -1,6 +1,7 @@
 from eslib.functions import add_default
 import numpy as np
 import matplotlib.pyplot as plt
+from itertools import product
 
 def generate_colors(N,map='tab10'):
     cmap = plt.get_cmap(map)  # You can choose other colormaps as well
@@ -26,16 +27,6 @@ def hzero(ax, shift=0, **argv):
 def vzero(ax, shift=0, **argv):
     return straigh_line(ax,shift,ax.get_ylim,ax.vlines,ax.set_ylim,**argv)
 
-    # default = {"color": "black", "alpha": 0.5, "linestyle": "dashed"}
-    # argv = add_default(argv,default)
-
-    # xlim = ax.get_xlim()
-    
-    # ax.hlines(shift,xlim[0],xlim[1],**argv)
-
-    # return ax
-
-
 def square_plot(ax,lims:tuple=None):
     if lims is None :
         x = ax.get_xlim()
@@ -49,7 +40,6 @@ def square_plot(ax,lims:tuple=None):
     ax.set_ylim(l, r)
     return ax
 
-
 def plot_bisector(ax, shiftx=0, shifty=0, argv:dict=None):
     default = {"color": "black", "alpha": 0.5, "linestyle": "dashed"}
     argv = add_default(argv,default)
@@ -57,8 +47,6 @@ def plot_bisector(ax, shiftx=0, shifty=0, argv:dict=None):
     xlim = ax.get_xlim()
     ylim = ax.get_ylim()
 
-    # x1 = min(x.min(),y.min())
-    # y2 = max(x.max(),y.max())
     x1 = min(xlim[0], ylim[0])
     y2 = max(xlim[1], ylim[1])
     bis = np.linspace(x1, y2, 1000)
@@ -147,3 +135,50 @@ def histogram(data: np.ndarray, file: str=None):
         plt.savefig(file)
     else :
         plt.show()
+
+#---------------------------------------#
+def plot_matrix(M,Natoms=None,file=None):
+    import matplotlib.pyplot as plt  
+    # from matplotlib.colors import ListedColormap
+    # Create a figure and axis
+    fig, ax = plt.subplots()  
+    argv = {
+        "alpha":0.5
+    }
+    ax.matshow(M, origin='upper',extent=[0, M.shape[1], M.shape[0], 0],**argv)
+    if Natoms is not None:
+        argv = {
+            "linewidth":0.8,
+            "linestyle":'--',
+            "color":"white",
+            "alpha":1
+        }
+        xx = np.arange(0,M.shape[0],Natoms*3)
+        yy = np.arange(0,M.shape[1],Natoms*3)
+        for x in xx:
+            ax.axhline(x, **argv) # horizontal lines
+        for y in yy:
+            ax.axvline(y, **argv) # horizontal lines
+        
+        
+
+        xx = xx + np.unique(np.diff(xx)/2)
+        N = int(np.power(len(xx),1/3)) # int(np.log2(len(xx)))
+        ticks = list(product(*([np.arange(N).tolist()]*3)))
+        ax.set_xticks(xx)
+        ax.set_xticklabels([str(i) for i in ticks])
+        # ax.xaxis.set(ticks=xx, ticklabels=[str(i) for i in ticks])
+        
+        yy = yy + np.unique(np.diff(yy)/2)
+        N = int(np.power(len(yy),1/3))
+        ticks = list(product(*([np.arange(N).tolist()]*3)))
+        # ax.yaxis.set(ticks=yy, ticklabels=ticks)
+        ax.set_yticks(yy)
+        ax.set_yticklabels([str(i) for i in ticks])
+
+    plt.tight_layout()
+    if file is None:
+        plt.show()
+    else:
+        plt.savefig(file)
+    return

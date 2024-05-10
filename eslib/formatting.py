@@ -4,6 +4,7 @@ from eslib.functions import Dict2Obj, args_to_dict
 from eslib.functions import add_default
 from datetime import datetime
 import inspect
+from eslib.show import dict_to_list
 import colorama
 from colorama import Fore, Style
 # from icecream import ic
@@ -28,17 +29,6 @@ input_arguments = Fore.GREEN   + Style.NORMAL + input_arguments         + Style.
 warning         = Fore.MAGENTA + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
 everythingok    = Fore.BLUE    + Style.BRIGHT + everythingok            + Style.RESET_ALL
 
-#---------------------------------------#
-def dict_to_string(d:dict):
-    return ' '.join([f'--{key} {value}' for key, value in d.items()])
-
-def dict_to_list(d:dict):
-    if d == {} or d is None:
-        return None
-    result = []
-    for key, value in d.items():
-        result.extend([f'--{key}', value])
-    return result
 
 #---------------------------------------#
 def print_python_info():

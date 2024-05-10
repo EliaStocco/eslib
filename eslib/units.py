@@ -22,6 +22,13 @@ atomic_unit["frequency"] = 1 / atomic_unit["time"]
 dtype = Union[xr.DataArray,np.ndarray]
 utype = pint.Unit
 
+families = {    "energy"          : ["conserved","kinetic_md","potential"],
+                "polarization"    : ["polarization"],
+                "electric-dipole" : ["dipole"],
+                "time"            : ["time"],
+                "electric-field"  : ["Efield","Eenvelope"]
+}
+
 def remove_unit(array:dtype)->dtype:
     """Returns a tuple with the input array without the ```pint``` unit, and the removed ```pint``` unit."""
     out = array.copy()
@@ -66,3 +73,12 @@ def check_dim(array:dtype,dimension:str)->bool:
     else:
         out *= atomic_unit["dimensionless"]
         return out.check(dimension)
+
+def search_family(what):
+    for k in families.keys():
+        if what in families[k]:
+            return k
+    else :
+        raise ValueError('family {:s} not found. \
+                            But you can add it to the "families" dict :) \
+                            to improve the code '.format(what))
