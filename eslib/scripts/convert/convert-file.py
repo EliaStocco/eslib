@@ -82,7 +82,7 @@ def main(args):
                            remove_replicas=args.remove_replicas)
         if args.input_format == "pickle":
             index = integer_to_slice_string(args.index)
-            atoms = atoms[index]
+            atoms = AtomicStructures(atoms[index])
         # atoms:List[Atoms] = list(atoms)
     print("done")
     print("\tn. of atomic structures: {:d}".format(len(atoms)))
