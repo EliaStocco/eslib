@@ -2,11 +2,10 @@
 - improve documentation for all the functions
 - remove old scripts
 - add automatic tests with `pytest`
-- implement script to compute vibrational modes from a `replay` trajectory
 - implement finite difference methods for vibrational modes exploiting symmetries (as done in `phononpy`) using `spglib`
-- clean `convert-file.py` script
 - create "backup file" for `soap.py`
 - find a way to restart `fps.py` from an interrupted script
 - find a way to "standardize" `DipoleModel`, `MACEModel` and `Calculator`
 - set up scripts to compute time autocorrelation functions
-- doce a clean way to vectory `ase.Atoms` into `AtomicStructures`
+- code a clean way to vectory `ase.Atoms` into `AtomicStructures`
+- optimize reading from `extxyz` file by reducing number of for loops
