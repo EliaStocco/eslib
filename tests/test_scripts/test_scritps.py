@@ -106,6 +106,16 @@ torun = {
             "input" : "tests/structures/bulk-water/bulk-water.au.empty.extxyz" ,   
         },
     },
+    "ipi" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : "tests/structures/LiNbO3/i-pi.positions_0.xyz",   
+            "input_format"       : "ipi",   
+            "output"             : "{:s}/output.extxyz".format(tmp_folder),     
+        },
+    },
 }
 
 
