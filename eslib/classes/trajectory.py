@@ -17,11 +17,27 @@ T = TypeVar('T', bound='AtomicStructures')
 
 #---------------------------------------#
 class AtomicStructures(aseio):
-    """Class to handle atomic structures:
-        - automatic extraction of `info` and `array` from the list of structures
     """
-    
+    Class to handle atomic structures with additional functionality:
+        - automatic extraction of `info` and `array` from the list of structures
+        - methods for getting and setting `info` and `array` attributes
+        - methods for converting units of `info` and `array` attributes
+        - method for searching if an attribute is present in `info` or `array`
+        - method for checking the presence of an attribute in `info`, `array`, or both
+        - method for subsampling the AtomicStructures object
+    """
+
     def get_info(self:T,name:str,default:np.ndarray=None)->np.ndarray:
+        """
+        Get information attribute values for all structures.
+
+        Parameters:
+        - name: Name of the information attribute.
+        - default: Default value if attribute is missing.
+
+        Returns:
+        - np.ndarray: Array of information attribute values.
+        """
         output = None
         def set_output(output,n,value):
             if output is None:
@@ -40,6 +56,16 @@ class AtomicStructures(aseio):
         return output
     
     def get_array(self:T,name:str,default:np.ndarray=None)->np.ndarray:
+        """
+        Get array attribute values for all structures.
+
+        Parameters:
+        - name: Name of the array attribute.
+        - default: Default value if attribute is missing.
+
+        Returns:
+        - np.ndarray: Array of array attribute values.
+        """
         output = None
         def set_output(output,n,value):
             if output is None:
@@ -58,6 +84,17 @@ class AtomicStructures(aseio):
         return output
 
     def get(self:T,name:str,default:np.ndarray=None,what:str="unknown")->np.ndarray:
+        """
+        Get information or array attribute values for all structures.
+
+        Parameters:
+        - name: Name of the attribute.
+        - default: Default value if attribute is missing.
+        - what: 'info' or 'arrays', if known.
+
+        Returns:
+        - np.ndarray: Array of attribute values.
+        """
         if what == "unknown":
             what = self.search(name)
         if what == "info":
@@ -69,6 +106,13 @@ class AtomicStructures(aseio):
 
     @deprecated(reason="Use `set` instead")
     def set_info(self:T,name:str,data:np.ndarray)->None:
+        """
+        Set information attribute values for all structures (deprecated).
+
+        Parameters:
+        - name: Name of the information attribute.
+        - data: Array of values to set.
+        """
         assert len(self) == data.shape[0]
         for n,atoms in enumerate(self):
             atoms.info[name] = data[n]
@@ -76,12 +120,27 @@ class AtomicStructures(aseio):
     
     @deprecated(reason="Use `set` instead")
     def set_array(self:T,name:str,data:np.ndarray)->None:
+        """
+        Set array attribute values for all structures (deprecated).
+
+        Parameters:
+        - name: Name of the array attribute.
+        - data: Array of values to set.
+        """
         assert len(self) == data.shape[0]
         for n,atoms in enumerate(self):
             atoms.arrays[name] = data[n]
         pass    
 
     def set(self:T,name:str,data:np.ndarray,what:str="unknown")->None:
+        """
+        Set information or array attribute values for all structures.
+
+        Parameters:
+        - name: Name of the attribute.
+        - data: Array of values to set.
+        - what: 'info' or 'arrays', if known.
+        """
         # if what == "unknown":
         #     what = self.search(name)
         if what == "info" or what == "arrays":
@@ -98,6 +157,19 @@ class AtomicStructures(aseio):
                 _from:str="atomic_unit",
                 _to:str="atomic_unit",
                 inplace:bool=False)->Union[None,np.ndarray]:
+        """
+        Convert units of attribute values for all structures.
+
+        Parameters:
+        - name: Name of the attribute to convert.
+        - family: Family of units for conversion.
+        - _from: Units to convert from.
+        - _to: Units to convert to.
+        - inplace: If True, perform conversion in place.
+
+        Returns:
+        - np.ndarray: Converted attribute values.
+        """
         data = self.get(name)
         data = convert(what=data,family=family,_from=_from,_to=_to)
         if inplace:
@@ -106,7 +178,15 @@ class AtomicStructures(aseio):
             return data
         
     def search(self,name:str)->str:
+        """
+        Search if attribute is present in 'info' or 'arrays'.
 
+        Parameters:
+        - name: Name of the attribute to search.
+
+        Returns:
+        - str: 'info', 'arrays', or 'both' if found, 'none' if not found.
+        """
         # is it in `info`?
         booleans = [ name in s.info for s in self ]
         info = np.all(booleans)
@@ -121,6 +201,17 @@ class AtomicStructures(aseio):
         if arrays: return "arrays"
 
     def is_there(self:T,name:str,_all:bool=True,where:str=None)->np.ndarray:
+        """
+        Check if attribute is present in 'info', 'arrays', or both.
+
+        Parameters:
+        - name: Name of the attribute to check.
+        - _all: If True, check if attribute is present in all structures.
+        - where: Specify where to search ('info', 'arrays', or None for both).
+
+        Returns:
+        - np.ndarray: Boolean array indicating presence of attribute.
+        """
         if where is None:
             booleans = [ name in s.info or name in s.arrays for s in self ]
         elif where in ["i","info"]:

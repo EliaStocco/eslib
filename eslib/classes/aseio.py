@@ -38,6 +38,20 @@ def read_trajectory(file:str,
                pbc:bool=True,
                same_cell:bool=False,
                remove_replicas:bool=False)->List[Atoms]:
+    """
+    Read atomic structures from a trajectory file.
+
+    Args:
+        file (str): Path to the trajectory file.
+        format (str, optional): File format. Defaults to None.
+        index (str, optional): Selection string. Defaults to ":".
+        pbc (bool, optional): Periodic boundary conditions. Defaults to True.
+        same_cell (bool, optional): Use the same cell for all frames. Defaults to False.
+        remove_replicas (bool, optional): Remove replicas. Defaults to False.
+
+    Returns:
+        List[Atoms]: List of atomic structures.
+    """
 
     format = format.lower() if format is not None else None
     f = "extxyz" if format in ["i-pi","ipi"] else format
@@ -130,6 +144,15 @@ def abc2h(a, b, c, alpha, beta, gamma):
 
 #------------------------------------#
 def integer_to_slice_string(index):
+    """
+    Convert integer index to slice string.
+
+    Args:
+        index: Index to convert.
+
+    Returns:
+        slice: Converted slice.
+    """
     if isinstance(index, int):
         return string2index(f"{index}:{index+1}")
     elif index is None:
@@ -149,6 +172,18 @@ def get_offset(file:TextIOWrapper,
                Nmax:int=1000000,
                line_offset_old:list=None,
                index:slice=None):
+    """
+    Get line offsets in a file.
+
+    Args:
+        file (TextIOWrapper): File object.
+        Nmax (int, optional): Maximum number of offsets. Defaults to 1000000.
+        line_offset_old (list, optional): Old line offsets. Defaults to None.
+        index (slice, optional): Slice index. Defaults to None.
+
+    Returns:
+        list: List of line offsets.
+    """
     # Read in the file once and build a list of line offsets
     n = 0 
     line_offset = [None]*Nmax
@@ -176,6 +211,16 @@ def get_offset(file:TextIOWrapper,
 #---------------------------------------#
 def read_comments_xyz(file:TextIOWrapper,
                       index:slice=None):
+    """
+    Read comments from an XYZ file.
+
+    Args:
+        file (TextIOWrapper): File object.
+        index (slice, optional): Slice index. Defaults to None.
+
+    Returns:
+        list: List of comments.
+    """
     offset = get_offset(file=file,index=index)
     if index is not None:
         offset = offset[index]
@@ -187,6 +232,9 @@ def read_comments_xyz(file:TextIOWrapper,
 
 #------------------------------------#
 class FakeList:
+    """
+    A fake list implementation.
+    """
     def __init__(self, value, length):
         self.value = value
         self.length = length
