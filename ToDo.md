@@ -9,3 +9,4 @@
 - find a way to restart `fps.py` from an interrupted script
 - find a way to "standardize" `DipoleModel`, `MACEModel` and `Calculator`
 - set up scripts to compute time autocorrelation functions
+- doce a clean way to vectory `ase.Atoms` into `AtomicStructures`
