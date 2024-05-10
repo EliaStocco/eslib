@@ -1,6 +1,5 @@
 from typing import List
 import numpy as np
-# from icecream import ic
 
 class easyvectorize():
 
@@ -81,17 +80,17 @@ class easyvectorize():
                 else:
                     super().__setitem__(key,value)      
 
-            def get(self,key):
-                return self[key]
+            # def get(self,key):
+            #     return self[key]
 
-            def set(self,key,value):
-                try:
-                    self[key] = value
-                except:
-                    try:
-                        self[key] = easyvectorize.dtype(value)
-                    except:
-                        raise ValueError("Cannot convert value to",easyvectorize.dtype)
+            # def set(self,key,value):
+            #     try:
+            #         self[key] = value
+            #     except:
+            #         try:
+            #             self[key] = easyvectorize.dtype(value)
+            #         except:
+            #             raise ValueError("Cannot convert value to",easyvectorize.dtype)
 
             @easyvectorize.convert_array   
             def apply(self,func:callable,*args, **kwargs):

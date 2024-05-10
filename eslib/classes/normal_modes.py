@@ -335,7 +335,7 @@ class NormalModes(pickleIO):
         # velocities
         if trajectory.is_there("velocities"):
             try :
-                v = trajectory.call(lambda e: e.arrays["velocities"])
+                v = trajectory.get_array("velocities") # trajectory.call(lambda e: e.arrays["velocities"])
                 v = v.reshape(len(v),-1)
             except:
                 warn("velocities not found, setting them to zero.")

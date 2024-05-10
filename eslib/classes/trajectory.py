@@ -3,6 +3,9 @@ import numpy as np
 from eslib.tools import convert
 from eslib.functional import deprecated
 from eslib.classes.aseio import aseio, integer_to_slice_string
+from eslib.formatting import esfmt
+from eslib.classes.vectorize import easyvectorize
+from ase import Atoms
 from typing import List, Union, TypeVar
 
 T = TypeVar('T', bound='AtomicStructures')
@@ -231,4 +234,29 @@ class AtomicStructures(aseio):
             subsampled_structures = self[indices]
             subsampled_structures = AtomicStructures(subsampled_structures)
         return subsampled_structures
+
+    def call(self: T, func) -> np.ndarray:
+        t = easyvectorize(Atoms)(self)
+        return t.call(func)
     
+def random_water_structure(num_molecules=1):
+    from ase import Atoms
+    symbols = ['H', 'H', 'O']  # Atomic symbols for water molecule
+    water_structure = Atoms()  # Initialize ASE Atoms object
+    # Generate random positions for each water molecule
+    for _ in range(num_molecules):
+        # Randomly generate positions for each atom in the water molecule
+        positions = np.random.rand(3, 3)
+        # Append the atoms of the water molecule to the overall structure
+        water_structure.extend(Atoms(symbols=symbols, positions=positions))
+    return water_structure
+
+@esfmt(None,None)
+def main(args):
+    atoms = random_water_structure(3)
+    structures = AtomicStructures(atoms)
+    pbc = structures.pbc
+    return 
+
+if __name__ == "__main__":
+    main()

@@ -48,7 +48,7 @@ def print_python_info():
 def line():
     print("-"*30)
 
-def esfmt(prepare_parser:callable, description:str=None):
+def esfmt(prepare_parser:callable=None, description:str=None):
     """Decorator for the 'main' function of many scripts."""
 
     #---------------------------------------#
