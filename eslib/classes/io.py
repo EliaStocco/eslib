@@ -13,36 +13,44 @@ class pickleIO:
             raise ValueError(f"Error saving to pickle file: {e}")
 
     @classmethod
-    def from_pickle(cls: Type[T], file_path: str) -> T:
+    def from_pickle(cls: Type[T], file: str) -> T:
         """Load an object from a *.pickle file."""
         try:
-            with open(file_path, 'rb') as file:
-                obj = pickle.load(file)
+            with open(file, 'rb') as ff:
+                obj = pickle.load(ff)
             if isinstance(obj, cls):
                 return obj
             else:
                 raise ValueError(f"Invalid pickle file format. Expected type: {cls.__name__}")
         except FileNotFoundError:
-            print(f"Error loading from pickle file: File not found - {file_path}")
+            print(f"Error loading from pickle file: File not found - {file}")
         except Exception as e:
             print(f"Error loading from pickle file: {e}")
 
     @staticmethod
     def correct_extension_out(func):
-        """Decorator to redirect the decorated method to `pickleIO.to_pickle` if the file extension is `.pickle`."""
+        """
+        Decorator to redirect the decorated method to `pickleIO.to_pickle` if the file extension is `.pickle`.
+
+        Attention: keyword-only arguments are allowed.
+        """
         def wrapper(self:Type[T],**argv):
             if 'file' in argv and isinstance(argv['file'], str) and argv['file'].endswith('.pickle'):
-                return self.to_pickle(argv['file'])
+                return self.to_pickle(file=argv['file'])
             else:
                 return func(self,**argv)
         return wrapper
     
     @staticmethod
     def correct_extension_in(func):
-        """Decorator to redirect the decorated method to `pickleIO.from_pickle` if the file extension is `.pickle`."""
+        """
+        Decorator to redirect the decorated method to `pickleIO.from_pickle` if the file extension is `.pickle`.
+
+        Attention: keyword-only arguments are allowed.        
+        """
         def wrapper(cls: Type[T],**argv):
             if 'file' in argv and isinstance(argv['file'], str) and argv['file'].endswith('.pickle'):
-                return cls.from_pickle(argv['file'])
+                return cls.from_pickle(file=argv['file'])
             else:
                 return func(cls,**argv)
         return wrapper
