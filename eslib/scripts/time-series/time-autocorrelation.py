@@ -4,12 +4,14 @@ from ase import Atoms
 from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt
 import numpy as np
-from scipy.signal import correlate
+from eslib.mathematics import tacf, reshape_into_blocks
 import matplotlib.pyplot as plt 
+from eslib.plot import hzero
+from scipy.optimize import curve_fit
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Compute the time autocorrelation function (TACF) of a quantity."
+description = "Compute the time autocorrelation function (TACF) of an array."
 
 #---------------------------------------#
 def prepare_args(description):
@@ -17,12 +19,10 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , **argv, required=True , type=str, help="txt/npy input file")
-    # parser.add_argument("-if", "--input_format" , **argv, required=False, type=str, help="input file format (default: 'None')" , default=None)
-    # parser.add_argument("-in", "--in_name"      , **argv, required=True , type=str, help="name of quantity whose TACF has to be computed")
-    # parser.add_argument("-on", "--out_name"     , **argv, required=False, type=str, help="name used to save the TACF (default: '[in_name]-tacf')", default=None)
     parser.add_argument("-b" , "--blocks"       , **argv, required=False, type=int, help="number of blocks (default: 10)", default=10)
     parser.add_argument("-o" , "--output"       , **argv, required=True , type=str, help="txt/npy output file")
-    # parser.add_argument("-of", "--output_format", **argv, required=False, type=str, help="output file format (default: 'None')", default=None)
+    parser.add_argument("-p" , "--plot"       , **argv, required=False, type=str, help="output file for the plot")
+
     return parser
 
 #---------------------------------------#
@@ -40,8 +40,18 @@ def main(args):
     print("\tdata shape: :",data.shape)
 
     #------------------#
+    print("\tn. of blocks: ", args.blocks)
+    data = reshape_into_blocks(data,args.blocks).T
+    print("\tdata shape: :",data.shape)
+
+    #------------------#
+    print("\tremoving mean ... ",end="")
+    data -= data.mean(axis=0)
+    print("done")
+
+    #------------------#
     print("\tComputing the autocorrelation function ... ", end="")
-    autocorr = correlate(data,data,mode="same")# [:len(data)]
+    autocorr = tacf(data)
     print("done")
     print("\tautocorr shape: :",autocorr.shape)
 
@@ -53,18 +63,61 @@ def main(args):
         np.savetxt(args.output,autocorr)
     print("done")
 
-    lags = np.arange(len(autocorr))
-    plt.plot(lags, autocorr)
-    plt.xlabel('Lag')
-    plt.ylabel('Autocorrelation')
-    plt.title('Autocorrelation Function of Time Series')
-    plt.show()
+    #------------------#
+    print("\tFitting the autocorrelation function with an exponential ... ", end="")
 
-    plt.plot(data)
-    plt.xlabel('Lag')
-    plt.ylabel('Autocorrelation')
-    plt.title('Autocorrelation Function of Time Series')
-    plt.show()
+    mean = autocorr.mean(axis=1)
+    std = autocorr.std(axis=1)
+    x = np.arange(len(mean))
+
+    # Define the exponential function to fit
+    def exponential(x,tau):
+        return np.exp(-x/tau)
+
+    # Fit the data to the exponential function, providing the standard deviation as sigma
+    popt, pcov = curve_fit(f=exponential, 
+                           xdata=x, 
+                           ydata=mean,
+                           sigma=std)
+
+    yfit = exponential(x, *popt)
+    print("done")
+    print("\ttau: {:e}".format(popt[0]))
+
+
+    #------------------#
+    if args.plot is not None:
+        print("\tProducing autocorrelation plot ... ", end="")
+        fig, axes = plt.subplots(2, 1, figsize=(10, 8),sharex=True)
+
+        for i in range(autocorr.shape[1]):
+            axes[0].plot(autocorr[:, i], label=f'{i+1}')
+
+        axes[1].plot(mean,color="blue",label='$\\mu$')
+        axes[1].fill_between(x, mean - std, mean + std, color='gray', alpha=0.25, label='$\\mu\\pm\\sigma$')
+        axes[1].fill_between(x, mean - 2*std, mean + 2*std, color='gray', alpha=0.15, label='$\\mu\\pm2\\sigma$')
+
+        axes[1].plot(yfit,color="red",label='$e^{-x/\\tau}$',linewidth=1)
+
+        for ax in axes:
+            ax.legend(loc="upper right",facecolor='white', framealpha=1,edgecolor="black")
+            ax.grid()
+            hzero(ax)
+            ax.set_xlim(0,ax.get_xlim()[1])
+            # ax.set_ylim(0,1)
+            
+        axes[1].set_xlabel('x')
+        # Add text box with the value of a variable
+        textbox_text = "$\\tau={:.2e}$".format(popt[0]) 
+        plt.text(0.05, 0.05, textbox_text, transform=plt.gca().transAxes, fontsize=10, ha='right', va='bottom', bbox=dict(facecolor='white', alpha=0.5))
+
+        
+        plt.tight_layout()
+        print("done")
+
+        print("\tSaving plot to file '{:s}'... ".format(args.plot), end="")
+        plt.savefig(args.plot)
+        print("done")
 
     return 0
 
