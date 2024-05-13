@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 from eslib.plot import plot_bisector
 from eslib.formatting import esfmt
-from eslib.classes.trajectory import AtomicStructures, info
+from eslib.classes.trajectory import AtomicStructures
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -32,12 +32,12 @@ def main(args):
     #------------------#
     # data
     print("\tExtracting '{:s}' from the trajectory ... ".format(args.keyword_A), end="")
-    A = info(atoms,args.keyword_A)  
+    A = atoms.get(args.keyword_A)  
     print("done")
     print("\t'{:s}' shape: ".format(args.keyword_A),A.shape)
 
     print("\tExtracting '{:s}' from the trajectory ... ".format(args.keyword_B), end="")
-    B = info(atoms,args.keyword_B)  
+    B = atoms.get(args.keyword_B)  
     print("done")
     print("\t'{:s}' shape: ".format(args.keyword_B),B.shape)
 
