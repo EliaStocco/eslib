@@ -117,7 +117,7 @@ def main(args):
 
     #------------------#
     print("\n\tWriting unfolded structures to output file '{:s}' ... ".format(args.output), end="")
-    atoms.to_file(args.output,args.output_format)
+    atoms.to_file(file=args.output,format=args.output_format)
     print("done")
 
 #---------------------------------------#
