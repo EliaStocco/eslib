@@ -60,7 +60,7 @@ def main(args):
     #---------------------------------------#
     # store
     print("\tStoring data to '{:s}' with name '{}' ... ".format(what,args.name), end="")
-    atoms = list(atoms)
+    # atoms = list(atoms)
     for n in range(N):
         if what == "info":
             atoms[n].info[args.name] = data[n]
@@ -71,11 +71,8 @@ def main(args):
 
     #---------------------------------------#
     print("\n\tWriting trajectory to file '{:s}' ... ".format(args.output), end="")
-    try:
-        write(args.output, list(atoms)) # fmt)
-        print("done")
-    except Exception as e:
-        print(f"\n\t{error}: {e}")
+    atoms.to_file(file=args.output)
+    print("done")
 
 if __name__ == "__main__":
     main()
