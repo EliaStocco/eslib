@@ -18,13 +18,21 @@ class aseio(List[Atoms], pickleIO):
     @classmethod
     @pickleIO.correct_extension_in
     def from_file(cls, **argv):
-        """Load atomic structures from a file."""
+        """
+        Load atomic structures from file.
+
+        Attention: it's recommended to use keyword-only arguments.
+        """
         traj = read_trajectory(**argv)
         return cls(traj)
         
     @pickleIO.correct_extension_out
     def to_file(self: T, file: str, format: Union[str, None] = None):
-        """Write atomic structures to a file."""
+        """
+        Write atomic structures to file.
+        
+        Attention: it's recommended to use keyword-only arguments.
+        """
         write(images=self, filename=file, format=format)
     
     def to_list(self: T) -> List[Atoms]:
@@ -143,6 +151,14 @@ def abc2h(a, b, c, alpha, beta, gamma):
     return h
 
 #------------------------------------#
+def is_convertible_to_integer(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+#------------------------------------#
 def integer_to_slice_string(index):
     """
     Convert integer index to slice string.
@@ -153,6 +169,10 @@ def integer_to_slice_string(index):
     Returns:
         slice: Converted slice.
     """
+    
+    if is_convertible_to_integer(index):
+        index=int(index)
+
     if isinstance(index, int):
         return string2index(f"{index}:{index+1}")
     elif index is None:
