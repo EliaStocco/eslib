@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from eslib.formatting import esfmt
-from eslib.classes.trajectory import AtomicStructures, info
+from eslib.classes.trajectory import AtomicStructures
 from eslib.plot import generate_colors
 
 #---------------------------------------#
@@ -65,7 +65,7 @@ def main(args):
     #------------------#
     # data
     print("\tExtracting '{:s}' from the trajectory ... ".format(args.name), end="")
-    data = info(atoms,args.name)  
+    data = atoms.get(args.name)  
     print("done")
 
     print("\t'{:s}' shape: ".format(args.name),data.shape)
@@ -74,7 +74,7 @@ def main(args):
     time = None
     if args.time is not None:
         print("\tExtracting '{:s}' from the trajectory ... ".format(args.time), end="")
-        time = info(atoms,args.time)  
+        time = atoms.get(args.time)  
         print("done")
 
         print("\t'{:s}' shape: ".format(args.time),data.shape)

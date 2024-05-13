@@ -19,8 +19,9 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , **argv, required=True , type=str  , help="file with the atomic structures")
     parser.add_argument("-if", "--input_format" , **argv, required=False, type=str  , help="input file format (default: 'None')" , default=None)
-    parser.add_argument("-rc", "--cutoff"       , **argv, required=False, type=float, help="cutoff/bond length(default: 3)" , default=3)
-    parser.add_argument("-s" , "--species"      , **argv, required=True , type=slist, help="atomic species of the bonds to be fixed (default: ['O','H'])", default=['O','H'])
+    # parser.add_argument("-rc", "--cutoff"       , **argv, required=False, type=float, help="cutoff/bond length(default: 3)" , default=3)
+    parser.add_argument("-n" , "--n_bonds"      , **argv, required=False, type=int  , help="number of bonds (default: 2)", default=2)
+    parser.add_argument("-s" , "--species"      , **argv, required=False, type=slist, help="atomic species of the bonds to be fixed (default: ['O','H'])", default=['O','H'])
     parser.add_argument("-o" , "--output"       , **argv, required=True , type=str  , help="output file with the oxidation numbers (default: 'wrapped.extxyz')", default="wrapped.extxyz")
     parser.add_argument("-of", "--output_format", **argv, required=False, type=str  , help="output file format (default: None)", default=None)
     return parser# .parse_args()
@@ -63,18 +64,19 @@ def main(args):
             # Find neighbors of the current oxygen atom within the cutoff distance
             
             distances = atoms.get_distances(o_index,hydrogens,mic=True,vector=False)
+            indices = list(np.argsort(distances)[:args.n_bonds])
 
-            for n,d in zip(hydrogens,distances):
-                if d > args.cutoff:
-                    continue
+            for n in np.asarray(hydrogens)[indices]:
+                # if d > args.cutoff:
+                #     continue
                 delta = atoms.positions[n] - atoms.positions[o_index] 
-                delta:np.ndarray = cart2frac(atoms.get_cell(),delta)[0]
+                delta:np.ndarray = cart2frac(atoms.get_cell(),delta)
                 # delta = (2*delta).round(0)/2.
                 delta = delta.round(0).astype(int)
                 if not np.allclose(delta,zeros):
                     # print("\t - wrapping hydrogen {:3d} by [{:>2d},{:>2d},{:>2d}]".format(n,*delta.tolist()),\
                     #     "(frac. coor.) so that it will be closer to oxygen {:d}".format(o_index))
-                    delta = frac2cart(atoms.get_cell(),delta)[0]
+                    delta = frac2cart(atoms.get_cell(),delta)
                     atoms.positions[n,:] -= delta
                     wrapped.append(n)
                     # print(n," ",delta)

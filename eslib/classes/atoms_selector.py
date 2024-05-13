@@ -32,7 +32,7 @@ class AtomSelector:
             # Select atoms by index or range
             elif index_str:
                 ii = integer_to_slice_string(selection)
-                selected_atoms.extend([n for n,_ in enumerate(atoms_obj[ii])])
+                selected_atoms.extend([n for _,n in enumerate(np.arange(len(atoms_obj))[ii])])
             else:
                 raise ValueError("coding error")
                 

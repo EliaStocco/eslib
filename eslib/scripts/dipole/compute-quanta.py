@@ -43,7 +43,7 @@ def main(args):
 
     #------------------#
     print("\n\tSaving atomic structures to file '{:s}' ... ".format(args.output), end="")
-    structures.to_file(args.output,args.output_format)
+    structures.to_file(file=args.output,format=args.output_format)
     print("done")    
 
 #---------------------------------------#
