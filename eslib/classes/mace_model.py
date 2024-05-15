@@ -10,6 +10,7 @@ from warnings import warn
 from eslib.tools import add_info_array, reshape_info_array
 import torch
 import json
+import os
 
 @dataclass
 class MACEModel(pickleIO):
@@ -21,6 +22,7 @@ class MACEModel(pickleIO):
     charges_key: str
     _initialized:bool = field(init=False)
     _attributes_dict: Dict[str, str] = field(init=False)
+    _folder: str = field(init=False)
 
     def to_pickle(self,*argv,**kwargs):
         # self._initialized = False
@@ -37,6 +39,7 @@ class MACEModel(pickleIO):
     def __post_init__(self):
         self._attributes_dict = self.to_dict()
         self._initialized = False
+        self._folder = os.getcwd()
         self.initialize()
 
     def to_dict(self) -> Dict[str, str]:
@@ -58,9 +61,16 @@ class MACEModel(pickleIO):
         if not self._initialized:   
             torch_tools.set_default_dtype(self.default_dtype)
             self.device = torch_tools.init_device([self.device])
-            self.network = get_model(model_path=self.model,
-                                model_type=self.model_type,
-                                device=self.device)
+            try :
+                model_path = self.model
+                self.network = get_model(model_path=model_path,
+                                    model_type=self.model_type,
+                                    device=self.device)
+            except:
+                model_path = "{:s}/{:s}".format(self._folder,self.model)
+                self.network = get_model(model_path=model_path,
+                                    model_type=self.model_type,
+                                    device=self.device)
             self.network = self.network.to(self.device)  # shouldn't be necessary but seems to help with CUDA problems
             for param in self.network.parameters():
                 param.requires_grad = False
