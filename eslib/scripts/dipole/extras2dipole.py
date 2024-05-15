@@ -15,6 +15,7 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input" , **argv, required=True , type=str, help="input file with the JSOn formatted dipoles [au]")
+    parser.add_argument("-k" , "--keyword" , **argv, required=False , type=str, help="keyword (default: 'dipole')", default='dipole')
     parser.add_argument("-rr" , "--remove_replicas", **argv,required=False, type=str2bool, help='whether to remove replicas (default: false)', default=False)
     parser.add_argument("-o" , "--output", **argv, required=False, type=str, help="txt output file with dipoles (default: 'dipoles.txt')", default='dipoles.txt')
     return parser# .parse_args()
@@ -42,10 +43,10 @@ def main(args):
         if test is not None:
             steps.append(int(test.group(1)))
         # Check if the line contains dipole data
-        if '"dipole"' in line:
+        if '\"{:s}\"'.format(args.keyword) in line:
             # Extract the dipole values from the line
-            json_data = json.loads(line.replace("\n",""))
-            dipole_data = json_data["dipole"] #json.loads(line.strip().split('"dipole":')[1][:-1])
+            json_data = json.loads(line.replace("\n","").replace('\x00',""))
+            dipole_data = json_data[args.keyword] #json.loads(line.strip().split('"dipole":')[1][:-1])
             # Append the dipole values to the list
             dipoles.append(dipole_data)
     print("done")
