@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 from ase.io import write
-from eslib.classes.trajectory import AtomicStructures, info, array
+from eslib.classes.trajectory import AtomicStructures# , info, array
 from eslib.formatting import esfmt
 
 #---------------------------------------#
@@ -16,7 +16,7 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input" , **argv,type=str, help="input file [extxyz]")
     parser.add_argument("-n" , "--name"  , **argv,type=str, help="name for the new info/array")
-    parser.add_argument("-w" , "--what"  , **argv,type=str, help="what the data is: 'i' (info) or 'a' (arrays)")
+    # parser.add_argument("-w" , "--what"  , **argv,type=str, help="what the data is: 'i' (info) or 'a' (arrays)")
     parser.add_argument("-o" , "--output", **argv,type=str, help="output file (default: '[name].txt')", default=None)
     parser.add_argument("-of", "--output_format", **argv,type=str, help="output format for np.savetxt (default: '%%24.18f')", default='%24.18f')
     return parser# .parse_args()
@@ -34,15 +34,16 @@ def main(args):
     #---------------------------------------#
     # reshape
     print("\tExtracting '{:s}' from the trajectory ... ".format(args.name), end="")
-    N = len(atoms)
-    Natoms = atoms[0].positions.shape[0]
-    if args.what in ['a','arrays','array']:
-        data = array(atoms,args.name)
-    elif args.what in ['i','info']:
-        data = info(atoms,args.name)  
-        what = "info"
-    else:
-        raise ValueError("'what' (-w,--what) can be only 'i' (info), or 'a' (array)")
+    # N = len(atoms)
+    # Natoms = atoms[0].positions.shape[0]
+    # if args.what in ['a','arrays','array']:
+    #     data = atoms.get(args.name)
+    # elif args.what in ['i','info']:
+    #     data = atoms.get(args.name)  
+    #     # what = "info"
+    # else:
+    #     raise ValueError("'what' (-w,--what) can be only 'i' (info), or 'a' (array)")
+    data = atoms.get(args.name)  
     print("done")
 
     print("\t'{:s}' shape: ".format(args.name),data.shape)

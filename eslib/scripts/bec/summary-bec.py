@@ -48,7 +48,7 @@ def main(args):
     
     #------------------#
     print("\n\tWriting BECs to file '{:s}' ... ".format(args.output), end="")
-    Z.to_file(args.output)
+    Z.to_file(file=args.output)
     print("done")
 
     if args.summary is not None:

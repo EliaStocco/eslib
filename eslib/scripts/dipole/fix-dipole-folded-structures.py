@@ -77,7 +77,7 @@ def main(args):
 
     #------------------#
     print("\n\tWriting output to file '{:s}' ... ".format(args.output), end="")
-    trajectory.to_file(args.output)
+    trajectory.to_file(file=args.output)
     print("done")
     
 

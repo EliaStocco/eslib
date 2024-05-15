@@ -47,7 +47,7 @@ def main(args):
     #-------------------#
     # Write the data to the specified output file with the specified format
     print("\n\tWriting data to file '{:s}' ... ".format(args.output), end="")
-    supercell.to_file(args.output,args.output_format)
+    supercell.to_file(file=args.output,format=args.output_format)
     print("done")
     
 #---------------------------------------#

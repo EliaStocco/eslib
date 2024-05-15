@@ -104,7 +104,7 @@ def main(args):
 
     #------------------#
     print("\n\tWriting unfolded structures to output file '{:s}' ... ".format(args.output), end="")
-    structures.to_file(args.output,args.output_format)
+    structures.to_file(file=args.output,format=args.output_format)
     print("done")
 
 

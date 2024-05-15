@@ -59,7 +59,7 @@ def main(args):
         # remove replicas
         if args.remove_replicas:
             print("\tRemoving replicas ... ", end="")
-            allproperties = allproperties.remove_replicas(keyword="step",ofile="steps-without-replicas.properties.txt")
+            allproperties = allproperties.remove_replicas(keyword="step") #,ofile="steps-without-replicas.properties.txt")
             print("done")
             print("\tNumber of snapshots : {:d}".format(len(allproperties)))
 
