@@ -3,6 +3,8 @@ import numpy as np
 from copy import copy
 from .functions import getproperty, get_property_header
 from eslib.classes.io import pickleIO
+from typing import Union, TypeVar
+T = TypeVar('T', bound='properties')
 
 class properties(pickleIO):
 
@@ -21,6 +23,26 @@ class properties(pickleIO):
         self.set_length()
         
         pass
+
+    @classmethod
+    @pickleIO.correct_extension_in
+    def from_file(cls, **argv):
+        """
+        Load atomic structures from file.
+
+        Attention: it's recommended to use keyword-only arguments.
+        """
+        traj = properties.load(**argv)
+        return cls(traj)
+        
+    @pickleIO.correct_extension_out
+    def to_file(self: T, file: str, format: Union[str, None] = None):
+        """
+        Write atomic structures to file.
+        
+        Attention: it's recommended to use keyword-only arguments.
+        """
+        raise ValueError("only pickle extension is supported")
 
     def set_length(self):
         length = None
@@ -96,6 +118,7 @@ class properties(pickleIO):
         usteps, indices = np.unique(steps, return_index=True)
         if ofile is not None: np.savetxt(ofile,usteps,fmt="%d")
         for k in self.properties.keys():
-            self.properties[k] = self.properties[k][indices]
+            out.properties[k] = self.properties[k][indices]
         out.set_length()
+        assert np.allclose(np.arange(len(out)),out.properties[keyword])
         return out
