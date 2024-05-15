@@ -39,6 +39,12 @@ class aseio(List[Atoms], pickleIO):
         return list(self)
     
 #------------------------------------#
+deg2rad     = np.pi / 180.0
+abcABC      = re.compile(r"CELL[\(\[\{]abcABC[\)\]\}]: ([-+0-9\.Ee ]*)\s*")
+abcABCunits = re.compile(r'\{([^}]+)\}')
+step        = re.compile(r"Step:\s+(\d+)")
+    
+#------------------------------------#
 # function to efficiently read atomic structure from a huge file
 def read_trajectory(file:str,
                format:str=None,
@@ -102,12 +108,16 @@ def read_trajectory(file:str,
                     comments = read_comments_xyz(ffile,index)
                 strings = [ step.search(comment).group(1) for comment in comments ]
                 steps = np.asarray([int(i) for i in strings],dtype=int)
-                test, indices = np.unique(steps, return_index=True)
+                unique_steps, indices = np.unique(steps, return_index=True)
+                assert np.allclose(unique_steps,steps[indices])
+                assert np.allclose(np.arange(len(unique_steps)),unique_steps)
                 # np.savetxt("steps-without-replicas.positions.txt",test,fmt="%d")
                 atoms = [atoms[index] for index in indices]
+                for n,s in enumerate(unique_steps):
+                    atoms[n].info["step"] = s
 
 
-            for a in atoms:
+            for n,a in enumerate(atoms):
                 a.set_cell(cells[n].T if pbc else None)
                 a.set_pbc(pbc)
 
@@ -117,12 +127,6 @@ def read_trajectory(file:str,
                 a.set_cell(None)
 
     return atoms
-
-#------------------------------------#
-deg2rad     = np.pi / 180.0
-abcABC      = re.compile(r"CELL[\(\[\{]abcABC[\)\]\}]: ([-+0-9\.Ee ]*)\s*")
-abcABCunits = re.compile(r'\{([^}]+)\}')
-step        = re.compile(r"Step:\s+(\d+)")
 
 #------------------------------------#
 def abc2h(a, b, c, alpha, beta, gamma):
