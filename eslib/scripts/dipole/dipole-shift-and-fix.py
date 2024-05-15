@@ -16,12 +16,15 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i", "--input"   , type=str     , **argv, required=True , help="input 'extxyz' file")
-    parser.add_argument("-n" , "--name"   , type=str     , **argv, required=False, help="name of the info to be handled (default: 'dipole')", default="dipole")
+    # parser.add_argument("-n" , "--name"   , type=str     , **argv, required=False, help="name of the info to be handled (default: 'dipole')", default="dipole")
+    parser.add_argument("-id", "--in_dipole"    , **argv, required=False, type=str, help="name for the input dipole (default: 'dipole')", default='dipole')
+    parser.add_argument("-od", "--out_dipole"   , **argv, required=False, type=str, help="name for the output dipole (default: same as --in_dipole)", default=None)
     parser.add_argument("-f", "--fix"     , type=str2bool, **argv, required=False, help="whether to fix only the jumps, without shifting (default: false)", default=False)
     parser.add_argument("-j", "--jumps"   , type=str     , **argv, required=False, help="output txt file with jumps indeces (default: 'None')", default=None)
     parser.add_argument("-a", "--average_shift", type=str2bool   , **argv, required=False, help="whether to shift the dipole quanta by their average value (default: true)", default=True)
     parser.add_argument("-s", "--shift"   , type=flist   , **argv, required=False, help="additional (negative) shift (default: [0,0,0])", default=None)
-    parser.add_argument("-q", "--quanta"  , type=str   , **argv, required=False, help="keyword for the dipole quanta (default: 'quanta')", default='quanta')
+    parser.add_argument("-d", "--discont"  , type=float   , **argv, required=False, help="maximum discontinuity between values (default: 0.5)", default=0.5)
+    parser.add_argument("-q", "--quanta" , type=str   , **argv, required=False, help="keyword for the dipole quanta (default: 'quanta')", default='quanta')
     parser.add_argument("-o", "--output"  , type=str     , **argv, required=True , help="output 'extxyz' file")
     return parser# .parse_args()
 
@@ -36,20 +39,20 @@ def main(args):
     print("done")
 
 
-    print("\n\tConverting '{:s}' from cartesian to lattice coordinates ... ".format(args.name), end="")
+    print("\n\tConverting '{:s}' from cartesian to lattice coordinates ... ".format(args.in_dipole), end="")
     N = len(atoms)
     phases = np.full((N,3),np.nan)
     for n in range(N):
         # for some strange reason I need the following line .... ???
         atoms[n].calc = None # atoms[n].set_calculator(None)
-        phases[n,:] = cart2frac(cell=atoms[n].get_cell(),v=atoms[n].info[args.name])
+        phases[n,:] = cart2frac(cell=atoms[n].get_cell(),v=atoms[n].info[args.in_dipole])
     print("done\n")
 
     if args.fix :
-        print("\tFixing the '{:s}' jumps ... ".format(args.name), end="")
+        print("\tFixing the '{:s}' jumps ... ".format(args.in_dipole), end="")
         old = phases.copy()
         for i in range(3):
-            phases[:,i] = np.unwrap(phases[:,i],period=1)
+            phases[:,i] = np.unwrap(phases[:,i],period=1,discont=args.discont)
         print("done")
 
         index = np.where(np.diff(old-phases,axis=0))[0]
@@ -76,8 +79,10 @@ def main(args):
 
 
     print("\tConverting dipoles from lattice to cartesian coordinates ... ", end="")
+    if args.out_dipole is None:
+        args.out_dipole = args.in_dipole
     for n in range(N):
-        atoms[n].info[args.name] = frac2cart(cell=atoms[n].get_cell(),v=phases[n,:]).reshape((3,))
+        atoms[n].info[args.out_dipole] = frac2cart(cell=atoms[n].get_cell(),v=phases[n,:]).reshape((3,))
     print("done")
 
     if args.quanta is not None:
