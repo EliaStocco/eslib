@@ -17,6 +17,7 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"        , **argv, type=str, required=True , help="file with the atomic structures")
     parser.add_argument("-if", "--input_format" , **argv, type=str, required=False, help="input file format (default: 'None')" , default=None)
     parser.add_argument("-m" , "--model"        , **argv, type=str, required=True , help="*.pth file with the MACE model of JSON file with instructions")
+    parser.add_argument("-c" , "--charges"      , **argv, required=False, type=str, help="charges name (default: None)", default=None)
     parser.add_argument("-p" , "--prefix"       , **argv, type=str, required=False, help="prefix to be prepended to the properties evaluated by the MACE model (default: 'MACE_')", default="MACE_")
     parser.add_argument("-o" , "--output"       , **argv, type=str, required=False, help="output file with the atomic structures and the predicted properties (default: 'mace.extxyz')", default="mace.extxyz")
     parser.add_argument("-of", "--output_format", **argv, type=str, required=False, help="output file format (default: 'None')", default=None)
@@ -42,6 +43,11 @@ def main(args):
         print("done")
 
     #------------------#
+    if args.charges is not None:
+        print("\n\tReplacing charges key: '{:s}' --> '{:s}'".format(model.charges_key,args.charges))
+        model.charges_key = args.charges
+
+    #------------------#
     print("\n\tMACE model summary: ")
     model.summary(string="\t\t")
 
@@ -59,7 +65,7 @@ def main(args):
 
     #------------------#
     print("\n\tSaving atomic structures to file '{:s}' ... ".format(args.output), end="")
-    output.to_file(args.output,args.output_format)
+    output.to_file(file=args.output,format=args.output_format)
     print("done")
      
 
