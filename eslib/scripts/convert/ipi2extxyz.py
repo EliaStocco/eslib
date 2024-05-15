@@ -5,8 +5,8 @@ import numpy as np
 from copy import copy
 from ase.io import write, read
 from eslib.classes.properties import properties as Properties
-from eslib.functions import suppress_output, get_one_file_in_folder, str2bool
-from eslib.input import size_type
+from eslib.functions import suppress_output, get_one_file_in_folder
+from eslib.input import size_type, str2bool
 from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt, error, warning
 
@@ -131,29 +131,45 @@ def main(args):
                 
         print("\tReading properties from file '{:s}' ... ".format(args.properties_file), end="")
         with suppress_output():
-            if str(args.properties_file).endswith(".pickle"):
-                allproperties = Properties.from_pickle(file_path=args.properties_file)
-            else:
-                allproperties = Properties.load(file=args.properties_file)
+            allproperties = Properties.from_file(file=args.properties_file)
+            # if str(args.properties_file).endswith(".pickle"):
+            #     allproperties = Properties.from_pickle(file_path=args.properties_file)
+            # else:
+            #     allproperties = Properties.load(file=args.properties_file)
         print("done")
 
         print("\n\tSummary:")
-        print("\t# atomic structures: {:d}".format(len(atoms)))
-        print("\t       # properties: {:d}".format(len(allproperties)))
+        print("\tn. of atomic structures: {:d}".format(len(atoms)))
+        print("\t       n. of properties: {:d}".format(len(allproperties)))
 
-        if len(allproperties) != len(atoms):
-            print("\n\t{:s}: n. of atomic structures and n. of properties differ.".format(warning))
-            if len(allproperties) == len(atoms)+1 :
-                information = "You should provide the positions as printed by i-PI."
-                try:
-                    from colorama import Fore, Style
-                    information = Fore.YELLOW   + Style.NORMAL + information + Style.RESET_ALL
-                except:
-                    pass
-                print("\t{:s}\n\tMaybe you provided a 'replay' input file --> discarding the first properties raw.".format(information))
-                allproperties = allproperties[1:]
-            else:
-                raise ValueError("I would expect n. of atomic structures to be (n. of properties + 1)")
+        try :
+            if len(allproperties) != len(atoms):
+                print("\n\t{:s}: n. of atomic structures and n. of properties differ.".format(warning))
+                if len(allproperties) == len(atoms)+1 :
+                    information = "You should provide the positions as printed by i-PI."
+                    try:
+                        from colorama import Fore, Style
+                        information = Fore.YELLOW   + Style.NORMAL + information + Style.RESET_ALL
+                    except:
+                        pass
+                    print("\t{:s}\n\tMaybe you provided a 'replay' input file --> discarding the first properties raw.".format(information))
+                    allproperties = allproperties[1:]
+                else:
+                    raise ValueError("I would expect n. of atomic structures to be (n. of properties + 1)")
+        except:
+            print("Fixing with step")
+            prop_steps = allproperties['step'].astype(int)
+            assert np.allclose(prop_steps, np.arange(len(prop_steps)))
+            pos_steps = atoms.get("step").astype(int)
+            assert np.allclose(pos_steps, np.arange(len(pos_steps)))
+            atoms = atoms.subsample(prop_steps)
+            pos_steps = atoms.get("step").astype(int)
+            assert np.allclose(pos_steps, np.arange(len(pos_steps)))
+            assert np.allclose(len(pos_steps), len(atoms))
+
+            print("\n\tSummary:")
+            print("\tn. of atomic structures: {:d}".format(len(atoms)))
+            print("\t       n. of properties: {:d}".format(len(allproperties)))
 
         print("\n\tSummary of the read properties:\n")
         df = allproperties.summary()
