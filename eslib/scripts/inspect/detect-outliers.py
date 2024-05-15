@@ -22,6 +22,7 @@ def prepare_args(description):
     parser.add_argument("-d"  , "--distribution"       , **argv, type=str  , required=False, help="*.pdf file with the distribution of the RMSE values (default: 'rmse.pdf')", default='rmse.pdf')
     parser.add_argument("-oi" , "--output_indices"     , **argv, type=str  , required=False, help="*.txt output file with the indices of the outliers (default: None)", default=None)
     parser.add_argument("-ogi", "--output_good_indices", **argv, type=str  , required=False, help="*.txt output file with the indices of the non-outliers (default: None)", default=None)
+    parser.add_argument("-og" , "--output_good"       , **argv, type=str  , required=False, help="*.extxyz output file with the good atomic configurations (default: 'good.extxyz')", default="good.extxyz")
     parser.add_argument("-o"  , "--output"             , **argv, type=str  , required=False, help="*.extxyz output file with the outliers atomic configurations (default: 'outliers.extxyz')", default="outliers.extxyz")
     return parser
 
@@ -77,19 +78,25 @@ def main(args):
     #------------------#
     outliers = trajectory.subsample(indices)
 
-    print("\tSaving outliers to file '{:s}' ... ".format(args.output), end="")
-    outliers.to_file(args.output)
+    print("\tSaving outlier structures to file '{:s}' ... ".format(args.output), end="")
+    outliers.to_file(file=args.output)
+    print("done")
+
+    good_indices = np.delete(np.arange(len(rmse)), indices)
+    good = trajectory.subsample(good_indices)
+
+    print("\tSaving good structures to file '{:s}' ... ".format(args.output_good), end="")
+    good.to_file(file=args.output_good)
     print("done")
 
     if args.output_indices is not None:
         print("\tSaving indices of the outlier structures to file '{:s}' ... ".format(args.output_indices), end="")
-        np.savetxt(args.output_indices,indices.astype(int))
+        np.savetxt(args.output_indices,indices.astype(int),fmt="%d")
         print("done")
 
     if args.output_good_indices is not None:
         print("\tSaving indices of the good structures to file '{:s}' ... ".format(args.output_good_indices), end="")
-        good_indices = np.delete(np.arange(len(rmse)), indices)
-        np.savetxt(args.output_good_indices,good_indices.astype(int))
+        np.savetxt(args.output_good_indices,good_indices.astype(int),fmt="%d")
         print("done")
 
     
