@@ -57,7 +57,7 @@ def main(args):
 
     #------------------#
     if args.output is not None:
-        print("\n\tSAving results to file '{:s}' ... ".format(args.output), end="")
+        print("\n\tSaving results to file '{:s}' ... ".format(args.output), end="")
         with open(args.output, "w") as f:
             json.dump(results, f)
         print("done")
