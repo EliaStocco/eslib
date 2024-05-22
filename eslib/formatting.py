@@ -10,6 +10,8 @@ from colorama import Fore, Style
 # from icecream import ic
 colorama.init(autoreset=True)
 
+os.environ["XDG_SESSION_TYPE"] = "xcb"
+
 float_format = '%24.12e' # Elia Stocco float format
 
 #---------------------------------------#
@@ -45,8 +47,13 @@ def print_python_info():
     else:
         print("Not using Conda environment.")
 
-def line():
-    print("-"*30)
+def line(start="",end="",N=30,mult=1):
+    print(start+"-"*mult*N+end)
+
+def get_path(main):
+    global_path = inspect.getfile(main)
+    local_path = os.path.basename(global_path)
+    return local_path, global_path
 
 def esfmt(prepare_parser:callable=None, description:str=None):
     """Decorator for the 'main' function of many scripts."""
@@ -65,9 +72,19 @@ def esfmt(prepare_parser:callable=None, description:str=None):
     @contextmanager
     def print_header(args:dict,main:callable):
         
-        line()
-        try: print("script file: {:s}".format(inspect.getfile(main))) #main.__file__))
-        except: pass        
+        line(start="###")
+        try: 
+            local_path, global_path = get_path(main)
+            print("script file: {:s}".format(local_path))
+            print("script global path: {:s}".format(global_path))
+        except: 
+            pass     
+        try:
+            command_line = ' '.join(sys.argv[1:])   
+            local_path, global_path = get_path(main)
+            print("running script as: {:s} ".format(local_path),command_line)
+        except: 
+            pass    
         print("working directory: {:s}".format(os.getcwd()))
         print("python --version:", sys.version)
         print("which python:", sys.executable)
@@ -82,7 +99,7 @@ def esfmt(prepare_parser:callable=None, description:str=None):
             print("not using conda env")
         print("start date: {:s}".format(start_date))
         print("start time: {:s}".format(start_time))
-        line()
+        line(start="###")
 
         print("\n\t{:s}".format(description))
         print("\n\t{:s}:".format(input_arguments))
@@ -114,12 +131,12 @@ def esfmt(prepare_parser:callable=None, description:str=None):
         # hours   = int(elapsed_seconds // 3600)
         # minutes = int(elapsed_seconds % 3600 // 60)
         # seconds = int(elapsed_seconds % 60)
-        line()
+        line(end="###")
         print("end date: {:s}".format(end_date))
         print("end time: {:s}".format(end_time))
         print("elapsed time: {:s}".format(format_seconds_to_hhmmss(elapsed_seconds)))
         print("elapsed seconds: {:d}".format(elapsed_seconds))
-        line()
+        line(end="###\n")
 
     def wrapper(main: callable):
         def wrapped_main(args=dict()):
