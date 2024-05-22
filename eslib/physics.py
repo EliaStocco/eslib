@@ -79,4 +79,5 @@ def compute_dipole_quanta(trajectory:List[Atoms],in_keyword:str="dipole",out_key
         quanta[n,:] = cart2frac(cell=atoms.get_cell(),v=atoms.info[in_keyword])
         out[n].info[out_keyword] = quanta[n,:]
     return out, quanta
+
     
