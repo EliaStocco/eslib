@@ -5,6 +5,8 @@ from eslib.classes.trajectory import AtomicStructures# , info, array
 from eslib.formatting import esfmt
 from eslib.physics import compute_dipole_quanta
 import matplotlib.pyplot as plt
+from eslib.tools import frac2cart
+from eslib.input import str2bool
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -18,6 +20,7 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"       , **argv, required=True , type=str, help="input file [extxyz]")
     parser.add_argument("-if", "--input_format", **argv, required=False, type=str, help="input file format (default: 'None')" , default=None)
+    parser.add_argument("-f" , "--fix"     , **argv, required=False, type=str2bool, help="fix branch", default=True)
     parser.add_argument("-k" , "--keyword"     , **argv, required=False, type=str, help="keyword the dipoles (default: 'dipole')", default="dipole")
     parser.add_argument("-o", "--output", **argv, required=False, type=str, help="output file (default: 'None')" , default=None)
     return parser
@@ -47,40 +50,34 @@ def main(args):
     assert all(elem == symbols[0] for elem in symbols) , "You displaced atoms of different species."
     
     #---------------------------------------#
-    dipole = atoms.get(args.keyword)
-    Dstart = dipole[0]
-    Dend = dipole[-1]
-    DeltaD = (Dend-Dstart)# /atoms[0].get_volume()
-    # Filter R2 and R using the non-zero indices
-    R2_filtered = R2[non_zero_indices]
-    R_filtered = R[non_zero_indices]
+    # dipole = atoms.get(args.keyword)
 
-    # Use the filtered R2 and R for further calculations
-    N = np.divide(DeltaD @ R_filtered.T, R2_filtered)
-    assert np.std(N) < 1e-3
+    quanta:np.ndarray= compute_dipole_quanta(atoms,args.keyword)[1]
+    shift = np.floor(quanta[0,:])
+    quanta -= shift
+    # assert quanta.shape == dipole.shape
 
-    DeltaN = np.mean(N)
-    N = DeltaN / len(N)
-    print("\n\tOxidation number for '{:s}': {:f}".format(symbols[0],np.round(N,1)))
+    # quanta *= np.sign(R_filtered[0,:]) # just to have the correct slope in the plot
 
-    if args.output is not None:
-        quanta:np.ndarray= compute_dipole_quanta(atoms,args.keyword)[1]
-        assert quanta.shape == dipole.shape
+    if args.fix:
 
-        quanta *= np.sign(R_filtered[0,:]) # just to have the correct slope in the plot
+        print("\n\tFixing branch ...  ",end="")
 
         def fix_quanta(quanta):
+
+            if quanta.ndim == 1:
+                quanta = quanta.reshape((-1,1))
 
             quanta = np.unwrap(quanta,period=1,axis=0).astype(float)
 
             dQ = np.diff(quanta,axis=0)
-            dQ = np.unwrap(dQ,axis=0,period=1)
+            # dQ = np.unwrap(dQ,axis=0,period=1)
             
-            add = np.zeros_like(quanta)
-            add[1:,:] = np.cumsum(dQ, axis=0).astype(float)
-            new_quanta = add + quanta[0,:]
+            # add = np.zeros_like(quanta)
+            # add[1:,:] = np.cumsum(dQ, axis=0).astype(float)
+            # new_quanta = add + quanta[0,:]
 
-            return new_quanta, dQ
+            return quanta, dQ
 
         new_quanta, dQ = fix_quanta(quanta)
 
@@ -97,36 +94,65 @@ def main(args):
         new_outliers[0, :] = False  # Mark the first element as okay
         new_outliers[1:] = outliers  # Copy the rest of the outliers
 
-        # Step 2: Extract non-outlier elements from new_quanta
-        tmp = new_quanta[~new_outliers]
-        tmp = tmp.reshape((-1, 3))
-
-        # Step 3: Fix the quanta for the non-outlier elements
-        new_new_quanta, dQ = fix_quanta(tmp)
-
-        # Step 4: Update new_quanta with fixed values and mark outliers as NaN
-        new_quanta[new_outliers] = np.nan
         for n in range(3):
-            new_quanta[~new_outliers[:,n],n] = new_new_quanta[:,n]
+            # Step 2: Extract non-outlier elements from new_quanta
+            tmp = new_quanta[~new_outliers[:,n],n]# .reshape((-1, 3))
+            # tmp = tmp.reshape((-1, 3))
 
-        x = np.linspace(0,1,len(new_quanta),endpoint=True)
-        label = ["P$_x$","P$_y$","P$_z$"]
+            # Step 3: Fix the quanta for the non-outlier elements
+            new_new_quanta, dQ = fix_quanta(tmp)
 
+            # Step 4: Update new_quanta with fixed values and mark outliers as NaN
+            new_quanta[new_outliers] = np.nan
         
-        fig, ax = plt.subplots(figsize=(5, 4))
+            new_quanta[~new_outliers[:,n],n] = new_new_quanta.flatten()# [:,n]
+
+        quanta = new_quanta.copy()
+
+        print("done")
+
+    dipole = frac2cart(atoms[0].get_cell(),quanta)
+
+    Dstart = dipole[0]
+    Dend = dipole[-1]
+    DeltaD = (Dend-Dstart)# /atoms[0].get_volume()
+    # Filter R2 and R using the non-zero indices
+    R2_filtered = R2[non_zero_indices]
+    R_filtered = R[non_zero_indices]
+
+    # Use the filtered R2 and R for further calculations
+    N = np.divide(DeltaD @ R_filtered.T, R2_filtered)
+    assert np.std(N) < 1e-3
+
+    DeltaN = np.mean(N)
+    N = DeltaN / len(N)
+    print("\n\tOxidation number for '{:s}': {:f}".format(symbols[0],np.round(N,1)))
+
+    if args.output is not None:
+
+        print("\n\tCreating plot ...  ",end="")
+        quanta *= np.sign(R_filtered[0,:]) # just to have the correct slope in the plot
+        
+        label = ["P$_x$","P$_y$","P$_z$"]
+        fig, ax = plt.subplots(figsize=(4, 3))
         for n in range(3):
-            ax.plot(x,new_quanta[:,n],label=label[n],marker='.')
+            y = quanta[:,n]
+            # Filter out NaN values
+            mask = ~np.isnan(y)
+            x = np.linspace(0,1,len(quanta),endpoint=True)
+            x = x[mask]
+            y = y[mask]
+            ax.plot(x,y,label=label[n],marker='.')
         ax.grid(True)
         ax.set_ylabel("polarization/quantum")
-        ax.set_yticks(np.arange(np.floor(np.nanmin(new_quanta)), np.ceil(np.nanmax(new_quanta)) + 1, 1))
+        ax.set_yticks(np.arange(np.floor(np.nanmin(quanta)), np.ceil(np.nanmax(quanta)) + 1, 1))
         ax.legend(facecolor='white', framealpha=1,edgecolor="black")
-
-        # # Add text with the value of new_quanta[0]
-        # text = f'$\\Delta N$ = {DeltaN}'
-        # plt.text(x[0], new_quanta[0, 0], text, ha='right', va='bottom')
-
         plt.tight_layout()
+        print("done")
+
+        print("\tSaving plot to file '{:s}' ... ".format(args.output), end="")
         plt.savefig(args.output)
+        print("done")
         
         
     
