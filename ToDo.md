@@ -9,3 +9,4 @@
 - set up scripts to compute time autocorrelation functions
 - code a clean way to vectory `ase.Atoms` into `AtomicStructures`
 - optimize reading from `extxyz` file by reducing number of for loops
+- find an expression for the effective mass of a normal mode
