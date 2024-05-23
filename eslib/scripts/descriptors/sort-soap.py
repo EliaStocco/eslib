@@ -7,6 +7,7 @@ from eslib.formatting import esfmt
 from python_tsp import exact
 from python_tsp import heuristics
 from eslib.classes.trajectory import AtomicStructures
+from eslib.functions import suppress_output
  
 # git@github.com:fillipe-gsm/python-tsp.git
 methods = {
@@ -33,8 +34,10 @@ def prepare_args(description):
     parser.add_argument("-if" , "--input_format"    , type=str     , required=False, **argv, help="input file format (default: 'None')" , default=None)
     parser.add_argument("-d"  , "--distance"        , type=str     , required=True , **argv, help="file with the distance matrix")
     parser.add_argument("-m"  , "--method"          , type=str     , required=False, **argv, help="sorting method (default: 'local')", default='local', choices=list(methods.keys()))
+    parser.add_argument("-l"  , "--log_file"        , type=str     , required=False, **argv, help="log file (default: 'log.out')", default="log.out")
+    parser.add_argument("-N"  , "--max_N"           , type=int     , required=False, **argv, help="maximum number of iterations (default: 1000)", default=10)
     parser.add_argument("-oi" , "--output_indices"  , type=str     , required=False, **argv, help="output file with indices of the selected structures (default: 'None')", default=None)
-    parser.add_argument("-oi" , "--output_indices"  , type=str     , required=False, **argv, help="output file with indices of the selected structures (default: 'None')", default=None)
+    # parser.add_argument("-oi" , "--output_indices"  , type=str     , required=False, **argv, help="output file with indices of the selected structures (default: 'None')", default=None)
     parser.add_argument("-o"  , "--output"          , type=str     , required=True , **argv, help="output file with the selected structures")
     parser.add_argument("-of" , "--output_format"   , type=str     , required=False, **argv, help="output file format (default: 'None')", default=None)
     return parser
@@ -54,11 +57,22 @@ def main(args):
     elif str(args.distance).endswith("txt"):
         D = np.loadtxt(args.distance)
     print("done")
+    print("\tDistance matrix shape: ",D.shape)
+
+    #------------------#
+    print("\n\tNormalizing distance matrix ... ",end="")
+    D /= np.linalg.norm(D)
+    print("done")
 
     #------------------#
     print("\n\tSorting structures using '{:s}' algorithm ... ".format(args.method),end="")
     method:callable = methods[args.method]
-    permutation, distance = method(D)
+    max_N = None if args.max_N <= 0 else args.max_N
+    with suppress_output():
+        try:
+            permutation, distance = method(D,log_file=args.log_file,verbose=True,max_iterations=max_N)
+        except:
+            permutation, distance = method(D,log_file=args.log_file,verbose=True,max_processing_time=max_N)
     print("done")
 
     return 0   

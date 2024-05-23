@@ -32,9 +32,11 @@ def main(args):
     print("\n\tComputing the distance matrix from the SOAP descriptors ... ",end="")
     # this could be optimized
     D = X @ X.T
-    assert D.shape[0] == X.shape[0]
-    assert D.shape[1] == X.shape[0]
+    assert D.shape[0] == X.shape[0], "distance matrix with wrong shape[0]"
+    assert D.shape[1] == X.shape[0], "distance matrix with wrong shape[1]"
+    assert np.allclose(D,D.T), "distance matrix not symmetric"
     print("done")
+    print("\tDistance matrix shape: ",D.shape)
 
     #------------------#
     print("\tSaving distance matrix to file '{:s}' ... ".format(args.output),end="")
@@ -47,3 +49,22 @@ def main(args):
 #---------------------------------------#
 if __name__ == "__main__":
     main()
+
+# { 
+#     // Use IntelliSense to learn about possible attributes.
+#     // Hover to view descriptions of existing attributes.
+#     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+#     "version": "0.2.0",
+#     "configurations": [
+#         {
+#             "name": "Python: Current File",
+#             "type": "debugpy",
+#             "request": "launch",
+#             "program": "/home/stoccoel/google-personal/codes/eslib/eslib/scripts/descriptors/soap-distance.py",
+#             "cwd" : "/home/stoccoel/google-personal/simulations/LiNbO3/ML/LiNbO3-oxn/original-data",
+#             "args" : ["-x","soap.npy","-o","distance.npy"],
+#             "console": "integratedTerminal",
+#             "justMyCode": true,
+#         }
+#     ]
+# }
