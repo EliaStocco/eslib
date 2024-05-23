@@ -15,9 +15,9 @@ def vectorial_pearson(x: np.ndarray, y: np.ndarray) -> float:
                  {\\sqrt{\\sum_{i=1}^N (x_i - \\bar{x})^2 \\cdot \\sum_{i=1}^N (y_i - \\bar{y})^2}}
 
     where:
-    - \( x_i \) and \( y_i \) are the vector components of the samples.
-    - \( \\bar{x} \) and \( \\bar{y} \) are the means of the vector components of x and y, respectively.
-    - \( N \) is the number of samples.
+    - x_i and y_i are the vector components of the samples.
+    - \\bar{x} and \\bar{y} are the means of the vector components of x and y, respectively.
+    - N is the number of samples.
 
     Parameters:
     x (np.ndarray): A 2D numpy array where each row is a vector representing a sample.

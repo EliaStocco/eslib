@@ -26,7 +26,7 @@ def read_arguments():
     parser.add_argument('--nbins', '-n', type=int, default=200,
                         help='number of bins')
     parser.add_argument('--set_lattice', '-sl', type=float, nargs='+',
-                        help='set lattice parameters (in $\AA$)')
+                        help='set lattice parameters (in angstrom)')
     parser.add_argument('--from_frame', '-ff', type=int, default=0,
                         help='start from frame nr. <n>')
     parser.add_argument('--to_frame', '-tf', type=int,

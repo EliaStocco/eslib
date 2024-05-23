@@ -78,7 +78,7 @@ def extract_arrays(file, keyword, shape:tuple=None):
     arrays = [None] * num_occurrences
 
     # Use regular expression to find arrays
-    pattern = re.compile(f'{keyword}:\s*\[([\s\S]*?)\]', re.MULTILINE)
+    pattern = re.compile(rf'{keyword}:\s*\[([\s\S]*?)\]', re.MULTILINE)
     matches = pattern.finditer(log_content)
 
     for i, match in enumerate(matches):
