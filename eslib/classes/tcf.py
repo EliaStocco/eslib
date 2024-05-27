@@ -117,6 +117,27 @@ class TimeAutoCorrelation(TimeCorrelation):
     def __init__(self:T,A:np.ndarray):
         super().__init__(A=A,B=A.copy())
 
+    @property
+    def tcf(self:T,axis: Optional[int] = 0)->np.ndarray:
+        """
+        Computes the time correlation function along the specified axis.
+
+        Parameters
+        ----------
+        axis : int, optional
+            Axis along which to compute the correlation function. Default is 0.
+
+        Returns
+        -------
+        np.ndarray
+            Computed time correlation function.
+        """
+        arr = super().tcf
+        arr /= np.mean(self.A**2,axis=0)
+        N = int(len(arr)/2)
+        arr = arr[:N]
+        return arr
+
     # def __post_init__(self:T):
     #     """
     #     Initializes the TimeAutoCorrelation instance and validates the input array.
