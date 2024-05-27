@@ -15,6 +15,7 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input" , **argv,type=str, help="input file [extxyz]")
+    parser.add_argument("-if", "--input_format", **argv, required=False, type=str, help="input file format (default: 'None')" , default=None)
     parser.add_argument("-n" , "--name"  , **argv,type=str, help="name for the new info/array")
     # parser.add_argument("-w" , "--what"  , **argv,type=str, help="what the data is: 'i' (info) or 'a' (arrays)")
     parser.add_argument("-o" , "--output", **argv,type=str, help="output file (default: '[name].txt')", default=None)
@@ -28,7 +29,7 @@ def main(args):
     #---------------------------------------#
     # atomic structures
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms = AtomicStructures.from_file(file=args.input)
+    atoms = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done")
 
     #---------------------------------------#
