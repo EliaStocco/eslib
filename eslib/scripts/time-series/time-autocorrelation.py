@@ -36,7 +36,7 @@ def main(args):
     if args.input.endswith("npy"):
         data = np.load(args.input)
     else:
-        data = np.load(args.input)
+        data = np.loadtxt(args.input)
     print("done")
     print("\tdata shape: :",data.shape)
 
