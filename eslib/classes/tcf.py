@@ -87,7 +87,7 @@ class TimeCorrelation:
             self._ready = True
             return self._tcf.copy()
 
-@dataclass
+# @dataclass
 class TimeAutoCorrelation(TimeCorrelation):
     """
     Class to compute auto-correlation functions for a single array.
@@ -114,17 +114,20 @@ class TimeAutoCorrelation(TimeCorrelation):
     >>> tcf_result = tac.tcf(axis=0)
     """
 
-    def __post_init__(self:T):
-        """
-        Initializes the TimeAutoCorrelation instance and validates the input array.
+    def __init__(self:T,A:np.ndarray):
+        super().__init__(A=A,B=A)
 
-        Raises
-        ------
-        AssertionError
-            If the input array shape is not compatible.
-        """
-        self.B = self.A  # Ensure A and B are the same for auto-correlation
-        super().__post_init__()
+    # def __post_init__(self:T):
+    #     """
+    #     Initializes the TimeAutoCorrelation instance and validates the input array.
+
+    #     Raises
+    #     ------
+    #     AssertionError
+    #         If the input array shape is not compatible.
+    #     """
+    #     self.B = self.A  # Ensure A and B are the same for auto-correlation
+    #     super().__post_init__()
 
 
 def correlate(
