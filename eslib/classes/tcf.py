@@ -115,7 +115,7 @@ class TimeAutoCorrelation(TimeCorrelation):
     """
 
     def __init__(self:T,A:np.ndarray):
-        super().__init__(A=A,B=A)
+        super().__init__(A=A,B=A.copy())
 
     # def __post_init__(self:T):
     #     """
