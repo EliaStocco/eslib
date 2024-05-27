@@ -51,7 +51,7 @@ def main(args):
     print("done")
 
     #------------------#
-    print("\tComputing the autocorrelation function ... ", end="")
+    print("\n\tComputing the autocorrelation function ... ", end="")
     if args.method == "function":
         autocorr = tacf(data)
     else:
@@ -62,7 +62,7 @@ def main(args):
     print("\tautocorr shape: :",autocorr.shape)
 
     #------------------#
-    print("\tSaving TACF to file '{:s}' ... ".format(args.output), end="")
+    print("\n\tSaving TACF to file '{:s}' ... ".format(args.output), end="")
     if args.output.endswith("npy"):
         np.save(args.output,autocorr)
     else:
@@ -70,7 +70,7 @@ def main(args):
     print("done")
 
     #------------------#
-    print("\tFitting the autocorrelation function with an exponential ... ", end="")
+    print("\n\tFitting the autocorrelation function with an exponential ... ", end="")
 
     mean = autocorr.mean(axis=1)
     std = autocorr.std(axis=1)
@@ -88,36 +88,40 @@ def main(args):
 
     yfit = exponential(x, *popt)
     print("done")
-    print("\ttau: {:e}".format(popt[0]))
+    print("\ttau: {:.0f}".format(popt[0]))
 
 
     #------------------#
     if args.plot is not None:
-        print("\tProducing autocorrelation plot ... ", end="")
+        print("\n\tProducing autocorrelation plot ... ", end="")
         fig, axes = plt.subplots(2, 1, figsize=(10, 8),sharex=True)
 
         for i in range(autocorr.shape[1]):
             axes[0].plot(autocorr[:, i], label=f'{i+1}')
 
-        axes[1].plot(mean,color="blue",label='$\\mu$')
-        axes[1].fill_between(x, mean - std, mean + std, color='gray', alpha=0.25, label='$\\mu\\pm\\sigma$')
-        axes[1].fill_between(x, mean - 2*std, mean + 2*std, color='gray', alpha=0.15, label='$\\mu\\pm2\\sigma$')
+        axes[1].plot(x[1:],mean[1:],color="blue",label='$\\mu$')
+        ylow,yhigh = mean - std, mean + std
+        axes[1].fill_between(x[1:],ylow[1:],yhigh[1:], color='gray', alpha=0.25, label='$\\mu\\pm\\sigma$')
+        ylow,yhigh = mean - 2*std, mean + 2*std
+        axes[1].fill_between(x[1:],ylow[1:],yhigh[1:], color='gray', alpha=0.15, label='$\\mu\\pm2\\sigma$')
 
-        axes[1].plot(yfit,color="red",label='$e^{-x/\\tau}$',linewidth=1)
+        axes[1].plot(x[1:],yfit[1:],color="red",label='$e^{-x/\\tau}$',linewidth=1)
 
         for ax in axes:
-            ax.legend(loc="upper right",facecolor='white', framealpha=1,edgecolor="black")
             ax.grid()
+            ax.set_xlim(1,x.max())
             hzero(ax)
-            ax.set_xlim(0,ax.get_xlim()[1])
-            # ax.set_ylim(0,1)
-            
-        axes[1].set_xlabel('x')
-        # Add text box with the value of a variable
-        textbox_text = "$\\tau={:.2e}$".format(popt[0]) 
-        plt.text(0.05, 0.05, textbox_text, transform=plt.gca().transAxes, fontsize=10, ha='right', va='bottom', bbox=dict(facecolor='white', alpha=0.5))
-
+            # ax.set_xlim(1,x.max())
+            ax.set_xscale("log")
         
+        axes[1].legend(loc="upper right",facecolor='white', framealpha=1,edgecolor="black")
+        axes[1].set_xlabel('x')
+
+        # Add text box with the value of a variable
+        textbox_text = "$\\tau\\approx{:.0f}$".format(popt[0]) 
+        # plt.text(0.1, 0.05, textbox_text,  ha='center', va='top', fontsize=10, bbox=dict(facecolor='white', alpha=0.5))
+        plt.annotate(textbox_text, xy=(0.5, 0.95), xycoords='axes fraction', fontsize=10,
+                ha='center', va='top', bbox=dict(facecolor='white', alpha=1,edgecolor="black"))
         plt.tight_layout()
         print("done")
 
