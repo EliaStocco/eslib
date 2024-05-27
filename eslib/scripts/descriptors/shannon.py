@@ -19,6 +19,7 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b"}
     parser.add_argument("-x"  , "--soap_descriptors", type=str     , required=True , **argv, help="file with the SOAP descriptors")
+    parser.add_argument("-i"  , "--indices"         , type=str     , required=False, **argv, help="indices (default: None)", default=None)
     parser.add_argument("-b"  , "--n_bins"          , type=ilist     , required=False, **argv, help="number of bins (default: [1000])", default=[1000])
     parser.add_argument("-n"  , "--block_length"    , type=int     , required=False, **argv, help="length of each block (default: 100)", default=100)
     parser.add_argument("-o"  , "--output"          , type=str     , required=False, **argv, help="output file with the Kullback-Leibler divergence (default: entropy.csv)", default='entropy.csv')
@@ -39,6 +40,18 @@ def main(args):
     print("done")
     print("\tSOAP.shape: ",X.shape)
 
+    #------------------#
+    if args.indices is not None:
+        print("\n\tReading indices from file '{:s}' ... ".format(args.indices),end="")
+        indices = np.loadtxt(args.indices,dtype=int)
+        print("done")
+        print("\tindices.shape: ",indices.shape)
+
+        print("\n\tSorting SOAP descriptors according to indices  ... ",end="")
+        # indices = indices.astype(int)
+        X = X[indices,:]
+        print("done")
+    
     #------------------#
     N = X.shape[0] // args.block_length
     print("\n\tDividing the SOAP descriptors into '{:d}' blocks ... ".format(N),end="")
@@ -109,9 +122,11 @@ def main(args):
     
     for ax,loc in zip(axes,['upper left','upper right']):
         ax.legend(title="n. bins",facecolor='white', framealpha=1,edgecolor="black",loc=loc)
-        ax.grid(True)
+        ax.grid(True, which='both', axis='both')
 
     axes[1].set_xlabel('Dataset size')
+    axes[1].set_yscale('log')
+    # axes[1].grid(which='both', axis='both')
     axes[0].set_ylabel('H')
     axes[1].set_ylabel('-$\\Delta$H')
     axes[0].set_title('Shannon entropy H')
