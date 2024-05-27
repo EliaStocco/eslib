@@ -18,10 +18,11 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i" , "--input"        , **argv, required=True , type=str, help="txt/npy input file")
-    parser.add_argument("-b" , "--blocks"       , **argv, required=False, type=int, help="number of blocks (default: 10)", default=10)
-    parser.add_argument("-o" , "--output"       , **argv, required=True , type=str, help="txt/npy output file")
-    parser.add_argument("-p" , "--plot"       , **argv, required=False, type=str, help="output file for the plot")
+    parser.add_argument("-i" , "--input"  , **argv, required=True , type=str, help="txt/npy input file")
+    parser.add_argument("-b" , "--blocks" , **argv, required=False, type=int, help="number of blocks (default: 10)", default=10)
+    parser.add_argument("-m" , "--method" , **argv, required=False, type=str, help="method (default: 'class')", default='class', choices=['class','function'])
+    parser.add_argument("-o" , "--output" , **argv, required=True , type=str, help="txt/npy output file")
+    parser.add_argument("-p" , "--plot"   , **argv, required=False, type=str, help="output file for the plot")
 
     return parser
 
@@ -51,7 +52,12 @@ def main(args):
 
     #------------------#
     print("\tComputing the autocorrelation function ... ", end="")
-    autocorr = tacf(data)
+    if args.method == "function":
+        autocorr = tacf(data)
+    else:
+        from eslib.classes.tcf import TimeAutoCorrelation
+        obj = TimeAutoCorrelation(data)
+        autocorr = obj.tcf
     print("done")
     print("\tautocorr shape: :",autocorr.shape)
 
