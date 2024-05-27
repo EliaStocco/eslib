@@ -3,11 +3,11 @@ from ase.io import read, write
 import numpy as np
 from skmatter.feature_selection import FPS
 from eslib.input import str2bool
-from eslib.formatting import esfmt
+from eslib.formatting import esfmt, error
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Process atomic structures and select a diverse subset using the Farthest Point Sampling (FPS) algorithm."
+description = "Select a diverse subset of structures using the Farthest Point Sampling (FPS) algorithm."
 
 #---------------------------------------#
 def prepare_args(description):
@@ -18,7 +18,7 @@ def prepare_args(description):
     parser.add_argument("-i"  , "--input"           , type=str     , required=True , **argv, help="input file [au]")
     parser.add_argument("-if" , "--input_format"    , type=str     , required=False, **argv, help="input file format (default: 'None')" , default=None)
     parser.add_argument("-n"  , "--number"          , type=int     , required=True , **argv, help="number of desired structure")
-    parser.add_argument("-s"  , "--sort"            , type=str2bool, required=False, **argv, help="whether to sort the indices (default: true)", default=True)
+    parser.add_argument("-s"  , "--sort"            , type=str2bool, required=False, **argv, help="whether to sort the indices (default: False)", default=False)
     parser.add_argument("-x"  , "--soap_descriptors", type=str     , required=True , **argv, help="file with the SOAP descriptors")
     parser.add_argument("-oi" , "--output_indices"  , type=str     , required=False, **argv, help="output file with indices of the selected structures (default: 'None')", default=None)
     parser.add_argument("-o"  , "--output"          , type=str     , required=True , **argv, help="output file with the selected structures")
@@ -28,6 +28,9 @@ def prepare_args(description):
 #---------------------------------------#
 @esfmt(prepare_args, description)
 def main(args):
+
+    if args.number == -1 and args.sort:
+        raise ValueError("You can not sort the indices and consider all the structures. It's just meaningless.") 
     
     print("\n\tReading positions from file '{:s}' ... ".format(args.input),end="")
     frames = read(args.input, index=':', format=args.input_format)  #eV
@@ -41,10 +44,12 @@ def main(args):
     print("done")
 
     #
-    print("\tExtracting structures using the FPS algorithm:")
+    
     if args.number == -1:
         args.number = len(frames)
-    struct_idx = FPS(n_to_select=args.number, progress_bar = True, initialize = 'random').fit(X.T).selected_idx_
+    
+    print("\tExtracting structures using the FPS algorithm:")
+    struct_idx = FPS(n_to_select=args.number, progress_bar = True, initialize=0).fit(X.T).selected_idx_
     X_fps = X[struct_idx]
 
     print("\n\tFPS selected indices: {:d}".format(struct_idx.shape[0]))
@@ -56,6 +61,8 @@ def main(args):
         print("\n\tSorting indices ... ",end="")
         indices = np.sort(indices)
         print("done")
+
+    
 
     # Saving the fps selected structure
     if args.output_indices :
