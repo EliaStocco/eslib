@@ -133,7 +133,7 @@ def main(args):
         print("\n\tCreating plot ...  ",end="")
         quanta *= np.sign(R_filtered[0,:]) # just to have the correct slope in the plot
         
-        label = ["P$_x$","P$_y$","P$_z$"]
+        label = ["x","y","z"]
         fig, ax = plt.subplots(figsize=(4, 3))
         for n in range(3):
             y = quanta[:,n]
@@ -144,7 +144,8 @@ def main(args):
             y = y[mask]
             ax.plot(x,y,label=label[n],marker='.')
         ax.grid(True)
-        ax.set_ylabel("polarization/quantum")
+        ax.set_xlabel("path")
+        ax.set_ylabel("dipole/quantum [unitless]")
         ax.set_yticks(np.arange(np.floor(np.nanmin(quanta)), np.ceil(np.nanmax(quanta)) + 1, 1))
         ax.legend(facecolor='white', framealpha=1,edgecolor="black")
         plt.tight_layout()
