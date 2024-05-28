@@ -20,9 +20,9 @@ def prepare_args(description):
     argv = {"metavar" : "\b"}
     parser.add_argument("-x"  , "--soap_descriptors", type=str     , required=True , **argv, help="file with the SOAP descriptors")
     parser.add_argument("-i"  , "--indices"         , type=str     , required=False, **argv, help="indices (default: None)", default=None)
-    parser.add_argument("-b"  , "--n_bins"          , type=ilist     , required=False, **argv, help="number of bins (default: [1000])", default=[1000])
-    parser.add_argument("-n"  , "--block_length"    , type=int     , required=False, **argv, help="length of each block (default: 100)", default=100)
-    parser.add_argument("-o"  , "--output"          , type=str     , required=False, **argv, help="output file with the Kullback-Leibler divergence (default: entropy.csv)", default='entropy.csv')
+    parser.add_argument("-b"  , "--n_bins"          , type=ilist   , required=False, **argv, help="number of bins (default: [100,200,400,600,800,1000])", default=[100,200,400,600,800,1000])
+    parser.add_argument("-n"  , "--block_length"    , type=int     , required=False, **argv, help="length of each block (default: 50)", default=50)
+    parser.add_argument("-o"  , "--output"          , type=str     , required=False, **argv, help="output file with the Shannon entropy (default: entropy.csv)", default='entropy.csv')
     parser.add_argument("-p"  , "--plot"            , type=str     , required=False, **argv, help="plot (default: 'entropy.pdf')", default='entropy.pdf')
     return parser
 
