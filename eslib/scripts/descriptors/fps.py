@@ -3,7 +3,8 @@ from ase.io import read, write
 import numpy as np
 from skmatter.feature_selection import FPS
 from eslib.input import str2bool
-from eslib.formatting import esfmt, error
+from eslib.formatting import esfmt
+from eslib.classes.trajectory import AtomicStructures
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -33,7 +34,7 @@ def main(args):
         raise ValueError("You can not sort the indices and consider all the structures. It's just meaningless.") 
     
     print("\n\tReading positions from file '{:s}' ... ".format(args.input),end="")
-    frames = read(args.input, index=':', format=args.input_format)  #eV
+    frames = AtomicStructures.from_file(file=args.input, format=args.input_format)
     print("done")
 
     print("\tReading SOAP descriptors from file '{:s}' ... ".format(args.soap_descriptors),end="")
