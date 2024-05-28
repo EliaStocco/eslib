@@ -9,6 +9,7 @@ from eslib.functions import add_default
 from eslib.show import show_dict
 from eslib.tools import convert
 from eslib.formatting import esfmt
+from eslib.classes.trajectory import AtomicStructures
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -32,7 +33,7 @@ def main(args):
 
     #
     print("\n\tReading positions from file '{:s}' ... ".format(args.input),end="")
-    frames = read(args.input, index=':', format=args.input_format)  #eV
+    frames = AtomicStructures.from_file(file=args.input, format=args.input_format)
     print("done")
 
     # print("\n\tConverting the atomic structures positions and cells from atomic unit to angstrom ... ",end="")
