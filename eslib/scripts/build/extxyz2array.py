@@ -2,7 +2,7 @@
 import numpy as np
 from ase.io import write
 from eslib.classes.trajectory import AtomicStructures# , info, array
-from eslib.formatting import esfmt
+from eslib.formatting import esfmt, float_format
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -19,7 +19,7 @@ def prepare_args(description):
     parser.add_argument("-n" , "--name"  , **argv,type=str, help="name for the new info/array")
     # parser.add_argument("-w" , "--what"  , **argv,type=str, help="what the data is: 'i' (info) or 'a' (arrays)")
     parser.add_argument("-o" , "--output", **argv,type=str, help="output file (default: '[name].txt')", default=None)
-    parser.add_argument("-of", "--output_format", **argv,type=str, help="output format for np.savetxt (default: '%%24.18f')", default='%24.18f')
+    parser.add_argument("-of", "--output_format", **argv,type=str, help="output format for np.savetxt (default: '%%24.12f')", default=float_format)
     return parser# .parse_args()
 
 #---------------------------------------#
