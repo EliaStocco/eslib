@@ -2,6 +2,13 @@ import pytest
 import os
 import shutil
 from contextlib import contextmanager
+# # Try to import the timing function from the eslib.classes.timing module
+# try:
+#     from eslib.classes.timing import timing
+# # If ImportError occurs (module not found), define a dummy timing function
+# except ImportError:
+#     def timing(func):
+#         return func  # Dummy timing function that returns the input function unchanged
 
 def import_from(module, name):
     module = __import__(module, fromlist=[name])
@@ -116,6 +123,26 @@ torun = {
             "output"             : "{:s}/output.extxyz".format(tmp_folder),     
         },
     },
+    "long-raw" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : "tests/structures/LiNbO3/raw-ipi.n=10000.xyz",   
+            "input_format"       : "ipi",   
+            "output"             : "{:s}/output.extxyz".format(tmp_folder),     
+        },
+    },
+    "long" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : "tests/structures/LiNbO3/long.n=10000.extxyz",   
+            "input_format"       : "extxyz",   
+            "output"             : "{:s}/output.extxyz".format(tmp_folder),     
+        },
+    },
 }
 
 
@@ -127,7 +154,21 @@ def test_scripts(name, test):
     with change_directory():
         if not os.path.exists(tmp_folder):
             os.mkdir(tmp_folder)
+
+        # from eslib.classes.aseio import set_parallel
+        # from copy import copy 
+
+        # kwargs = test["kwargs"]
+        # with timing(True):
+        #     set_parallel(True)
+        #     main(copy(kwargs))
+        
+        # with timing(True):
+        #     set_parallel(False)
+        #     main(copy(kwargs))
+
         main(test["kwargs"])
+
         if 'clean' in test and not test['clean']:
             pass
         else:
