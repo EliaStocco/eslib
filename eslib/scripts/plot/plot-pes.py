@@ -3,6 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from eslib.formatting import esfmt
 from eslib.classes.trajectory import AtomicStructures
+from eslib.input import ilist
+import pandas as pd
+from itertools import product
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -13,10 +16,11 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
-    parser.add_argument("-i", "--input"  , type=str, **argv, required=True , help='input extxyz file')
-    parser.add_argument("-e", "--energy" , type=str, **argv, required=False , help="info keyword of the energy (default: 'harmonic-potential-energy')", default='harmonic-potential-energy')
-    parser.add_argument("-n", "--indices", type=str, **argv, required=False, help="info keyword of the 2D indices (default: 'displacements')", default='displacements')
-    parser.add_argument("-o", "--output" , type=str, **argv, required=False, help="pdf output file (default: 'pes.pdf')", default='pes.pdf')
+    parser.add_argument("-i", "--input"  , type=str  , **argv, required=True , help='input extxyz file')
+    parser.add_argument("-e", "--energy" , type=str  , **argv, required=False , help="info keyword of the energy (default: 'harmonic-potential-energy')", default='harmonic-potential-energy')
+    parser.add_argument("-n", "--indices", type=str  , **argv, required=False, help="info keyword of the 2D indices (default: None)", default=None)
+    parser.add_argument("-s", "--shape"  , type=ilist, **argv, required=False, help="shape of the PES (default: None)", default=None)
+    parser.add_argument("-o", "--output" , type=str  , **argv, required=False, help="pdf output file (default: 'pes.pdf')", default='pes.pdf')
     return parser# .parse_args()
 
 #---------------------------------------#
@@ -52,6 +56,10 @@ def plot_pes(energy, indices, file):
 def main(args):
 
     #------------------#
+    assert args.indices is not None or args.shape is not None, "--indices and --shape can not be both 'None'"
+    assert len(args.shape) == 2, "--shape must contain two numbers."
+
+    #------------------#
     # atomic structures
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
     atoms = AtomicStructures.from_file(file=args.input)
@@ -67,8 +75,38 @@ def main(args):
     assert energy.shape == (len(atoms),)
 
     #------------------#
+    if args.indices is None:
+        assert len(atoms) == args.shape[0]*args.shape[1]
+        
+        instructions = pd.DataFrame(columns=["mode","start","end","N"],index=[0,1])
+
+        instructions.at[0,"mode"]  = 0
+        instructions.at[0,"start"] = 0
+        instructions.at[0,"end"]   = 1
+        instructions.at[0,"N"]     = args.shape[0]-1
+
+        instructions.at[1,"mode"]  = 1
+        instructions.at[1,"start"] = 0
+        instructions.at[1,"end"]   = 1
+        instructions.at[1,"N"]     = args.shape[1]-1
+
+        #------------------#
+        print("\tPreparing displacement along single modes:")
+        lists = [None]*len(instructions)
+        for n,row in instructions.iterrows():
+            print("\t\tmode {:3d}: ".format(int(row['mode'])),end="")
+            lists[n]= np.linspace(row['start'],row['end'],int(row['N']+1),endpoint=True)
+            print(lists[n])
+
+        displacements = np.asarray(list(product(*lists)))
+        print(displacements.shape)
+
+        atoms.set("indices",displacements,"info")
+        args.indices = "indices"
+        
+    #------------------#
     print("\n\tExtracting '{:s}' from the atomic structures ... ".format(args.indices), end="")
-    indices = atoms.get_info(args.indices)
+    indices = atoms.get(args.indices)
     print("done")
     print("\t'{:s}' shape: ".format(args.indices),indices.shape)
 
