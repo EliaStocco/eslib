@@ -104,7 +104,7 @@ def main(args):
     # convert into a pandas dataframe
     df = SE.to_dataframe(name="entropy").reset_index()
     df['size'] = (df['dataset']+1)*args.block_length
-    df['bins'] = args.n_bins[df['bins']]
+    df['bins'] = np.asarray(args.n_bins)[np.asarray(df['bins'],dtype=int)]
     print("\n\tSaving results to file '{:s}' ... ".format(args.output),end="")
     df.to_csv(args.output,index=False)
     print("done")
