@@ -57,7 +57,7 @@ def main(args):
     else:
         from eslib.classes.tcf import TimeAutoCorrelation
         obj = TimeAutoCorrelation(data)
-        autocorr = obj.tcf
+        autocorr = obj.tcf()
     print("done")
     print("\tautocorr shape: :",autocorr.shape)
 

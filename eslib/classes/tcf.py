@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
 import numpy as np
-from typing import Optional, TypeVar, Tuple
-from scipy.signal import correlate
+from typing import Optional, TypeVar, Tuple, Callable, Any
+from scipy.signal import correlate as scipy_correlate
+import functools
 
 # Try to import the timing function from the eslib.classes.timing module
 try:
@@ -49,7 +50,7 @@ class TimeCorrelation:
     _ready: bool = field(default=False, init=False)
     _tcf: np.ndarray = field(default=None, init=False)
 
-    def __post_init__(self:T):
+    def __post_init__(self: T):
         """
         Initializes the TimeCorrelation instance and validates input array shapes.
 
@@ -62,11 +63,10 @@ class TimeCorrelation:
         Bshape = list(self.B.shape)[1:]
 
         assert self.A.ndim == self.B.ndim
-        assert len(Ashape) == len(Bshape) # redundant
-        assert all( [ a==b for a,b in zip(Ashape,Bshape) ])
+        assert len(Ashape) == len(Bshape)  # redundant
+        assert all([a == b for a, b in zip(Ashape, Bshape)])
 
-    @property
-    def tcf(self:T,axis: Optional[int] = 0)->np.ndarray:
+    def tcf(self, axis: Optional[int] = 0) -> np.ndarray:
         """
         Computes the time correlation function along the specified axis.
 
@@ -87,7 +87,6 @@ class TimeCorrelation:
             self._ready = True
             return self._tcf.copy()
 
-# @dataclass
 class TimeAutoCorrelation(TimeCorrelation):
     """
     Class to compute auto-correlation functions for a single array.
@@ -114,11 +113,10 @@ class TimeAutoCorrelation(TimeCorrelation):
     >>> tcf_result = tac.tcf(axis=0)
     """
 
-    def __init__(self:T,A:np.ndarray):
-        super().__init__(A=A,B=A.copy())
+    def __init__(self: T, A: np.ndarray):
+        super().__init__(A=A, B=A.copy())
 
-    @property
-    def tcf(self:T,axis: Optional[int] = 0)->np.ndarray:
+    def tcf(self: T, axis: Optional[int] = 0, mode: str = "half") -> np.ndarray:
         """
         Computes the time correlation function along the specified axis.
 
@@ -126,30 +124,22 @@ class TimeAutoCorrelation(TimeCorrelation):
         ----------
         axis : int, optional
             Axis along which to compute the correlation function. Default is 0.
+        mode : str, optional
+            Mode of the correlation function, either 'half' or 'full'. Default is 'half'.
 
         Returns
         -------
         np.ndarray
             Computed time correlation function.
         """
-        arr = super().tcf
-        arr /= np.mean(self.A**2,axis=0)
-        N = int(len(arr)/2)
-        arr = arr[:N]
+        if mode not in ["half","full"]:
+            raise ValueError("`mode` can be only `half` or `full`")
+        arr = super().tcf(axis)
+        arr /= np.mean(self.A ** 2, axis=0)  # normalized to 1
+        if mode == "half":
+            N = int(len(arr) / 2)  # the second half is noisy
+            arr = arr[:N]            
         return arr
-
-    # def __post_init__(self:T):
-    #     """
-    #     Initializes the TimeAutoCorrelation instance and validates the input array.
-
-    #     Raises
-    #     ------
-    #     AssertionError
-    #         If the input array shape is not compatible.
-    #     """
-    #     self.B = self.A  # Ensure A and B are the same for auto-correlation
-    #     super().__post_init__()
-
 
 def correlate(
     A: np.ndarray, 
@@ -303,7 +293,7 @@ def main():
         A = np.random.random((100,dim))
         B = np.random.random((240,dim))
         test = TimeCorrelation(A=A,B=B)
-        tcf_AB = test.tcf # tcf_AB.shape: (240,1)
+        tcf_AB = test.tcf() # tcf_AB.shape: (240,1)
     with timing():
         tcf, N = dummy_correlation(A,B,std=False)
     with timing():
@@ -317,7 +307,7 @@ def main():
         A = np.random.random((300,dim))
         B = np.random.random((120,dim))
         test = TimeCorrelation(A=A,B=B)
-        tcf_BA = test.tcf # tcf_AB.shape: (100,1)
+        tcf_BA = test.tcf() # tcf_AB.shape: (100,1)
     
     with timing():
         tcf, N = dummy_correlation(A,B,std=False)
