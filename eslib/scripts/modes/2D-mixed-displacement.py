@@ -28,12 +28,13 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
-    parser.add_argument("-a" , "--structure_A"  , type=str, required=True, **argv, help="extxyz file with the structure A [a.u.]")
-    parser.add_argument("-b" , "--structure_B"  , type=str, required=True, **argv, help="fextxyz file with the structure A [a.u.]")
-    parser.add_argument("-ma", "--modes_A"      , type=str, required=True, **argv, help="pickle file with the normal modes of the structure A")
-    parser.add_argument("-mb", "--modes_B"      , type=str, required=True, **argv, help="pickle file with the normal modes of the structure B")
-    parser.add_argument("-i" , "--instructions", type=str, required=True, **argv, help="JSON file with the instructions")
-    parser.add_argument("-o" , "--output"       , type=str, required=True, **argv, help="output file [a.u.] (default: 'displaced-structures.extxyz')", default='displaced-structures.extxyz')
+    parser.add_argument("-a" , "--structure_A"  , type=str, required=True , **argv, help="extxyz file with the structure A [a.u.]")
+    parser.add_argument("-b" , "--structure_B"  , type=str, required=True , **argv, help="fextxyz file with the structure A [a.u.]")
+    parser.add_argument("-ma", "--modes_A"      , type=str, required=True , **argv, help="pickle file with the normal modes of the structure A")
+    parser.add_argument("-mb", "--modes_B"      , type=str, required=True , **argv, help="pickle file with the normal modes of the structure B")
+    parser.add_argument("-i" , "--instructions" , type=str, required=True , **argv, help="JSON file with the instructions")
+    parser.add_argument("-o" , "--output"       , type=str, required=False, **argv, help="extxyz output file [a.u.] (default: 'displaced-structures.extxyz')", default='displaced-structures.extxyz')
+    parser.add_argument("-oi", "--output_info"  , type=str, required=False, **argv, help="csv output file (default: 'info.csv')", default='info.csv')
     return parser
 
 @esfmt(prepare_args,description)
@@ -94,8 +95,17 @@ def main(args):
     Mb = modes_B.mode.isel(mode=instructions['MB'])
     print("done")
 
+    #------------------#
     print("\tn. of displaced structures:",Ndispl)
     print("\tA-B distance: {:4f} bohr".format(A2B_distance))
+
+    #------------------#
+    a = np.asarray(Ma)
+    b = np.asarray(Mb)
+    prod = a @ b
+    sign = np.sign(prod).astype(int)
+    print("\n\tScalar product between modes: {:.4f}".format(prod))
+    print("\tThe second mode will be multiplied by {:d}".format(sign))
 
     #------------------#
     print("\n\tDisplacing the structures ... ", end="")
@@ -115,7 +125,7 @@ def main(args):
             # set up the normal modes
             modes = np.zeros((MixedModes.Ndof,2))
             modes[:,0] = A2B_mode
-            modes[:,1] = float(1-ab)/(N_AB-1)*Ma + float(ab)/(N_AB-1)*Mb
+            modes[:,1] = float(1-ab)/(N_AB-1)*Ma + sign * float(ab)/(N_AB-1)*Mb
             MixedModes.set_modes(modes)
             # ic(modes.T)
             # if np.any(np.isnan(modes)):
@@ -132,6 +142,11 @@ def main(args):
     print("\n\tWriting displaced structures to file '{:s}' ... ".format(args.output), end="")
     displaced_structures = AtomicStructures(displaced_structures)
     displaced_structures.to_file(file=args.output)
+    print("done")
+
+    #------------------#
+    print("\n\tWriting information to file '{:s}' ... ".format(args.output_info), end="")
+    displ_information.to_csv(args.output_info,index=False)
     print("done")
     
     return 0     
@@ -150,10 +165,10 @@ if __name__ == "__main__":
 #             "name": "Python: Current File",
 #             "type": "debugpy",
 #             "request": "launch",
-#             "program": "/home/stoccoel/google-personal/codes/eslib/eslib/scripts/modes/displace-along-normal-modes.py",
-#             "cwd" : "/home/stoccoel/google-personal/works/LiNbO3/displacements",
+#             "program": "/home/stoccoel/google-personal/codes/eslib/eslib/scripts/modes/2D-mixed-displacement.py",
+#             "cwd" : "/home/stoccoel/google-personal/simulations/LiNbO3/skew-1x1x1/displ",
 #             "console": "integratedTerminal",
-#             "args" : ["-i", "start.au.extxyz", "-nm", "normal-modes.pickle", "-d", "displacements.csv","-od","out-dis.txt"],
+#             "args" : ["-a", "std.au.extxyz", "-b", "inv.au.extxyz", "-ma", "vib-std.pickle", "-mb", "vib-inv.pickle", "-i", "instructions.json"],
 #             "justMyCode": false,
 #         }
 #     ]
