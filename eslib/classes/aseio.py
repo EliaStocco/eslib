@@ -7,8 +7,10 @@ import numpy as np
 from concurrent.futures import ProcessPoolExecutor
 from eslib.classes.io import pickleIO
 from typing import List, Union, TypeVar, Match, Callable, Any
+import functools
 
 T = TypeVar('T', bound='aseio')
+M = TypeVar('M', bound=Callable[..., Any])
 
 PARALLEL = False
 
@@ -24,7 +26,7 @@ def set_parallel(value: bool):
     PARALLEL = value
 
 #------------------#
-def calc_none_static(method: Callable) -> Callable:
+def calc_none_static(method: M) -> M:
     """
     Decorator to set `calc` = None for all `ase.Atoms` objects in `self`
     before executing the method (usually before saving the object to file).
@@ -40,6 +42,7 @@ def calc_none_static(method: Callable) -> Callable:
     This function assures that this will be the case.
     Weird behaviors (hard to detect and debug) can occur if  `calc` != None, especially when IO streaming.
     """
+    @functools.wraps(method)
     def wrapper(self: List[Atoms], *args, **kwargs) -> Any:
         for a in self:
             a.calc = None
@@ -47,7 +50,7 @@ def calc_none_static(method: Callable) -> Callable:
     return wrapper
 
 #------------------#
-def calc_none_class(method: Callable) -> List[Atoms]:
+def calc_none_class(method: M) -> M :
     """
     Decorator to set `calc` = None for all `ase.Atoms` objects in the output
     returned by the class method.
@@ -63,7 +66,8 @@ def calc_none_class(method: Callable) -> List[Atoms]:
     This function assures that this will be the case.
     Weird behaviors (hard to detect and debug) can occur if  `calc` != None, especially when IO streaming.
     """
-    def wrapper(*args, **kwargs) -> Any:
+    @functools.wraps(method)
+    def wrapper(*args, **kwargs):
         out: List[Atoms] = method(*args, **kwargs)
         for a in out:
             a.calc = None
