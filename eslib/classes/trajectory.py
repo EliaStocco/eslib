@@ -6,6 +6,7 @@ from eslib.classes.aseio import aseio, integer_to_slice_string
 from eslib.formatting import esfmt
 from eslib.classes.vectorize import easyvectorize
 from ase import Atoms
+from copy import deepcopy
 from typing import List, Union, TypeVar
 
 T = TypeVar('T', bound='AtomicStructures')
@@ -138,10 +139,10 @@ class AtomicStructures(aseio):
         """
         # if what == "unknown":
         #     what = self.search(name)
-        if what == "info" or what == "arrays":
-            pass
-        else:
-            raise ValueError("can not find {:s}".format(name))
+        # if what == "info" or what == "arrays":
+        #     pass
+        # else:
+        #     raise ValueError("can not find {:s}".format(name))
         assert len(self) == data.shape[0]
         for n,atoms in enumerate(self):
             getattr(atoms,what)[name] = data[n]
@@ -239,6 +240,14 @@ class AtomicStructures(aseio):
         t = easyvectorize(Atoms)(self)
         return t.call(func)
     
+    def copy(self:T)->T:
+        out = deepcopy(self)
+        assert self == out  # Should print True
+        assert not (self is out)  # Should print False
+        assert all( [ not (a is b) for a,b in zip(self,out) ])
+        assert all( [ a == b for a,b in zip(self,out) ])
+        return out
+
 def random_water_structure(num_molecules=1):
     from ase import Atoms
     symbols = ['H', 'H', 'O']  # Atomic symbols for water molecule
