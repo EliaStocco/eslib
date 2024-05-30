@@ -6,6 +6,7 @@ import numpy as np
 import xarray as xr
 from eslib.formatting import esfmt
 from eslib.classes.trajectory import AtomicStructures
+from itertools import product
 import json
 from icecream import ic
 
@@ -35,6 +36,7 @@ def prepare_args(description):
     parser.add_argument("-i" , "--instructions" , type=str, required=True , **argv, help="JSON file with the instructions")
     parser.add_argument("-o" , "--output"       , type=str, required=False, **argv, help="extxyz output file [a.u.] (default: 'displaced-structures.extxyz')", default='displaced-structures.extxyz')
     parser.add_argument("-oi", "--output_info"  , type=str, required=False, **argv, help="csv output file (default: 'info.csv')", default='info.csv')
+    parser.add_argument("-od" , "--out_dis"     , type=str, required=False, **argv, help="*.txt output file with the displacements (default: 'displacement.txt')", default='displacement.txt')
     return parser
 
 @esfmt(prepare_args,description)
@@ -148,6 +150,33 @@ def main(args):
     print("\n\tWriting information to file '{:s}' ... ".format(args.output_info), end="")
     displ_information.to_csv(args.output_info,index=False)
     print("done")
+
+    #------------------#
+    print("\n\tWriting displacements to file '{:s}' ... ".format(args.out_dis), end="")
+    # tmp = pd.DataFrame(columns=["mode","start","end","N"],index=[0,1])
+
+    # tmp.at[0,"mode"]  = 0
+    # tmp.at[0,"start"] = 0
+    # tmp.at[0,"end"]   = 1
+    # tmp.at[0,"N"]     = args.shape[0]-1
+
+    # tmp.at[1,"mode"]  = 1
+    # tmp.at[1,"start"] = 0
+    # tmp.at[1,"end"]   = 1
+    # tmp.at[1,"N"]     = args.shape[1]-1
+
+    # #------------------#
+    # print("\tPreparing displacement along single modes:")
+    # lists = [None]*len(tmp)
+    # for n,row in tmp.iterrows():
+    #     print("\t\tmode {:3d}: ".format(int(row['mode'])),end="")
+    #     lists[n]= np.linspace(row['start'],row['end'],int(row['N']+1),endpoint=True)
+    #     print(lists[n])
+    sud_df = displ_information[ ['M [bohr]','A-B [bohr]'] ]
+    displacements = np.asarray(sud_df)
+    print(displacements.shape)
+    np.savetxt(args.out_dis,displacements,fmt='%10.4f')
+    print("done") 
     
     return 0     
 
