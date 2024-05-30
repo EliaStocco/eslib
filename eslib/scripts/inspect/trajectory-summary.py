@@ -28,7 +28,7 @@ def main(args):
     print("\tn. of atomic structures: {:d}".format(len(atoms)))
 
     #---------------------------------------#
-    pbc = atoms.call(lambda e:e.pbc)
+    pbc = [ np.all(a.get_pbc()) for a in atoms ] #atoms.call(lambda e:e.pbc)
     if np.all(pbc):
         print("\tperiodic (all axis): true")
     elif np.all(~pbc):
