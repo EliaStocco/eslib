@@ -225,8 +225,8 @@ def read_trajectory(file:str,
         if pbc is not None:
             for atom in atoms:
                 atom.set_pbc(pbc)
-                # if not pbc:
-                #     atom.set_cell(None)
+                if not pbc:
+                    atom.set_cell(None)
 
     return atoms
 
