@@ -1,14 +1,13 @@
-
+"""Empty docstring"""
+from copy import deepcopy
+from typing import List, Union, TypeVar
 import numpy as np
+from ase import Atoms
 from eslib.tools import convert
 from eslib.functional import deprecated
 from eslib.classes.aseio import aseio, integer_to_slice_string
 from eslib.formatting import esfmt
 from eslib.classes.vectorize import easyvectorize
-from ase import Atoms
-from copy import deepcopy
-from typing import List, Union, TypeVar
-
 T = TypeVar('T', bound='AtomicStructures')
 
 #---------------------------------------#
@@ -40,11 +39,11 @@ class AtomicStructures(aseio):
                 output = np.zeros((len(self),*value.shape))
             output[n] = np.asarray(value)
             return output
-            
+           
         for n,structure in enumerate(self):
             if name not in structure.info:
                 if default is None:
-                    raise ValueError("structure n. {:n} does not have '{:s}' in `info`".format(n,name))
+                    raise ValueError(f'structure n. {n} does not have `{name}` in `info`')
                 else:
                     output = set_output(output,n,default)
             else:
@@ -112,8 +111,7 @@ class AtomicStructures(aseio):
         assert len(self) == data.shape[0]
         for n,atoms in enumerate(self):
             atoms.info[name] = data[n]
-        pass
-    
+
     @deprecated(reason="Use `set` instead")
     def set_array(self:T,name:str,data:np.ndarray)->None:
         """
@@ -236,9 +234,9 @@ class AtomicStructures(aseio):
             subsampled_structures = AtomicStructures(subsampled_structures)
         return subsampled_structures
 
-    def call(self: T, func) -> np.ndarray:
-        t = easyvectorize(Atoms)(self)
-        return t.call(func)
+    # def call(self: T, func) -> np.ndarray:
+    #     t = easyvectorize(Atoms)(self)
+    #     return t.call(func)
     
     def copy(self:T)->T:
         out = deepcopy(self)
@@ -260,12 +258,12 @@ def random_water_structure(num_molecules=1):
         water_structure.extend(Atoms(symbols=symbols, positions=positions))
     return water_structure
 
-@esfmt(None,None)
-def main(args):
-    atoms = random_water_structure(3)
-    structures = AtomicStructures(atoms)
-    pbc = structures.pbc
-    return 
+# @esfmt(None,None)
+# def main(args):
+#     atoms = random_water_structure(3)
+#     structures = AtomicStructures(atoms)
+#     pbc = structures.pbc
+#     return 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
