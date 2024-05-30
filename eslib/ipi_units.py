@@ -200,6 +200,12 @@ UnitMap = {
         "cal/mol": 0.0000015946679,
         "kelvin": 3.1668152e-06,
     },
+    "charge" : {
+        "" : 1.00,
+        "automatic": 1.00,
+        "atomic_unit": 1.00,
+        "coulomb" : 1./1.602176634e-19 # 1 coulomb = 1/1.602176634e-19 atomic_unit
+    },
     "temperature": {
         "": 1.00,
         "automatic": 1.00,
@@ -231,6 +237,11 @@ UnitMap = {
         "atomic_unit": 1.00,
         "eang": 1.8897261,  # electron charge * angstrom
     },
+    "polarization": {  # electron charge * Bohr
+        "": 1.00,
+        "automatic": 1.00,
+        "atomic_unit": 1.00,
+    },
     "ms-momentum": {  # TODO fill up units here (mass-scaled momentum)
         "": 1.00,
         "automatic": 1.00,
@@ -240,7 +251,7 @@ UnitMap = {
         "": 1.00,
         "automatic": 1.00,
         "atomic_unit": 1.00,
-        "angstrom": 1.8897261,
+        "angstrom": 1.8897261, # 1 angstrom = 1.8897261 atomic_unit
         "meter": 1.8897261e10,
         "radian": 1.00,
         "degree": 0.017453292519943295,
@@ -284,7 +295,6 @@ UnitMap = {
         "ev/ang^2": 0.010290858,
     },
 }
-
 
 # a list of magnitude prefixes
 UnitPrefix = {

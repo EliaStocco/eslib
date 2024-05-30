@@ -5,7 +5,7 @@ from ase.geometry import distance
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
 from typing import Union, Dict, List
-from eslib.ipi_units import unit_to_internal, unit_to_user
+from eslib.ipi_units import unit_to_internal, unit_to_user, UnitMap
 from copy import copy
 import pandas as pd
 
@@ -84,6 +84,14 @@ def convert(what:Union[np.ndarray,float], family:str=None, _from:str="atomic_uni
         return what * factor
     else :
         return what
+
+#---------------------------------------#
+def add_conversion(family:str,unit:str,value:float)->None:
+    """value must be the conversion factor from `unit` to 'atomic_unit'"""
+    UnitMap[family.lower()][unit.lower()] = value
+
+value = convert(1,"charge","coulomb","atomic_unit")/( convert(1,"length","meter","atomic_unit")**2)
+add_conversion("polarization","C/m^2",value)
 
 #---------------------------------------#
 # Decorator to convert ase.Cell to np.array and transpose

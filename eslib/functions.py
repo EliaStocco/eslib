@@ -325,3 +325,20 @@ def get_line_with_pattern(file, pattern):
         raise ValueError("File '{:s}' not found".format(file))
     except:
         raise ValueError("error in 'get_line_with_pattern'")
+    
+def check_pattern_in_file(file_path: str, pattern: str) -> bool:
+    """
+    Check if a specific pattern is present in a given file.
+
+    Args:
+        file_path (str): The path to the file to be checked.
+        phrase (str): The phrase to search for within the file.
+
+    Returns:
+        bool: True if the phrase is found in the file, False otherwise.
+    """
+    with open(file_path, 'r') as file:
+        for line in file:
+            if pattern in line:
+                return True
+    return False
