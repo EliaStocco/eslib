@@ -162,12 +162,14 @@ def read_trajectory(file:str,
     # really weird (and wrong) behavior in the IO stream
     for atom in atoms:
         atom.calc = None 
+        if format in ["i-pi","ipi"]:
+            atom.info = dict()
     ########################
 
     if format in ["i-pi","ipi"]:
 
-        for atom in atoms:
-            atom.info = dict()
+        # for atom in atoms:
+        #     atom.info = dict()
 
         pbc = pbc if pbc is not None else True
 
@@ -191,10 +193,10 @@ def read_trajectory(file:str,
                 else:
                     strings:List[Match[str]] = [ abcABC.search(comment) for comment in comments ]
                     cells = np.zeros((len(strings),3,3))
-                    for string,cell in zip(strings,cells):
+                    for n,string in enumerate(strings):
                         a, b, c = [float(x) for x in string.group(1).split()[:3]]
                         alpha, beta, gamma = [float(x) * deg2rad for x in string.group(1).split()[3:6]]
-                        cell = abc2h(a, b, c, alpha, beta, gamma)
+                        cells[n] = abc2h(a, b, c, alpha, beta, gamma)
 
             if remove_replicas:
                 if not read_all_comments:
