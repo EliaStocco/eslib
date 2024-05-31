@@ -6,7 +6,7 @@
 - create "backup file" for `soap.py`
 - find a way to restart `fps.py` from an interrupted script
 - find a way to "standardize" `DipoleModel`, `MACEModel` and `Calculator`
-- set up scripts to compute time autocorrelation functions
-- code a clean way to vectory `ase.Atoms` into `AtomicStructures`
-- optimize reading from `extxyz` file by reducing number of for loops
 - find an expression for the effective mass of a normal mode
+- saving to `pickle` files could have a bug
+- implement a `CLI` based on `argparse` to manipulate, inspect and perform calculations on trajectories
+- implement a class to deal with `i-PI` properties
