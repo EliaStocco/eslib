@@ -51,7 +51,7 @@ def main(args):
         data = data.reshape((N,Natoms,-1))
         what = "arrays"
     elif args.what in ['i','info']:
-        data = data.reshape((N,-1))    
+        # data = data.reshape((N,-1))    
         what = "info"
     else:
         raise ValueError("'what' (-w,--what) can be only 'i' (info), or 'a' (array)")
