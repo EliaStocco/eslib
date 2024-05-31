@@ -35,7 +35,7 @@ def prepare_args(description):
     # parser.add_argument("-sh" , "--soap_hyper"        , type=str  , **argv, help="JSON file with the SOAP hyperparameters", default=None)
     # parser.add_argument("-pca", "--pca"               , type=str2bool  , **argv, help="whether to perform PCA or not (default: true)", default=True)
     parser.add_argument("-p" , "--parameters" , type=str  , **argv, help="JSON file with the parameters for the sklearn method (default: 'None')", default=None)
-    parser.add_argument("-j", "--component" , type=int  , **argv, help="cartesian component of the features to be saved (default: -1)", default=-1)
+    parser.add_argument("-j", "--component" , type=int  , **argv, help="cartesian component of the features to be saved (default: 0)", default=0)
     parser.add_argument("-m", "--method"    , type=str  , **argv, help="analysis method (default: 'pca')", default=2, choices=['pca','tsne','mds'])
     parser.add_argument("-n", "--number"    , type=int  , **argv, help="number of components to be used in PCA (default: 2)", default=2)
     parser.add_argument("-f", "--feature"   , type=str  , **argv, help="feature to be analysed using PCA (default: 'dipole')", default="dipole")
@@ -58,7 +58,7 @@ def save_feature_to_chemiscope(features,name,frames,T,file):
         # this is an example of how to add structure-level properties
         name: {
             "target": "structure",
-            "values": features.tolist(),
+            "values": np.asarray(features).flatten().tolist(),
 
             # change the following line to correspond to the units of your property
             "units": "atomic_unit",
@@ -143,8 +143,9 @@ def main(args):
     except:
         raise ValueError("encountered problems extracting '{:s}' info from the atomic structures".format(args.feature))
     print("done")
+    print("\tfeatures.shape: ",features.shape)
 
-    tmp = np.concatenate([T, features], axis=1)
+    tmp = np.concatenate([T, features.reshape(len(features),-1)], axis=1)
     print("\tSaving analysis results to file '{:s}' ... ".format(args.output),end="")
     np.savetxt(args.output,tmp,fmt='%24.18e')
     print("done")
@@ -152,22 +153,31 @@ def main(args):
     print()
     extension = ".json.gz"
     base_name = str(args.chemiscope).split(extension)[0]
-    if args.component == -1:
-        for n in range(features.shape[1]):
-            file = f"{base_name}.{n}{extension}"
-            print("\tSaving results (component {:d}) for chemiscope to file '{:s}' ... ".format(n,file),end="")
-            save_feature_to_chemiscope(features[:,n],args.feature,frames,T,file)
+    if features.ndim == 1 and args.component >= 0 :
+        raise ValueError("`features` is a scalar, only `-j 0` allowed.")
+    
+    if features.ndim > 1:
+        if args.component == -1:
+            for n in range(features.shape[1]):
+                file = f"{base_name}.{n}{extension}"
+                print("\tSaving results (component {:d}) for chemiscope to file '{:s}' ... ".format(n,file),end="")
+                save_feature_to_chemiscope(features[:,n],args.feature,frames,T,file)
+                print("done")
+        elif args.component == -2:
+            file = f"{base_name}{extension}"
+            print("\tSaving results (modulus) for chemiscope to file '{:s}' ... ".format(file),end="")
+            features = np.linalg.norm(features,axis=1)
+            save_feature_to_chemiscope(features,args.feature,frames,T,file)
             print("done")
-    elif args.component == -2:
-        file = f"{base_name}{extension}"
-        print("\tSaving results (modulus) for chemiscope to file '{:s}' ... ".format(file),end="")
-        features = np.linalg.norm(features,axis=1)
-        save_feature_to_chemiscope(features,args.feature,frames,T,file)
-        print("done")
+        else:
+            file = f"{base_name}{extension}"
+            print("\tSaving results for chemiscope to file '{:s}' ... ".format(file),end="")
+            save_feature_to_chemiscope(features[:,args.component],args.feature,frames,T,file)
+            print("done")
     else:
         file = f"{base_name}{extension}"
         print("\tSaving results for chemiscope to file '{:s}' ... ".format(file),end="")
-        save_feature_to_chemiscope(features,args.feature,frames,T,args.output)
+        save_feature_to_chemiscope(features,args.feature,frames,T,file)
         print("done")
 
 #---------------------------------------#
