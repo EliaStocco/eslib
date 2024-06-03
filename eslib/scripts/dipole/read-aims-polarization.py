@@ -87,9 +87,9 @@ def main(args):
     #------------------#
     print("\n\tKeeping only files with 'Have a nice day' ... ", end="")
     finished = [ check_pattern_in_file(f,'Have a nice day') for f in all_files ]
-    all_files = [ f for f, finished_flag in zip(all_files, finished) if finished_flag]
+    all_good_files = [ f for f, finished_flag in zip(all_files, finished) if finished_flag]
     print("done")
-    N = len(all_files)
+    N = len(all_good_files)
     print("\tn. files: ", N)
 
     #------------------#
@@ -112,7 +112,7 @@ def main(args):
     
     #------------------#
     print("\n\tReading files and extracting the polarization ... ", end="")
-    for n, file in enumerate(all_files):
+    for n, file in enumerate(all_good_files):
         df.at[n, "file"] = file
 
         P, string = read_polarization(file) # C/m^2
