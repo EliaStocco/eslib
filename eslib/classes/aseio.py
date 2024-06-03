@@ -6,6 +6,7 @@ import math
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor
 from eslib.classes.io import pickleIO
+from eslib.tools import convert
 from typing import List, Union, TypeVar, Match, Callable, Any
 import functools
 
@@ -150,6 +151,15 @@ def read_trajectory(file:str,
     atoms = read(file,index=index,format=f)
     index = integer_to_slice_string(index)
 
+    units = {
+        "positions" : "atomic_unit",
+        "cell" : "atomic_unit"
+    }
+    factor = {
+        "positions" : np.nan,
+        "cell" : np.nan
+    }
+
     read_all_comments = False
 
     if not isinstance(atoms,list):
@@ -175,8 +185,17 @@ def read_trajectory(file:str,
 
         with open(file,"r") as ffile:
 
+            # units
+            comment = read_comments_xyz(ffile,slice(0,1,None))[0]
+            units["positions"] = str(comment).split("positions{")[1].split("}")[0]
+            units["cell"] = str(comment).split("cell{")[1].split("}")[0]
+            factor = {
+                "positions" : convert(1,"length",_from=units["positions"],_to="angstrom"),
+                     "cell" : convert(1,"length",_from=units["cell"],     _to="angstrom"),
+            }
+
             if same_cell:
-                comment = read_comments_xyz(ffile,slice(0,1,None))[0]
+                # comment = read_comments_xyz(ffile,slice(0,1,None))[0]
                 comments = FakeList(comment,len(atoms))
             else:
                 comments = read_comments_xyz(ffile,index)
@@ -218,8 +237,9 @@ def read_trajectory(file:str,
                     atom.info["step"] = step
 
             for atom,cell in zip(atoms,cells):
-                atom.set_cell(cell.T if pbc else None)
+                atom.set_cell(cell.T * factor["cell"] if pbc else None)
                 atom.set_pbc(pbc)
+                atom.positions *= factor["positions"]
 
     else:
         if pbc is not None:
