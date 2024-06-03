@@ -45,7 +45,8 @@ def get_property_header(inputfile, N=1000, search=True):
     if restart:
         return get_property_header(inputfile, N=icol)
     else:
-        return names[:icol]
+        out = names[:icol]
+        return [ str(n).split("{")[0] for n in out ]
 
 
 def getproperty(inputfile, propertyname, data=None, skip="0", show=False):
@@ -66,6 +67,7 @@ def getproperty(inputfile, propertyname, data=None, skip="0", show=False):
         units = dict()
         data = np.loadtxt(inputfile)
         for p in propertyname:
+            p = p.split("{")[0]
             out[p], units[p] = getproperty(inputfile, p, data, skip=skip)
         return out, units
 
