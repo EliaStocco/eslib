@@ -21,7 +21,7 @@ def prepare_args(description):
     parser.add_argument("-a" , "--atoms"         , **argv, type=str  , help="atoms to be displaced")
     parser.add_argument("-n" , "--number"        , **argv, type=int  , help="number of intermediate structures in the path")
     parser.add_argument("-d" , "--direction"     , **argv, type=flist, help="direction of the displacement")
-    parser.add_argument("-o" , "--output"        , **argv, type=str  , help="output file (default: 'path.extxyz')", default="path.extxyz")
+    parser.add_argument("-o" , "--output"        , **argv, type=str  , help="output file (default: %(default)s)", default="path.extxyz")
     return parser
 
 #---------------------------------------#

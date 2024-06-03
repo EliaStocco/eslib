@@ -75,15 +75,15 @@ def prepare_parser(description):
     )
     parser.add_argument(
         "-t", "--threshold",  type=float,**argv,
-        help="threshold for GIMS (default: 1e-3)", default=1e-3
+        help="threshold for GIMS (default: %(default)s)", default=1e-3
     )
     parser.add_argument(
         "-r"  , "--rotate" , type=str2bool, **argv,
-        help="whether to rotate the cell to the upper triangular form compatible with i-PI (default: True)", default=True
+        help="whether to rotate the cell to the upper triangular form compatible with i-PI (default: %(default)s)", default=True
     )
     parser.add_argument(
         "-p"  , "--primitive" , type=str2bool, **argv,
-        help="whether to compute the primitive structure (default: False)", default=False
+        help="whether to compute the primitive structure (default: %(default)s)", default=False
     )
     parser.add_argument(
         "-o", "--output",  type=str,**argv,

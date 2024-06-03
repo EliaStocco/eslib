@@ -14,7 +14,7 @@ def prepare_args(description):
     argv = {"metavar": "\b"}
     parser.add_argument("-a", "--bec_a", **argv, required=True, type=str, help="*.txt input file with the first BECs")
     parser.add_argument("-b", "--bec_b", **argv, required=True, type=str, help="*.txt input file with the second BECs")
-    parser.add_argument("-o", "--output", **argv, required=False, type=str, help="output file (default: 'bec.pdf')", default='bec.pdf')
+    parser.add_argument("-o", "--output", **argv, required=False, type=str, help="output file (default: %(default)s)", default='bec.pdf')
     return parser
 
 #---------------------------------------#

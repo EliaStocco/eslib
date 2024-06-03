@@ -16,11 +16,11 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
-    parser.add_argument("-i" , "--instructions", type=str, **argv, help="model input file (default: 'instructions.json')", default="instructions.json")
-    parser.add_argument("-p" , "--parameters"  , type=str, **argv, help="torch parameters file (default: 'parameters.pth')", default=None)
+    parser.add_argument("-i" , "--instructions", type=str, **argv, help="model input file (default: %(default)s)", default="instructions.json")
+    parser.add_argument("-p" , "--parameters"  , type=str, **argv, help="torch parameters file (default: %(default)s)", default=None)
     parser.add_argument("-s" , "--structure"   , type=str, **argv, help="file with an atomic structure [a.u.]")
     parser.add_argument("-n" , "--number"      , type=int, **argv, help="number of tests to perform", default=100)
-    parser.add_argument("-f" , "--fold"        , type=str2bool, **argv, help="whether the atomic structures have to be folded into the primitive unit cell (default: false)", default=False)
+    parser.add_argument("-f" , "--fold"        , type=str2bool, **argv, help="whether the atomic structures have to be folded into the primitive unit cell (default: %(default)s)", default=False)
     return parser# .parse_args()
 
 #---------------------------------------#

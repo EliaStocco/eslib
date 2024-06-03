@@ -24,9 +24,9 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i", "--input"    , **argv,type=str, required=True , help="file with the atomic configurations [a.u]")
-    parser.add_argument("-n", "--name"     , **argv,type=str, required=False, help="keyword (default: 'dipole')" , default="dipole")
-    parser.add_argument("-o", "--output"   , **argv,type=str, required=False, help="JSON output file with the partial charges (default: 'partial-charges.json')", default='partial-charges.json')
-    # parser.add_argument("-z", "--born_charges"   , **argv,type=str, help="output file with the Born Effective Charges (default: 'bec.oxn.txt')", default='bec.oxn.txt')
+    parser.add_argument("-n", "--name"     , **argv,type=str, required=False, help="keyword (default: %(default)s)" , default="dipole")
+    parser.add_argument("-o", "--output"   , **argv,type=str, required=False, help="JSON output file with the partial charges (default: %(default)s)", default='partial-charges.json')
+    # parser.add_argument("-z", "--born_charges"   , **argv,type=str, help="output file with the Born Effective Charges (default: %(default)s)", default='bec.oxn.txt')
     return parser# .parse_args()
 
 #---------------------------------------#

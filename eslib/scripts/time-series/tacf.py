@@ -19,8 +19,8 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"  , **argv, required=True , type=str, help="txt/npy input file")
-    parser.add_argument("-b" , "--blocks" , **argv, required=False, type=int, help="number of blocks (default: 10)", default=10)
-    parser.add_argument("-m" , "--method" , **argv, required=False, type=str, help="method (default: 'class')", default='class', choices=['class','function'])
+    parser.add_argument("-b" , "--blocks" , **argv, required=False, type=int, help="number of blocks (default: %(default)s)", default=10)
+    parser.add_argument("-m" , "--method" , **argv, required=False, type=str, help="method (default: %(default)s)", default='class', choices=['class','function'])
     parser.add_argument("-o" , "--output" , **argv, required=True , type=str, help="txt/npy output file")
     parser.add_argument("-p" , "--plot"   , **argv, required=False, type=str, help="output file for the plot")
 

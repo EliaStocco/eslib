@@ -4,7 +4,7 @@ import argparse
 parser = argparse.ArgumentParser(description="Convert input numbers to LaTeX table.")
 parser.add_argument("--input", help="input txt file")
 parser.add_argument("--output", help="output LaTeX file")
-parser.add_argument("--decimal", type=int, default=2, help="Number of decimal places to use in the table (default: 2)")
+parser.add_argument("--decimal", type=int, default=2, help="Number of decimal places to use in the table (default: %(default)s)")
 args = parser.parse_args()
 
 # Read numbers from the input file

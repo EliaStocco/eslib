@@ -16,9 +16,9 @@ def prepare_args(description):
     from argparse import RawTextHelpFormatter
     parser = argparse.ArgumentParser(description=description,formatter_class=RawTextHelpFormatter)
     argv = {"metavar" : "\b"}
-    parser.add_argument("-p", "--predicted", **argv,type=str, help="txt file with the predicted values (default: 'pred.txt')", default="pred.txt")
-    parser.add_argument("-e", "--expected" , **argv,type=str, help="txt file with the expected values (default: 'exp.txt')", default="exp.txt")
-    parser.add_argument("-m", "--metrics"  , **argv,type=lambda s: size_type(s,dtype=str), help="list of regression metrics (default: ['RMSE','MAE'])" , default=["RMSE","MAE"])
+    parser.add_argument("-p", "--predicted", **argv,type=str, help="txt file with the predicted values (default: %(default)s)", default="pred.txt")
+    parser.add_argument("-e", "--expected" , **argv,type=str, help="txt file with the expected values (default: %(default)s)", default="exp.txt")
+    parser.add_argument("-m", "--metrics"  , **argv,type=lambda s: size_type(s,dtype=str), help="list of regression metrics (default: %(default)s)" , default=["RMSE","MAE"])
     parser.add_argument("-o", "--output"   , **argv,type=str, help="JSON output file with the computed metrics (default: %(default)s)", default=None)
     return parser
 

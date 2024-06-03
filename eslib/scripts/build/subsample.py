@@ -21,13 +21,13 @@ def prepare_args(description):
 
     argv = {"metavar" : "\b"}
     parser.add_argument("-i", "--input",  type=str, default='i-pi.positions_0.xyz', **argv,
-                        help="input file containing the MD trajectory (default: 'i-pi.positions_0.xyz')")
+                        help="input file containing the MD trajectory (default: %(default)s)")
 
     parser.add_argument("-f", "--format", type=str, default='extxyz', **argv, 
-                        help="file format (default: extxyz)" )
+                        help="file format (default: %(default)s)" )
     
     parser.add_argument("-n", "--indices", type=lambda s: union_type(s,Union[str,List[int]]), **argv, default='indices.txt',
-                        help="txt file with the subsampling indices, or list of integers (default: 'indices.txt')")
+                        help="txt file with the subsampling indices, or list of integers (default: %(default)s)")
 
     parser.add_argument("-o", "--output", type=str, **argv, 
                         help="output file")

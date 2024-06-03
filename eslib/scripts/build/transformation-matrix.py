@@ -70,7 +70,7 @@ def prepare_parser():
     parser.add_argument("-a" , "--structure_A"  , type=str, **argv, help="atomic structure A [cell]")
     parser.add_argument("-b" , "--structure_B"  , type=str, **argv, help="atomic structure B [supercell]")
     parser.add_argument("-o" , "--output"       , type=str, **argv, help="output file for the trasformatio matrix", default=None)
-    parser.add_argument("-of", "--output_format", type=str, **argv, help="output format for np.savetxt (default: '%%24.18e')", default='%24.18e')
+    parser.add_argument("-of", "--output_format", type=str, **argv, help="output format for np.savetxt (default: %(default)s)", default='%24.18e')
     options = parser.parse_args()
     return options
 

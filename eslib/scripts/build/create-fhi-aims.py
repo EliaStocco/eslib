@@ -15,7 +15,7 @@ parser.add_argument("-s" , "--species"      , action="store", type=str     , hel
 parser.add_argument("-f" , "--folder"       , action="store", type=str     , help="FHI-aims folder"                     , default=None)
 parser.add_argument("-v" , "--variable"     , action="store", type=str     , help="bash variable for FHI-aims folder"   , default="AIMS_PATH")
 parser.add_argument("-i" , "--input"        , action="store", type=str     , help="input file"                          , default="geometry.in")
-parser.add_argument("-if", "--input_format" , action="store", type=str     , help="input file format (default: 'aims')" , default='aims')
+parser.add_argument("-if", "--input_format" , action="store", type=str     , help="input file format (default: %(default)s)" , default='aims')
 parser.add_argument("-o" , "--output"       , action="store", type=str     , help="output file    "                     , default=None)
 
 args = parser.parse_args()

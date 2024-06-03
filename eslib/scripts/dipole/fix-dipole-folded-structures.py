@@ -25,10 +25,10 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i", "--input"    , **argv, type=str, help="extxyz file with the unfolded atomic configurations [a.u]")
-    parser.add_argument("-id", "--in_dipole"  , **argv, type=str, help="name of the input dipoles(default: 'dipole')", default='dipole')
-    parser.add_argument("-od", "--out_dipole"  , **argv, type=str, help="name of the output dipoles(default: 'dipole')", default='dipole')
+    parser.add_argument("-id", "--in_dipole"  , **argv, type=str, help="name of the input dipoles(default: %(default)s)", default='dipole')
+    parser.add_argument("-od", "--out_dipole"  , **argv, type=str, help="name of the output dipoles(default: %(default)s)", default='dipole')
     parser.add_argument("-c", "--charges", **argv, type=str, required=True , help="JSON file with the oxidation number/integer charges")
-    parser.add_argument("-o", "--output"   , **argv, type=str, help="output file with the fixed trajectory (default: 'trajectory.fixed.extxyz')", default="trajectory.fixed.extxyz")
+    parser.add_argument("-o", "--output"   , **argv, type=str, help="output file with the fixed trajectory (default: %(default)s)", default="trajectory.fixed.extxyz")
     return parser# .parse_args()
 
 #---------------------------------------#

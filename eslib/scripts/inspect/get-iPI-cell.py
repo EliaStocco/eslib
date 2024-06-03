@@ -15,9 +15,9 @@ def prepare_parser(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
     parser.add_argument("-i", "--input",  type=str,**argv,help="atomic structure input file")
-    parser.add_argument("-d", "--digits",  type=int,**argv,help="number of digits (default: 6)", default=6)
+    parser.add_argument("-d", "--digits",  type=int,**argv,help="number of digits (default: %(default)s)", default=6)
     parser.add_argument("-m", "--mode"  ,  type=int,**argv,help="mode (default: %(default)s)", default=None)
-    parser.add_argument("-e", "--exponential",  type=bool,**argv,help="exponential notation (default: False)", default=False)
+    parser.add_argument("-e", "--exponential",  type=bool,**argv,help="exponential notation (default: %(default)s)", default=False)
     parser.add_argument("-o", "--output",  type=str,**argv,help="output file (default: %(default)s)", default=None)
     return parser# .parse_args()
 

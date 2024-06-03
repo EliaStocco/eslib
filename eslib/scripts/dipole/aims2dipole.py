@@ -16,8 +16,8 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i", "--input"         , **argv,type=str, help="input txt file")
     parser.add_argument("-rr" , "--remove_replicas", **argv,required=False, type=str2bool, help='whether to remove replicas (default: false)', default=False)
-    parser.add_argument("-o", "--output"        , **argv,type=str, help="output file with the dipole values (default: 'dipole.aims.txt')", default="dipole.aims.txt")
-    parser.add_argument("-of", "--output_format", **argv,type=str, help="output format for np.savetxt (default: '%%24.18f')", default='%24.18f')
+    parser.add_argument("-o", "--output"        , **argv,type=str, help="output file with the dipole values (default: %(default)s)", default="dipole.aims.txt")
+    parser.add_argument("-of", "--output_format", **argv,type=str, help="output format for np.savetxt (default: %(default)s)", default='%24.18f')
     return parser# .parse_args()
 
 #---------------------------------------#

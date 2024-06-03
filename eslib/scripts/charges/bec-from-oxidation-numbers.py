@@ -18,8 +18,8 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"         , **argv, required=True , type=str, help="extxyz input file with an atomic structure and oxidation numbers")
     parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-k" , "--keyword"       , **argv, required=False, type=str, help="keyword for the oxidation numbers (default: 'oxidation-numbers')", default='oxidation-numbers')
-    parser.add_argument("-o" , "--output"        , **argv, required=False, type=str, help="txt output file with the BECs (default: 'bec.txt')", default='bec.txt')
+    parser.add_argument("-k" , "--keyword"       , **argv, required=False, type=str, help="keyword for the oxidation numbers (default: %(default)s)", default='oxidation-numbers')
+    parser.add_argument("-o" , "--output"        , **argv, required=False, type=str, help="txt output file with the BECs (default: %(default)s)", default='bec.txt')
     return parser# .parse_args()
 
 #---------------------------------------#

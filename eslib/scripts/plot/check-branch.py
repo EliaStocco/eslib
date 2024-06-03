@@ -23,9 +23,9 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i", "--input"  , **argv, type=slist, required=True , help="input 'extxyz' files")
-    parser.add_argument("-k", "--keyword"  , **argv, type=str, help="keyword of the dipoles (default: 'dipole')", default='dipole')
-    parser.add_argument("-m", "--model"  , **argv, type=str,   required=False, help="pickle file with the dipole linear model (default: 'DipoleModel.pickle')", default='DipoleModel.pickle')
-    parser.add_argument("-o", "--output" , **argv, type=str,   required=False, help="file with the branches plot (default: 'branch.pdf')", default="branch.pdf")
+    parser.add_argument("-k", "--keyword"  , **argv, type=str, help="keyword of the dipoles (default: %(default)s)", default='dipole')
+    parser.add_argument("-m", "--model"  , **argv, type=str,   required=False, help="pickle file with the dipole linear model (default: %(default)s)", default='DipoleModel.pickle')
+    parser.add_argument("-o", "--output" , **argv, type=str,   required=False, help="file with the branches plot (default: %(default)s)", default="branch.pdf")
     return parser# .parse_args()
 
 #---------------------------------------#

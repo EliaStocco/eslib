@@ -15,9 +15,9 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input" , **argv, required=True , type=str, help="input file with the JSOn formatted dipoles [au]")
-    parser.add_argument("-k" , "--keyword" , **argv, required=False , type=str, help="keyword (default: 'dipole')", default='dipole')
+    parser.add_argument("-k" , "--keyword" , **argv, required=False , type=str, help="keyword (default: %(default)s)", default='dipole')
     parser.add_argument("-rr" , "--remove_replicas", **argv,required=False, type=str2bool, help='whether to remove replicas (default: false)', default=False)
-    parser.add_argument("-o" , "--output", **argv, required=False, type=str, help="txt output file with dipoles (default: 'dipoles.txt')", default='dipoles.txt')
+    parser.add_argument("-o" , "--output", **argv, required=False, type=str, help="txt output file with dipoles (default: %(default)s)", default='dipoles.txt')
     return parser# .parse_args()
 
 #---------------------------------------#

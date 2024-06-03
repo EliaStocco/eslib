@@ -17,7 +17,7 @@ def prepare_args(description):
     parser.add_argument("-n" , "--name"  , **argv,type=str, help="name for the new info/array")
     parser.add_argument("-d" , "--data"  , **argv,type=str, help="file (txt or csv) with the data to add")
     parser.add_argument("-w" , "--what"  , **argv,type=str, help="what the data is: 'i' (info) or 'a' (arrays)")
-    parser.add_argument("-o" , "--output", **argv,type=str, help="output file (default: 'output.extxyz')", default="output.extxyz")
+    parser.add_argument("-o" , "--output", **argv,type=str, help="output file (default: %(default)s)", default="output.extxyz")
     return parser# .parse_args()
 
 #---------------------------------------#

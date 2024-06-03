@@ -14,9 +14,9 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"    , **argv, type=str, help="extxyz file with the unfolded atomic configurations [a.u]")
     parser.add_argument("-if", "--input_format" , **argv, type=str, required=False, help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-id", "--in_dipole"  , **argv, type=str, help="name of the input dipoles (default: 'dipole')", default='dipole')
-    parser.add_argument("-oq", "--out_quanta"  , **argv, type=str, help="name of the output quanta (default: 'quanta')", default='quanta')
-    parser.add_argument("-o" , "--output"   , **argv, type=str, help="output file with the fixed trajectory (default: 'trajectory.fixed.extxyz')", default="trajectory.fixed.extxyz")
+    parser.add_argument("-id", "--in_dipole"  , **argv, type=str, help="name of the input dipoles (default: %(default)s)", default='dipole')
+    parser.add_argument("-oq", "--out_quanta"  , **argv, type=str, help="name of the output quanta (default: %(default)s)", default='quanta')
+    parser.add_argument("-o" , "--output"   , **argv, type=str, help="output file with the fixed trajectory (default: %(default)s)", default="trajectory.fixed.extxyz")
     parser.add_argument("-of", "--output_format", **argv, type=str, required=False, help="output file format (default: %(default)s)", default=None)
     return parser
 

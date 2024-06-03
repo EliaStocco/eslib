@@ -40,17 +40,17 @@ def prepare_args():
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
     parser.add_argument("-q",  "--qpoints",       type=str, **argv, 
-                        help="qpoints file (default: 'qpoints.yaml')", default="qpoints.yaml")
+                        help="qpoints file (default: %(default)s)", default="qpoints.yaml")
     # parser.add_argument("-i",  "--input",         type=str, **argv, 
-    #                     help="general phonopy file (default: 'phonopy.yaml')", default="phonopy.yaml")
+    #                     help="general phonopy file (default: %(default)s)", default="phonopy.yaml")
     # parser.add_argument("-o",  "--output",        type=str, **argv, 
-    #                     help="output file (default: 'phonon-modes.pickle')", default="phonon-modes.pickle")
+    #                     help="output file (default: %(default)s)", default="phonon-modes.pickle")
     # parser.add_argument("-of", "--output_folder", type=str, **argv, 
     #                     help="output folder for *.mode, *.eigvec and *.eigval files (default: %(default)s)", default=None)
     # parser.add_argument("-f", "--factor", type=float, **argv, 
     #                     help="conversion factor to THz for the frequencies ω", default=None)
     # parser.add_argument("-m",  "--matrices",      type=lambda x: size_type(x,str), **argv, 
-    #                     help="matrices/vectors to print (default: ['eigval','eigvec','mode'])", default=['eigval','eigvec','mode'])
+    #                     help="matrices/vectors to print (default: %(default)s)", default=['eigval','eigvec','mode'])
     return parser# .parse_args()
 #---------------------------------------#
 def main():

@@ -40,8 +40,8 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i", "--input"    , **argv,type=str, required=True , help="*.pth file with the torch dataset (default: 'dataset.pth')", default="dataset.pth")
-    parser.add_argument("-o", "--output"   , **argv,type=str, required=False, help="output extxyz file (default: 'dataset.extxyz')", default="dataset.extxyz")
+    parser.add_argument("-i", "--input"    , **argv,type=str, required=True , help="*.pth file with the torch dataset (default: %(default)s)", default="dataset.pth")
+    parser.add_argument("-o", "--output"   , **argv,type=str, required=False, help="output extxyz file (default: %(default)s)", default="dataset.extxyz")
     return parser# .parse_args()
 
 #---------------------------------------#

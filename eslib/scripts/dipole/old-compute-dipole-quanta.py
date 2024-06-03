@@ -16,9 +16,9 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , **argv,type=str, help="input file")
     parser.add_argument("-if", "--input_format" , **argv,type=str, help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-k"  , "--keyword"     , **argv,type=str, help="keyword (default: 'dipole')" , default="dipole")
-    parser.add_argument("-o" , "--output"       , **argv,type=str, help="txt output file (default: 'quanta.txt')", default="quanta.txt")
-    parser.add_argument("-of", "--output_format", **argv,type=str, help="output format for np.savetxt (default: '%%24.18e')", default='%24.18e')
+    parser.add_argument("-k"  , "--keyword"     , **argv,type=str, help="keyword (default: %(default)s)" , default="dipole")
+    parser.add_argument("-o" , "--output"       , **argv,type=str, help="txt output file (default: %(default)s)", default="quanta.txt")
+    parser.add_argument("-of", "--output_format", **argv,type=str, help="output format for np.savetxt (default: %(default)s)", default='%24.18e')
     return parser# .parse_args()
 
 #---------------------------------------#

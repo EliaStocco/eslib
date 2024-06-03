@@ -21,13 +21,13 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
-    parser.add_argument("-i" , "--instructions", type=str     , **argv, help="model input file (default: 'instructions.json')", default="instructions.json")
-    parser.add_argument("-p" , "--parameters"  , type=str     , **argv, help="torch parameters file (default: 'parameters.pth')", default="parameters.pth",)
+    parser.add_argument("-i" , "--instructions", type=str     , **argv, help="model input file (default: %(default)s)", default="instructions.json")
+    parser.add_argument("-p" , "--parameters"  , type=str     , **argv, help="torch parameters file (default: %(default)s)", default="parameters.pth",)
     parser.add_argument("-t" , "--trajectory"  , type=str     , **argv, help="trajectory file [a.u.]")
-    parser.add_argument("-z" , "--compute_BEC" , type=str2bool, **argv, help="whether to compute BECs (default: false)", default=False)
-    # parser.add_argument("-d" , "--debug"       , type=str2bool, **argv, help="debug mode (default: false)", default=False)
-    parser.add_argument("-o" , "--output"      , type=str     , **argv, help="output file with the dipoles (default: 'dipole.nn.txt')", default="dipole.nn.txt")
-    parser.add_argument("-oz", "--output_BEC"  , type=str     , **argv, help="output file with the BECs (default: 'bec.nn.txt')", default="bec.nn.txt")
+    parser.add_argument("-z" , "--compute_BEC" , type=str2bool, **argv, help="whether to compute BECs (default: %(default)s)", default=False)
+    # parser.add_argument("-d" , "--debug"       , type=str2bool, **argv, help="debug mode (default: %(default)s)", default=False)
+    parser.add_argument("-o" , "--output"      , type=str     , **argv, help="output file with the dipoles (default: %(default)s)", default="dipole.nn.txt")
+    parser.add_argument("-oz", "--output_BEC"  , type=str     , **argv, help="output file with the BECs (default: %(default)s)", default="bec.nn.txt")
     return parser# .parse_args()
 
 #---------------------------------------#

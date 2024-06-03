@@ -15,7 +15,7 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"        , required=True,**argv,type=str, help="txt input file")
     parser.add_argument("-f" , "--function"     , required=True,**argv,type=str, help="source code of the function to be applied")
     parser.add_argument("-o" , "--output"       , required=True,**argv,type=str, help="txt output file")
-    parser.add_argument("-of", "--output_format", required=False,**argv,type=str, help="txt output format for np.savetxt (default: '%%24.18f')", default='%24.18f')
+    parser.add_argument("-of", "--output_format", required=False,**argv,type=str, help="txt output format for np.savetxt (default: %(default)s)", default='%24.18f')
     return parser
 
 #---------------------------------------#

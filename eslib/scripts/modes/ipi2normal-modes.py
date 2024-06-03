@@ -13,8 +13,8 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
     parser.add_argument("-r",  "--reference",       type=str, **argv, help="reference structure w.r.t. which the phonons are computed [a.u.] (default: %(default)s)",default=None)
-    parser.add_argument("-f",  "--folder",         type=str, **argv, help="folder with the output files of the i-PI normal analysis (default: 'vib')", default="vib")
-    parser.add_argument("-o",  "--output",        type=str, **argv, help="output file (default: 'normal-modes.pickle')", default="normal-modes.pickle")
+    parser.add_argument("-f",  "--folder",         type=str, **argv, help="folder with the output files of the i-PI normal analysis (default: %(default)s)", default="vib")
+    parser.add_argument("-o",  "--output",        type=str, **argv, help="output file (default: %(default)s)", default="normal-modes.pickle")
     return parser
 
 #---------------------------------------#

@@ -18,12 +18,12 @@ def prepare_args(description):
     parser.add_argument("-i"  , "--input"              , **argv, type=str  , required=True , help="extxyz file with the atomic configurations [a.u]")
     parser.add_argument("-rn" , "--ref_name"           , **argv, type=str  , required=True , help="name of the reference quantity")
     parser.add_argument("-pn" , "--pred_name"          , **argv, type=str  , required=True , help="name of the predicted quantity")
-    parser.add_argument("-t"  , "--threshold"          , **argv, type=float, required=False, help="RMSE threshold (default: 1e-1)", default=1e-1)   
-    parser.add_argument("-d"  , "--distribution"       , **argv, type=str  , required=False, help="*.pdf file with the distribution of the RMSE values (default: 'rmse.pdf')", default='rmse.pdf')
+    parser.add_argument("-t"  , "--threshold"          , **argv, type=float, required=False, help="RMSE threshold (default: %(default)s)", default=1e-1)   
+    parser.add_argument("-d"  , "--distribution"       , **argv, type=str  , required=False, help="*.pdf file with the distribution of the RMSE values (default: %(default)s)", default='rmse.pdf')
     parser.add_argument("-oi" , "--output_indices"     , **argv, type=str  , required=False, help="*.txt output file with the indices of the outliers (default: %(default)s)", default=None)
     parser.add_argument("-ogi", "--output_good_indices", **argv, type=str  , required=False, help="*.txt output file with the indices of the non-outliers (default: %(default)s)", default=None)
-    parser.add_argument("-og" , "--output_good"       , **argv, type=str  , required=False, help="*.extxyz output file with the good atomic configurations (default: 'good.extxyz')", default="good.extxyz")
-    parser.add_argument("-o"  , "--output"             , **argv, type=str  , required=False, help="*.extxyz output file with the outliers atomic configurations (default: 'outliers.extxyz')", default="outliers.extxyz")
+    parser.add_argument("-og" , "--output_good"       , **argv, type=str  , required=False, help="*.extxyz output file with the good atomic configurations (default: %(default)s)", default="good.extxyz")
+    parser.add_argument("-o"  , "--output"             , **argv, type=str  , required=False, help="*.extxyz output file with the outliers atomic configurations (default: %(default)s)", default="outliers.extxyz")
     return parser
 
 #---------------------------------------#

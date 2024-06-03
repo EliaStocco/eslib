@@ -13,10 +13,10 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-m" , "--model"        , **argv, type=str, required=True , help="*.pth file with the MACE model")
     parser.add_argument("-mt", "--model_type"   , **argv, type=str, required=True , help="model type")
-    parser.add_argument("-d" , "--device"       , **argv, type=str, required=False, help="device (default: 'cpu')", choices=["cpu", "cuda"], default="cpu")
-    parser.add_argument("-dt", "--default_dtype", **argv, type=str, required=False, help="default dtype (default: 'float64')", choices=["float32", "float64"], default="float64")
-    parser.add_argument("-bs", "--batch_size"   , **argv, type=int, required=False, help="batch size (default: 64)", default=64)
-    parser.add_argument("-ck", "--charges_key"  , **argv, type=str, required=False, help="key of atomic charges (default: 'Qs')", default="Qs")
+    parser.add_argument("-d" , "--device"       , **argv, type=str, required=False, help="device (default: %(default)s)", choices=["cpu", "cuda"], default="cpu")
+    parser.add_argument("-dt", "--default_dtype", **argv, type=str, required=False, help="default dtype (default: %(default)s)", choices=["float32", "float64"], default="float64")
+    parser.add_argument("-bs", "--batch_size"   , **argv, type=int, required=False, help="batch size (default: %(default)s)", default=64)
+    parser.add_argument("-ck", "--charges_key"  , **argv, type=str, required=False, help="key of atomic charges (default: %(default)s)", default="Qs")
     parser.add_argument("-o" , "--output"       , **argv, type=str, required=True , help="*.pickle output file with the MACE model")
     parser.add_argument("-jo", "--json_output"  , **argv, type=str, required=False, help="JSON output file with all the previous instructions to initialize the MACE model (default: %(default)s)",default=None)
     return parser

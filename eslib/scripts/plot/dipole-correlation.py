@@ -15,8 +15,8 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-a" , "--dataset_A", **argv,type=str, help="txt file with the dataset A (DFT)")
     parser.add_argument("-b" , "--dataset_B", **argv,type=str, help="txt file with the dataset B (NN)")
-    parser.add_argument("-an", "--name_A"   , **argv,type=str, help="name of the dataset A (default: 'DFT')", default="DFT")
-    parser.add_argument("-bn", "--name_B"   , **argv,type=str, help="name of the dataset B (default: 'NN')" , default="NN")   
+    parser.add_argument("-an", "--name_A"   , **argv,type=str, help="name of the dataset A (default: %(default)s)", default="DFT")
+    parser.add_argument("-bn", "--name_B"   , **argv,type=str, help="name of the dataset B (default: %(default)s)" , default="NN")   
     parser.add_argument("-o" , "--output"   , **argv,type=str, help="output plot file")
     return parser# .parse_args()
 

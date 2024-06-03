@@ -17,7 +17,7 @@ def prepare_args(description):
     parser.add_argument("-i", "--input" , type=str, **argv, required=True , help='input extxyz file')
     parser.add_argument("-n", "--name"  , type=str, **argv, required=True , help="info keyword to be plotted")
     parser.add_argument("-t", "--time"  , type=str, **argv, required=False, help="time keyword (default: %(default)s)", default=None)
-    parser.add_argument("-o", "--output", type=str, **argv, required=False, help="output file (default: '[name].pdf')", default=None)
+    parser.add_argument("-o", "--output", type=str, **argv, required=False, help="output file (default: %(default)s)", default=None)
     return parser# .parse_args()
 
 #---------------------------------------#

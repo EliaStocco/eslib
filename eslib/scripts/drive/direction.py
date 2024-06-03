@@ -16,9 +16,9 @@ def main():
     argv = {"metavar":"\b"}
     parser.add_argument("-i" , "--input"     ,   **argv,type=str      , help="input file with the cell")
     parser.add_argument("-v" , "--vector"    ,   **argv,type=size_type, help="vector components in lattice coordinates")
-    parser.add_argument("-n" , "--normalize" ,   **argv,type=str2bool , help="whether the vectors is expressed w.r.t. normalized lattice vectors (default: true)",default=True)
-    parser.add_argument("-a" , "--amplitude" ,   **argv,type=float    , help="amplitude of the output vector (default: 1)",default=1.)
-    parser.add_argument("-d" , "--digit"     ,   **argv,type=int      , help="digit of the final result (default: 8)",default=8)
+    parser.add_argument("-n" , "--normalize" ,   **argv,type=str2bool , help="whether the vectors is expressed w.r.t. normalized lattice vectors (default: %(default)s)",default=True)
+    parser.add_argument("-a" , "--amplitude" ,   **argv,type=float    , help="amplitude of the output vector (default: %(default)s)",default=1.)
+    parser.add_argument("-d" , "--digit"     ,   **argv,type=int      , help="digit of the final result (default: %(default)s)",default=8)
     
     # Print the script's description
     print("\n{:s}".format(description))

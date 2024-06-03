@@ -34,9 +34,9 @@ def prepare_args():
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i", "--input"    , **argv,type=str, help="file with the atomic configurations [a.u]")
-    parser.add_argument("-m", "--model"    , **argv,type=str, help="pickle file with the dipole linear model (default: 'DipoleModel.pickle')", default='DipoleModel.pickle')
-    parser.add_argument("-f", "--frame"    , **argv,type=str, help="frame type [eckart,global] (default: global)", default="global", choices=["eckart", "global"])
-    parser.add_argument("-o", "--output"   , **argv,type=str, help="output file with the dipole values (default: 'dipole.linear-model.txt')", default="dipole.linear-model.txt")
+    parser.add_argument("-m", "--model"    , **argv,type=str, help="pickle file with the dipole linear model (default: %(default)s)", default='DipoleModel.pickle')
+    parser.add_argument("-f", "--frame"    , **argv,type=str, help="frame type [eckart,global] (default: %(default)s)", default="global", choices=["eckart", "global"])
+    parser.add_argument("-o", "--output"   , **argv,type=str, help="output file with the dipole values (default: %(default)s)", default="dipole.linear-model.txt")
     return parser# .parse_args()
 
 #---------------------------------------#

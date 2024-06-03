@@ -20,7 +20,7 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"         , **argv, required=True , type=str, help="input file with the atomic structures")
     parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: %(default)s)", default=None)
-    parser.add_argument("-n" , "--name"          , **argv, required=False, type=str, help="name for the charges (default: 'Qs')", default='Qs')
+    parser.add_argument("-n" , "--name"          , **argv, required=False, type=str, help="name for the charges (default: %(default)s)", default='Qs')
     parser.add_argument("-c" , "--charges"       , **argv, required=True , type=str, help="JSON file with the charges")
     parser.add_argument("-o" , "--output"        , **argv, required=True , type=str, help="output file with the atomic structures")
     parser.add_argument("-of" , "--output_format", **argv, required=False, type=str, help="output file format (default: %(default)s)", default=None)

@@ -13,9 +13,9 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-t" ,"--training"     ,  **argv, type=str  , help="training input file (default: 'input.json')", default="input.json")
-    parser.add_argument("-i" ,"--instructions" ,  **argv, type=str  , help="model input file (default: 'instructions.json')", default="instructions.json")
-    parser.add_argument("-f" ,"--folder"       ,  **argv, type=str  , help="folder where the previous files are stored (default: '.')", default=".")
+    parser.add_argument("-t" ,"--training"     ,  **argv, type=str  , help="training input file (default: %(default)s)", default="input.json")
+    parser.add_argument("-i" ,"--instructions" ,  **argv, type=str  , help="model input file (default: %(default)s)", default="instructions.json")
+    parser.add_argument("-f" ,"--folder"       ,  **argv, type=str  , help="folder where the previous files are stored (default: %(default)s)", default=".")
     parser.add_argument("-bs","--batch_size"   ,  **argv, type=int  , help="batch size")
     parser.add_argument("-lr","--learning_rate",  **argv, type=float, help="learning rate")
     return parser# .parse_args()

@@ -18,15 +18,15 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-p" , "--positions"       , **argv, required=True , type=str  , help="xyz/extxyz file with the displaced atomic structures [au] (default: 'replay.xyz')", default='replay.xyz')
+    parser.add_argument("-p" , "--positions"       , **argv, required=True , type=str  , help="xyz/extxyz file with the displaced atomic structures [au] (default: %(default)s)", default='replay.xyz')
     parser.add_argument("-f" , "--forces"          , **argv, required=False, type=str  , help="xyz/extxyz file with the forces (default: %(default)s)", default=None)
     parser.add_argument("-n" , "--name"            , **argv, required=False, type=str  , help="name of the forces array in the positions file (default: %(default)s)", default=None)
-    parser.add_argument("-pf", "--positions_format", **argv, required=False, type=str  , help="positions file format (default: 'ipi')", default='ipi')
-    parser.add_argument("-ff", "--forces_format"   , **argv, required=False, type=str  , help="forces file format (default: 'ipi')", default='ipi')
-    parser.add_argument("-pu", "--positions_unit"  , **argv, required=False, type=str  , help="positions unit (default: 'atomic_unit')", default='atomic_unit')
-    parser.add_argument("-fu", "--forces_unit"     , **argv, required=False, type=str  , help="forces unit (default: 'atomic_unit')", default='atomic_unit')
+    parser.add_argument("-pf", "--positions_format", **argv, required=False, type=str  , help="positions file format (default: %(default)s)", default='ipi')
+    parser.add_argument("-ff", "--forces_format"   , **argv, required=False, type=str  , help="forces file format (default: %(default)s)", default='ipi')
+    parser.add_argument("-pu", "--positions_unit"  , **argv, required=False, type=str  , help="positions unit (default: %(default)s)", default='atomic_unit')
+    parser.add_argument("-fu", "--forces_unit"     , **argv, required=False, type=str  , help="forces unit (default: %(default)s)", default='atomic_unit')
     parser.add_argument("-s" , "--displacement"    , **argv, required=True , type=float, help="displacement")
-    parser.add_argument("-o" , "--output"          , **argv, required=False, type=str  , help="pickle output file with the vibrations (default: 'vibrations.pickle')", default='vibrations.pickle')
+    parser.add_argument("-o" , "--output"          , **argv, required=False, type=str  , help="pickle output file with the vibrations (default: %(default)s)", default='vibrations.pickle')
     return parser
 
 #---------------------------------------#

@@ -18,8 +18,8 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"       , **argv, required=True , type=str, help="atomic structures file [extxyz]")
     parser.add_argument("-if", "--input_format", **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-k" , "--keyword"     , **argv, required=False, type=str, help="keyword for BEC tensors (default: 'bec')", default="bec")
-    parser.add_argument("-o" , "--output"      , **argv, required=False, type=str, help="output file with the BEC tensors (default: 'bec.txt')", default='bec.txt')
+    parser.add_argument("-k" , "--keyword"     , **argv, required=False, type=str, help="keyword for BEC tensors (default: %(default)s)", default="bec")
+    parser.add_argument("-o" , "--output"      , **argv, required=False, type=str, help="output file with the BEC tensors (default: %(default)s)", default='bec.txt')
     return parser# .parse_args()
             
 #---------------------------------------#

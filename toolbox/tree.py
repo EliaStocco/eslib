@@ -34,9 +34,9 @@ def tree(directory, level=0, max_level=2, output=None):
 
 def main():
     parser = argparse.ArgumentParser(description="Print directory tree up to specified depth")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to print tree from (default: current directory)")
-    parser.add_argument("-L", "--max-level", type=int, default=2, help="Maximum depth of tree (default: 2)")
-    parser.add_argument("-o", "--output", default="tree_output.txt", help="Output file name (default: tree_output.txt)")
+    parser.add_argument("directory", nargs="?", default=".", help="Directory to print tree from (default: %(default)s)")
+    parser.add_argument("-L", "--max-level", type=int, default=2, help="Maximum depth of tree (default: %(default)s)")
+    parser.add_argument("-o", "--output", default="tree_output.txt", help="Output file name (default: %(default)s)")
     args = parser.parse_args()
 
     tree(args.directory, max_level=args.max_level, output=args.output)

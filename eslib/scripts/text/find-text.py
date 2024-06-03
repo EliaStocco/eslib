@@ -16,8 +16,8 @@ def main():
     parser = argparse.ArgumentParser(description="Search for files in a folder and its subfolders based on a pattern in the filename.")
     argv = {"metavar" : "\b",}
     parser.add_argument("-p","--pattern"  , **argv, help="pattern to search for in the filenames")
-    parser.add_argument("-f","--folder"   , **argv, help="folder to search in (default: '.')", default=".")
-    parser.add_argument("-e","--extension", **argv, help="file extension to filter (default: 'pdf')", default="pdf")
+    parser.add_argument("-f","--folder"   , **argv, help="folder to search in (default: %(default)s)", default=".")
+    parser.add_argument("-e","--extension", **argv, help="file extension to filter (default: %(default)s)", default="pdf")
 
     args = parser.parse_args()
 

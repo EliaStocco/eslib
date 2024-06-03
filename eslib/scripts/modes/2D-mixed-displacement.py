@@ -34,9 +34,9 @@ def prepare_args(description):
     parser.add_argument("-ma", "--modes_A"      , type=str, required=True , **argv, help="pickle file with the normal modes of the structure A")
     parser.add_argument("-mb", "--modes_B"      , type=str, required=True , **argv, help="pickle file with the normal modes of the structure B")
     parser.add_argument("-i" , "--instructions" , type=str, required=True , **argv, help="JSON file with the instructions")
-    parser.add_argument("-o" , "--output"       , type=str, required=False, **argv, help="extxyz output file [a.u.] (default: 'displaced-structures.extxyz')", default='displaced-structures.extxyz')
-    parser.add_argument("-oi", "--output_info"  , type=str, required=False, **argv, help="csv output file (default: 'info.csv')", default='info.csv')
-    parser.add_argument("-od" , "--out_dis"     , type=str, required=False, **argv, help="*.txt output file with the displacements (default: 'displacement.txt')", default='displacement.txt')
+    parser.add_argument("-o" , "--output"       , type=str, required=False, **argv, help="extxyz output file [a.u.] (default: %(default)s)", default='displaced-structures.extxyz')
+    parser.add_argument("-oi", "--output_info"  , type=str, required=False, **argv, help="csv output file (default: %(default)s)", default='info.csv')
+    parser.add_argument("-od" , "--out_dis"     , type=str, required=False, **argv, help="*.txt output file with the displacements (default: %(default)s)", default='displacement.txt')
     return parser
 
 @esfmt(prepare_args,description)

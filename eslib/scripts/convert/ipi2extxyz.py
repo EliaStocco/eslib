@@ -29,22 +29,22 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
 
     parser.add_argument("-p", "--prefix", type=str, default='i-pi', **argv,
-                        help="prefix of the i-PI output files (default: 'i-pi')")
+                        help="prefix of the i-PI output files (default: %(default)s)")
     
     parser.add_argument("-f", "--folder", type=str, default='.', **argv,
-                        help="folder (default: '.')")
+                        help="folder (default: %(default)s)")
     
     parser.add_argument("-qf", "--positions_file",  type=str, default=None, **argv,
-                        help="input file containing the MD trajectory positions and cells (default: '[prefix].positions_0.xyz')")
+                        help="input file containing the MD trajectory positions and cells (default: %(default)s)")
     
     parser.add_argument("-pbc", "--pbc",  type=str2bool, default=True, **argv,
-                        help="whether the system is periodic (default: True)")
+                        help="whether the system is periodic (default: %(default)s)")
 
     parser.add_argument("-pf", "--properties_file",  type=str, default=None, **argv,
-                        help="input file containing the MD trajectory properties (default: '[prefix].properties.out')")
+                        help="input file containing the MD trajectory properties (default: %(default)s)")
 
     parser.add_argument("-if", "--format",  type=str, default='i-pi', **argv,
-                        help="input file format (default: 'i-pi')")
+                        help="input file format (default: %(default)s)")
 
     parser.add_argument("-aa", "--additional_arrays",  type=lambda s: size_type(s,dtype=str), default=None, **argv,
                         help="additional arrays to be added to the output file (example: [velocities,forces], default: [])")
@@ -53,7 +53,7 @@ def prepare_args(description):
                         help="additional properties to be added to the output file (example: [potential,dipole], default: [all])")
 
     parser.add_argument("-o", "--output",  type=str, default='output.extxyz', **argv,
-                        help="output file in extxyz format (default: 'output.extxyz')")
+                        help="output file in extxyz format (default: %(default)s)")
 
     return parser# .parse_args()
 

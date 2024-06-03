@@ -31,7 +31,7 @@ def prepare_args():
     parser.add_argument("-s", "--structure", type=str, **argv, help="atomic structure to be sorted")
     parser.add_argument("-f", "--format"   , type=str, **argv, help="file format for both the input and the output (default: %(default)s)" , default=None)
     parser.add_argument("-i", "--indices"  , type=str, **argv, help="output txt with the indices used to sort the structure (default: %(default)s)", default=None)
-    parser.add_argument("-o", "--output"   , type=str, **argv, help="output file for the sorted structure (default: 'sorted.extxyz')", default="sorted.xyz")
+    parser.add_argument("-o", "--output"   , type=str, **argv, help="output file for the sorted structure (default: %(default)s)", default="sorted.xyz")
     return parser# .parse_args()
 
 #---------------------------------------#

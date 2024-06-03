@@ -20,7 +20,7 @@ def prepare_args(description):
     parser.add_argument("-l" , "--logger"     , **argv, required=False, type=str     , help="logging file (default: %(default)s)", default=None)
     parser.add_argument("-p" , "--port"        , **argv, required=False, type=int     , help="TCP/IP port number. Ignored when using UNIX domain sockets.")
     parser.add_argument("-a" , "--address"     , **argv, required=True , type=str     , help="Host name (for INET sockets) or name of the UNIX domain socket to connect to.")
-    parser.add_argument("-u" , "--unix"        , **argv, required=False, type=str2bool, help="Use a UNIX domain socket (default: false)", default=False)
+    parser.add_argument("-u" , "--unix"        , **argv, required=False, type=str2bool, help="Use a UNIX domain socket (default: %(default)s)", default=False)
     return parser
 
 #---------------------------------------#

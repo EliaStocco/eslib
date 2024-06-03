@@ -20,12 +20,12 @@ def prepare_parser(description):
     argv = {"metavar":"\b"}
     parser.add_argument(
         "-i","--instructions", action="store", type=str, **argv,
-        help="model input file (default: 'instructions.json')", default="instructions.json"
+        help="model input file (default: %(default)s)", default="instructions.json"
     )
 
     parser.add_argument(
         "-p","--parameters", action="store", type=str, **argv,
-        help="torch parameters file (default: 'parameters.pth')", default="parameters.pth",
+        help="torch parameters file (default: %(default)s)", default="parameters.pth",
     )
 
     parser.add_argument(
@@ -35,9 +35,9 @@ def prepare_parser(description):
 
     parser.add_argument(
         "-o","--output", action="store", type=str, **argv,
-        help="prefix for the output files (default: 'test')", default="test"
+        help="prefix for the output files (default: %(default)s)", default="test"
     )
-    parser.add_argument("-of", "--output_format", **argv,type=str, help="output format for np.savetxt (default: '%%24.18f')", default='%24.18f')
+    parser.add_argument("-of", "--output_format", **argv,type=str, help="output format for np.savetxt (default: %(default)s)", default='%24.18f')
 
     # parser.add_argument(
     #     "-f","--folder", action="store", type=str,

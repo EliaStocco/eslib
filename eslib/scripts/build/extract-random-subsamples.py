@@ -20,7 +20,7 @@ def prepare_args(description):
     parser.add_argument("-i", "--input"        , type=str     , **argv, required=True , help='input file')
     parser.add_argument("-if", "--input_format", type=str     , **argv, required=False, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-n", "--sizes"        , type=ilist   , **argv, required=True , help="list with the sizes of the subsamples")
-    parser.add_argument("-s", "--shuffle"      , type=str2bool, **argv, required=False, help="whether to shuffle (default: true)", default=True)
+    parser.add_argument("-s", "--shuffle"      , type=str2bool, **argv, required=False, help="whether to shuffle (default: %(default)s)", default=True)
     parser.add_argument("-o", "--output"       , type=slist   , **argv, required=True , help="output files")
     return parser# .parse_args()
 

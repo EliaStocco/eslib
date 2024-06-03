@@ -21,7 +21,7 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"       , **argv, required=True , type=str, help="input file [extxyz]")
     parser.add_argument("-if", "--input_format", **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-f" , "--fix"     , **argv, required=False, type=str2bool, help="fix branch", default=True)
-    parser.add_argument("-k" , "--keyword"     , **argv, required=False, type=str, help="keyword the dipoles (default: 'dipole')", default="dipole")
+    parser.add_argument("-k" , "--keyword"     , **argv, required=False, type=str, help="keyword the dipoles (default: %(default)s)", default="dipole")
     parser.add_argument("-o", "--output", **argv, required=False, type=str, help="output file (default: %(default)s)" , default=None)
     return parser
 

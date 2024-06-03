@@ -13,7 +13,7 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-c", "--charges", **argv, type=str, required=True , help="JSON file with the partial charges")
-    parser.add_argument("-o", "--output" , **argv, type=str, required=False, help="pickle output file with the dipole model (default: 'DipolePC.pickle')", default="DipolePC.pickle")
+    parser.add_argument("-o", "--output" , **argv, type=str, required=False, help="pickle output file with the dipole model (default: %(default)s)", default="DipolePC.pickle")
     return parser
 
 #---------------------------------------#

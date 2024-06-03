@@ -12,8 +12,8 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i", "--input"          , **argv, type=str, help="pickle file with the dipole linear model (default: 'DipoleModel.pickle')", default='DipoleModel.pickle')
-    parser.add_argument("-o" , "--output"        , **argv, required=False, type=str, help="output file with the reference structure (default: 'reference.extxyz')", default="reference.extxyz")
+    parser.add_argument("-i", "--input"          , **argv, type=str, help="pickle file with the dipole linear model (default: %(default)s)", default='DipoleModel.pickle')
+    parser.add_argument("-o" , "--output"        , **argv, required=False, type=str, help="output file with the reference structure (default: %(default)s)", default="reference.extxyz")
     parser.add_argument("-of" , "--output_format", **argv, required=False, type=str, help="output file format (default: %(default)s)", default=None)
     return parser# .parse_args()
 

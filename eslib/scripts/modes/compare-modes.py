@@ -22,7 +22,7 @@ def prepare_args(description):
     argv = {"metavar":"\b"}
     parser.add_argument("-a", "--modes_A", type=str, **argv, required=True , help="normal modes A")
     parser.add_argument("-b", "--modes_B", type=str, **argv, required=True , help="normal modes B")
-    parser.add_argument("-d" , "--dof"   , type=int, **argv, required=False, help="dof to be skipped (default: 3)", default=3)
+    parser.add_argument("-d" , "--dof"   , type=int, **argv, required=False, help="dof to be skipped (default: %(default)s)", default=3)
     parser.add_argument("-o", "--output" , type=str, **argv, required=True , help="output folder")
     return parser
 
