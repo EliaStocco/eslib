@@ -136,8 +136,8 @@ class NormalModes(pickleIO):
 
         # masses
         # I should remove this
-        file = get_one_file_in_folder(folder=folder,ext=".masses")
-        self.masses[:] = np.loadtxt(file)
+        # file = get_one_file_in_folder(folder=folder,ext=".masses")
+        # self.masses[:] = np.loadtxt(file)
 
         # ortho mode
         file = get_one_file_in_folder(folder=folder,ext=".mode")
