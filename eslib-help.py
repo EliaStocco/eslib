@@ -90,7 +90,7 @@ def extract_description_from_files(filepaths):
 def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-f", "--folders"     , **argv,type=slist   , help="folders to search for Python files in (default: None)", default=None)
+    parser.add_argument("-f", "--folders"     , **argv,type=slist   , help="folders to search for Python files in (default: %(default)s)", default=None)
     parser.add_argument("-s", "--show_folders"     , action='store_true', help="show folders only")
     parser.add_argument("-d", "--descriptions", **argv, type=str2bool, help="whether to print descriptions (default: true)", default=True)
     return parser# .parse_args()

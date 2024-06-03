@@ -29,7 +29,7 @@ def prepare_args(description):
     argv = {"metavar":"\b"}
     parser.add_argument("-i",  "--input",        type=str, **argv, help="atomic structure file [angstrom,xyz]")
     parser.add_argument("-m",  "--modes",        type=str, **argv, help="file with vibrational modes displacements [a.u.] (default: 'i-pi.phonons.mode')", default="i-pi.phonons.mode")
-    parser.add_argument("-w",  "--eigenvalues",  type=str, **argv, help="file with vibrational modes eigenvalues [a.u.] (default: None)", default=None)
+    parser.add_argument("-w",  "--eigenvalues",  type=str, **argv, help="file with vibrational modes eigenvalues [a.u.] (default: %(default)s)", default=None)
     parser.add_argument("-o",  "--output",       type=str, **argv, help="JMOL output file (default: 'vibmodes.jmol')", default="vibmodes.jmol")
     return parser
 

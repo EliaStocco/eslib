@@ -46,7 +46,7 @@ def prepare_args():
     # parser.add_argument("-o",  "--output",        type=str, **argv, 
     #                     help="output file (default: 'phonon-modes.pickle')", default="phonon-modes.pickle")
     # parser.add_argument("-of", "--output_folder", type=str, **argv, 
-    #                     help="output folder for *.mode, *.eigvec and *.eigval files (default: None)", default=None)
+    #                     help="output folder for *.mode, *.eigvec and *.eigval files (default: %(default)s)", default=None)
     # parser.add_argument("-f", "--factor", type=float, **argv, 
     #                     help="conversion factor to THz for the frequencies ω", default=None)
     # parser.add_argument("-m",  "--matrices",      type=lambda x: size_type(x,str), **argv, 

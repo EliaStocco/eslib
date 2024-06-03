@@ -18,7 +18,7 @@ def prepare_args(description):
     parser.add_argument("-bs", "--batch_size"   , **argv, type=int, required=False, help="batch size (default: 64)", default=64)
     parser.add_argument("-ck", "--charges_key"  , **argv, type=str, required=False, help="key of atomic charges (default: 'Qs')", default="Qs")
     parser.add_argument("-o" , "--output"       , **argv, type=str, required=True , help="*.pickle output file with the MACE model")
-    parser.add_argument("-jo", "--json_output"  , **argv, type=str, required=False, help="JSON output file with all the previous instructions to initialize the MACE model (default: None)",default=None)
+    parser.add_argument("-jo", "--json_output"  , **argv, type=str, required=False, help="JSON output file with all the previous instructions to initialize the MACE model (default: %(default)s)",default=None)
     return parser
 
 #---------------------------------------#

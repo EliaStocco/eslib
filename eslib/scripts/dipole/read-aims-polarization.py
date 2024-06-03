@@ -21,7 +21,7 @@ def prepare_args(description):
     argv = {"metavar": "\b"}
     parser.add_argument("-i" , "--input"            , **argv, type=str, required=True , help="input file, folder, or search options")
     parser.add_argument("-u" , "--unit"             , **argv, type=str, required=False, help="output dipoles unit (default: 'eang')", default='eang')
-    parser.add_argument("-bf", "--bad_files"        , **argv, type=str, required=False, help="txt output file with the filepath of the non-converged calculations (default: None)", default=None)
+    parser.add_argument("-bf", "--bad_files"        , **argv, type=str, required=False, help="txt output file with the filepath of the non-converged calculations (default: %(default)s)", default=None)
     parser.add_argument("-o" , "--output"           , **argv, type=str, required=False, help="output file with the dipole values (default: 'dipole.eang.txt')", default="dipole.eang.txt")
     parser.add_argument("-oi", "--output_info"      , **argv, type=str, required=False, help="*.csv output file with information (default: 'info.csv')", default="info.csv")
     parser.add_argument("-os", "--output_structures", **argv, type=str, required=False, help="output file with the dipole values and the atomic structures (default: 'aims-with-dipoles.ang.extxyz')", default='aims-with-dipoles.ang.extxyz')

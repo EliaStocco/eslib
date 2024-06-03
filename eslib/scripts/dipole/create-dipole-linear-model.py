@@ -20,7 +20,7 @@ def prepare_args(description):
     # parser.add_argument("-i", "--input"    , **argv,type=str, help="file with the atomic configurations [a.u]")
     # parser.add_argument("-n", "--index"    , **argv,type=int, help="index of the reference configuration",default=None)
     parser.add_argument("-r", "--reference", **argv,type=str, help="file with the reference configuration [a.u.,xyz]")
-    parser.add_argument("-d", "--dipole"   , **argv,type=flist, help="dipole (quanta) of the reference configuration (default: None)",default=None)
+    parser.add_argument("-d", "--dipole"   , **argv,type=flist, help="dipole (quanta) of the reference configuration (default: %(default)s)",default=None)
     parser.add_argument("-k", "--keyword"  , **argv,type=str, help="keyword for the dipole (default: 'dipole')", default='dipole')
     parser.add_argument("-z", "--bec"      , **argv,type=str, help="file with the BEC tensors of the reference configuration [txt] (default: None --> specify -n,--index)",default=None)
     parser.add_argument("-o", "--output"   , **argv,type=str, help="output file with the dipole linear model (default: 'DipoleModel.pickle')", default="DipoleModel.pickle")

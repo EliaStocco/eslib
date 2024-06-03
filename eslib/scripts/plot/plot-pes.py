@@ -18,8 +18,8 @@ def prepare_args(description):
     argv = {"metavar":"\b"}
     parser.add_argument("-i", "--input"  , type=str  , **argv, required=True , help='input extxyz file')
     parser.add_argument("-e", "--energy" , type=str  , **argv, required=False , help="info keyword of the energy (default: 'harmonic-potential-energy')", default='harmonic-potential-energy')
-    parser.add_argument("-n", "--indices", type=str  , **argv, required=False, help="info keyword of the 2D indices (default: None)", default=None)
-    parser.add_argument("-s", "--shape"  , type=ilist, **argv, required=False, help="shape of the PES (default: None)", default=None)
+    parser.add_argument("-n", "--indices", type=str  , **argv, required=False, help="info keyword of the 2D indices (default: %(default)s)", default=None)
+    parser.add_argument("-s", "--shape"  , type=ilist, **argv, required=False, help="shape of the PES (default: %(default)s)", default=None)
     parser.add_argument("-o", "--output" , type=str  , **argv, required=False, help="pdf output file (default: 'pes.pdf')", default='pes.pdf')
     return parser# .parse_args()
 

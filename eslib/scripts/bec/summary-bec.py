@@ -20,7 +20,7 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"       , **argv, required=True , type=str, help="input file with the atomic structures")
     parser.add_argument("-if", "--input_format", **argv, required=False, type=str, help="input file format (default: %(default)s)", default=None)
     parser.add_argument("-n" , "--name"        , **argv, required=False, type=str, help="name of the BEC (default: 'BEC')", default='BEC')
-    parser.add_argument("-s" , "--summary"     , **argv, required=False, type=str, help="JSON file with a summary (default: None)", default=None)
+    parser.add_argument("-s" , "--summary"     , **argv, required=False, type=str, help="JSON file with a summary (default: %(default)s)", default=None)
     parser.add_argument("-o" , "--output"      , **argv, required=False, type=str, help="*.txt output file (default: 'bec.txt')", default='bec.txt')
     return parser
 

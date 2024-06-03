@@ -17,9 +17,9 @@ def prepare_args(description):
     argv = {"metavar":"\b"}
     parser.add_argument("-i" , "--input"         , type=str     , **argv, required=True , help='pickle file with the properties')
     parser.add_argument("-n" , "--name"          , **argv, required=True , type=str, help="name of the property to extract")
-    parser.add_argument("-f" , "--family"        , **argv, required=False , type=str, help="family (default: None)", default=None)
-    parser.add_argument("-iu", "--in_unit"       , **argv, required=False , type=str, help="input unit (default: None)", default=None)
-    parser.add_argument("-ou", "--out_unit"      , **argv, required=False , type=str, help="output unit (default: None)", default=None)
+    parser.add_argument("-f" , "--family"        , **argv, required=False , type=str, help="family (default: %(default)s)", default=None)
+    parser.add_argument("-iu", "--in_unit"       , **argv, required=False , type=str, help="input unit (default: %(default)s)", default=None)
+    parser.add_argument("-ou", "--out_unit"      , **argv, required=False , type=str, help="output unit (default: %(default)s)", default=None)
     parser.add_argument("-o" , "--output"        , type=str     , **argv, required=True , help='npy/txt output file')
     return parser# .parse_args()
 

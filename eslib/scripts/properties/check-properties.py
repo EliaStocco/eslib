@@ -16,7 +16,7 @@ def prepare_args(description):
     argv = {"metavar":"\b"}
     parser.add_argument("-i" , "--input"          , type=str     , **argv, required=True , help='txt input file')
     parser.add_argument("-rr", "--remove_replicas", type=str2bool, **argv, required=False, help='whether to remove replicas (default: false)', default=False)
-    parser.add_argument("-o" , "--output"         , type=str     , **argv, required=False, help='output pickle file (default: None)', default=None)
+    parser.add_argument("-o" , "--output"         , type=str     , **argv, required=False, help='output pickle file (default: %(default)s)', default=None)
     return parser# .parse_args()
 
 #---------------------------------------#

@@ -17,7 +17,7 @@ def prepare_args(description):
     parser.add_argument("-r", "--reference", **argv, type=str, required=True , help="file with a reference configuration [xyz]")
     parser.add_argument("-f", "--format"   , **argv, type=str, required=False, help="reference configuration format (default: %(default)s)" , default=None)
     parser.add_argument("-z", "--bec"      , **argv, type=str, required=True , help="file with a BEC tensor [txt]")
-    parser.add_argument("-o", "--output"   , **argv, type=str, required=False, help="JSON output file with the partial charges (default: None)", default=None)
+    parser.add_argument("-o", "--output"   , **argv, type=str, required=False, help="JSON output file with the partial charges (default: %(default)s)", default=None)
     return parser
 
 #---------------------------------------#

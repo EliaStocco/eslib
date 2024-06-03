@@ -19,7 +19,7 @@ def prepare_args(description):
     parser.add_argument("-p", "--predicted", **argv,type=str, help="txt file with the predicted values (default: 'pred.txt')", default="pred.txt")
     parser.add_argument("-e", "--expected" , **argv,type=str, help="txt file with the expected values (default: 'exp.txt')", default="exp.txt")
     parser.add_argument("-m", "--metrics"  , **argv,type=lambda s: size_type(s,dtype=str), help="list of regression metrics (default: ['RMSE','MAE'])" , default=["RMSE","MAE"])
-    parser.add_argument("-o", "--output"   , **argv,type=str, help="JSON output file with the computed metrics (default: None)", default=None)
+    parser.add_argument("-o", "--output"   , **argv,type=str, help="JSON output file with the computed metrics (default: %(default)s)", default=None)
     return parser
 
 @esfmt(prepare_args,description)

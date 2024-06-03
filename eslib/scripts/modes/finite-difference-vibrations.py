@@ -19,8 +19,8 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-p" , "--positions"       , **argv, required=True , type=str  , help="xyz/extxyz file with the displaced atomic structures [au] (default: 'replay.xyz')", default='replay.xyz')
-    parser.add_argument("-f" , "--forces"          , **argv, required=False, type=str  , help="xyz/extxyz file with the forces (default: None)", default=None)
-    parser.add_argument("-n" , "--name"            , **argv, required=False, type=str  , help="name of the forces array in the positions file (default: None)", default=None)
+    parser.add_argument("-f" , "--forces"          , **argv, required=False, type=str  , help="xyz/extxyz file with the forces (default: %(default)s)", default=None)
+    parser.add_argument("-n" , "--name"            , **argv, required=False, type=str  , help="name of the forces array in the positions file (default: %(default)s)", default=None)
     parser.add_argument("-pf", "--positions_format", **argv, required=False, type=str  , help="positions file format (default: 'ipi')", default='ipi')
     parser.add_argument("-ff", "--forces_format"   , **argv, required=False, type=str  , help="forces file format (default: 'ipi')", default='ipi')
     parser.add_argument("-pu", "--positions_unit"  , **argv, required=False, type=str  , help="positions unit (default: 'atomic_unit')", default='atomic_unit')

@@ -23,7 +23,7 @@ def prepare_args(description):
     parser.add_argument("-n" , "--n_bonds"      , **argv, required=False, type=int  , help="number of bonds (default: 2)", default=2)
     parser.add_argument("-s" , "--species"      , **argv, required=False, type=slist, help="atomic species of the bonds to be fixed (default: ['O','H'])", default=['O','H'])
     parser.add_argument("-o" , "--output"       , **argv, required=True , type=str  , help="output file with the oxidation numbers (default: 'wrapped.extxyz')", default="wrapped.extxyz")
-    parser.add_argument("-of", "--output_format", **argv, required=False, type=str  , help="output file format (default: None)", default=None)
+    parser.add_argument("-of", "--output_format", **argv, required=False, type=str  , help="output file format (default: %(default)s)", default=None)
     return parser# .parse_args()
 
 #---------------------------------------#
