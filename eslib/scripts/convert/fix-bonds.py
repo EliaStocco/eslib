@@ -18,7 +18,7 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , **argv, required=True , type=str  , help="file with the atomic structures")
-    parser.add_argument("-if", "--input_format" , **argv, required=False, type=str  , help="input file format (default: 'None')" , default=None)
+    parser.add_argument("-if", "--input_format" , **argv, required=False, type=str  , help="input file format (default: %(default)s)" , default=None)
     # parser.add_argument("-rc", "--cutoff"       , **argv, required=False, type=float, help="cutoff/bond length(default: 3)" , default=3)
     parser.add_argument("-n" , "--n_bonds"      , **argv, required=False, type=int  , help="number of bonds (default: 2)", default=2)
     parser.add_argument("-s" , "--species"      , **argv, required=False, type=slist, help="atomic species of the bonds to be fixed (default: ['O','H'])", default=['O','H'])

@@ -21,10 +21,11 @@ def prepare_args(description):
     argv = {"metavar": "\b"}
     parser.add_argument("-i" , "--input"            , **argv, type=str, required=True , help="input file, folder, or search options")
     parser.add_argument("-u" , "--unit"             , **argv, type=str, required=False, help="output dipoles unit (default: 'eang')", default='eang')
+    parser.add_argument("-bf", "--bad_files"        , **argv, type=str, required=False, help="txt output file with the filepath of the non-converged calculations (default: None)", default=None)
     parser.add_argument("-o" , "--output"           , **argv, type=str, required=False, help="output file with the dipole values (default: 'dipole.eang.txt')", default="dipole.eang.txt")
     parser.add_argument("-oi", "--output_info"      , **argv, type=str, required=False, help="*.csv output file with information (default: 'info.csv')", default="info.csv")
     parser.add_argument("-os", "--output_structures", **argv, type=str, required=False, help="output file with the dipole values and the atomic structures (default: 'aims-with-dipoles.ang.extxyz')", default='aims-with-dipoles.ang.extxyz')
-    parser.add_argument("-of", "--output_format"    , **argv, type=str, required=False, help="output file format (default: 'None')", default=None)
+    parser.add_argument("-of", "--output_format"    , **argv, type=str, required=False, help="output file format (default: %(default)s)", default=None)
     parser.add_argument("-k", "--keyword"           , **argv, type=str, required=False, help="keyword of the dipoles (default: 'dipole')", default='dipole')
     return parser
 
@@ -90,6 +91,17 @@ def main(args):
     print("done")
     N = len(all_files)
     print("\tn. files: ", N)
+
+    #------------------#
+    if args.bad_files is not None:
+        print("\n\tSaving non-converged calculations to file '{:s}' ... ".format(args.bad_files), end="")
+        bad_files = [ f for f, finished_flag in zip(all_files, finished) if not finished_flag]
+        # Open the file in write mode and write each string to the file
+        with open(args.bad_files, "w") as f:
+            for string in bad_files:
+                f.write(string + "\n")
+    print("done")
+
 
     #------------------#
     columns = ["file", "Px [au]", "Py [au]", "Pz [au]", "P [au]", "volume [au]", "dx [au]", "dy [au]", "dz [au]", "d [au]","string"]

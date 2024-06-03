@@ -14,11 +14,11 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , **argv, type=str, required=True , help="file with the atomic structures")
-    parser.add_argument("-if", "--input_format" , **argv, type=str, required=False, help="input file format (default: 'None')" , default=None)
+    parser.add_argument("-if", "--input_format" , **argv, type=str, required=False, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-m" , "--model"        , **argv, type=str, required=True , help="*.pickle file with the dioole model")
     parser.add_argument("-n" , "--name"         , **argv, type=str, required=False, help="name for the output dipoles (default: 'model_dipole')", default="model_dipole")
     parser.add_argument("-o" , "--output"       , **argv, type=str, required=True , help="output file with the atomic structures and the predicted properties")
-    parser.add_argument("-of", "--output_format", **argv, type=str, required=False, help="output file format (default: 'None')", default=None)
+    parser.add_argument("-of", "--output_format", **argv, type=str, required=False, help="output file format (default: %(default)s)", default=None)
     return parser
 
 #---------------------------------------#

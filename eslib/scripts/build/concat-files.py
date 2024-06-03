@@ -15,7 +15,7 @@ def prepare_parser(description):
     argv = {"metavar":"\b"}
     parser.add_argument("-i"  , "--input"        , **argv, type=slist, help="list of input files (example [fileA.xyz,fileB.cif])")
     parser.add_argument("-o"  , "--output"       , **argv, type=str  , help="output file")
-    parser.add_argument("-of" , "--output_format", **argv, type=str  , help="output file format (default: 'None')", default=None)
+    parser.add_argument("-of" , "--output_format", **argv, type=str  , help="output file format (default: %(default)s)", default=None)
     options = parser.parse_args()
     return options
 

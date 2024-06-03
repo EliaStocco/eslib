@@ -15,10 +15,10 @@ def prepare_parser(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
     parser.add_argument("-i"  , "--input"        ,   **argv,type=str, help="input file")
-    parser.add_argument("-if" , "--input_format" ,   **argv,type=str, help="input file format (default: 'None')" , default=None)
+    parser.add_argument("-if" , "--input_format" ,   **argv,type=str, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-m"  , "--method"       ,   **argv,type=str, help="method (default: 'eslib')", default='eslib', choices=['ase','eslib'])    
     parser.add_argument("-o"  , "--output"       ,   **argv,type=str, help="output file")
-    parser.add_argument("-of" , "--output_format",   **argv,type=str, help="output file format (default: 'None')", default=None)
+    parser.add_argument("-of" , "--output_format",   **argv,type=str, help="output file format (default: %(default)s)", default=None)
     return parser
 
 #---------------------------------------#

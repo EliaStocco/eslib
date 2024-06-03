@@ -15,11 +15,11 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"         , **argv, required=True , type=str, help="file with the atomic structures to be modified")
-    parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: 'None')" , default=None)
+    parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-c" , "--cell"          , **argv, required=True , type=str, help="file with the atomic structure with the cell to be copied")
-    parser.add_argument("-cf", "--cell_format"   , **argv, required=False, type=str, help="input cell file format (default: 'None')" , default=None)
+    parser.add_argument("-cf", "--cell_format"   , **argv, required=False, type=str, help="input cell file format (default: %(default)s)" , default=None)
     parser.add_argument("-o" , "--output"        , **argv, required=True , type=str, help="output file with the modified atomic structures")
-    parser.add_argument("-of" , "--output_format", **argv, required=False, type=str, help="output file format (default: 'None')", default=None)
+    parser.add_argument("-of" , "--output_format", **argv, required=False, type=str, help="output file format (default: %(default)s)", default=None)
     return parser# .parse_args()
 
 #---------------------------------------#

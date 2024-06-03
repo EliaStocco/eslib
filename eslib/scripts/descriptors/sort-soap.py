@@ -31,15 +31,15 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b"}
     parser.add_argument("-i"  , "--input"           , type=str     , required=True , **argv, help="input file [au]")
-    parser.add_argument("-if" , "--input_format"    , type=str     , required=False, **argv, help="input file format (default: 'None')" , default=None)
+    parser.add_argument("-if" , "--input_format"    , type=str     , required=False, **argv, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-d"  , "--distance"        , type=str     , required=True , **argv, help="file with the distance matrix")
     parser.add_argument("-m"  , "--method"          , type=str     , required=False, **argv, help="sorting method (default: 'local')", default='local', choices=list(methods.keys()))
     parser.add_argument("-l"  , "--log_file"        , type=str     , required=False, **argv, help="log file (default: 'log.out')", default="log.out")
     parser.add_argument("-N"  , "--max_N"           , type=int     , required=False, **argv, help="maximum number of iterations (default: 1000)", default=10)
-    parser.add_argument("-oi" , "--output_indices"  , type=str     , required=False, **argv, help="output file with indices of the selected structures (default: 'None')", default=None)
-    # parser.add_argument("-oi" , "--output_indices"  , type=str     , required=False, **argv, help="output file with indices of the selected structures (default: 'None')", default=None)
+    parser.add_argument("-oi" , "--output_indices"  , type=str     , required=False, **argv, help="output file with indices of the selected structures (default: %(default)s)", default=None)
+    # parser.add_argument("-oi" , "--output_indices"  , type=str     , required=False, **argv, help="output file with indices of the selected structures (default: %(default)s)", default=None)
     parser.add_argument("-o"  , "--output"          , type=str     , required=True , **argv, help="output file with the selected structures")
-    parser.add_argument("-of" , "--output_format"   , type=str     , required=False, **argv, help="output file format (default: 'None')", default=None)
+    parser.add_argument("-of" , "--output_format"   , type=str     , required=False, **argv, help="output file format (default: %(default)s)", default=None)
     return parser
 
 #---------------------------------------#

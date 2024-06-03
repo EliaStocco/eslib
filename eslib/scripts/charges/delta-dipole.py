@@ -17,12 +17,12 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , **argv, required=True , type=str, help="input file with the atomic structures")
-    parser.add_argument("-if", "--input_format" , **argv, required=False, type=str, help="input file format (default: 'None')", default=None)
+    parser.add_argument("-if", "--input_format" , **argv, required=False, type=str, help="input file format (default: %(default)s)", default=None)
     parser.add_argument("-id", "--in_dipole"    , **argv, required=False, type=str, help="name for the input dipole (default: 'dipole')", default='dipole')
     parser.add_argument("-od", "--out_dipole"   , **argv, required=False, type=str, help="name for the output dipole (default: 'delta_dipole')", default='delta_dipole')
     parser.add_argument("-c" , "--charges"      , **argv, required=False, type=str, help="JSON file with the charges (default: 'charges.json')", default='charges.json')
     parser.add_argument("-o" , "--output"       , **argv, required=True , type=str, help="output file with the atomic structures")
-    parser.add_argument("-of", "--output_format", **argv, required=False, type=str, help="output file format (default: 'None')", default=None)
+    parser.add_argument("-of", "--output_format", **argv, required=False, type=str, help="output file format (default: %(default)s)", default=None)
     return parser# .parse_args()
 
 #---------------------------------------#

@@ -15,10 +15,10 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , **argv, required=True , type=str  , help="file with the reference atomic structure [au]")
-    parser.add_argument("-if", "--input_format" , **argv, required=False, type=str  , help="input file format (default: 'None')" , default=None)
+    parser.add_argument("-if", "--input_format" , **argv, required=False, type=str  , help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-d" , "--displacement" , **argv, required=False, type=float, help="displacement [au] (default: 0.001)" , default=0.001)
     parser.add_argument("-o" , "--output"       , **argv, required=False, type=str  , help="output file with the displaced atomic structures (default: 'replay.xyz')", default='replay.xyz')
-    parser.add_argument("-of", "--output_format", **argv, required=False, type=str  , help="output file format (default: 'None')", default=None)
+    parser.add_argument("-of", "--output_format", **argv, required=False, type=str  , help="output file format (default: %(default)s)", default=None)
     return parser# .parse_args()
 
 #---------------------------------------#

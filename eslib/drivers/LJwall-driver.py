@@ -15,7 +15,7 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-s" , "--structure"   , **argv, required=True , type=str     , help="file with the atomic structure")
-    parser.add_argument("-f" , "--format"      , **argv, required=False, type=str     , help="file format of the atomic structure (default: 'None')" , default=None)
+    parser.add_argument("-f" , "--format"      , **argv, required=False, type=str     , help="file format of the atomic structure (default: %(default)s)" , default=None)
     parser.add_argument("-i" , "--instructions", **argv, required=True , type=str     , help="file with the instuctions for the calulator")
     parser.add_argument("-l" , "--logger"     , **argv, required=False, type=str     , help="logging file (default: None)", default=None)
     parser.add_argument("-p" , "--port"        , **argv, required=False, type=int     , help="TCP/IP port number. Ignored when using UNIX domain sockets.")

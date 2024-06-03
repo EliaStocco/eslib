@@ -18,11 +18,11 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"         , **argv, required=True , type=str, help="file with an atomic structure")
-    parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: 'None')" , default=None)
+    parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-n" , "--numbers"       , **argv, required=False, type=str, help="JSON file with the user-defined oxidation numbers (default: None)", default=None)
     parser.add_argument("-k" , "--keyword"       , **argv, required=False, type=str, help="keyword for the oxidation numbers (default: 'oxidation-numbers')", default='oxidation-numbers')
     parser.add_argument("-o" , "--output"        , **argv, required=False, type=str, help="output file with the oxidation numbers (default: 'oxidation-numbers.extxyz')", default="oxidation-numbers.extxyz")
-    parser.add_argument("-of" , "--output_format", **argv, required=False, type=str, help="output file format (default: 'None')", default=None)
+    parser.add_argument("-of" , "--output_format", **argv, required=False, type=str, help="output file format (default: %(default)s)", default=None)
     return parser# .parse_args()
 
 #---------------------------------------#

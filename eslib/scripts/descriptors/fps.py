@@ -17,13 +17,13 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b"}
     parser.add_argument("-i"  , "--input"           , type=str     , required=True , **argv, help="input file [au]")
-    parser.add_argument("-if" , "--input_format"    , type=str     , required=False, **argv, help="input file format (default: 'None')" , default=None)
+    parser.add_argument("-if" , "--input_format"    , type=str     , required=False, **argv, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-n"  , "--number"          , type=int     , required=True , **argv, help="number of desired structure")
     parser.add_argument("-s"  , "--sort"            , type=str2bool, required=False, **argv, help="whether to sort the indices (default: False)", default=False)
     parser.add_argument("-x"  , "--soap_descriptors", type=str     , required=True , **argv, help="file with the SOAP descriptors")
-    parser.add_argument("-oi" , "--output_indices"  , type=str     , required=False, **argv, help="output file with indices of the selected structures (default: 'None')", default=None)
+    parser.add_argument("-oi" , "--output_indices"  , type=str     , required=False, **argv, help="output file with indices of the selected structures (default: %(default)s)", default=None)
     parser.add_argument("-o"  , "--output"          , type=str     , required=True , **argv, help="output file with the selected structures")
-    parser.add_argument("-of" , "--output_format"   , type=str     , required=False, **argv, help="output file format (default: 'None')", default=None)
+    parser.add_argument("-of" , "--output_format"   , type=str     , required=False, **argv, help="output file format (default: %(default)s)", default=None)
     return parser# .parse_args()
 
 #---------------------------------------#

@@ -30,7 +30,7 @@ def prepare_args():
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar": "\b", }
     parser.add_argument("-i" , "--input"  , type=str                             , **argv, help="input atomic structure")
-    parser.add_argument("-f" , "--format" , type=str                             , **argv, help="input file format (default: 'None')" , default=None)
+    parser.add_argument("-f" , "--format" , type=str                             , **argv, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-a" , "--axes"   , type=lambda s: size_type(s,dtype=str), **argv, help="axes w.r.t. invert the positions [1,2,3,x,y,z] (default: [1,2,3])" , default=["1","2","3"])
     parser.add_argument("-s" , "--sort"   , type=str2bool                        , **argv, help="whether to sort the second structure (dafault: true)", default=True)
     parser.add_argument("-n", "--number"  , type=int                             , **argv, help="number of inner structures (default: 10)", default=10)

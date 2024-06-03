@@ -87,11 +87,11 @@ def prepare_parser(description):
     )
     parser.add_argument(
         "-o", "--output",  type=str,**argv,
-        help="output file of the primitive structure (default: 'None')", default=None
+        help="output file of the primitive structure (default: %(default)s)", default=None
     )
     parser.add_argument(
         "-of" , "--output_format",   type=str, **argv,
-        help="output file format (default: 'None')", default=None
+        help="output file format (default: %(default)s)", default=None
     )
     return parser# .parse_args()
 

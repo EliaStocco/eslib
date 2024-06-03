@@ -30,7 +30,7 @@ def prepare_args():
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b"}
     parser.add_argument("-i"  , "--input"        , **argv, type=str, help="input extxyz file")
-    parser.add_argument("-if" , "--input_format" , **argv, type=str, help="input file format (default: 'None')", default=None)
+    parser.add_argument("-if" , "--input_format" , **argv, type=str, help="input file format (default: %(default)s)", default=None)
     parser.add_argument("-n"  , "--name"         , **argv, type=str, help="name for the array where BEC are stores (default: 'bec')", default="bec")
     parser.add_argument("-o"  , "--output"       , **argv, type=str, help="output *.pickle file")
     return parser# .parse_args()

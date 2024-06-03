@@ -15,14 +15,14 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"         , **argv, required=True , type=str, help="file with an atomic structure")
-    parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: 'None')" , default=None)
+    parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-n" , "--name"          , **argv, required=True , type=str, help="name for the new info/array")
     parser.add_argument("-w" , "--what"          , **argv, required=False, type=str, help="what the data is: 'i' (info) or 'a' (arrays) (default: 'i')", choices=["i","a"], default="i")
     parser.add_argument("-f" , "--family"        , **argv, required=True , type=str, help="family")
     parser.add_argument("-iu", "--in_unit"       , **argv, required=True , type=str, help="input unit")
     parser.add_argument("-ou", "--out_unit"      , **argv, required=True , type=str, help="output unit")
     parser.add_argument("-o" , "--output"        , **argv, required=False, type=str, help="output file with the oxidation numbers (default: 'oxidation-numbers.extxyz')", default="oxidation-numbers.extxyz")
-    parser.add_argument("-of", "--output_format" , **argv, required=False, type=str, help="output file format (default: 'None')", default=None)
+    parser.add_argument("-of", "--output_format" , **argv, required=False, type=str, help="output file format (default: %(default)s)", default=None)
     return parser# .parse_args()
 
 #---------------------------------------#

@@ -17,7 +17,7 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"       , **argv, required=False, type=str  , help="input file with the displaced atomic structures [au] (default: 'replay.xyz')", default='replay.xyz')
-    parser.add_argument("-if", "--input_format", **argv, required=False, type=str  , help="input file format (default: 'None')" , default=None)
+    parser.add_argument("-if", "--input_format", **argv, required=False, type=str  , help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-d" , "--dipoles"     , **argv, required=True , type=str  , help="file with the dipoles")
     parser.add_argument("-s" , "--displacement", **argv, required=True , type=float, help="displacement")
     parser.add_argument("-u" , "--unit"        , **argv, required=False, type=str  , help="dipole unit (default: 'atomic_unit')", default='atomic_unit')
