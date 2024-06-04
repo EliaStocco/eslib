@@ -34,7 +34,7 @@ def main(args):
         print("\n\tStructures have varying numbers of atoms.")
 
     #---------------------------------------#
-    pbc = [np.all(a.get_pbc()) for a in atoms]
+    pbc = np.asarray([np.all(a.get_pbc()) for a in atoms])
     if np.all(pbc):
         print("\tperiodic (all axis): true")
     elif np.all(~pbc):

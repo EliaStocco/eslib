@@ -6,6 +6,7 @@ from copy import copy
 import contextlib
 import sys
 from scipy.ndimage import gaussian_filter1d, generic_filter
+import re
 
 #---------------------------------------#
 def phonopy2atoms(data):
@@ -342,3 +343,20 @@ def check_pattern_in_file(file_path: str, pattern: str) -> bool:
             if pattern in line:
                 return True
     return False
+
+#---------------------------------------#
+def extract_number_from_filename(filename: str) -> float:
+    """
+    Extract the first numerical value found in a filename.
+
+    Args:
+        filename (str): The filename from which to extract the numerical value.
+
+    Returns:
+        float: The numerical value extracted from the filename.
+    """
+    # Use regular expressions to find the first numerical value in the filename
+    match_obj = re.search(r'(\d+\.?\d*)', filename)
+    if match_obj:
+        return float(match_obj.group(1))
+    return float('inf')  # If no number is found, return infinity so these files appear last

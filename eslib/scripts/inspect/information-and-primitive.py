@@ -50,7 +50,7 @@ def print_info(structure:Atoms,threshold:float,title:str):
 
     if np.all(structure.get_pbc()):
         print("\n\tCell:")
-        line = matrix2str(structure.cell.array.T,col_names=["1","2","3"],cols_align="^",width=6)
+        line = matrix2str(structure.cell.array.T,col_names=["1","2","3"],cols_align="^",width=10,digits=4)
         print(line)
 
         print("\n\tPositions (cartesian and fractional):")
@@ -69,31 +69,14 @@ def prepare_parser(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
-    parser.add_argument(
-        "-i", "--input",  type=str,**argv,
-        help="atomic structure input file"
-    )
-    parser.add_argument(
-        "-t", "--threshold",  type=float,**argv,
-        help="threshold for GIMS (default: %(default)s)", default=1e-3
-    )
-    parser.add_argument(
-        "-r"  , "--rotate" , type=str2bool, **argv,
-        help="whether to rotate the cell to the upper triangular form compatible with i-PI (default: %(default)s)", default=True
-    )
-    parser.add_argument(
-        "-p"  , "--primitive" , type=str2bool, **argv,
-        help="whether to compute the primitive structure (default: %(default)s)", default=False
-    )
-    parser.add_argument(
-        "-o", "--output",  type=str,**argv,
-        help="output file of the primitive structure (default: %(default)s)", default=None
-    )
-    parser.add_argument(
-        "-of" , "--output_format",   type=str, **argv,
-        help="output file format (default: %(default)s)", default=None
-    )
-    return parser# .parse_args()
+    parser.add_argument("-i" , "--input"        , type=str     , **argv, help="atomic structure input file")
+    parser.add_argument("-t" , "--threshold"    , type=float   , **argv, help="threshold for GIMS (default: %(default)s)", default=1e-3)
+    parser.add_argument("-r" , "--rotate"       , type=str2bool, **argv, help="whether to rotate the cell to the upper triangular form compatible with i-PI (default: %(default)s)", default=True)
+    parser.add_argument("-s" , "--shift"        , type=str2bool, **argv, help="shift the first atom to the origing (default: %(default)s)", default=False)
+    parser.add_argument("-c" , "--conversion"   , type=str     , **argv, help="structure conversion form (default: %(default)s)", default=None, choices=['niggli','minkowski','conventional','primitive'])
+    parser.add_argument("-o" , "--output"       , type=str     , **argv, help="output file of the converted structure (default: %(default)s)", default=None)
+    parser.add_argument("-of", "--output_format", type=str     , **argv, help="output file format (default: %(default)s)", default=None)
+    return parser
 
 #---------------------------------------#
 @esfmt(prepare_parser,description)
@@ -116,51 +99,73 @@ def main(args):
         else:
             atoms.set_cell(cell,scale_atoms=True)
             print("done")
+    
+    if args.shift:
+        print("\tShifting the first atom to the origin ... ",end="")
+        pos = atoms.get_positions()
+        v = pos[0,:]
+        pos -= v
+        atoms.set_positions(pos)
+        print("done")
+
 
     print("\n\tComputing general information of the atomic structure using GIMS ... ",end="")
     structure = Structure(atoms)
     print("done") 
     print_info(structure,args.threshold,"Original structure information:")
 
-    if args.primitive:
+    if args.conversion is not None:
+        args.conversion  = str(args.conversion )
         #---------------------------------------#
         print("\n\t{:s}".format(divisor))
-        print("\n\tComputing the primitive cell using GIMS ... ",end="")
-        primive_structure = structure.get_primitive_cell(args.threshold)
+        print("\n\tConverting the structure to '{:s}' ... ".format(args.conversion),end="")
+        converted_structure = structure.copy()
+        if args.conversion == "niggli":
+            from ase.build import niggli_reduce
+            niggli_reduce(converted_structure)
+        elif args.conversion == "minkowski":
+            raise ValueError("not implemented yet")
+            from ase.geometry.minkowski_reduction import minkowski_reduce
+            minkowski_reduce(converted_structure)
+        elif args.conversion == "primitive":
+            converted_structure = converted_structure.get_primitive_cell(args.threshold)
+        elif args.conversion == "conventional":
+            converted_structure.get_conventional_cell(args.threshold)
+        else:
+            raise ValueError("coding error")
         print("done")
 
-        if args.rotate:
-            print("\tRotating the lattice vectors of the primitive structure such that they will be in upper triangular form ... ",end="")
-            # frac = atom.get_scaled_positions()
-            cellpar = primive_structure.cell.cellpar()
-            cell = Cell.fromcellpar(cellpar).array
-            if np.allclose(cell,primive_structure.cell):
-                print("done")
-                print("\tThe lattice vectors are already in upper triangular form.")
-            else:
-                primive_structure.set_cell(cell,scale_atoms=True)
-                print("done")    
+        # if args.rotate:
+        #     print("\tRotating the lattice vectors of the primitive structure such that they will be in upper triangular form ... ",end="")
+        #     # frac = atom.get_scaled_positions()
+        #     cellpar = primive_structure.cell.cellpar()
+        #     cell = Cell.fromcellpar(cellpar).array
+        #     if np.allclose(cell,primive_structure.cell):
+        #         print("done")
+        #         print("\tThe lattice vectors are already in upper triangular form.")
+        #     else:
+        #         primive_structure.set_cell(cell,scale_atoms=True)
+        #         print("done")    
 
         print("\n\tComputing general information of the primitive structure using GIMS ... ",end="")
         print("done") 
-        print_info(primive_structure,args.threshold,"Primitive cell structure information:")
+        print_info(converted_structure,args.threshold,"Primitive cell structure information:")
         
-        #---------------------------------------#
-        # trasformation
-        print("\n\t{:s}".format(divisor))
-        size, M = find_transformation(primive_structure,structure)
-        print("\tTrasformation matrix from primitive to original cell:")
-        line = matrix2str(M.round(2),col_names=["1","2","3"],cols_align="^",width=6)
-        print(line)
+        # #---------------------------------------#
+        # # trasformation
+        # print("\n\t{:s}".format(divisor))
+        # size, M = find_transformation(primive_structure,structure)
+        # print("\tTrasformation matrix from primitive to original cell:")
+        # line = matrix2str(M.round(2),col_names=["1","2","3"],cols_align="^",width=6)
+        # print(line)
 
         #---------------------------------------#
         # Write the data to the specified output file with the specified format
         if args.output is not None:            
             print("\n\t{:s}".format(divisor))
-            print("\n\tWriting primitive structure to file '{:s}' ... ".format(args.output), end="")
+            print("\n\tWriting converted structure to file '{:s}' ... ".format(args.output), end="")
             try:
-                write(images=primive_structure,filename=args.output, \
-                      format=args.output_format) # fmt)
+                write(images=converted_structure,filename=args.output, format=args.output_format)
                 print("done")
             except Exception as e:
                 print("\n\tError: {:s}".format(e))

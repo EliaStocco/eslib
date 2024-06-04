@@ -43,6 +43,7 @@ class StructureInfo:
             
             dataset = spg.get_symmetry_dataset(spg_cell, symprec=sym_thresh)
             if dataset:
+                # self.dataset = dataset
                 prim_lattice, prim_scaled_positions, prim_numbers = spg.find_primitive(
                     spg_cell, symprec=sym_thresh
                 )

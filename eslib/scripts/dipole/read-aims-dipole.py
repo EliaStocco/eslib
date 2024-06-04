@@ -11,10 +11,9 @@ from eslib.functions import check_pattern_in_file
 from eslib.classes.trajectory import AtomicStructures
 from eslib.functions import extract_number_from_filename
 from eslib.regex import extract_float
-
 #---------------------------------------#
 # Description of the script's purpose
-description = "Extract the values of the polarization from a bunch of FHI-aims files and compute the dipoles."
+description = "Extract the values of the dipole from a bunch of FHI-aims files."
 
 #---------------------------------------#
 def prepare_args(description):
@@ -32,32 +31,30 @@ def prepare_args(description):
     return parser
 
 #---------------------------------------#
-def read_polarization(file: str) -> Tuple[np.ndarray, str]:
+def read_dipole(file: str) -> Tuple[np.ndarray, str]:
     """
-    Read the polarization values from a file.
+    Read the dipole values from a file.
 
     Args:
         file (str): The path to the file to be read.
 
     Returns:
-        Tuple[np.ndarray, str]: A tuple containing the polarization values as a NumPy array and the line containing the polarization.
+        Tuple[np.ndarray, str]: A tuple containing the dipole values as a NumPy array and the line containing the dipole.
     """
-    # Initialize the polarization array with NaN values
-    polarization = np.full(3, np.nan)
-    line_with_polarization = ""
+    # Initialize the dipole array with NaN values
+    dipole = np.full(3, np.nan)
+    line_with_dipole = ""
 
     with open(file, 'r') as f:
         for line in f:
-            if "| Cartesian Polarization" in line:
-                polarization = extract_float(line)
-                line_with_polarization = line.strip()
-                # match_obj = re.search(r'\| Cartesian Polarization\s+([-0-9.Ee+]+)\s+([-0-9.Ee+]+)\s+([-0-9.Ee+]+)', line)
-                # if match_obj:
-                #     polarization = np.array([float(match_obj.group(1)), float(match_obj.group(2)), float(match_obj.group(3))])
-                #     line_with_polarization = line.strip()
-                #     break
+            if "| Total dipole moment" in line:
+                dipole = extract_float(line)
+                assert len(dipole) == 3, "wrong number of float extracted from the string"
+                line_with_dipole = line.strip()
+                break
 
-    return polarization, line_with_polarization
+    return dipole, line_with_dipole
+
 
 #---------------------------------------#
 @esfmt(prepare_args, description)
@@ -91,52 +88,46 @@ def main(args):
 
 
     #------------------#
-    columns = ["file", "Px [au]", "Py [au]", "Pz [au]", "P [au]", "volume [au]", "dx [au]", "dy [au]", "dz [au]", "d [au]","string"]
+    columns = ["file", "dx [eang]", "dy [eang]", "dz [eang]", "d [eang]","string"]
     df = pd.DataFrame(columns=columns, index=np.arange(N))
 
     structures = [None]*N
     good = np.full(N,fill_value=True,dtype=bool)
     
     #------------------#
-    print("\n\tReading files and extracting the polarization ... ", end="")
+    print("\n\tReading files and extracting the dipole ... ", end="")
     for n, file in enumerate(all_good_files):
         df.at[n, "file"] = file
 
-        P, string = read_polarization(file) # C/m^2
+        
         try :
             structure = read(file,format='aims-output')
+            assert np.all(~structure.get_pbc()), "The atomic structures should not be periodic"
         except:
             print("\tskipping file '{:s}'".format(file))
             good[n] = False
             continue
 
+        dipole, string = read_dipole(file) # C/m^2
+
+        assert np.any(~np.isnan(dipole)), "Found NaN values"
+
         structures[n] = structure
 
-        V = structure.get_volume() # angstrom^3
-        V = convert(V,"volume","angstrom3","atomic_unit")
-        P = convert(P,"polarization","C/m^2","atomic_unit")
-        dipole = P * V
-
-        df.at[n, "Px [au]"] = P[0]
-        df.at[n, "Py [au]"] = P[1]
-        df.at[n, "Pz [au]"] = P[2]
-        df.at[n, "P [au]"] = np.linalg.norm(P)
-        df.at[n, "volume [au]"] = V
-
-        df.at[n, "dx [au]"] = dipole[0]
-        df.at[n, "dy [au]"] = dipole[1]
-        df.at[n, "dz [au]"] = dipole[2]
-        df.at[n, "d [au]"] = np.linalg.norm(dipole)
+        df.at[n, "dx [eang]"] = dipole[0]
+        df.at[n, "dy [eang]"] = dipole[1]
+        df.at[n, "dz [eang]"] = dipole[2]
+        df.at[n, "d [eang]"] = np.linalg.norm(dipole)
 
         df.at[n,"string"] = string
 
     print("done")
 
     #------------------#
-    dipoles = df[ ["dx [au]","dy [au]","dz [au]"]]
+    dipoles = df[ ["dx [eang]","dy [eang]","dz [eang]"]]
     dipoles = np.asarray(dipoles).astype(float)
     assert dipoles.shape == (N,3)
-    dipoles = convert(dipoles,"electric-dipole","atomic_unit",args.unit)
+    dipoles = convert(dipoles,"electric-dipole","eang",args.unit)
     print("\n\tSaving dipoles to file '{:s}' ... ".format(args.output), end="")
     file = str(args.output)
     if file.endswith("txt"):

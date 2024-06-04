@@ -24,7 +24,7 @@ def prepare_parser(description):
     parser.add_argument("-i"  , "--input"       , type=str, required=True , **argv, help="input file [au]")
     parser.add_argument("-if" , "--input_format", type=str, required=False, **argv, help="input file format (default: %(default)s)", default=None)
     parser.add_argument("-sh" , "--soap_hyper"  , type=str, required=False, **argv, help="JSON file with the SOAP hyperparameters (default: %(default)s)", default=None)
-    parser.add_argument("-o"  , "--output"      , type=str, required=False, **argv, help="output file with SOAP descriptors (default: %(default)s)", default=None)
+    parser.add_argument("-o"  , "--output"      , type=str, required=False, **argv, help="output file with SOAP descriptors (default: %(default)s)", default='soap.npy')
     return parser
 
 #---------------------------------------#
