@@ -75,6 +75,30 @@ def calc_none_class(method: M) -> M :
         return out
     return wrapper
 
+def correct_pbc(atoms:List[Atoms]):
+    for a in atoms:
+        if a.get_cell() is None or a.get_cell().volume == 0.0 :
+            a.set_pbc(False)
+        else:
+            a.set_pbc(True)
+
+#------------------#
+def correct_pbc_static(method: M) -> M:
+    @functools.wraps(method)
+    def wrapper(self: List[Atoms], *args, **kwargs) -> Any:
+        correct_pbc(self)
+        return method(self, *args, **kwargs)
+    return wrapper
+
+#------------------#
+def correct_pbc_class(method: M) -> M :
+    @functools.wraps(method)
+    def wrapper(*args, **kwargs):
+        out: List[Atoms] = method(*args, **kwargs)
+        correct_pbc(out)
+        return out
+    return wrapper
+
 #------------------#
 class aseio(List[Atoms], pickleIO):
     """Class to handle atomic structures:
@@ -87,6 +111,7 @@ class aseio(List[Atoms], pickleIO):
     # The order of the following decorators matters.
     # Do not change it.
     @classmethod
+    @correct_pbc_class
     @calc_none_class
     @pickleIO.correct_extension_in
     def from_file(cls, **argv):
@@ -102,6 +127,7 @@ class aseio(List[Atoms], pickleIO):
     # Attention!
     # The order of the following decorators matters.
     # Do not change it.
+    @correct_pbc_static
     @calc_none_static
     @pickleIO.correct_extension_out
     def to_file(self: T, file: str, format: Union[str, None] = None):
@@ -126,7 +152,7 @@ Step        = re.compile(r"Step:\s+(\d+)")
 def read_trajectory(file:str,
                format:str=None,
                index:str=":",
-               pbc:bool=True,
+               pbc:bool=None,
                same_cell:bool=False,
                remove_replicas:bool=False)->List[Atoms]:
     """
