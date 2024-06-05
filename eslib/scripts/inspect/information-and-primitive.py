@@ -82,6 +82,8 @@ def prepare_parser(description):
 @esfmt(prepare_parser,description)
 def main(args):
 
+    converted_structure = None
+    
     #---------------------------------------#
     print("\n\t{:s}".format(divisor))
     print("\tReading atomic structure from input file '{:s}' ... ".format(args.input), end="")
@@ -159,16 +161,18 @@ def main(args):
         # line = matrix2str(M.round(2),col_names=["1","2","3"],cols_align="^",width=6)
         # print(line)
 
-        #---------------------------------------#
-        # Write the data to the specified output file with the specified format
-        if args.output is not None:            
-            print("\n\t{:s}".format(divisor))
-            print("\n\tWriting converted structure to file '{:s}' ... ".format(args.output), end="")
-            try:
-                write(images=converted_structure,filename=args.output, format=args.output_format)
-                print("done")
-            except Exception as e:
-                print("\n\tError: {:s}".format(e))
+    #---------------------------------------#
+    # Write the data to the specified output file with the specified format
+    if args.output is not None: 
+        if converted_structure is None:
+            converted_structure = atoms
+        print("\n\t{:s}".format(divisor))
+        print("\n\tWriting converted structure to file '{:s}' ... ".format(args.output), end="")
+        try:
+            write(images=converted_structure,filename=args.output, format=args.output_format)
+            print("done")
+        except Exception as e:
+            print("\n\tError: {:s}".format(e))
 
 #---------------------------------------#
 if __name__ == "__main__":
