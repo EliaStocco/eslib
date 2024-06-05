@@ -98,6 +98,7 @@ def main(args):
     good = np.full(N,fill_value=True,dtype=bool)
     
     #------------------#
+    first = True
     print("\n\tReading files and extracting the polarization ... ", end="")
     for n, file in enumerate(all_good_files):
         df.at[n, "file"] = file
@@ -106,6 +107,9 @@ def main(args):
         try :
             structure = read(file,format='aims-output')
         except:
+            if first:
+                print()
+                first = False
             print("\tskipping file '{:s}'".format(file))
             good[n] = False
             continue
@@ -152,7 +156,7 @@ def main(args):
 
     #------------------#
     if np.any(~good) :
-        print("\n\t{:s}: there are {:s} bad structures --> they will be discarded".format(warning,np.sum(~good)))
+        print("\n\t{:s}: there are {:d} bad structures --> they will be discarded".format(warning,np.sum(~good)))
         file = 'bad-structures-indices.txt'
         print("\tSaving indices of the bad structures to file 'bad-structures-indices.txt' ... ".format(file), end="")
         indices = np.where(~good)
@@ -162,6 +166,7 @@ def main(args):
     #------------------#
     print("\n\tPreparing atomic structures ... ", end="")
     structures = [ s for s,g in zip(structures,good) if g ]
+    dipoles = dipoles[good]
     structures = AtomicStructures(structures)
     structures.set(args.keyword,dipoles,"info")
     print("done")
