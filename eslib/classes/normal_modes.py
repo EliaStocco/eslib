@@ -2,7 +2,7 @@ import numpy as np
 from copy import copy
 from itertools import product
 # import xarray as xr
-from eslib.functions import get_one_file_in_folder, nparray2list_in_dict
+from eslib.functions import get_one_file_in_folder #, nparray2list_in_dict
 from .io import pickleIO
 from warnings import warn
 from eslib.units import *
@@ -14,6 +14,7 @@ from eslib.classes.physical_tensor import *
 from typing import List, Dict
 import pint
 import os
+from eslib.functional import unsafe, improvable
 import warnings
 # Disable all UserWarnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -45,23 +46,19 @@ class NormalModes(pickleIO):
         # Natoms
         self.Natoms = int(self.Ndof / 3)
 
+        # dynamical matrix
         self.dynmat = PhysicalTensor(np.full((self.Ndof,self.Ndof),np.nan), dims=('dof-a', 'dof-b'))
 
+        # normal modes and eigenvectors
         empty = PhysicalTensor(np.full((self.Ndof,self.Nmodes),np.nan,dtype=np.complex128), dims=('dof', 'mode'))
         self.eigvec = empty.copy()
         self.mode   = empty.copy()
-        # self.non_ortho_modes = empty.copy()
-
+        
+        # eigenvalues and masses
         self.eigval = PhysicalTensor(np.full(self.Nmodes,np.nan), dims=('mode')) 
         self.masses = PhysicalTensor(np.full(self.Ndof,np.nan), dims=('dof'))
 
-        
-        # if ref is not None:
-        #     self.set_reference(ref)
-        # else:
-        #     self.reference = Atoms()
-        #     self.masses = None
-
+        # reference structure
         self.set_reference(ref)
 
         pass
@@ -89,9 +86,10 @@ class NormalModes(pickleIO):
     #     line += "{:<10s}: {:<10d}\n".format("# atoms",self.Natoms)  
     #     return line
     
-    def to_dict(self)->dict:
-        return nparray2list_in_dict(vars(self))
+    # def to_dict(self)->dict:
+    #     return nparray2list_in_dict(vars(self))
 
+    @unsafe
     def to_folder(self,folder,prefix):
 
         outputs = {
@@ -173,6 +171,7 @@ class NormalModes(pickleIO):
 
         return self   
     
+    @unsafe
     def set_dynmat(self,dynmat,mode="phonopy"):
         _dynmat = np.asarray(dynmat)
         if mode == "phonopy":
@@ -188,10 +187,12 @@ class NormalModes(pickleIO):
             raise ValueError("not implemented yet")
         pass
 
+    @unsafe
     def set_modes(self,modes):
         self.mode.values = PhysicalTensor(modes, dims=('dof', 'mode'))
         self.mode /= norm_by(self.mode,"dof")
         
+    @unsafe
     def set_eigvec(self,band,mode="phonopy"):
         if mode == "phonopy":
             N = self.Nmodes
@@ -206,9 +207,11 @@ class NormalModes(pickleIO):
             raise ValueError("not implemented yet")
         pass
 
+    @unsafe
     def set_eigval(self,eigval):
         self.eigval[:] = PhysicalTensor(eigval, dims=('mode'))
     
+    @unsafe
     def set_force_constants(self,force_constant):
         Msqrt = diag_matrix(self.masses,exp="-1/2")
         MsqrtLeft  = PhysicalTensor(Msqrt, dims=('dof-A','dof-a'))
@@ -217,6 +220,7 @@ class NormalModes(pickleIO):
         self.dynmat = dot(dot(MsqrtLeft,Phi,'dof-A'),MsqrtRight,'dof-B')
         pass
 
+    @unsafe
     def diagonalize(self):
         dm = remove_unit(self.dynmat)[0]
         dm = 0.50 * (dm + dm.T)
@@ -226,6 +230,7 @@ class NormalModes(pickleIO):
         self.eigvec2modes(_test=False)
         self.sort()
 
+    @unsafe
     def eigvec2modes(self,_test:bool=True):
         self.non_ortho_mode = self.eigvec.copy()
         for i in range(self.non_ortho_mode.sizes['dof']):
@@ -239,6 +244,7 @@ class NormalModes(pickleIO):
         self.mode = self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof")
         pass
     
+    @unsafe
     def build_supercell_displacement(self,size,q):
 
         q = np.asarray(q)
@@ -318,6 +324,7 @@ class NormalModes(pickleIO):
         structure.set_positions(structure.get_positions()+displ.get_positions())
         return structure
 
+    @improvable
     def project(self,trajectory:List[Atoms],warning="**Warning**")->Dict[str,PhysicalTensor]:       
 
         #-------------------#
@@ -574,6 +581,7 @@ class NormalModes(pickleIO):
                     setattr(self, attr_name, attr_value[:, sorted_indices])
         return
     
+    @unsafe
     def get_characteristic_spring_constants(self):
         Nleft  = inv(self.mode.rename({"dof": "dof-a","mode":"mode-a"}))
         Nright = self.mode.rename({"dof": "dof-b","mode":"mode-b"})
@@ -582,6 +590,7 @@ class NormalModes(pickleIO):
         dM = np.diagonal(M).real
         return dM
     
+    @improvable
     def get_characteristic_scales(self):
         """Returns a `pandas.DataFrame` with the characteristic scales of the normal modes, intended as quantum harmonic oscillators.
         
@@ -611,6 +620,7 @@ class NormalModes(pickleIO):
         
         return scales
     
+    @unsafe
     def potential_energy(self,structure:List[Atoms]):
         """Compute the harmonic energy of list of atomic structures."""
         results = self.project(structure)
