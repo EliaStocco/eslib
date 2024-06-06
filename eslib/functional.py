@@ -1,7 +1,8 @@
 import functools
 import warnings
+from typing import Callable, Any
 
-def deprecated(reason):
+def deprecated(reason: str = "", name: str = "deprecated", warning:Warning=DeprecationWarning) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
     A decorator to mark functions as deprecated. It will result in a warning being emitted 
     when the function is used.
@@ -18,11 +19,19 @@ def deprecated(reason):
         def old_function(x, y):
             return x + y
     """
-    def decorator(func):
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            message = f"Call to deprecated function {func.__name__}. {reason}"
-            warnings.warn(message, category=DeprecationWarning, stacklevel=2)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            message = f"Call to {name} function {func.__name__}. {reason}"
+            warnings.warn(message, category=warning, stacklevel=2)
             return func(*args, **kwargs)
         return wrapper
     return decorator
+
+# Create the unsafe decorator using functools.partial
+def unsafe(func: Callable[..., Any]) -> Callable[..., Any]:
+    return deprecated("this method has not been debugged", "unsafe", UserWarning )(func)
+
+# Create the unsafe decorator using functools.partial
+def improvable(func: Callable[..., Any]) -> Callable[..., Any]:
+    return deprecated("this method can be improved", "improvable", UserWarning )(func)
