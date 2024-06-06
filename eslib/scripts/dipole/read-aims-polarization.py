@@ -66,7 +66,8 @@ def main(args):
     #------------------#
     print("\n\tSearching for files ... ", end="")
     all_files = glob.glob(args.input)
-    all_files = sorted(all_files, key=lambda x: (x, extract_number_from_filename(x)))
+    all_files = [ all_files[i] for i in np.argsort(np.asarray([ int(extract_number_from_filename(x)) for x in all_files ])) ]
+    # all_files = sorted(all_files, key=lambda x: (x, extract_number_from_filename(x)))
     print("done")
     N = len(all_files)
     print("\tn. files: ", N)
