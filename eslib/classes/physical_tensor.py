@@ -73,6 +73,8 @@ def diag_matrix(M,exp):
 
     
 class PhysicalTensor(xr.DataArray):
+    __slots__ = ()
+    data:np.ndarray
 
     def cdot(self:T,B:T,dim:str)->T:
         return dot(self,B,dim)
