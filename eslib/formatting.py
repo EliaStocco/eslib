@@ -4,6 +4,7 @@ from eslib.functions import Dict2Obj, args_to_dict
 from eslib.functions import add_default
 from datetime import datetime
 import inspect
+import json
 from eslib.show import dict_to_list
 import colorama
 from colorama import Fore, Style
@@ -83,6 +84,8 @@ def esfmt(prepare_parser:callable=None, description:str=None):
             command_line = ' '.join(sys.argv[1:])   
             local_path, global_path = get_path(main)
             print("running script as: {:s} ".format(local_path),command_line)
+            vscode_args = json.dumps(sys.argv[1:])
+            print("hint for VScode debugging: \"args\" : {:s} ".format(vscode_args))
         except: 
             pass    
         print("working directory: {:s}".format(os.getcwd()))
