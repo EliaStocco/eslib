@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 import json
 import numpy as np
-from eslib.classes.dipole import DipolePartialCharges
-from eslib.classes.trajectory import AtomicStructures, astype
-from eslib.formatting import esfmt, warning
-from eslib.show import show_dict
-from eslib.tools import is_integer
+from eslib.classes.trajectory import AtomicStructures
+from eslib.formatting import esfmt
 from eslib.classes.bec import bec
 
 #---------------------------------------#
@@ -31,7 +28,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\n\tReading the atomic structures from file '{:s}' ... ".format(args.input), end="")
-    trajectory:AtomicStructures = AtomicStructures.from_file(file=args.input,format=args.input_format)
+    trajectory = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done")
     print("\tn. of atomic structures: {:d}".format(len(trajectory)))
 
@@ -52,8 +49,11 @@ def main(args):
     print("done")
 
     if args.summary is not None:
-        print("\n\tWriting BECs summary to file '{:s}' ... ".format(args.output), end="")
-        data = Z.summary()
+        print("\n\tComputing BECs summary ... ", end="")
+        data = Z.summary(symbols=trajectory[0].get_chemical_symbols())
+        print("done")
+
+        print("\tWriting BECs summary to file '{:s}' ... ".format(args.summary), end="")
         with open(args.summary,"w") as ffile:
             json.dump(obj=data,fp=ffile,indent=4)
         print("done")
