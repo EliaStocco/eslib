@@ -1,21 +1,21 @@
 import xarray as xr
 import numpy as np
 from .io import pickleIO
-from typing import Union
+from typing import Union, List, Dict, Tuple
 from eslib.formatting import float_format
 import warnings
 # Filter out the warning by category and message
 warnings.filterwarnings("ignore", category=FutureWarning, message="xarray subclass bec should explicitly define __slots__")
 
 class bec(xr.DataArray,pickleIO):
-    __slots__ = ('_data', '_dtype', '_file', '_other_attribute')  # Add any additional attributes you may have
+    # __slots__ = xr.DataArray.__slots__ #('_data', '_dtype', '_file', '_other_attribute')  # Add any additional attributes you may have
 
-    @classmethod
-    def from_extxyz(cls,file:str,name:str="bec"):
-        from .trajectory import AtomicStructures, array
-        atoms = AtomicStructures.from_file(file)
-        becs = array(atoms,name)
-        return cls.from_numpy(becs)
+    # @classmethod
+    # def from_extxyz(cls,file:str,name:str="bec"):
+    #     from .trajectory import AtomicStructures, array
+    #     atoms = AtomicStructures.from_file(file)
+    #     becs = array(atoms,name)
+    #     return cls.from_numpy(becs)
 
     @classmethod
     def from_file(cls,file:str,natoms:int):
@@ -43,13 +43,27 @@ class bec(xr.DataArray,pickleIO):
         else:
             raise ValueError("not implemented yet for file '{:s}'".format(file))
         
-    def summary(self):
+    def summary(self,symbols:List[str]=None):
         structure_mean = self.mean("structure")
+        structure_std = self.std("structure")
+        structure_rel = 100*structure_std/structure_mean
+        trace_atoms, _ = self.trace("atoms")
+        if symbols is not None:
+            trace_species, std_species = self.trace(average="species",symbols=symbols,trace_atoms=trace_atoms)
+            traces = trace_species.mean("structure")
+            traces = dict(zip(np.unique(symbols).tolist(), traces.to_numpy().tolist()))
+            std = std_species.mean("structure")
+            std = dict(zip(np.unique(symbols).tolist(), std.to_numpy().tolist()))
         # structure_atoms_mean = structure_mean
         output = {
-            "structure-mean" : structure_mean.to_numpy().tolist(),
-            # "structure-atoms-mean" : list(structure_atoms_mean),
+            "species-mean" : traces,
+            "species-std" : std,
+            "structure-percentage" : structure_rel.to_numpy().tolist(),  
+            "structure-std" : structure_std.to_numpy().tolist(),  
+            "structure-mean" : structure_mean.to_numpy().tolist(),            
         }
+        # for k,value in output.items():
+        #     output[k] = value.to_numpy().tolist()
         return output
 
     @classmethod
@@ -139,3 +153,34 @@ class bec(xr.DataArray,pickleIO):
         array = array.reshape((array.shape[0],int(array.shape[1]/3),3,3))
         obj = xr.DataArray(array.copy(), dims=('structure', 'atom', 'xyz', 'dir'))
         return bec(obj)
+    
+    def trace(self,average:str="atoms",symbols:List[str]=None,trace_atoms:xr.DataArray=None)->Tuple[xr.DataArray,xr.DataArray]:
+        symbols = np.asarray(symbols) 
+        if average == "atoms":
+            atomic_bec = self.expand_with_atoms()
+            trace = xr.DataArray(np.zeros(atomic_bec.shape[0:2]), dims=('structure', 'atom'))
+            # std = trace.copy()
+            for i,s in enumerate(atomic_bec): # cycle over structures
+                for j,a in enumerate(s): # cycle over atoms
+                    # val = np.trace(a)/3
+                    z = np.diagonal(a)
+                    # assert val == np.mean(z)
+                    trace[i,j] = np.mean(z) # trace(Z)/3
+                    # std[i,j] = np.std(z)
+            return trace, None
+        elif average == "species":
+            if trace_atoms is None:
+                trace_atoms = self.trace(average="atoms")
+            species,index = np.unique(symbols,return_inverse=True)
+            assert all( [ a== b for a,b in zip(species[index],symbols)])
+            trace = xr.DataArray(np.zeros((trace_atoms.shape[0],len(species))), dims=('structure', 'species'))
+            std = trace.copy()
+            for n,s in enumerate(species): # cycle over species
+                ii = np.where(symbols == s)[0]
+                trace[:,n] = trace_atoms[:,ii].mean("atom")
+                std[:,n] = trace_atoms[:,ii].std("atom")
+            return trace, std
+        else:
+            raise ValueError("coding error")
+
+
