@@ -11,3 +11,4 @@
 - implement a `CLI` based on `argparse` to manipulate, inspect and perform calculations on trajectories
 - implement a class to deal with `i-PI` properties
 - add a script to transfrom an atomic structure into its Niggli, Minkowski, and standard form.
+- move changes made to `MACE` into `eslib`
