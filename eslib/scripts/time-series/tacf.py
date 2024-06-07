@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 from ase.io import write
-from ase import Atoms
-from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt
 import numpy as np
 from eslib.mathematics import tacf, reshape_into_blocks
@@ -21,8 +19,8 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"  , **argv, required=True , type=str, help="txt/npy input file")
     parser.add_argument("-b" , "--blocks" , **argv, required=False, type=int, help="number of blocks (default: %(default)s)", default=10)
     parser.add_argument("-m" , "--method" , **argv, required=False, type=str, help="method (default: %(default)s)", default='class', choices=['class','function'])
-    parser.add_argument("-o" , "--output" , **argv, required=True , type=str, help="txt/npy output file")
-    parser.add_argument("-p" , "--plot"   , **argv, required=False, type=str, help="output file for the plot")
+    parser.add_argument("-o" , "--output" , **argv, required=False, type=str, help="txt/npy output file (default: %(default)s)", default='tacf.npy')
+    parser.add_argument("-p" , "--plot"   , **argv, required=False, type=str, help="output file for the plot (default: %(default)s)", default='tacf.pdf')
 
     return parser
 
