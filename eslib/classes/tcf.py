@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 import numpy as np
-from typing import Optional, TypeVar, Tuple, Callable, Any
-from scipy.signal import correlate as scipy_correlate
-import functools
+from typing import Optional, TypeVar, Tuple# , Callable, Any
+# from scipy.signal import correlate as scipy_correlate
+# import functools
 
 # Try to import the timing function from the eslib.classes.timing module
 try:
@@ -83,7 +83,14 @@ class TimeCorrelation:
         if self._ready:
             return self._tcf
         else:
-            self._tcf = correlate(self.A, self.B, axis=axis)
+            if axis != 0:
+                self.A = np.moveaxis(self.A, axis, 0)
+                self.B = np.moveaxis(self.B, axis, 0)
+            self._tcf = correlate(self.A, self.B, axis=0)
+            if axis != 0:
+                self.A    = np.moveaxis(self.A, 0, axis)
+                self.B    = np.moveaxis(self.B, 0, axis)
+                self._tcf = np.moveaxis(self._tcf, 0, axis)
             self._ready = True
             return self._tcf.copy()
 
@@ -134,11 +141,12 @@ class TimeAutoCorrelation(TimeCorrelation):
         """
         if mode not in ["half","full"]:
             raise ValueError("`mode` can be only `half` or `full`")
-        arr = super().tcf(axis)
-        arr /= np.mean(self.A ** 2, axis=0)  # normalized to 1
+        arr:np.ndarray = super().tcf(axis)
+        arr = arr / np.mean(self.A ** 2, axis=axis,keepdims=True)  # normalized to 1
         if mode == "half":
-            N = int(len(arr) / 2)  # the second half is noisy
-            arr = arr[:N]            
+            N = int(arr.shape[axis] / 2)  # the second half is noisy
+            # arr = arr[:N]      
+            arr = np.take(arr, np.arange(N), axis=axis)      
         return arr
 
 def correlate(
@@ -163,6 +171,7 @@ def correlate(
         Cross-correlation of the two input arrays.
     """
 
+    assert axis == 0, "not debugged yet with `axis` != 0"
     assert A.ndim == B.ndim
     shape_a = A.shape
     len_a = shape_a[axis]
