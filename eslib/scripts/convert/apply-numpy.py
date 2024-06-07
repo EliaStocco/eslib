@@ -2,6 +2,7 @@
 import numpy as np
 from eslib.tools import string2function
 from eslib.formatting import esfmt
+from eslib.classes.physical_tensor import PhysicalTensor
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -29,7 +30,8 @@ def main(args):
 
     #---------------------------------------#
     print("\tReading array from file '{:s}' ... ".format(args.input), end="")
-    inarray = np.loadtxt(args.input)
+    # inarray = np.loadtxt(args.input)
+    inarray:np.ndarray = PhysicalTensor.from_file(file=args.input).to_data()
     print("done")
 
     print("\tinput array shape: ",inarray.shape)
@@ -46,7 +48,9 @@ def main(args):
         print("\t{:s}: no output file provided.\nSpecify it with -o,--output")
     else:
         print("\tSave output array to file '{:s}' ... ".format(args.output), end="")
-        np.savetxt(args.output,outarray,fmt=args.output_format)
+        outarray = PhysicalTensor(outarray)
+        outarray.to_file(file=args.output,fmt=args.output_format)
+        # np.savetxt(args.output,outarray,fmt=args.output_format)
         print("done")
 
 if __name__ == "__main__":
