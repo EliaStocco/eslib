@@ -451,3 +451,38 @@ def add_info_array(traj:List[Atoms],props:Dict[str,np.ndarray],shapes)->List[Ato
             else:
                 raise ValueError("`whereto[{k}]` can be either `info` or `arrays`.")
     return new_traj
+
+def element_wise_multiplication(A: np.ndarray, B: np.ndarray, axis: int) -> np.ndarray:
+    """
+    Perform element-wise multiplication of a 1D array with an ND array along a specified axis.
+
+    Parameters:
+    A (np.ndarray): 1D array to be multiplied.
+    B (np.ndarray): ND array to be multiplied with.
+    axis (int): Axis along which to perform the multiplication.
+
+    Returns:
+    np.ndarray: Resulting array after element-wise multiplication.
+
+    Raises:
+    AssertionError: If A is not a 1D array.
+
+    Examples:
+    >>> A = np.array([1, 2, 3])
+    >>> B = np.random.rand(2, 3, 4)
+    >>> result = element_wise_multiplication(A, B, axis=1)
+    >>> result.shape
+    (2, 3, 4)
+
+    >>> A = np.array([1, 2])
+    >>> B = np.random.rand(2, 3, 2)
+    >>> result = element_wise_multiplication(A, B, axis=2)
+    >>> result.shape
+    (2, 3, 2)
+    """
+    assert A.ndim == 1, "A must be a 1D array"
+    new_shape = [1] * B.ndim
+    new_shape[axis] = len(A)
+    A_reshaped = A.reshape(new_shape)
+    return A_reshaped * B
+
