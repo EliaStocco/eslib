@@ -3,6 +3,7 @@ import numpy as np
 from ase.io import write
 from eslib.classes.trajectory import AtomicStructures# , info, array
 from eslib.formatting import esfmt, float_format
+from eslib.input import ilist
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -17,7 +18,7 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input" , **argv,type=str, help="input file [extxyz]")
     parser.add_argument("-if", "--input_format", **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-n" , "--name"  , **argv,type=str, help="name for the new info/array")
-    # parser.add_argument("-w" , "--what"  , **argv,type=str, help="what the data is: 'i' (info) or 'a' (arrays)")
+    parser.add_argument("-s" , "--shape"  , **argv,type=ilist, help="reshape the data (default: %(default)s", default=None)  
     parser.add_argument("-o" , "--output", **argv,type=str, help="output file (default: %(default)s)", default=None)
     parser.add_argument("-of", "--output_format", **argv,type=str, help="output format for np.savetxt (default: %(default)s)", default=float_format)
     return parser# .parse_args()
@@ -49,14 +50,25 @@ def main(args):
 
     print("\t'{:s}' shape: ".format(args.name),data.shape)
 
+    if args.shape is not None:
+        shape = tuple(args.shape)
+        print("\tReshaping data to ",shape," ... ",end="")
+        data = data.reshape(shape)
+        print("done")
+
     #---------------------------------------#
     # store
     if args.output is None:
         file = "{:s}.txt".format(args.name)
     else:
-        file = args.output
+        file = str(args.output)
     print("\tStoring '{:s}' to file '{:s}' ... ".format(args.name,file), end="")
-    np.savetxt(file,data,fmt=args.output_format) # fmt)
+    if file.endswith("txt"):
+        np.savetxt(file,data,fmt=args.output_format) # fmt)
+    elif file.endswith("npy"):
+        np.save(file,data)
+    else:
+        raise ValueError("Only `txt` and `npy` files are supported.")
     print("done")
 
 #---------------------------------------#
