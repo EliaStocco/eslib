@@ -18,6 +18,7 @@ float_format = '%24.12e' # Elia Stocco float format
 #---------------------------------------#
 error           = "***Error***"
 warning         = "***Warning***"
+message         = "***Message***"
 closure         = "Job done :)"
 closure_error   = "***An error occurred :(***"
 input_arguments = "Input arguments"
@@ -30,6 +31,7 @@ closure_error   = Fore.RED     + Style.BRIGHT + closure_error.replace("*","")   
 closure         = Fore.BLUE    + Style.BRIGHT + closure                 + Style.RESET_ALL
 input_arguments = Fore.GREEN   + Style.NORMAL + input_arguments         + Style.RESET_ALL
 warning         = Fore.MAGENTA + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
+message         = Fore.MAGENTA + Style.BRIGHT + message.replace("*","") + Style.RESET_ALL
 everythingok    = Fore.BLUE    + Style.BRIGHT + everythingok            + Style.RESET_ALL
 
 
