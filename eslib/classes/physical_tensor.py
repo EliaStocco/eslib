@@ -1,7 +1,9 @@
 import xarray as xr
 import numpy as np
+import glob
+from eslib.classes.io import pickleIO
 from eslib.units import *
-from typing import TypeVar
+from typing import TypeVar, Union, Any, Callable, Type
 T = TypeVar('T', bound='PhysicalTensor')
 
 threshold = 1e-18
@@ -71,10 +73,104 @@ def diag_matrix(M,exp):
 #     obj.__name__ = basecls.__name__
 #     return obj
 
-    
-class PhysicalTensor(xr.DataArray):
+def read_from_pattern(func: Callable) -> Callable:
+    """
+    Decorator to handle file patterns and apply a function to all matching files.
+
+    This decorator checks if the provided file name contains wildcard characters.
+    If it does, it iterates over all matching files and applies the decorated function
+    to each file, returning a list of results. If it doesn't, it applies the function
+    directly to the provided file.
+
+    Parameters:
+    func (Callable): The function to be decorated.
+
+    Returns:
+    Callable: The wrapped function that handles file patterns.
+
+    Raises:
+    ValueError: If no file is specified in the arguments.
+
+    Examples:
+    >>> class Example:
+    >>>     @read_from_pattern
+    >>>     def load(cls, file: str):
+    >>>         return f"Loading {file}"
+
+    >>> example = Example()
+    >>> results = example.load(file="*.txt")
+    >>> isinstance(results, list)
+    True
+    >>> all(isinstance(res, str) for res in results)
+    True
+
+    >>> result = example.load(file="example.txt")
+    >>> isinstance(result, str)
+    True
+    """
+    def wrapper(cls: Type, **argv: Any) -> Any:
+        file = argv.get('file') or argv.get('fname')
+        if not file:
+            raise ValueError("File not specified")
+        
+        if any(char in file for char in '*?[]'):
+            # If the file is a pattern, iterate over all matching files
+            all_files = glob.glob(file)
+            results = [None] * len(all_files)
+            for n, matched_file in enumerate(all_files):
+                new_argv = argv.copy()
+                new_argv['file'] = matched_file
+                results[n] = func(cls, **new_argv)
+            return cls(results)
+        else:
+            # If the file is not a pattern, call the function directly
+            return func(cls, **argv)
+    return wrapper
+
+class PhysicalTensor(pickleIO,xr.DataArray):
     __slots__ = ()
     data:np.ndarray
 
     def cdot(self:T,B:T,dim:str)->T:
         return dot(self,B,dim)
+    
+    def to_data(self:T)->np.ndarray:
+        return remove_unit(self)[0].to_numpy()
+    
+    @classmethod
+    @read_from_pattern
+    @pickleIO.correct_extension_in
+    def from_file(cls, **argv):
+        """
+        Load atomic structures from file.
+
+        Attention: it's recommended to use keyword-only arguments.
+        """
+        if 'file' in argv: 
+            file = str(argv['file'])
+            del argv['file']
+        elif 'fname' in argv:
+            file = str(argv['fname'])
+            del argv['fname']
+        else:
+            raise ValueError("error")
+        if file.endswith("txt"):
+            data = np.loadtxt(fname=file,**argv)
+        elif file.endswith("npy"):
+            data = np.load(file,**argv)
+        else:
+            raise ValueError("Only `txt` and `npy` files are supported.")
+        return cls(data)
+    
+    @pickleIO.correct_extension_out
+    def to_file(self: T, file: str, fmt: Union[str, None] = None):
+        """
+        Write atomic structures to file.
+        
+        Attention: it's recommended to use keyword-only arguments.
+        """
+        data = self.to_data()
+        if file.endswith("txt"):
+            np.savetxt(file,data,fmt=fmt) # fmt)
+        elif file.endswith("npy"):
+            np.save(file,data)
