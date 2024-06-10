@@ -355,6 +355,7 @@ def extract_number_from_filename(filename: str) -> float:
     Returns:
         float: The numerical value extracted from the filename.
     """
+    filename = os.path.basename(filename)
     # Use regular expressions to find the first numerical value in the filename
     match_obj = re.search(r'(\d+\.?\d*)', filename)
     if match_obj:
