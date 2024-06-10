@@ -23,7 +23,7 @@ def prepare_args(description):
     argv = {"metavar": "\b"}
     parser.add_argument("-i" , "--input"            , **argv, type=str, required=True , help="input file, folder, or search options")
     parser.add_argument("-u" , "--unit"             , **argv, type=str, required=False, help="output dipoles unit (default: %(default)s)", default='eang')
-    parser.add_argument("-bf", "--bad_files"        , **argv, type=str, required=False, help="txt output file with the filepath of the non-converged calculations (default: %(default)s)", default=None)
+    parser.add_argument("-bf", "--bad_files"        , **argv, type=str, required=False, help="txt output file with the filepath of the non-converged calculations (default: %(default)s)", default='bad.txt')
     parser.add_argument("-o" , "--output"           , **argv, type=str, required=False, help="output file with the dipole values (default: %(default)s)", default="dipole.eang.txt")
     parser.add_argument("-oi", "--output_info"      , **argv, type=str, required=False, help="*.csv output file with information (default: %(default)s)", default="info.csv")
     parser.add_argument("-os", "--output_structures", **argv, type=str, required=False, help="output file with the dipole values and the atomic structures (default: %(default)s)", default='aims-with-dipoles.ang.extxyz')
@@ -71,6 +71,10 @@ def main(args):
     print("done")
     N = len(all_files)
     print("\tn. files: ", N)
+
+    if N == 0 :
+        print("\t{:s}: no file found.".format(warning))
+        return 0
 
     #------------------#
     print("\n\tKeeping only files with 'Have a nice day' ... ", end="")
