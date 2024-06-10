@@ -4,7 +4,15 @@ from typing import Type, TypeVar
 T = TypeVar('T', bound='pickleIO')  # T is a subclass of pickleIO
 
 class pickleIO:
-    def to_pickle(self, file):
+
+    def to_file(self:T,file:str)->None:
+        self.to_pickle(file)
+
+    @classmethod
+    def from_file(cls: Type[T], file: str) -> T:
+        return cls.from_pickle(file)
+
+    def to_pickle(self:T, file:str)->None:
         """Save the object to a *.pickle file."""
         try:
             with open(file, 'wb') as f:
@@ -21,7 +29,9 @@ class pickleIO:
             if isinstance(obj, cls):
                 return obj
             else:
-                raise ValueError(f"Invalid pickle file format. Expected type: {cls.__name__}")
+                return cls(obj)
+            # else:
+            #     raise ValueError(f"Invalid pickle file format. Expected type: {cls.__name__}")
         except FileNotFoundError:
             print(f"Error loading from pickle file: File not found - {file}")
         except Exception as e:
