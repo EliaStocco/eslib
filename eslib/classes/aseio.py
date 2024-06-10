@@ -128,7 +128,7 @@ class aseio(List[Atoms], pickleIO):
     # The order of the following decorators matters.
     # Do not change it.
     @correct_pbc_static
-    @calc_none_static
+    # @calc_none_static
     @pickleIO.correct_extension_out
     def to_file(self: T, file: str, format: Union[str, None] = None):
         """
