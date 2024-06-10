@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from ase.io import read
+import glob
 import matplotlib.pyplot as plt
 from eslib.input import slist
 from eslib.formatting import esfmt
@@ -42,13 +43,23 @@ def main(args):
         print("\tLinear model quanta: ",model.get_quanta())
 
     #------------------#
-    # read
-    print("\n\tReading atomic structures from file:")
-    trajectories = [None]*len(args.input)
-    for n,file in enumerate(args.input):
-        print("\t\t{:d}: '{:s}' ... ".format(n,file), end="")
-        trajectories[n] = read(file,format='extxyz',index=":")
-        print("done --> (n. atomic structures: {:d})".format(len(trajectories[n])))
+    matched_files = glob.glob(args.input[0])
+    if matched_files is None or len(matched_files):
+        print("\n\tReading atomic structures from pattern '{:s}':".format(args.input[0]))
+        args.input = matched_files
+        trajectories = [None]*len(args.input)
+        for n,file in enumerate(matched_files):
+            print("\t\t{:d}: '{:s}' ... ".format(n,file), end="")
+            trajectories[n] = read(file,format='extxyz',index=":")
+            print("done --> (n. atomic structures: {:d})".format(len(trajectories[n])))
+        
+    else:
+        print("\n\tReading atomic structures from file:")
+        trajectories = [None]*len(args.input)
+        for n,file in enumerate(args.input):
+            print("\t\t{:d}: '{:s}' ... ".format(n,file), end="")
+            trajectories[n] = read(file,format='extxyz',index=":")
+            print("done --> (n. atomic structures: {:d})".format(len(trajectories[n])))
 
     #------------------#
     # DFT quanta
@@ -65,7 +76,7 @@ def main(args):
     print("\n\tComputing the dipoles using the linear model:")
     for n,atoms in enumerate(trajectories):
         print("\t\t{:d}: '{:s}' ... ".format(n,args.input[n]), end="")
-        model_dipoles[n] = model.get(atoms)
+        model_dipoles[n] = model.compute(atoms)
         print("done")
 
     #------------------#
