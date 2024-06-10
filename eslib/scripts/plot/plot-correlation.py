@@ -16,6 +16,7 @@ def prepare_args(description):
     parser.add_argument("-i", "--input"     , type=str, **argv, required=True , help='input extxyz file')
     parser.add_argument("-a" , "--keyword_A", type=str, **argv, required=True , help="property A keyword")
     parser.add_argument("-b" , "--keyword_B", type=str, **argv, required=True , help="property B keyword")
+    parser.add_argument("-s", "--size"  , type=float, **argv, required=False, help="point size (default: %(default)s)", default=1)
     parser.add_argument("-o", "--output"    , type=str, **argv, required=False, help="output file (default: %(default)s)", default='corr.pdf')
     return parser# .parse_args()
 
@@ -50,7 +51,7 @@ def main(args):
 
         labels = ["x","y","z"]
         for n,ax in enumerate(axes):
-            ax.scatter(A[:,n],B[:,n],label=labels[n])
+            ax.scatter(A[:,n],B[:,n],label=labels[n],s=args.size)
             plot_bisector(ax)
             ax.grid()
             
