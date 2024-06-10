@@ -28,7 +28,7 @@ def get_tools(args):
         else:
             cell = None
             pos = array
-        y,_ = model.get(pos=pos.reshape((-1,3)),cell=cell)
+        y,_ = model.compute(pos=pos.reshape((-1,3)),cell=cell)
         return y.detach().numpy()
     
     if pbc:

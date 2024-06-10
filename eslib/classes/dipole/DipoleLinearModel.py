@@ -48,7 +48,7 @@ class DipoleLinearModel(DipoleModel):
         if self._check_bec(bec):
             self.bec = bec
 
-    def get(self,traj:List[Atoms],frame:str="global"):
+    def compute(self,traj:List[Atoms],frame:str="global"):
         """Compute the dipole according to a linear model in the cartesian displacements."""
         # raise ValueError()
         N = len(traj)

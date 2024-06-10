@@ -62,7 +62,7 @@ def main(args):
     
     def loss(input_oxn):
         model = model_OxN(input_oxn)
-        ypred = model.get(trajectory)
+        ypred = model.compute(trajectory)
         return metrics["rmse"](yreal,ypred)
     
     #------------------#

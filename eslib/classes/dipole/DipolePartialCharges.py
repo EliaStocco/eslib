@@ -58,7 +58,7 @@ class DipolePartialCharges(DipoleModel):
             
 
 
-    def get(self,traj:List[Atoms],**argv):
+    def compute(self,traj:List[Atoms],**argv):
         dipole = np.zeros((len(traj),3))
         for n,structure in enumerate(traj):
             if not self.check_charge_neutrality(structure):

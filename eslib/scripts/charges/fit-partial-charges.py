@@ -73,7 +73,7 @@ def main(args):
     def loss(charges):
         model = model_PC(charges)
         model.impose_charge_neutrality(reference)
-        ypred = model.get(trajectory)
+        ypred = model.compute(trajectory)
         return metrics["rmse"](yreal,ypred)
     
     def constraint_func(charges):

@@ -78,7 +78,7 @@ def main(args):
                 d,z,x = model.get_value_and_jac(pos=atoms.get_positions(),cell=atoms.get_cell())
                 Z[n,:,:] = z.detach().numpy()#.flatten()
             else:
-                d,x = model.get(pos=atoms.get_positions(),cell=atoms.get_cell())
+                d,x = model.compute(pos=atoms.get_positions(),cell=atoms.get_cell())
             D[n,:] = d.detach().numpy()#.flatten()
     else:        
         if args.compute_BEC:
@@ -88,7 +88,7 @@ def main(args):
                 D[n,:] = d.detach().numpy()
         else:
             X = next(iter(make_dataloader(dataset=trajectory,batch_size=len(trajectory),shuffle=False,drop_last=False)))
-            d,x = model.get(X=X)
+            d,x = model.compute(X=X)
             D = d.detach().numpy()
 
     #------------------#

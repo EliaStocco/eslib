@@ -12,3 +12,5 @@
 - implement a class to deal with `i-PI` properties
 - add a script to transfrom an atomic structure into its Niggli, Minkowski, and standard form.
 - move changes made to `MACE` into `eslib`
+- add automatic printing of user messages in scripts
+- add a `README.md` for each folder

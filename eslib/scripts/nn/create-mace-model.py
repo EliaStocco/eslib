@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from eslib.formatting import esfmt, warning
-from eslib.classes.mace_model import MACEModel
+# from eslib.classes.mace_model import MACEModel
+from eslib.classes.dipole import DipoleMACECalculator
 from eslib.functions import args_to_dict
 from eslib.input import slist, str2bool
 import json
@@ -15,12 +16,11 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , **argv, type=str, required=False, help="JSON file with all the following parameters default: %(default)s)", default=None)
     parser.add_argument("-m" , "--model_path"   , **argv, type=str, required=True , help="*.pth file with the MACE model")
-    # parser.add_argument("-mt", "--model_type"   , **argv, type=str, required=True , help="model type")
     parser.add_argument("-d" , "--device"       , **argv, type=str, required=False, help="device (default: %(default)s)", choices=["cpu", "cuda"], default="cpu")
     parser.add_argument("-dt", "--default_dtype", **argv, type=str, required=False, help="default dtype (default: %(default)s)", choices=["float32", "float64"], default="float64")
     parser.add_argument("-bs", "--batch_size"   , **argv, type=int, required=False, help="batch size (default: %(default)s)", default=64)
     parser.add_argument("-ck", "--charges_key"  , **argv, type=str, required=False, help="key of atomic charges (default: %(default)s)", default="Qs")
-    parser.add_argument("-dR", "--dR"           , **argv, type=str2bool, required=False, help="whether to compute spatial derivatives (default: %(default)s)", default=True)
+    parser.add_argument("-dR", "--dR"           , **argv, type=str2bool, required=False, help="whether to compute spatial derivatives (default: %(default)s)", default=False)
     parser.add_argument("-dp", "--to_diff_props"  , **argv, type=slist, required=False, help="properties to be differentiated (default: %(default)s)", default=["dipole"])
     parser.add_argument("-rp", "--rename_props"  , **argv, type=dict, required=False, help="properties to be renamed (default: %(default)s)", default={"dipole_dR":"BEC"})
     parser.add_argument("-o" , "--output"       , **argv, type=str, required=True , help="*.pickle output file with the MACE model")
@@ -46,8 +46,11 @@ def main(args):
     if "output" in kwargs: del kwargs["output"]
 
     print("\n\tAllocating the MACE model ... ",end="")
-    model = MACEModel(**kwargs)
+    model = DipoleMACECalculator(**kwargs)
     print("done")
+
+    if model is None:
+        raise ValueError("Loaded model is None.")
 
     #------------------#
     print("\n\tMACE model summary: ")

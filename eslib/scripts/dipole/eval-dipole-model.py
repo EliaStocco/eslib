@@ -42,7 +42,7 @@ def main(args):
 
     #------------------#
     print("\n\tEvaluating the dipole model ... ", end="")
-    output:np.ndarray = model.get(structures)
+    output:np.ndarray = model.compute(structures)
     print("done")
 
     #------------------#

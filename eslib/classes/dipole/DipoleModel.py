@@ -10,9 +10,9 @@ class DipoleModel(pickleIO):
         raise NotImplementedError("this method should be overwritten.")
         pass
 
-    @classmethod
-    def from_file(cls: Type[T], file_path: str) -> T:
-        return super().from_pickle(file_path)
+    # @classmethod
+    # def from_file(cls: Type[T], file_path: str) -> T:
+    #     return super().from_pickle(file_path)
     
-    def summary(self, string="\t"):
-        return
+    # def summary(self, string="\t"):
+    #     return
