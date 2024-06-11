@@ -1,9 +1,29 @@
 import numpy as np
-import scipy.stats
-from sklearn.metrics import mean_squared_error, \
-    mean_absolute_error, r2_score, explained_variance_score, \
-        max_error, mean_squared_log_error, median_absolute_error
+from typing import Union, Tuple, Dict, Any, Optional, Callable
+from functools import partial
 
+# Documentations;
+# - https://stats.stackexchange.com/questions/413209/is-there-something-like-a-root-mean-square-relative-error-rmsre-or-what-is-t
+
+def num_elements_along_axis(arr: np.ndarray, axis: Union[int, Tuple[int]]) -> int:
+    """
+    Get the number of elements of a numpy array along a specified axis or axes.
+
+    Parameters:
+    arr (np.ndarray): The input numpy array.
+    axis (Union[int, Tuple[int]]): The axis or tuple of axes along which to count elements.
+
+    Returns:
+    int: The number of elements along the specified axis or axes.
+    """
+    if isinstance(axis, int):
+        return arr.shape[axis]
+    elif isinstance(axis, tuple):
+        return np.prod([arr.shape[ax] for ax in axis])
+    else:
+        raise ValueError("Axis must be an integer or a tuple of integers.")
+
+#---------------------------------------#
 def vectorial_pearson(x: np.ndarray, y: np.ndarray) -> float:
     """
     Computes the Pearson correlation coefficient for vectorial values.
@@ -59,21 +79,266 @@ def vectorial_pearson(x: np.ndarray, y: np.ndarray) -> float:
 
     return r
 
+Tshape = Union[Tuple[int],int]
+
+# #---------------------------------------#
+# def check_axis(same_axis: bool=False,finalize:bool=False):
+#     def decorator(func):
+#         def wrapper(**kwargs: Dict[str, Any]):
+
+#             # `axisD` is the axis of the Difference, e.g. the one computed in RMSE
+#             # `axisR` is the axis of the Reference, used to compute the norm of the reference array
+
+#             # convert axis from `int`` to `tuple`` for easier manipulation
+#             for ax in ['axisR','axisD','axis']:
+#                 if ax in kwargs and type(kwargs[ax]) == int:
+#                     kwargs[ax] = tuple([kwargs[ax],])
+#             # if `axis` has already been specified, remove `axisR` and `axisD`
+#             # because the next function that will be called it's gonna be a `numpy` function.
+#             if 'axis' in kwargs:
+#                 if 'axisR' in kwargs: del kwargs['axisR']
+#                 if 'axisD' in kwargs: del kwargs['axisD']
+#             # `axisR` and `axisD` must be the same
+#             # set `axis` equal to `axisD` (it's the default)
+#             if same_axis:
+#                 if 'axis' not in kwargs :
+#                     kwargs['axis'] = kwargs['axisD']
+#                 if 'axisR' in kwargs: del kwargs['axisR']
+#                 if 'axisD' in kwargs: del kwargs['axisD']
+#             # The next function that will be called it's gonna be a `numpy`` function.
+#             # Remove `axisR` and `axisD` and set `axis`.
+#             if finalize:
+#                 if 'axis' not in kwargs :
+#                     if 'axisD' in kwargs: 
+#                         kwargs['axis'] = kwargs['axisD']
+#                         del kwargs['axisD']
+#                     elif 'axisR' in kwargs: 
+#                         kwargs['axis'] = kwargs['axisR']
+#                         del kwargs['axisR']
+#                 if 'axisR' in kwargs: del kwargs['axisR']
+#                 if 'axisD' in kwargs: del kwargs['axisD']
+#             return func(**kwargs)
+#         return wrapper
+#     return decorator
+
+#---------------------------------------#
+def p_norm(x: np.ndarray, p: float, axis: Optional[Union[int, Tuple[int]]] = None, keepdims: bool = False, func:Optional[str]="sum") -> np.ndarray:
+    """
+    Compute the p-norm of a given numpy array along a specified axis.
+
+    Parameters:
+    x (np.ndarray): Input array.
+    p (float): The order of the norm (p).
+    axis (Optional[Union[int, Tuple[int]]]): Axis or axes along which to compute the norm. Default is None.
+    keepdims (bool): If True, retains reduced dimensions with size 1. Default is False.
+
+    Returns:
+    np.ndarray: The p-norm of the input array along the specified axis.
+    """
+    if p < 1 and p != np.inf:
+        raise ValueError("p must be greater than or equal to 1 or np.inf")
+    
+    if p == np.inf:
+        return np.max(np.abs(x), axis=axis, keepdims=keepdims)
+    
+    abs_x_p = np.abs(x) ** p
+    func = getattr(np,func)
+    sum_abs_x_p = func(abs_x_p, axis=axis, keepdims=keepdims)
+    return sum_abs_x_p ** (1 / p)
+
+#---------------------------------------#
+# Norm
+def norm2(x:np.ndarray,**kwargs)->Union[float,np.ndarray]:
+    """Norm"""
+    return np.sum(np.square(x),**kwargs)
+
+def norm(x:np.ndarray,**kwargs)->Union[float,np.ndarray]:
+    """Norm"""
+    x = norm2(x=x,**kwargs)
+    out = np.sqrt(x)
+    assert np.allclose(np.linalg.norm(x,**kwargs),out)
+    return out
+
+def RMS(x:np.ndarray,axis:Tshape,**kwargs)->np.ndarray:
+    """Root Mean Square"""
+    # dim = num_elements_along_axis(x,axis)
+    # return np.sqrt(norm2(x=x,axis=axis,**kwargs)/dim)
+    return p_norm(x=x,p=2,axis=axis,func="mean")
+
+#---------------------------------------#
+# Error/distances/loss functions
+def MSE(pred:np.ndarray,ref:np.ndarray,**kwargs)->Union[float,np.ndarray]:
+    """Mean Squared Error"""
+    err  = pred - ref           #              error
+    se   = np.square(err)       #      squared error
+    mse  = np.mean(se,**kwargs) # mean squared error
+    return mse
+
+def RMSE(pred:np.ndarray,ref:np.ndarray,**kwargs)->Union[float,np.ndarray]:
+    """Root Mean Squared Error"""
+    err  = pred - ref           #                   error
+    se   = np.square(err)       #           squared error
+    mse  = np.mean(se,**kwargs) #      mean squared error
+    rmse = np.sqrt(mse)         # root mean squared error
+    return rmse
+
+def RMSRE(pred:np.ndarray,ref:np.ndarray,**kwargs)->Union[float,np.ndarray]:
+    """Root Mean Squared Relative Error"""
+    err   = pred - ref            #                            error
+    rel   = err / ref             #                   relative error
+    sre   = np.square(rel)        #           squared relative error
+    msre  = np.mean(sre,**kwargs) #      mean squared relative error
+    rmsre = np.sqrt(msre)         # root mean squared relative error
+    return rmsre
+
+def RRMSE(pred:np.ndarray,ref:np.ndarray,**kwargs)->Union[float,np.ndarray]:
+    """Relative Root Mean Squared Error"""
+    err   = pred - ref                 #                            error
+    se    = np.square(err)             #                    squared error
+    mse   = np.mean(se,**kwargs)       #               mean squared error
+    rmse  = mse/np.sum(np.square(ref)) #      relative mean squared error
+    rrmse = np.sqrt(rmse)              # root relative mean squared error
+    return rrmse
+
+#---------------------------------------#
+# Elia Stocco's customs functions for atomic references
+
+def MAR(x:np.ndarray)->np.ndarray:
+    """Mean Atomic Reference"""
+    assert x.ndim == 3
+    # reshape array
+    dim = int(np.sqrt(x.shape[2]))
+    shape = (x.shape[0],x.shape[1],dim,dim)
+    ref = x.reshape(shape)
+    # compute the trace/dim along the last 2 axes
+    ref = np.mean(ref,axis=(2,3),keepdims=False)
+    # reshape back to the original shape
+    ref = np.repeat(ref, x.shape[2])
+    ref = ref.reshape(x.shape)
+    return ref
+
+def RMSAR(x:np.ndarray)->np.ndarray:
+    """Root Mean Squared Atomic Reference"""
+    assert x.ndim == 3
+    # reshape array
+    dim = int(np.sqrt(x.shape[2]))
+    shape = (x.shape[0],x.shape[1],dim,dim)
+    ref = x.reshape(shape)
+    # compute the trace/dim along the last 2 axes
+    ref = np.square(ref)
+    ref = np.mean(ref,axis=(2,3),keepdims=False)
+    ref = np.sqrt(ref)
+    # reshape back to the original shape
+    ref = np.repeat(ref, x.shape[2])
+    ref = ref.reshape(x.shape)
+    return ref
+
+def MDAR(x:np.ndarray)->np.ndarray:
+    """Mean Diagonal Atomic Reference"""
+    assert x.ndim == 3
+    # reshape array
+    dim = int(np.sqrt(x.shape[2]))
+    shape = (x.shape[0],x.shape[1],dim,dim)
+    ref = x.reshape(shape)
+    # compute the trace/dim along the last 2 axes
+    ref = np.diagonal(ref, axis1=2, axis2=3)
+    ref = np.mean(ref,axis=2,keepdims=False)
+    # reshape back to the original shape
+    ref = np.repeat(ref, x.shape[2])
+    ref = ref.reshape(x.shape)
+    return ref
+
+def RMSDAR(x:np.ndarray)->np.ndarray:
+    """Root Mean Squared Diagonal Atomic Reference"""
+    assert x.ndim == 3
+    # reshape array
+    dim = int(np.sqrt(x.shape[2]))
+    shape = (x.shape[0],x.shape[1],dim,dim)
+    ref = x.reshape(shape)
+    # compute the trace/dim along the last 2 axes
+    ref = np.diagonal(ref, axis1=2, axis2=3)
+    ref = np.square(ref)
+    ref = np.mean(ref,axis=2,keepdims=False)
+    ref = np.sqrt(ref)
+    # reshape back to the original shape
+    ref = np.repeat(ref, x.shape[2])
+    ref = ref.reshape(x.shape)
+    return ref
+
+#---------------------------------------#
+# Elia Stocco's customs functions
+
+def RMSRAE(pred:np.ndarray,ref:np.ndarray,func:Callable[[np.ndarray], np.ndarray]=MDAR,**kwargs)->np.ndarray:
+    """Root Mean Squared Relative Atomic Error"""
+    ar    = func(ref)             #                        atomic reference
+    err   = pred - ref            #                                   error
+    rel   = err / ar              #                   relative atomic error
+    sre   = np.square(rel)        #           squared relative atomic error
+    msre  = np.mean(sre,**kwargs) #      mean squared relative atomic error
+    rmsre = np.sqrt(msre)         # root mean squared relative atomic error
+    return rmsre
+
+RMSRAE_MAR   :Callable[[np.ndarray], np.ndarray] = partial(RMSRAE, func=MAR)
+RMSRAE_RMSAR :Callable[[np.ndarray], np.ndarray] = partial(RMSRAE, func=RMSAR)
+RMSRAE_MDAR  :Callable[[np.ndarray], np.ndarray] = partial(RMSRAE, func=MDAR)
+RMSRAE_RMSDAR:Callable[[np.ndarray], np.ndarray] = partial(RMSRAE, func=RMSDAR)
+
+def RRAMSE(pred:np.ndarray,ref:np.ndarray,func:Callable[[np.ndarray], np.ndarray]=MDAR,**kwargs)->np.ndarray:
+    """Root Relative Atomic Mean Squared Error"""
+    ar     = func(ref)                 #                        atomic reference
+    err    = pred - ref                #                                   error
+    se     = np.square(err)            #                           squared error
+    mse    = np.mean(se,**kwargs)      #                      mean squared error
+    ramse  = mse/np.sum(np.square(ar)) #      relative atomic mean squared error
+    rramse = np.sqrt(ramse)            # root relative atomic mean squared error
+    return rramse
+
+RRAMSE_MAR   :Callable[[np.ndarray], np.ndarray] = partial(RRAMSE, func=MAR)
+RRAMSE_RMSAR :Callable[[np.ndarray], np.ndarray] = partial(RRAMSE, func=RMSAR)
+RRAMSE_MDAR  :Callable[[np.ndarray], np.ndarray] = partial(RRAMSE, func=MDAR)
+RRAMSE_RMSDAR:Callable[[np.ndarray], np.ndarray] = partial(RRAMSE, func=RMSDAR)
+
+# def RelRMSE(pred:np.ndarray,ref:np.ndarray,axis:Tshape=None,*argv,**kwargs)->Union[float,np.ndarray]:
+#     """Relative Root Mean Squared Error"""
+#     rmse = RMSE(pred=pred,ref=ref,axis=axis,*argv,**kwargs)
+#     refnorm = norm(x=ref,axis=axis,*argv,**kwargs)
+#     relrmse = np.divide(rmse,refnorm)
+#     axis = tuple([ i for i in range(relrmse.ndim) if i in axis])
+#     return np.mean(relrmse,axis=axis)
+
+def RelTensorRMSE(pred:np.ndarray,ref:np.ndarray,axis:Tshape=None,*argv,**kwargs)->Union[float,np.ndarray]:
+    """Relative Tensorial Root Mean Squared Error"""
+    assert pred.ndim == 3 and ref.ndim == 3
+    diff = pred - ref 
+    ref = ref.reshape((ref.shape[0],ref.shape[1],3,3))
+    diag = np.diagonal(ref, axis1=2, axis2=3)
+    rms = RMS(x=diag,axis=2)
+    rms = np.repeat(rms, diff.shape[2])
+    rms = rms.reshape(diff.shape)
+    rel = np.divide(diff,rms)
+    return p_norm(x=rel,p=2,axis=(1,2),func="sum")/num_elements_along_axis(rel,axis)
+
+    rmse = RMSE(pred=pred,ref=ref,axis=axisR,*argv,**kwargs)
+    refnorm = norm(x=ref,axis=axisR,*argv,**kwargs)
+    relrmse = np.divide(rmse,refnorm)
+    axis = tuple([ i for i in range(relrmse.ndim) if i in axisD])
+    return np.mean(relrmse,axis=axis)
+
 #---------------------------------------#
 # Dictionary of regression metrics
 metrics = {
-    "mse"    : mean_squared_error,
-    "rmse"   : lambda x,y,**argv : mean_squared_error(x,y,squared=False,**argv),
-    "relrmse"   : lambda x,y,**argv : mean_squared_error(x,y,squared=False,**argv)/np.linalg.norm(y,**argv),
-    "norm"   : lambda x,y,**argv : np.linalg.norm(x-y,**argv),
-    "mae"    : mean_absolute_error,
-    "ev"     : explained_variance_score,
-    # "me"    : max_error,
-    # "msle"  : mean_squared_log_error,
-    "medae"  : median_absolute_error,
-    "r2"     : r2_score,
-    "1-r2"   : lambda x,y,**argv : 1-r2_score(x,y,**argv),
-    "r"   : lambda x,y,**argv : np.corrcoef(x,y,**argv)[0, 1],
-    "1-r" : lambda x,y,**argv : 1-np.corrcoef(x,y,**argv)[0, 1],
+    "mse"     : MSE,
+    "rmse"    : RMSE,
+    "rrmse"   : RRMSE,
+    "rmsre"   : RMSRE,
+    "rmsrae_mar"    : RMSRAE_MAR,
+    "rmsrae_rmsar"  : RMSRAE_RMSAR,
+    "rmsrae_mdar"   : RMSRAE_MDAR,
+    "rmsrae_rmsdar" : RMSRAE_RMSDAR,
+    "rramse_mar"    : RRAMSE_MAR,
+    "rramse_rmsar"  : RRAMSE_RMSAR,
+    "rramse_mdar"   : RRAMSE_MDAR,
+    "rramse_rmsdar" : RRAMSE_RMSDAR,
+    "reltrmse"     : RelTensorRMSE,
     "vecr" : lambda x,y : vectorial_pearson(x,y)
 }
