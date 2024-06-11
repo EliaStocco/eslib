@@ -119,6 +119,7 @@ def compute_dielectric_gradients(dielectric: torch.Tensor, positions: torch.Tens
     Returns:
         torch.Tensor: Spatial derivatives of dielectric tensor.
     """
+    # dielectric = dielectric[:,0:2]
     d_dielectric_dr = []
     for i in range(dielectric.shape[-1]):
         grad_outputs: List[Optional[torch.Tensor]] = [
@@ -131,10 +132,10 @@ def compute_dielectric_gradients(dielectric: torch.Tensor, positions: torch.Tens
             retain_graph=True,
             create_graph=True,
             allow_unused=True,
-        )
-        d_dielectric_dr.append(gradient[0])
+        )[0]
+        d_dielectric_dr.append(gradient)
     d_dielectric_dr = torch.stack(d_dielectric_dr, dim=1)
-    if gradient[0] is None:
+    if gradient is None:
         return torch.zeros((positions.shape[0], dielectric.shape[-1], 3))
     return d_dielectric_dr
 
@@ -161,7 +162,7 @@ def add_derivatives(model: MACEModel, output: Dict[str, torch.Tensor], data: Dic
         output[name] = array
         if output[prop].shape[1] == 3:
             for n, i in enumerate(["x", "y", "z"]):
-                output["{:s}{:s}".format(name, i)] = array[:, :, n]
+                output["{:s}{:s}".format(name, i)] = array[:, n, :]
 
     return output
 
