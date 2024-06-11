@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt
-from eslib.sklearn_metrics import metrics
+from eslib.metrics import metrics
 from eslib.plot import histogram
 
 #---------------------------------------#

@@ -7,7 +7,7 @@ from eslib.classes.trajectory import info
 from eslib.formatting import esfmt, float_format, warning
 from eslib.physics import oxidation_number
 from eslib.physics import bec_from_oxidation_number
-from eslib.sklearn_metrics import metrics
+from eslib.metrics import metrics
 from scipy.optimize import minimize
 
 #---------------------------------------#

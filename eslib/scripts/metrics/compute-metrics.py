@@ -2,7 +2,7 @@
 import json
 import numpy as np
 from eslib.input import size_type, str2bool
-from eslib.sklearn_metrics import metrics
+from eslib.metrics import metrics
 from eslib.formatting import esfmt, warning
 from eslib.classes.trajectory import AtomicStructures
 
