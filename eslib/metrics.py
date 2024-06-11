@@ -118,8 +118,6 @@ def norm(x:np.ndarray,**kwargs)->Union[float,np.ndarray]:
 
 def RMS(x:np.ndarray,axis:Union[Tuple[int],int],**kwargs)->np.ndarray:
     """Root Mean Square"""
-    # dim = num_elements_along_axis(x,axis)
-    # return np.sqrt(norm2(x=x,axis=axis,**kwargs)/dim)
     return p_norm(x=x,p=2,axis=axis,func="mean")
 
 #---------------------------------------#
@@ -158,7 +156,7 @@ def RRMSE(pred:np.ndarray,ref:np.ndarray,**kwargs)->Union[float,np.ndarray]:
     return rrmse
 
 #---------------------------------------#
-# Elia Stocco's customs functions for atomic references
+# Elia Stocco's custom functions for atomic references
 
 def MAR(x:np.ndarray)->np.ndarray:
     """Mean Atomic Reference"""
@@ -223,7 +221,7 @@ def RMSDAR(x:np.ndarray)->np.ndarray:
     return ref
 
 #---------------------------------------#
-# Elia Stocco's customs functions
+# Elia Stocco's custom functions
 
 #------------------------------#
 def RMSRAE(pred:np.ndarray,ref:np.ndarray,func:Callable[[np.ndarray], np.ndarray]=MDAR,**kwargs)->np.ndarray:
@@ -299,6 +297,5 @@ metrics = {
     "rramse_rmsar"  : RRAMSE_RMSAR,
     "rramse_mdar"   : RRAMSE_MDAR,
     "rramse_rmsdar" : RRAMSE_RMSDAR,
-    # "reltrmse"     : RelTensorRMSE,
     "vecr" : lambda x,y : vectorial_pearson(x,y)
 }
