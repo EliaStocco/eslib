@@ -1,7 +1,5 @@
 import numpy as np
-from typing import Union, Tuple, Dict, Any, Optional, Callable
-from functools import partial
-import inspect
+from typing import Union, Tuple, Optional, Callable
 
 # Documentations;
 # - https://stats.stackexchange.com/questions/413209/is-there-something-like-a-root-mean-square-relative-error-rmsre-or-what-is-t
@@ -80,48 +78,6 @@ def vectorial_pearson(x: np.ndarray, y: np.ndarray) -> float:
 
     return r
 
-Tshape = Union[Tuple[int],int]
-
-# #---------------------------------------#
-# def check_axis(same_axis: bool=False,finalize:bool=False):
-#     def decorator(func):
-#         def wrapper(**kwargs: Dict[str, Any]):
-
-#             # `axisD` is the axis of the Difference, e.g. the one computed in RMSE
-#             # `axisR` is the axis of the Reference, used to compute the norm of the reference array
-
-#             # convert axis from `int`` to `tuple`` for easier manipulation
-#             for ax in ['axisR','axisD','axis']:
-#                 if ax in kwargs and type(kwargs[ax]) == int:
-#                     kwargs[ax] = tuple([kwargs[ax],])
-#             # if `axis` has already been specified, remove `axisR` and `axisD`
-#             # because the next function that will be called it's gonna be a `numpy` function.
-#             if 'axis' in kwargs:
-#                 if 'axisR' in kwargs: del kwargs['axisR']
-#                 if 'axisD' in kwargs: del kwargs['axisD']
-#             # `axisR` and `axisD` must be the same
-#             # set `axis` equal to `axisD` (it's the default)
-#             if same_axis:
-#                 if 'axis' not in kwargs :
-#                     kwargs['axis'] = kwargs['axisD']
-#                 if 'axisR' in kwargs: del kwargs['axisR']
-#                 if 'axisD' in kwargs: del kwargs['axisD']
-#             # The next function that will be called it's gonna be a `numpy`` function.
-#             # Remove `axisR` and `axisD` and set `axis`.
-#             if finalize:
-#                 if 'axis' not in kwargs :
-#                     if 'axisD' in kwargs: 
-#                         kwargs['axis'] = kwargs['axisD']
-#                         del kwargs['axisD']
-#                     elif 'axisR' in kwargs: 
-#                         kwargs['axis'] = kwargs['axisR']
-#                         del kwargs['axisR']
-#                 if 'axisR' in kwargs: del kwargs['axisR']
-#                 if 'axisD' in kwargs: del kwargs['axisD']
-#             return func(**kwargs)
-#         return wrapper
-#     return decorator
-
 #---------------------------------------#
 def p_norm(x: np.ndarray, p: float, axis: Optional[Union[int, Tuple[int]]] = None, keepdims: bool = False, func:Optional[str]="sum") -> np.ndarray:
     """
@@ -160,7 +116,7 @@ def norm(x:np.ndarray,**kwargs)->Union[float,np.ndarray]:
     assert np.allclose(np.linalg.norm(x,**kwargs),out)
     return out
 
-def RMS(x:np.ndarray,axis:Tshape,**kwargs)->np.ndarray:
+def RMS(x:np.ndarray,axis:Union[Tuple[int],int],**kwargs)->np.ndarray:
     """Root Mean Square"""
     # dim = num_elements_along_axis(x,axis)
     # return np.sqrt(norm2(x=x,axis=axis,**kwargs)/dim)
@@ -327,32 +283,6 @@ def RRAMSE_MDAR(**kwargs)->np.ndarray:
 def RRAMSE_RMSDAR(**kwargs)->np.ndarray:
     """Root Relative Atomic Mean Squared Error, using Root Mean Squared Diagonal Atomic Reference."""
     return RRAMSE(**kwargs,func=RMSDAR)
-
-# def RelRMSE(pred:np.ndarray,ref:np.ndarray,axis:Tshape=None,*argv,**kwargs)->Union[float,np.ndarray]:
-#     """Relative Root Mean Squared Error"""
-#     rmse = RMSE(pred=pred,ref=ref,axis=axis,*argv,**kwargs)
-#     refnorm = norm(x=ref,axis=axis,*argv,**kwargs)
-#     relrmse = np.divide(rmse,refnorm)
-#     axis = tuple([ i for i in range(relrmse.ndim) if i in axis])
-#     return np.mean(relrmse,axis=axis)
-
-# def RelTensorRMSE(pred:np.ndarray,ref:np.ndarray,axis:Tshape=None,*argv,**kwargs)->Union[float,np.ndarray]:
-#     """Relative Tensorial Root Mean Squared Error"""
-#     assert pred.ndim == 3 and ref.ndim == 3
-#     diff = pred - ref 
-#     ref = ref.reshape((ref.shape[0],ref.shape[1],3,3))
-#     diag = np.diagonal(ref, axis1=2, axis2=3)
-#     rms = RMS(x=diag,axis=2)
-#     rms = np.repeat(rms, diff.shape[2])
-#     rms = rms.reshape(diff.shape)
-#     rel = np.divide(diff,rms)
-#     return p_norm(x=rel,p=2,axis=(1,2),func="sum")/num_elements_along_axis(rel,axis)
-
-#     rmse = RMSE(pred=pred,ref=ref,axis=axisR,*argv,**kwargs)
-#     refnorm = norm(x=ref,axis=axisR,*argv,**kwargs)
-#     relrmse = np.divide(rmse,refnorm)
-#     axis = tuple([ i for i in range(relrmse.ndim) if i in axisD])
-#     return np.mean(relrmse,axis=axis)
 
 #---------------------------------------#
 # Dictionary of regression metrics
