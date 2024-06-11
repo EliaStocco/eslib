@@ -8,7 +8,8 @@ from eslib.classes.trajectory import AtomicStructures
 
 #---------------------------------------#
 # Description of the script's purpose
-description = """Evaluate a regression metric (using sklearn) between two datasets.""" + """The possible metrics are: """ + str(list(metrics.keys()))
+description = "Evaluate a regression metric (using sklearn) between two datasets." 
+# + """The possible metrics are: """ + str(list(metrics.keys()))
 
 #---------------------------------------#
 def prepare_args(description):
