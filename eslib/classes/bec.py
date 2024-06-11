@@ -1,11 +1,13 @@
 import xarray as xr
 import numpy as np
 from .io import pickleIO
-from typing import Union, List, Dict, Tuple
+from typing import Union, List, Dict, Tuple, TypeVar, Type
 from eslib.formatting import float_format
 import warnings
 # Filter out the warning by category and message
 warnings.filterwarnings("ignore", category=FutureWarning, message="xarray subclass bec should explicitly define __slots__")
+
+T = TypeVar('T', bound='bec')
 
 class bec(xr.DataArray,pickleIO):
     # __slots__ = xr.DataArray.__slots__ #('_data', '_dtype', '_file', '_other_attribute')  # Add any additional attributes you may have
@@ -18,7 +20,7 @@ class bec(xr.DataArray,pickleIO):
     #     return cls.from_numpy(becs)
 
     @classmethod
-    def from_file(cls,file:str,natoms:int):
+    def from_file(cls:Type[T],file:str,natoms:int=None)->T:
         if file.endswith("txt"):
             array = np.loadtxt(file)
         elif file.endswith("npy"):
@@ -28,10 +30,12 @@ class bec(xr.DataArray,pickleIO):
                 array = np.load(file)
             except:
                 array = np.load(file)
+        if natoms is None:
+            natoms = int(array.shape[0]/3)
         array = array.reshape((-1,3*natoms,3))
         return cls.from_numpy(array)
     
-    def to_file(self,file:str):
+    def to_file(self:T,file:str)->None:
         if file.endswith("pickle"):
             self.to_pickle(file)
         elif file.endswith("txt"):
@@ -43,7 +47,7 @@ class bec(xr.DataArray,pickleIO):
         else:
             raise ValueError("not implemented yet for file '{:s}'".format(file))
         
-    def summary(self,symbols:List[str]=None):
+    def summary(self:T,symbols:List[str]=None):
         structure_mean = self.mean("structure")
         structure_std = self.std("structure")
         structure_rel = 100*structure_std/structure_mean
@@ -114,7 +118,7 @@ class bec(xr.DataArray,pickleIO):
     def natoms(self)->int:
         return int(self.shape[1]/3)
 
-    def norm2(self,reference:Union[xr.DataArray,np.ndarray]):
+    def norm2(self:T,reference:Union[xr.DataArray,np.ndarray]):
         """Computes the norm squared per atom of the difference w.r.t. a reference BEC."""
         if not isinstance(reference,xr.DataArray):
             reference = xr.DataArray(reference,dims=('dof','dir'))
@@ -125,7 +129,7 @@ class bec(xr.DataArray,pickleIO):
         # delta = np.sqrt(delta)
         return delta
     
-    def check_asr(self,index:int=None):
+    def check_asr(self:T,index:int=None):
         """Check whether a specific BEC satisfies the Acoustic Sum Rule."""
         tmp = self.expand_with_atoms()
         if index is not None:
@@ -134,7 +138,7 @@ class bec(xr.DataArray,pickleIO):
         else:
             return np.asarray([ tmp.isel(structure=i) for i in range(tmp.shape[0]) ])
     
-    # def check_asr(self,index:int=None):
+    # def check_asr(self:T,index:int=None):
     #     """Check whether a specific BEC satisfies the Acoustic Sum Rule."""
     #     if index is not None:
     #         array = self.isel(structure=index)
@@ -142,7 +146,7 @@ class bec(xr.DataArray,pickleIO):
     #     else:
     #         return np.asarray([ self.isel(structure=i) for i in range(self.shape[0]) ])
         
-    def force_asr(self,index:int=None):
+    def force_asr(self:T,index:int=None):
         """Enforce the Acoustic Sum Rule."""
         mean = self.mean(dim="dof")
         self = self-mean
@@ -154,7 +158,7 @@ class bec(xr.DataArray,pickleIO):
         obj = xr.DataArray(array.copy(), dims=('structure', 'atom', 'xyz', 'dir'))
         return bec(obj)
     
-    def trace(self,average:str="atoms",symbols:List[str]=None,trace_atoms:xr.DataArray=None)->Tuple[xr.DataArray,xr.DataArray]:
+    def trace(self:T,average:str="atoms",symbols:List[str]=None,trace_atoms:xr.DataArray=None)->Tuple[xr.DataArray,xr.DataArray]:
         symbols = np.asarray(symbols) 
         if average == "atoms":
             atomic_bec = self.expand_with_atoms()
@@ -182,5 +186,10 @@ class bec(xr.DataArray,pickleIO):
             return trace, std
         else:
             raise ValueError("coding error")
+        
+    def relative_to(self:T,arr:T)->T:
+        trace,_ = arr.trace("atoms")
+        trace = np.repeat(trace.values, 9).reshape(trace.shape[0], trace.shape[1] * 3, 3)
+        return self/trace
 
 

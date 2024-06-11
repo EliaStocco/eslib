@@ -4,6 +4,7 @@ from ase import Atoms
 from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt, warning, float_format
 from eslib.tools import convert
+from eslib.input import str2bool
 import numpy as np
 from typing import List
 
@@ -19,6 +20,7 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"       , **argv, required=True , type=str, help="atomic structures file [extxyz]")
     parser.add_argument("-if", "--input_format", **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-k" , "--keyword"     , **argv, required=False, type=str, help="keyword for BEC tensors (default: %(default)s)", default="bec")
+    parser.add_argument("-c" , "--check"     , **argv, required=False, type=str2bool, help="check that BEC tensors are correctly formatted (default: %(default)s)", default=True)
     parser.add_argument("-o" , "--output"      , **argv, required=False, type=str, help="output file with the BEC tensors (default: %(default)s)", default='bec.txt')
     return parser# .parse_args()
             
@@ -29,32 +31,43 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    trajectory:List[Atoms] = AtomicStructures.from_file(file=args.input,format=args.input_format,index=":")
-    print("done")
+    trajectory = AtomicStructures.from_file(file=args.input,format=args.input_format,index=":")
+    print("done\n")
 
     #------------------#
     # extract
     N = len(trajectory)
+    Natoms = trajectory[0].get_global_number_of_atoms()
+    shape = (N,Natoms)
     all_bec = {
-        "x":[None]*N,
-        "y":[None]*N,
-        "z":[None]*N,
+        "x":np.full(shape,np.nan),
+        "y":np.full(shape,np.nan),
+        "z":np.full(shape,np.nan),
     }
     for key in all_bec.keys():
         name = "{:s}{:s}".format(args.keyword,key)
-        print("\tExtracting '{:s}' from the trajectory ... ".format(name), end="")
-        for n,atoms in enumerate(trajectory):
-            all_bec[key][n] = atoms.arrays[name]
+        print("\tExtracting '{:s}' from the trajectory".format(name), end="")
+        all_bec[key] = trajectory.get(name)
+        print(" --> shape: ",all_bec[key].shape," ... ",end="")
         print("done")
+    
+    shape = (len(trajectory),3*Natoms,3)
+    BEC = np.full(shape,np.nan)
+    print("\n\tBEC.shape: ",BEC.shape)
 
     #------------------#
-    # reshape
-    BEC = [None]*N
-    for n in range(N):
-        x = np.asarray(all_bec["x"][n]).flatten()
-        y = np.asarray(all_bec["y"][n]).flatten()
-        z = np.asarray(all_bec["z"][n]).flatten()
-        BEC[n] = np.column_stack((x,y,z))
+    for n,key in enumerate(["x","y","z"]):
+        tmp = all_bec[key]
+        BEC[:,:,n] = tmp.reshape((N,3*Natoms))
+
+    assert np.isnan(BEC).sum() == 0, "Found nan values in BEC"
+
+    if args.check:
+        if not trajectory.is_there(args.keyword):
+            print("\n\t{:s}: '{:s}' not found --> it's not possible to check whether BECs are correctly formatted.".format(warning,args.keyword))
+            tmp = trajectory.get(args.keyword)
+            if not np.allclose(BEC,tmp):
+                print("\t{:s}: '{:s}' and the ones reconstructued differ".format(warning,args.keyword))
     
     #------------------#
     print("\n\tWriting the BEC tensors to file '{:s}' ... ".format(args.output), end="")

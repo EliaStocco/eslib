@@ -41,7 +41,7 @@ def main(args):
     print("\tData shape: ",data.shape)
 
     #---------------------------------------#
-    if data.shape[0] != N:
+    if data.shape[0] != N and args.what in ['i','info'] :
         print("\t{:s}: shapes do not match --> keeping only the last {:d} elements of the array to be stored".format(warning,N))
         data = data[-N:]
     #---------------------------------------#

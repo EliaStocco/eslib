@@ -45,21 +45,14 @@ def main(args):
     #------------------#
     matched_files = glob.glob(args.input[0])
     if matched_files is None or len(matched_files):
-        print("\n\tReading atomic structures from pattern '{:s}':".format(args.input[0]))
         args.input = matched_files
-        trajectories = [None]*len(args.input)
-        for n,file in enumerate(matched_files):
-            print("\t\t{:d}: '{:s}' ... ".format(n,file), end="")
-            trajectories[n] = read(file,format='extxyz',index=":")
-            print("done --> (n. atomic structures: {:d})".format(len(trajectories[n])))
         
-    else:
-        print("\n\tReading atomic structures from file:")
-        trajectories = [None]*len(args.input)
-        for n,file in enumerate(args.input):
-            print("\t\t{:d}: '{:s}' ... ".format(n,file), end="")
-            trajectories[n] = read(file,format='extxyz',index=":")
-            print("done --> (n. atomic structures: {:d})".format(len(trajectories[n])))
+    print("\n\tReading atomic structures from file:")
+    trajectories = [None]*len(args.input)
+    for n,file in enumerate(args.input):
+        print("\t\t{:d}: '{:s}' ... ".format(n,file), end="")
+        trajectories[n] = read(file,format='extxyz',index=":")
+        print("done --> (n. atomic structures: {:d})".format(len(trajectories[n])))
 
     #------------------#
     # DFT quanta

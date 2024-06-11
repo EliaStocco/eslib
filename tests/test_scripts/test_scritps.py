@@ -42,105 +42,131 @@ def change_directory():
 tmp_folder = "tmp"
 
 torun = {
-    "extras2dipole" :
+    # "extras2dipole" :
+    # {
+    #     "folder"  : "dipole",
+    #     "file"   : "extras2dipole",
+    #     "kwargs"  : {
+    #         "input"  : "tests/data/i-pi.extras_0",  
+    #         "output" :  "tests/dipoles.txt",  
+    #     },
+    # },
+    # "get-iPI-cell" :
+    # {
+    #     "folder"  : "inspect",
+    #     "file"   : "get-iPI-cell",
+    #     "kwargs"  : {
+    #         "input" : "tests/structures/bulk-water/bulk-water.au.extxyz",            
+    #     },
+    # },
+    # "convert-file" :
+    # {
+    #     "folder"  : "convert",
+    #     "file"   : "convert-file",
+    #     "kwargs"  : {
+    #         "input"              : "tests/structures/bulk-water/bulk-water.au.extxyz",   
+    #         "remove_properties"  : "true",   
+    #         "output"             : "{:s}/output.extxyz".format(tmp_folder),     
+    #     },
+    # },
+    # "information-and-primitive.py" :
+    # {
+    #     "folder"  : "inspect",
+    #     "file"   : "information-and-primitive.py",
+    #     "kwargs"  : {
+    #         "input"  : "tests/structures/bulk-water/bulk-water.au.extxyz",   
+    #     },
+    # },
+    # "extxyz2pickle" :
+    # {
+    #     "folder"  : "convert",
+    #     "file"   : "convert-file",
+    #     "kwargs"  : {
+    #         "input"              : "tests/structures/bulk-water/bulk-water.au.extxyz",   
+    #         "remove_properties"  : "true",   
+    #         "output"             : "{:s}/output.pickle".format(tmp_folder),     
+    #     },
+    # },
+    # "pickle2extxyz" :
+    # {
+    #     "folder"  : "convert",
+    #     "file"   : "convert-file",
+    #     "kwargs"  : {
+    #         "input"              : "tests/structures/bulk-water/bulk-water.au.pickle" ,   
+    #         "remove_properties"  : "true",   
+    #         "output"             : "{:s}/output.extxyz".format(tmp_folder),    
+    #     },
+    # },
+    # "trajectory-summary" :
+    # {
+    #     "folder"  : "inspect",
+    #     "file"   : "trajectory-summary.py",
+    #     "kwargs"  : {
+    #         "input" : "tests/structures/bulk-water/bulk-water.au.extxyz" ,   
+    #     },
+    # },
+    # "trajectory-summary-empty" :
+    # {
+    #     "folder"  : "inspect",
+    #     "file"   : "trajectory-summary.py",
+    #     "kwargs"  : {
+    #         "input" : "tests/structures/bulk-water/bulk-water.au.empty.extxyz" ,   
+    #     },
+    # },
+    # "ipi" :
+    # {
+    #     "folder"  : "convert",
+    #     "file"   : "convert-file",
+    #     "kwargs"  : {
+    #         "input"              : "tests/structures/LiNbO3/i-pi.positions_0.xyz",   
+    #         "input_format"       : "ipi",   
+    #         "output"             : "{:s}/output.extxyz".format(tmp_folder),     
+    #     },
+    # },
+    # "long-raw" :
+    # {
+    #     "folder"  : "convert",
+    #     "file"   : "convert-file",
+    #     "kwargs"  : {
+    #         "input"              : "tests/structures/LiNbO3/raw-ipi.n=10000.xyz",   
+    #         "input_format"       : "ipi",   
+    #         "output"             : "{:s}/output.extxyz".format(tmp_folder),     
+    #     },
+    # },
+    # "long" :
+    # {
+    #     "folder"  : "convert",
+    #     "file"   : "convert-file",
+    #     "kwargs"  : {
+    #         "input"              : "tests/structures/LiNbO3/long.n=10000.extxyz",   
+    #         "input_format"       : "extxyz",   
+    #         "output"             : "{:s}/output.extxyz".format(tmp_folder),     
+    #     },
+    # },
+    "rmse-dipole" :
     {
-        "folder"  : "dipole",
-        "file"   : "extras2dipole",
+        "folder"  : "metrics",
+        "file"   : "compute-metrics",
         "kwargs"  : {
-            "input"  : "tests/data/i-pi.extras_0",  
-            "output" :  "tests/dipoles.txt",  
+            "input"              : "tests/structures/LiNbO3/geometries.extxyz",   
+            "expected"           : "dipole",
+            "predicted"          : "MACE_dipole",
+            "metrics"            : "rmse",
+            "statistics"         : "True",
+            "output"             : "{:s}/rmse.json".format(tmp_folder),     
         },
     },
-    "get-iPI-cell" :
+    "rmse-bec" :
     {
-        "folder"  : "inspect",
-        "file"   : "get-iPI-cell",
+        "folder"  : "metrics",
+        "file"   : "compute-metrics",
         "kwargs"  : {
-            "input" : "tests/structures/bulk-water/bulk-water.au.extxyz",            
-        },
-    },
-    "convert-file" :
-    {
-        "folder"  : "convert",
-        "file"   : "convert-file",
-        "kwargs"  : {
-            "input"              : "tests/structures/bulk-water/bulk-water.au.extxyz",   
-            "remove_properties"  : "true",   
-            "output"             : "{:s}/output.extxyz".format(tmp_folder),     
-        },
-    },
-    "information-and-primitive.py" :
-    {
-        "folder"  : "inspect",
-        "file"   : "information-and-primitive.py",
-        "kwargs"  : {
-            "input"  : "tests/structures/bulk-water/bulk-water.au.extxyz",   
-        },
-    },
-    "extxyz2pickle" :
-    {
-        "folder"  : "convert",
-        "file"   : "convert-file",
-        "kwargs"  : {
-            "input"              : "tests/structures/bulk-water/bulk-water.au.extxyz",   
-            "remove_properties"  : "true",   
-            "output"             : "{:s}/output.pickle".format(tmp_folder),     
-        },
-    },
-    "pickle2extxyz" :
-    {
-        "folder"  : "convert",
-        "file"   : "convert-file",
-        "kwargs"  : {
-            "input"              : "tests/structures/bulk-water/bulk-water.au.pickle" ,   
-            "remove_properties"  : "true",   
-            "output"             : "{:s}/output.extxyz".format(tmp_folder),    
-        },
-    },
-    "trajectory-summary" :
-    {
-        "folder"  : "inspect",
-        "file"   : "trajectory-summary.py",
-        "kwargs"  : {
-            "input" : "tests/structures/bulk-water/bulk-water.au.extxyz" ,   
-        },
-    },
-    "trajectory-summary-empty" :
-    {
-        "folder"  : "inspect",
-        "file"   : "trajectory-summary.py",
-        "kwargs"  : {
-            "input" : "tests/structures/bulk-water/bulk-water.au.empty.extxyz" ,   
-        },
-    },
-    "ipi" :
-    {
-        "folder"  : "convert",
-        "file"   : "convert-file",
-        "kwargs"  : {
-            "input"              : "tests/structures/LiNbO3/i-pi.positions_0.xyz",   
-            "input_format"       : "ipi",   
-            "output"             : "{:s}/output.extxyz".format(tmp_folder),     
-        },
-    },
-    "long-raw" :
-    {
-        "folder"  : "convert",
-        "file"   : "convert-file",
-        "kwargs"  : {
-            "input"              : "tests/structures/LiNbO3/raw-ipi.n=10000.xyz",   
-            "input_format"       : "ipi",   
-            "output"             : "{:s}/output.extxyz".format(tmp_folder),     
-        },
-    },
-    "long" :
-    {
-        "folder"  : "convert",
-        "file"   : "convert-file",
-        "kwargs"  : {
-            "input"              : "tests/structures/LiNbO3/long.n=10000.extxyz",   
-            "input_format"       : "extxyz",   
-            "output"             : "{:s}/output.extxyz".format(tmp_folder),     
+            "input"              : "tests/structures/LiNbO3/geometries.extxyz",   
+            "expected"           : "BEC",
+            "predicted"          : "MACE_BEC",
+            "metrics"            : "rmse",
+            "statistics"         : "True",
+            "output"             : "{:s}/bec.json".format(tmp_folder),     
         },
     },
 }
