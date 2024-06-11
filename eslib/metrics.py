@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Union, Tuple, Dict, Any, Optional, Callable
 from functools import partial
+import inspect
 
 # Documentations;
 # - https://stats.stackexchange.com/questions/413209/is-there-something-like-a-root-mean-square-relative-error-rmsre-or-what-is-t
@@ -268,6 +269,7 @@ def RMSDAR(x:np.ndarray)->np.ndarray:
 #---------------------------------------#
 # Elia Stocco's customs functions
 
+#------------------------------#
 def RMSRAE(pred:np.ndarray,ref:np.ndarray,func:Callable[[np.ndarray], np.ndarray]=MDAR,**kwargs)->np.ndarray:
     """Root Mean Squared Relative Atomic Error"""
     ar    = func(ref)             #                        atomic reference
@@ -278,11 +280,26 @@ def RMSRAE(pred:np.ndarray,ref:np.ndarray,func:Callable[[np.ndarray], np.ndarray
     rmsre = np.sqrt(msre)         # root mean squared relative atomic error
     return rmsre
 
-RMSRAE_MAR   :Callable[[np.ndarray], np.ndarray] = partial(RMSRAE, func=MAR)
-RMSRAE_RMSAR :Callable[[np.ndarray], np.ndarray] = partial(RMSRAE, func=RMSAR)
-RMSRAE_MDAR  :Callable[[np.ndarray], np.ndarray] = partial(RMSRAE, func=MDAR)
-RMSRAE_RMSDAR:Callable[[np.ndarray], np.ndarray] = partial(RMSRAE, func=RMSDAR)
+#------------------------------#
+# Functions derived from RMSRAE
 
+def RMSRAE_MAR(**kwargs)->np.ndarray:
+    """Root Mean Squared Relative Atomic Error, using Mean Atomic Reference."""
+    return RMSRAE(**kwargs,func=MAR)
+
+def RMSRAE_RMSAR(**kwargs)->np.ndarray:
+    """Root Mean Squared Relative Atomic Error, using Root Mean Squared Atomic Reference."""
+    return RMSRAE(**kwargs,func=RMSAR)
+
+def RMSRAE_MDAR(**kwargs)->np.ndarray:
+    """Root Mean Squared Relative Atomic Error, using Mean Diagonal Atomic Reference."""
+    return RMSRAE(**kwargs,func=MDAR)
+
+def RMSRAE_RMSDAR(**kwargs)->np.ndarray:
+    """Root Mean Squared Relative Atomic Error, using Root Mean Squared Diagonal Atomic Reference."""
+    return RMSRAE(**kwargs,func=RMSDAR)
+
+#------------------------------#
 def RRAMSE(pred:np.ndarray,ref:np.ndarray,func:Callable[[np.ndarray], np.ndarray]=MDAR,**kwargs)->np.ndarray:
     """Root Relative Atomic Mean Squared Error"""
     ar     = func(ref)                 #                        atomic reference
@@ -293,10 +310,23 @@ def RRAMSE(pred:np.ndarray,ref:np.ndarray,func:Callable[[np.ndarray], np.ndarray
     rramse = np.sqrt(ramse)            # root relative atomic mean squared error
     return rramse
 
-RRAMSE_MAR   :Callable[[np.ndarray], np.ndarray] = partial(RRAMSE, func=MAR)
-RRAMSE_RMSAR :Callable[[np.ndarray], np.ndarray] = partial(RRAMSE, func=RMSAR)
-RRAMSE_MDAR  :Callable[[np.ndarray], np.ndarray] = partial(RRAMSE, func=MDAR)
-RRAMSE_RMSDAR:Callable[[np.ndarray], np.ndarray] = partial(RRAMSE, func=RMSDAR)
+#------------------------------#
+# Functions derived from RRAMSE
+def RRAMSE_MAR(**kwargs)->np.ndarray:
+    """Root Relative Atomic Mean Squared Error, using Mean Atomic Reference."""
+    return RRAMSE(**kwargs,func=MAR)
+
+def RRAMSE_RMSAR(**kwargs)->np.ndarray:
+    """Root Relative Atomic Mean Squared Error, using Root Mean Squared Atomic Reference."""
+    return RRAMSE(**kwargs,func=RMSAR)
+
+def RRAMSE_MDAR(**kwargs)->np.ndarray:
+    """Root Relative Atomic Mean Squared Error, using Mean Diagonal Atomic Reference."""
+    return RRAMSE(**kwargs,func=MDAR)
+
+def RRAMSE_RMSDAR(**kwargs)->np.ndarray:
+    """Root Relative Atomic Mean Squared Error, using Root Mean Squared Diagonal Atomic Reference."""
+    return RRAMSE(**kwargs,func=RMSDAR)
 
 # def RelRMSE(pred:np.ndarray,ref:np.ndarray,axis:Tshape=None,*argv,**kwargs)->Union[float,np.ndarray]:
 #     """Relative Root Mean Squared Error"""
@@ -306,23 +336,23 @@ RRAMSE_RMSDAR:Callable[[np.ndarray], np.ndarray] = partial(RRAMSE, func=RMSDAR)
 #     axis = tuple([ i for i in range(relrmse.ndim) if i in axis])
 #     return np.mean(relrmse,axis=axis)
 
-def RelTensorRMSE(pred:np.ndarray,ref:np.ndarray,axis:Tshape=None,*argv,**kwargs)->Union[float,np.ndarray]:
-    """Relative Tensorial Root Mean Squared Error"""
-    assert pred.ndim == 3 and ref.ndim == 3
-    diff = pred - ref 
-    ref = ref.reshape((ref.shape[0],ref.shape[1],3,3))
-    diag = np.diagonal(ref, axis1=2, axis2=3)
-    rms = RMS(x=diag,axis=2)
-    rms = np.repeat(rms, diff.shape[2])
-    rms = rms.reshape(diff.shape)
-    rel = np.divide(diff,rms)
-    return p_norm(x=rel,p=2,axis=(1,2),func="sum")/num_elements_along_axis(rel,axis)
+# def RelTensorRMSE(pred:np.ndarray,ref:np.ndarray,axis:Tshape=None,*argv,**kwargs)->Union[float,np.ndarray]:
+#     """Relative Tensorial Root Mean Squared Error"""
+#     assert pred.ndim == 3 and ref.ndim == 3
+#     diff = pred - ref 
+#     ref = ref.reshape((ref.shape[0],ref.shape[1],3,3))
+#     diag = np.diagonal(ref, axis1=2, axis2=3)
+#     rms = RMS(x=diag,axis=2)
+#     rms = np.repeat(rms, diff.shape[2])
+#     rms = rms.reshape(diff.shape)
+#     rel = np.divide(diff,rms)
+#     return p_norm(x=rel,p=2,axis=(1,2),func="sum")/num_elements_along_axis(rel,axis)
 
-    rmse = RMSE(pred=pred,ref=ref,axis=axisR,*argv,**kwargs)
-    refnorm = norm(x=ref,axis=axisR,*argv,**kwargs)
-    relrmse = np.divide(rmse,refnorm)
-    axis = tuple([ i for i in range(relrmse.ndim) if i in axisD])
-    return np.mean(relrmse,axis=axis)
+#     rmse = RMSE(pred=pred,ref=ref,axis=axisR,*argv,**kwargs)
+#     refnorm = norm(x=ref,axis=axisR,*argv,**kwargs)
+#     relrmse = np.divide(rmse,refnorm)
+#     axis = tuple([ i for i in range(relrmse.ndim) if i in axisD])
+#     return np.mean(relrmse,axis=axis)
 
 #---------------------------------------#
 # Dictionary of regression metrics
@@ -339,6 +369,6 @@ metrics = {
     "rramse_rmsar"  : RRAMSE_RMSAR,
     "rramse_mdar"   : RRAMSE_MDAR,
     "rramse_rmsdar" : RRAMSE_RMSDAR,
-    "reltrmse"     : RelTensorRMSE,
+    # "reltrmse"     : RelTensorRMSE,
     "vecr" : lambda x,y : vectorial_pearson(x,y)
 }
