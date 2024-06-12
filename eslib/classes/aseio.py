@@ -7,7 +7,7 @@ import numpy as np
 from concurrent.futures import ProcessPoolExecutor
 from eslib.classes.io import pickleIO
 from eslib.tools import convert
-from typing import List, Union, TypeVar, Match, Callable, Any
+from typing import List, Union, TypeVar, Match, Callable, Any, Dict
 import functools
 
 T = TypeVar('T', bound='aseio')
@@ -112,7 +112,7 @@ class aseio(List[Atoms], pickleIO):
     # Do not change it.
     @classmethod
     @correct_pbc_class
-    @calc_none_class
+    # @calc_none_class
     @pickleIO.correct_extension_in
     def from_file(cls, **argv):
         """
@@ -194,9 +194,12 @@ def read_trajectory(file:str,
     ########################
     # Attention:
     # the following line is MANDATORY
-    # if tou do not set `calc``=None in post-processing script you could get 
+    # if tou do not set `calc`=None in post-processing script you could get 
     # really weird (and wrong) behavior in the IO stream
     for atom in atoms:
+        if atom.calc is not None:
+            results:Dict[str,Union[float,np.ndarray]] = atom.calc.results
+            atom.info = {**atom.info,**results}
         atom.calc = None 
         if format in ["i-pi","ipi"]:
             atom.info = dict()

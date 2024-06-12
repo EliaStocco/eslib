@@ -92,7 +92,8 @@ def main(args):
         with open(args.bad_files, "w") as f:
             for string in bad_files:
                 f.write(string + "\n")
-    print("done")
+        print("done")
+        print("\tn. non-converged files: ", len(bad_files))
 
 
     #------------------#
@@ -110,7 +111,9 @@ def main(args):
 
         P, string = read_polarization(file) # C/m^2
         try :
-            structure = read(file,format='aims-output')
+            # structure = read(file,format='aims-output')
+            # structure.calc = None
+            structure = AtomicStructures.from_file(file=file,format='aims-output',index=0)[0]
         except:
             if first:
                 print()
@@ -175,6 +178,7 @@ def main(args):
     structures = AtomicStructures(structures)
     structures.set(args.keyword,dipoles,"info")
     print("done")
+    print("\tinfo: ",list(structures[0].info.keys()))
 
     #------------------#
     print("\n\tSaving atomic structures to file '{:s}' ... ".format(args.output_structures), end="")

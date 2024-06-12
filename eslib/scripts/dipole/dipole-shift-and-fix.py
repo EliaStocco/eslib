@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import numpy as np
-from ase.io import write, read
-from copy import copy
-from eslib.tools import cart2lattice, lattice2cart
+# from copy import copy
+# from eslib.tools import cart2lattice, lattice2cart
+from eslib.classes.trajectory import AtomicStructures
 from eslib.tools import frac2cart, cart2frac
 from eslib.input import flist, str2bool
 from eslib.formatting import esfmt, warning
@@ -35,7 +35,8 @@ def main(args):
     ###
     # read the MD trajectory from file
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms = read(args.input,format='extxyz',index=":")
+    # atoms = read(args.input,format='extxyz',index=":")
+    atoms = AtomicStructures.from_file(file=args.input,format=None)
     print("done")
 
 
@@ -97,7 +98,8 @@ def main(args):
     # writing
     print("\n\tWriting output to file '{:s}' ... ".format(args.output), end="")
     try:
-        write(args.output, atoms, format="extxyz")
+        # write(args.output, atoms, format="extxyz")
+        atoms.to_file(file=args.output,format="extxyz")
         print("done")
     except Exception as e:
         print(f"\n\tError: {e}")
