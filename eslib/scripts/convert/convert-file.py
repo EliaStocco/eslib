@@ -61,10 +61,13 @@ def main(args):
 
     #------------------#
     if args.input_format is None:
-        print("\tDeducing input file format: ", end="")
-        from ase.io.formats import filetype
-        args.input_format = filetype(args.input, read=True)
-        print(args.input_format)
+        try:
+            print("\tDeducing input file format: ", end="")
+            from ase.io.formats import filetype
+            args.input_format = filetype(args.input, read=True)
+            print(args.input_format)
+        except:
+            print("failed")
     if args.output_format is None:
         print("\tDeducing output file format: ", end="")
         from ase.io.formats import filetype

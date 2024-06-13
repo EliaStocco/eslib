@@ -9,6 +9,7 @@ from eslib.classes.io import pickleIO
 from eslib.tools import convert
 from typing import List, Union, TypeVar, Match, Callable, Any, Dict
 import functools
+import glob
 
 T = TypeVar('T', bound='aseio')
 M = TypeVar('M', bound=Callable[..., Any])
@@ -100,6 +101,51 @@ def correct_pbc_class(method: M) -> M :
     return wrapper
 
 #------------------#
+def file_pattern(method: M) -> M:
+    """
+    A decorator that modifies the behavior of a method to support file pattern matching.
+
+    If the keyword argument 'file' is provided and contains a file pattern (e.g., '*.txt'), 
+    the decorator will use the `glob` module to find all matching files. It will then 
+    call the decorated method for each matched file and collect the results into a single list.
+
+    If no files match the pattern, a ValueError is raised.
+
+    Args:
+        method (M): The method to be decorated.
+
+    Returns:
+        M: The wrapped method with added file pattern matching capability.
+    """
+    
+    @functools.wraps(method)
+    def wrapper(cls,*args, **kwargs) -> Any:
+        # Check if 'file' keyword argument is present
+        if 'file' in kwargs:
+            # Find all files matching the pattern
+            matched_files = glob.glob(kwargs['file'])
+            
+            # Raise an error if no files were found
+            if not matched_files:
+                raise ValueError("No files found")
+            
+            # Initialize a list to hold results from each file
+            structures = [None] * len(matched_files)
+            
+            # Process each matched file
+            for n, file in enumerate(matched_files):
+                kwargs['file'] = file  # Update 'file' in kwargs
+                structures[n] = method(cls,*args, **kwargs)  # Call the method with updated 'file'
+            
+            # Flatten the list of results
+            return cls([item for sublist in structures for item in sublist])
+        else:
+            # Call the method normally if 'file' is not in kwargs
+            return method(cls,*args, **kwargs)
+    
+    return wrapper
+
+#------------------#
 class aseio(List[Atoms], pickleIO):
     """Class to handle atomic structures:
         - read from and write to big files (using `ase`)
@@ -111,6 +157,7 @@ class aseio(List[Atoms], pickleIO):
     # The order of the following decorators matters.
     # Do not change it.
     @classmethod
+    @file_pattern
     @correct_pbc_class
     @calc_none_class # try to comment it if you encounter ay problem
     @pickleIO.correct_extension_in
