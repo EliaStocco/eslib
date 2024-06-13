@@ -1,13 +1,9 @@
-"""Empty docstring"""
 from copy import deepcopy
 from typing import List, Union, TypeVar
 import numpy as np
-from ase import Atoms
 from eslib.tools import convert
 from eslib.functional import deprecated
 from eslib.classes.aseio import aseio, integer_to_slice_string
-from eslib.formatting import esfmt
-from eslib.classes.vectorize import easyvectorize
 T = TypeVar('T', bound='AtomicStructures')
 
 #---------------------------------------#
