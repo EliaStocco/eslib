@@ -78,32 +78,29 @@ def esfmt(prepare_parser:callable=None, description:str=None):
         line(start="###")
         try: 
             local_path, global_path = get_path(main)
-            print("script file: {:s}".format(local_path))
-            print("script global path: {:s}".format(global_path))
-        except: 
-            pass     
-        try:
+            print("{:20s}: {:s}".format("script file",local_path))
+            print("{:20s}: {:s}".format("script global path",global_path))
+            print("{:20s}: {:s}".format("working directory",os.getcwd()))
+            vscode_args = json.dumps(sys.argv[1:])
+            print("{:20}: \"args\" : {:s} ".format("VScode debugging",vscode_args))
             command_line = ' '.join(sys.argv[1:])   
             local_path, global_path = get_path(main)
-            print("running script as: {:s} ".format(local_path),command_line)
-            vscode_args = json.dumps(sys.argv[1:])
-            print("hint for VScode debugging: \"args\" : {:s} ".format(vscode_args))
+            print("{:20}: {:s} ".format("running script as",local_path),command_line)
         except: 
             pass    
-        print("working directory: {:s}".format(os.getcwd()))
-        print("python --version:", sys.version)
-        print("which python:", sys.executable)
+        print("{:20s}:".format("python --version"), sys.version)
+        print("{:20s}:".format("which python"), sys.executable)
         conda_env = os.environ.get('CONDA_DEFAULT_ENV')
         if conda_env:
-            print("conda env:", conda_env)
+            print("{:20s}:".format("conda env"), conda_env)
             index_bin = sys.executable.find('/bin')
             _conda_env = sys.executable[:index_bin].split('/')[-1]
             if _conda_env != conda_env:
                 print("{:s}: possible discrepancy between conda environment and python executable.".format(warning))
         else:
             print("not using conda env")
-        print("start date: {:s}".format(start_date))
-        print("start time: {:s}".format(start_time))
+        print("{:20s}: {:s}".format("start date",start_date))
+        print("{:20s}: {:s}".format("start time",start_time))
         line(start="###")
 
         print("\n\t{:s}".format(description))
