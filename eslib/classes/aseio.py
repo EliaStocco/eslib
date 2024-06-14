@@ -5,6 +5,8 @@ import re
 import math
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor
+
+from tomlkit import item
 from eslib.classes.io import pickleIO
 from eslib.tools import convert
 from typing import List, Union, TypeVar, Match, Callable, Any, Dict
@@ -246,7 +248,13 @@ def read_trajectory(file:str,
     for atom in atoms:
         if atom.calc is not None:
             results:Dict[str,Union[float,np.ndarray]] = atom.calc.results
-            atom.info = {**atom.info,**results}
+            for key,value in results.items():
+                if key in ['energy','free_energy','dipole','stress']:
+                    atom.info[key] = value
+                elif key in ['forces']:
+                    atom.arrays[key] = value
+                else: 
+                    atom.info[key] = value
         atom.calc = None 
         if format in ["i-pi","ipi"]:
             atom.info = dict()
