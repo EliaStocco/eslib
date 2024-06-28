@@ -76,6 +76,7 @@ def calc_none_class(method: M) -> M :
         return out
     return wrapper
 
+#------------------#
 def correct_pbc(atoms:List[Atoms]):
     for a in atoms:
         if a.get_cell() is None or a.get_cell().volume == 0.0 :
