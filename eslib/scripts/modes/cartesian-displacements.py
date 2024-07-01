@@ -17,9 +17,9 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , **argv, required=True , type=str  , help="file with the reference atomic structure [au]")
     parser.add_argument("-if", "--input_format" , **argv, required=False, type=str  , help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-pu", "--pos_unit"     , **argv, required=False, type=float, help="positions unit (default: %(default)s)" , default="atomic_unit")
+    parser.add_argument("-pu", "--pos_unit"     , **argv, required=False, type=str, help="positions unit (default: %(default)s)" , default="atomic_unit")
     parser.add_argument("-d" , "--displacement" , **argv, required=False, type=float, help="displacement [au] (default: %(default)s)" , default=0.001)
-    parser.add_argument("-du", "--displ_unit"   , **argv, required=False, type=float, help="displacement unit (default: %(default)s)" , default="atomic_unit")
+    parser.add_argument("-du", "--displ_unit"   , **argv, required=False, type=str, help="displacement unit (default: %(default)s)" , default="atomic_unit")
     parser.add_argument("-o" , "--output"       , **argv, required=False, type=str  , help="output file with the displaced atomic structures (default: %(default)s)", default='replay.xyz')
     parser.add_argument("-of", "--outunitput_format", **argv, required=False, type=str  , help="output file format (default: %(default)s)", default=None)
     return parser
