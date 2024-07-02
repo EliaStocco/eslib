@@ -1,15 +1,17 @@
-from ase.io import read, write, string2index
 from ase import Atoms
 from io import TextIOWrapper
 import re
 import math
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor
-from eslib.classes.io import pickleIO
-from eslib.tools import convert
 from typing import List, Union, TypeVar, Match, Callable, Any, Dict
 import functools
 import glob
+from ase.io import read, write, string2index
+# from classes.trajectory import AtomicStructures
+from eslib.classes.io import pickleIO
+from eslib.tools import convert
+from eslib.functions import extract_number_from_filename
 
 T = TypeVar('T', bound='aseio')
 M = TypeVar('M', bound=Callable[..., Any])
@@ -130,13 +132,21 @@ def file_pattern(method: M) -> M:
             if not matched_files:
                 raise ValueError("No files found")
             
+            try:
+                matched_files = [ matched_files[i] for i in np.argsort(np.asarray([ int(extract_number_from_filename(x)) for x in matched_files ])) ]
+            except:
+                pass
+            
             # Initialize a list to hold results from each file
             structures = [None] * len(matched_files)
-            
+
+            from classes.trajectory import AtomicStructures            
             # Process each matched file
             for n, file in enumerate(matched_files):
                 kwargs['file'] = file  # Update 'file' in kwargs
-                structures[n] = method(cls,*args, **kwargs)  # Call the method with updated 'file'
+                atoms:AtomicStructures = method(cls,*args, **kwargs)  # Call the method with updated 'file'
+                atoms.set("file",np.array([file] * len(atoms)),"info")
+                structures[n] = atoms.copy()
             
             # Flatten the list of results
             return cls([item for sublist in structures for item in sublist])
