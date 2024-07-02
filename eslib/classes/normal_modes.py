@@ -218,12 +218,14 @@ class NormalModes(pickleIO):
         MsqrtRight = PhysicalTensor(Msqrt, dims=('dof-B','dof-b'))
         Phi = PhysicalTensor(force_constant, dims=('dof-a', 'dof-b'))
         self.dynmat = dot(dot(MsqrtLeft,Phi,'dof-A'),MsqrtRight,'dof-B')
+        # tmp  = np.allclose(self.dynmat,self.dynmat.T)
         pass
 
     @unsafe
-    def diagonalize(self):
+    def diagonalize(self,symmetrize:bool=True):
         dm = remove_unit(self.dynmat)[0]
-        dm = 0.50 * (dm + dm.T)
+        if symmetrize:
+            dm = 0.50 * (dm + dm.T)
         eigval,eigvec = np.linalg.eigh(dm)
         self.eigvec.values = eigvec
         self.eigval.values = eigval
@@ -554,17 +556,26 @@ class NormalModes(pickleIO):
     
     def Zmodes(self,Z:PhysicalTensor)->PhysicalTensor:
         """Compute the Born Effective Charges of each Normal Mode."""
-        correction = Z.data.reshape((-1,3,3)).mean(axis=0)
-        Z -= np.tile(correction,int(Z.shape[0]/3)).T
-        INV = False
-        if INV:
-            invmode = inv(self.mode)
-            dZdN = dot(Z,invmode,dim="dof").real
-        else:
-            dZdN = dot(Z,self.mode,dim="dof").real
-        norm = norm_by(dZdN,"dir")
-        dZdN = xr.concat([dZdN, PhysicalTensor(norm, dims='mode')], dim='dir')
-        return remove_unit(dZdN)[0]
+        # correction = Z.data.reshape((-1,3,3)).mean(axis=0)
+        # Z -= np.tile(correction,int(Z.shape[0]/3)).T
+        # INV = True
+        # if INV:
+        M = self.mode.data.real
+        # invM = np.linalg.inv(np.asarray(M))
+        Z -= Z.mean(axis=0)
+        dZdN = (np.asarray(Z).T @ M).T
+        norm = np.sqrt(dZdN[:,0]**2 + dZdN[:,1]**2 + dZdN[:,2]**2 )
+        out = np.zeros((dZdN.shape[0],4))
+        out[:,0:3] = dZdN
+        out[:,3] = norm
+        return out
+        # invmode = inv(self.mode)
+        # dZdN = dot(Z,invmode,dim="dof").real
+        # else:
+        #     dZdN = dot(Z,self.mode.real,dim="dof")
+        # norm = norm_by(dZdN,"dir")
+        # dZdN = xr.concat([dZdN, PhysicalTensor(norm, dims='mode')], dim='dir')
+        # return remove_unit(dZdN)[0]
 
     def sort(self,criterion="value"):
         if criterion == "value":
