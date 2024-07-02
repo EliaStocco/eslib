@@ -16,11 +16,12 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i" , "--input"       , **argv, required=False, type=str  , help="input file with the displaced atomic structures [au] (default: %(default)s)", default='replay.xyz')
+    parser.add_argument("-i" , "--input"       , **argv, required=False, type=str  , help="input file with the displaced atomic structures (default: %(default)s)", default='replay.xyz')
     parser.add_argument("-if", "--input_format", **argv, required=False, type=str  , help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-d" , "--dipoles"     , **argv, required=True , type=str  , help="file with the dipoles")
     parser.add_argument("-s" , "--displacement", **argv, required=True , type=float, help="displacement")
-    parser.add_argument("-u" , "--unit"        , **argv, required=False, type=str  , help="dipole unit (default: %(default)s)", default='atomic_unit')
+    parser.add_argument("-pu", "--positions_unit"  , **argv, required=False, type=str  , help="positions unit (default: %(default)s)", default='angstrom')
+    parser.add_argument("-du", "--dipole_unit"     , **argv, required=False, type=str  , help="dipole unit (default: %(default)s)", default='eang')
     parser.add_argument("-o" , "--output"      , **argv, required=False, type=str  , help="output file with the BEC tensors (default: %(default)s)", default='bec.txt')
     return parser# .parse_args()
 
@@ -53,13 +54,13 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading the displaced atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms:List[Atoms] = list(AtomicStructures.from_file(file=args.input,format=args.input_format,index=":"))
+    atoms = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done")
 
     N = len(atoms)
     if N % 2 == 1:
         print("\t{:s}: you provided an odd number of structures, then the first one will be discarded.".format(warning))
-        atoms = atoms[1:]
+        atoms = AtomicStructures(atoms[1:])
 
     #------------------#
     # dipoles
@@ -75,11 +76,16 @@ def main(args):
 
     #------------------#
     # unit
-    if args.unit not in ["au","atomic_unit"]:
-        factor = convert(1,"electric-dipole",args.unit,"atomic_unit")
-        print("\tConverting the dipoles from file '{:s}' to 'atomic_unit'.".format(args.unit))
+    if args.dipole_unit not in ["eang"]:
+        factor = convert(1,"electric-dipole",args.dipole_unit,"eang")
+        print("\tConverting the dipoles from file '{:s}' to 'eang'.".format(args.dipole_unit))
         print("\tMultiplication factor: ",factor)
         dipoles *= factor
+    if args.positions_unit not in ["angstrom"]:
+        factor = convert(1,"length",args.positions_unit,"angstrom")
+        print("\tConverting the dipoles from file '{:s}' to 'angstrom'.".format(args.positions_unit))
+        print("\tMultiplication factor: ",factor)
+        atoms.convert("positions","length",args.positions_unit,"angstrom")
     
     #------------------#
     N = len(atoms)
