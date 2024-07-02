@@ -3,7 +3,8 @@ from typing import List, Union, TypeVar
 import numpy as np
 from eslib.tools import convert
 from eslib.functional import deprecated
-from eslib.classes.aseio import aseio, integer_to_slice_string
+from eslib.classes.aseio import aseio
+from eslib.classes.aseio import integer_to_slice_string
 T = TypeVar('T', bound='AtomicStructures')
 
 #---------------------------------------#
@@ -33,7 +34,10 @@ class AtomicStructures(aseio):
         def set_output(output,n,value):
             if output is None:
                 output = np.zeros((len(self),*value.shape))
-            output[n] = np.asarray(value)
+            try:
+                output[n] = np.asarray(value)
+            except:
+                output[n] = value
             return output
            
         for n,structure in enumerate(self):
@@ -61,7 +65,10 @@ class AtomicStructures(aseio):
         def set_output(output,n,value):
             if output is None:
                 output = np.zeros((len(self),*value.shape))
-            output[n] = np.asarray(value)
+            try:
+                output[n] = np.asarray(value)
+            except:
+                output[n] = value
             return output
             
         for n,structure in enumerate(self):
@@ -140,6 +147,10 @@ class AtomicStructures(aseio):
         assert len(self) == data.shape[0]
         for n,atoms in enumerate(self):
             getattr(atoms,what)[name] = data[n]
+            # if what not in ["positions"]:
+            #     getattr(atoms,what)[name] = data[n]
+            # elif what == "positions":
+            #     atoms.set_positions(data[n])
         pass
 
     def convert(self,name,
@@ -162,8 +173,9 @@ class AtomicStructures(aseio):
         """
         data = self.get(name)
         data = convert(what=data,family=family,_from=_from,_to=_to)
+        what = self.search(name)
         if inplace:
-            return self.set(name,data)
+            return self.set(name,data,what=what)
         else:
             return data
         
