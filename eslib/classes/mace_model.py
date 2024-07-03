@@ -1,6 +1,6 @@
 from ase import Atoms
 from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import numpy as np
 import torch
 from warnings import warn
@@ -24,6 +24,7 @@ class MACEModel(pickleIO):
     dR: bool
     to_diff_props: List[str]
     rename_props: Dict[str, Any]
+    implemented_properties = field(init=False)
 
     #------------------#
     def __post_init__(self) -> None:
@@ -38,6 +39,7 @@ class MACEModel(pickleIO):
             new_prop = get_d_prop_dR(self.to_diff_props, type(self.network), self.rename_props)
             self.network.implemented_properties = {**self.network.implemented_properties, **new_prop}
         self.network.set_prop()
+        self.implemented_properties = self.network.implemented_properties
 
     #------------------#
     def compute(self, traj: List[Atoms], prefix: str = "", raw: bool = False, **kwargs) -> Any:
