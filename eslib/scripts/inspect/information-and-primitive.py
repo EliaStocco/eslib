@@ -5,6 +5,7 @@
 import numpy as np
 from eslib.formatting import matrix2str
 from eslib.tools import find_transformation
+from eslib.classes.trajectory import AtomicStructures
 from eslib.input import str2bool
 from eslib.tools import convert
 from ase.cell import Cell
@@ -18,7 +19,7 @@ description     = "Show general information of a given atomic structure and find
 divisor         = "-"*100
     
 #---------------------------------------#
-def print_info(structure:Atoms,threshold:float,title:str):
+def print_info(structure:Atoms,threshold:float,title:str,show_pos:bool):
     from eslib.classes.structure import StructureInfo
     strinfo = StructureInfo(structure,threshold)
     info = str(strinfo)
@@ -53,16 +54,18 @@ def print_info(structure:Atoms,threshold:float,title:str):
         line = matrix2str(structure.cell.array.T,col_names=["1","2","3"],cols_align="^",width=10,digits=4)
         print(line)
 
-        print("\n\tPositions (cartesian and fractional):")
-        cartesian = structure.get_positions()
-        fractional = ( np.linalg.inv(structure.get_cell().T) @ cartesian.T ).T
-        M = np.concatenate([cartesian,fractional], axis=1)
-        line = matrix2str(M,digits=3,col_names=["Rx","Ry","Rz","fx","fy","fy"],cols_align="^",width=8,row_names=structure.get_chemical_symbols())
-        print(line)
+        if show_pos:
+            print("\n\tPositions (cartesian and fractional):")
+            cartesian = structure.get_positions()
+            fractional = ( np.linalg.inv(structure.get_cell().T) @ cartesian.T ).T
+            M = np.concatenate([cartesian,fractional], axis=1)
+            line = matrix2str(M,digits=3,col_names=["Rx","Ry","Rz","fx","fy","fy"],cols_align="^",width=8,row_names=structure.get_chemical_symbols())
+            print(line)
     else:
-        print("\n\tPositions (cartesian):")
-        line = matrix2str(structure.get_positions(),digits=3,col_names=["Rx","Ry","Rz"],cols_align="^",width=8,row_names=structure.get_chemical_symbols())
-        print(line)
+        if show_pos:
+            print("\n\tPositions (cartesian):")
+            line = matrix2str(structure.get_positions(),digits=3,col_names=["Rx","Ry","Rz"],cols_align="^",width=8,row_names=structure.get_chemical_symbols())
+            print(line)
     return
 #---------------------------------------#
 def prepare_parser(description):
@@ -70,9 +73,11 @@ def prepare_parser(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
     parser.add_argument("-i" , "--input"        , type=str     , **argv, help="atomic structure input file")
+    parser.add_argument("-if" , "--input_format"     , **argv,required=False, type=str     , help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-t" , "--threshold"    , type=float   , **argv, help="threshold for GIMS (default: %(default)s)", default=1e-3)
     parser.add_argument("-r" , "--rotate"       , type=str2bool, **argv, help="whether to rotate the cell to the upper triangular form compatible with i-PI (default: %(default)s)", default=True)
     parser.add_argument("-s" , "--shift"        , type=str2bool, **argv, help="shift the first atom to the origing (default: %(default)s)", default=False)
+    parser.add_argument("-sp" , "--show_positions"        , type=str2bool, **argv, help="show positions (default: %(default)s)", default=True)
     parser.add_argument("-c" , "--conversion"   , type=str     , **argv, help="structure conversion form (default: %(default)s)", default=None, choices=['niggli','minkowski','conventional','primitive'])
     parser.add_argument("-o" , "--output"       , type=str     , **argv, help="output file of the converted structure (default: %(default)s)", default=None)
     parser.add_argument("-of", "--output_format", type=str     , **argv, help="output file format (default: %(default)s)", default=None)
@@ -87,7 +92,7 @@ def main(args):
     #---------------------------------------#
     print("\n\t{:s}".format(divisor))
     print("\tReading atomic structure from input file '{:s}' ... ".format(args.input), end="")
-    atoms = read(args.input)
+    atoms:Atoms = AtomicStructures.from_file(file=args.input,format=args.input_format,index=0)[0]
     print("done")
 
     if args.rotate:
@@ -114,7 +119,7 @@ def main(args):
     print("\n\tComputing general information of the atomic structure using GIMS ... ",end="")
     structure = Structure(atoms)
     print("done") 
-    print_info(structure,args.threshold,"Original structure information:")
+    print_info(structure,args.threshold,"Original structure information:",args.show_positions)
 
     if args.conversion is not None:
         args.conversion  = str(args.conversion )
@@ -151,7 +156,7 @@ def main(args):
 
         print("\n\tComputing general information of the primitive structure using GIMS ... ",end="")
         print("done") 
-        print_info(converted_structure,args.threshold,"Primitive cell structure information:")
+        print_info(converted_structure,args.threshold,"Primitive cell structure information:",args.show_positions)
         
         # #---------------------------------------#
         # # trasformation
