@@ -1,4 +1,5 @@
 from ase import Atoms
+from ase.calculators.calculator import Calculator
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
 import numpy as np
@@ -12,7 +13,7 @@ from eslib.tools import add_info_array, reshape_info_array
 
 #---------------------------------------#
 @dataclass
-class MACEModel(pickleIO):
+class MACEModel(Calculator,pickleIO):
     """Class for loading and using MACE models."""
 
     #------------------#
