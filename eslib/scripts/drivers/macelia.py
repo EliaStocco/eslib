@@ -67,6 +67,11 @@ def main(args):
         with suppress_output():
             calculator = mace_off(model=args.model,**kwargv)
 
+    elif args.model_type == "eslib":
+        from eslib.classes.mace_model import MACEModel
+        print("\tLoading eslib MACE model from file '{:s}' ... ".format(args.model), end="")
+        calculator = MACEModel.from_pickle(args.model)
+        
     elif args.model_type == "MACE":
         print("\tLoading a MACECalculator based on the model that you provided ... ", end="")
         calculator = MACECalculator(model_paths=args.model,**kwargv)         
