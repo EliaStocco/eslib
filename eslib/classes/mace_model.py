@@ -24,7 +24,7 @@ class MACEModel(pickleIO):
     dR: bool
     to_diff_props: List[str]
     rename_props: Dict[str, Any]
-    implemented_properties = field(init=False)
+    implemented_properties:Dict[str, Any] = field(init=False)
 
     #------------------#
     def __post_init__(self) -> None:
