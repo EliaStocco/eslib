@@ -1,5 +1,6 @@
 import numpy as np
 from ase import Atoms
+from ase.calculators.calculator import Calculator
 import json
 import ase.units as units
 from ase.calculators.socketio import SocketClient, SocketClosed
@@ -74,9 +75,10 @@ class SocketClientExtras(SocketClient):
             pass        
 
         extras = {}
-        for name in atoms.calc.implemented_properties:
+        calc:Calculator = atoms.calc
+        for name in calc.implemented_properties:
             if name in ['energy', 'free_energy', 'node_energy', 'forces', 'stress']: continue
-            array:np.ndarray = atoms.calc.get_property(name=name)
+            array:np.ndarray = calc.get_property(name=name,atoms=atoms)
             name,array = FormatExtras.format(name,array,atoms)
             extras[name] = array.tolist()            
         extras = json.dumps(extras)
