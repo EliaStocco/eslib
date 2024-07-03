@@ -58,13 +58,20 @@ class SocketClientExtras(SocketClient):
         self.comm.broadcast(atoms.positions, 0)
         self.comm.broadcast(np.ascontiguousarray(atoms.cell), 0)
 
-        energy = atoms.get_potential_energy()
-        forces = atoms.get_forces()
-        if use_stress:
-            stress = atoms.get_stress(voigt=False)
-            virial = -atoms.get_volume() * stress
-        else:
-            virial = np.zeros((3, 3))
+        energy = 0
+        forces = np.zeros_like(atoms.positions)
+        virial = np.zeros((3, 3))
+
+        try:
+            energy = atoms.get_potential_energy()
+            forces = atoms.get_forces()
+            if use_stress:
+                stress = atoms.get_stress(voigt=False)
+                virial = -atoms.get_volume() * stress
+            else:
+                virial = np.zeros((3, 3))
+        except:
+            pass        
 
         extras = {}
         for name in atoms.calc.implemented_properties:
