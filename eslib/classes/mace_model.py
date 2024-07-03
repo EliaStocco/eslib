@@ -56,6 +56,11 @@ class MACEModel(Calculator,pickleIO):
         Returns:
             Any: Computed properties.
         """
+        # call to base-class to set atoms attribute
+        if len(traj) == 1:
+            atoms = traj[0]
+            Calculator.calculate(self, atoms)
+
         torch_tools.set_default_dtype(self.default_dtype)
         data_loader: torch_geometric.dataloader.DataLoader = make_dataloader(atoms_list=traj,
                                                                              model=self.network,
