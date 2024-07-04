@@ -33,7 +33,7 @@ class MACEModel(Calculator,pickleIO):
         """Initialize MACEModel object."""
         Calculator.__init__(self)
         torch_tools.set_default_dtype(self.default_dtype)
-        self.device = torch_tools.init_device([self.device])
+        self.device = torch_tools.init_device(self.device)
         self.network: MACEBaseModel = torch.load(f=self.model_path, map_location=self.device)
         self.network = self.network.to(self.device)  # Ensure model is on the specified device
         for param in self.network.parameters():
