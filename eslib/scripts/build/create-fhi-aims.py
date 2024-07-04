@@ -7,7 +7,7 @@ from eslib.classes.trajectory import AtomicStructures
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Create the 'control.in' file for FHI-aims"
+description = "Create the 'species.in' file for FHI-aims."
 
 #---------------------------------------#
 def prepare_args(description):
