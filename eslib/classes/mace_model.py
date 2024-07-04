@@ -1,5 +1,6 @@
 from ase import Atoms
 from ase.calculators.calculator import Calculator
+from ase.calculators.calculator import all_changes
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
 import numpy as np
@@ -43,6 +44,9 @@ class MACEModel(Calculator,pickleIO):
         self.network.set_prop()
         self.implemented_properties = self.network.implemented_properties
 
+    def calculate(self, atoms:Atoms=None, properties=None, system_changes=all_changes):
+        self.results = self.compute([atoms],raw=True)
+
     #------------------#
     def compute(self, traj: List[Atoms], prefix: str = "", raw: bool = False, **kwargs) -> Any:
         """Compute properties for a trajectory.
@@ -56,10 +60,10 @@ class MACEModel(Calculator,pickleIO):
         Returns:
             Any: Computed properties.
         """
-        if type(traj) == Atoms:
-            traj = [traj]
+        # if type(traj) == Atoms:
+        #     traj = [traj]
         Nconfig = len(traj)
-        Calculator.calculate(self, traj[0])
+        # Calculator.calculate(self, traj[0])
 
         torch_tools.set_default_dtype(self.default_dtype)
         data_loader: torch_geometric.dataloader.DataLoader = make_dataloader(atoms_list=traj,
@@ -107,7 +111,7 @@ class MACEModel(Calculator,pickleIO):
             "charges key": self.charges_key,
             "dtype": self.default_dtype,
             "derivatives": self.dR,
-            "properties": list(self.network.implemented_properties.keys())
+            "properties": list(self.implemented_properties.keys())
         }
 
         # Determine the length of the longest key
