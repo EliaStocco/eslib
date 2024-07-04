@@ -13,6 +13,7 @@ from ase.io import read, write, string2index
 from eslib.classes.io import pickleIO
 from eslib.tools import convert
 from eslib.functions import extract_number_from_filename
+# from eslib.formatting import float_format
 
 T = TypeVar('T', bound='aseio')
 M = TypeVar('M', bound=Callable[..., Any])
@@ -200,7 +201,8 @@ class aseio(List[Atoms], pickleIO):
                 os.remove(file)
             for atoms in self:
                 params = atoms.get_cell().cellpar()
-                fmt_header = "# CELL(abcABC): %10.5f  %10.5f  %10.5f  %10.5f  %10.5f  %10.5f  %s"
+                float_format = '%15.10e'
+                fmt_header = "# CELL(abcABC): {:s}  {:s}  {:s}  {:s}  {:s}  {:s}  %s".format(*([float_format]*6))
                 string = " positions{angstrom} cell{angstrom}"
                 comment = fmt_header%(*params,string)
                 write(file, atoms, format="xyz", append=True, comment=comment)
