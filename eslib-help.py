@@ -128,11 +128,14 @@ def main(args):
     RESET = "\033[0m"
     GREEN = "\033[0;32m"
 
+    folder_dict = {key: folder_dict[key] for key in sorted(folder_dict.keys())}
+
     for folder, file_descriptions in folder_dict.items():
         # Print the folder name in bold blue
         print("\t{:s}{:s}:{:s}".format(BOLD_BLUE, folder, RESET))
         if not args.show_folders:
             max_filename_length = max(len(filename) for filename, _ in file_descriptions)
+            file_descriptions = sorted(file_descriptions, key=lambda x: x[0])
             for filename, description in file_descriptions:
                 if args.descriptions:
                     # Only print the filename
