@@ -36,28 +36,31 @@ everythingok    = Fore.BLUE    + Style.BRIGHT + everythingok            + Style.
 
 
 #---------------------------------------#
-def print_python_info():
-    # Print Python version
-    print("Python Version:", sys.version)
+# def print_python_info():
+#     # Print Python version
+#     print("Python Version:", sys.version)
 
-    # Print Python executable path
-    print("Python Executable Path:", sys.executable)
+#     # Print Python executable path
+#     print("Python Executable Path:", sys.executable)
 
-    # Print Conda environment
-    conda_env = os.environ.get('CONDA_DEFAULT_ENV')
-    if conda_env:
-        print("Conda Environment:", conda_env)
-    else:
-        print("Not using Conda environment.")
+#     # Print Conda environment
+#     conda_env = os.environ.get('CONDA_DEFAULT_ENV')
+#     if conda_env:
+#         print("Conda Environment:", conda_env)
+#     else:
+#         print("Not using Conda environment.")
 
+#---------------------------------------#
 def line(start="",end="",N=30,mult=1):
     print(start+"-"*mult*N+end)
 
+#---------------------------------------#
 def get_path(main):
     global_path = inspect.getfile(main)
     local_path = os.path.basename(global_path)
     return local_path, global_path
 
+#---------------------------------------#
 def esfmt(prepare_parser:callable=None, description:str=None):
     """Decorator for the 'main' function of many scripts."""
 
@@ -88,8 +91,8 @@ def esfmt(prepare_parser:callable=None, description:str=None):
             print("{:20}: {:s} ".format("running script as",local_path),command_line)
         except: 
             pass    
-        print("{:20s}:".format("python --version"), sys.version)
-        print("{:20s}:".format("which python"), sys.executable)
+        print("{:20s}:".format("python --version"), sys.version.replace("\n"," "))
+        print("{:20s}:".format("which python"), sys.executable.replace("\n"," "))
         conda_env = os.environ.get('CONDA_DEFAULT_ENV')
         if conda_env:
             print("{:20s}:".format("conda env"), conda_env)
