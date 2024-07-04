@@ -134,28 +134,29 @@ def file_pattern(method: M) -> M:
             if not matched_files:
                 raise ValueError("No files found")
             
-            try:
-                matched_files = [ matched_files[i] for i in np.argsort(np.asarray([ int(extract_number_from_filename(x)) for x in matched_files ])) ]
-            except:
-                pass
-            
-            # Initialize a list to hold results from each file
-            structures = [None] * len(matched_files)
+            if len(matched_files) > 1:            
+                try:
+                    matched_files = [ matched_files[i] for i in np.argsort(np.asarray([ int(extract_number_from_filename(x)) for x in matched_files ])) ]
+                except:
+                    pass
+                
+                # Initialize a list to hold results from each file
+                structures = [None] * len(matched_files)
 
-            from classes.trajectory import AtomicStructures            
-            # Process each matched file
-            for n, file in enumerate(matched_files):
-                kwargs['file'] = file  # Update 'file' in kwargs
-                atoms:AtomicStructures = method(cls,*args, **kwargs)  # Call the method with updated 'file'
-                atoms.set("file",np.array([file] * len(atoms)),"info")
-                structures[n] = atoms.copy()
-            
-            # Flatten the list of results
-            return cls([item for sublist in structures for item in sublist])
-        else:
-            # Call the method normally if 'file' is not in kwargs
-            return method(cls,*args, **kwargs)
-    
+                from classes.trajectory import AtomicStructures            
+                # Process each matched file
+                for n, file in enumerate(matched_files):
+                    kwargs['file'] = file  # Update 'file' in kwargs
+                    atoms:AtomicStructures = method(cls,*args, **kwargs)  # Call the method with updated 'file'
+                    atoms.set("file",np.array([file] * len(atoms)),"info")
+                    structures[n] = atoms.copy()
+                
+                # Flatten the list of results
+                return cls([item for sublist in structures for item in sublist])
+        
+        # Call the method normally if 'file' is not in kwargs
+        return method(cls,*args, **kwargs)
+
     return wrapper
 
 #------------------#
