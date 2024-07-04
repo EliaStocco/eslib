@@ -21,7 +21,7 @@ warning         = "***Warning***"
 message         = "***Message***"
 closure         = "Job done :)"
 closure_error   = "***An error occurred :(***"
-input_arguments = "Input arguments"
+input_arguments = "Input arguments:"
 everythingok    = "Everything ok!"
 
 #---------------------------------------#
@@ -61,12 +61,16 @@ def get_path(main):
     return local_path, global_path
 
 #---------------------------------------#
-def esfmt(prepare_parser:callable=None, description:str=None):
+def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=None):
     """Decorator for the 'main' function of many scripts."""
 
     #---------------------------------------#
     # Description of the script's purpose
     description = description if description is not None else "Script without description."
+    if documentation is not None:
+        documentation = documentation.replace("\n","\n\t")
+        documentation = Fore.GREEN  + "\n\tDocumentation:\n\t" + Style.RESET_ALL + documentation
+
     try: description = Fore.GREEN  + Style.BRIGHT + description + Style.RESET_ALL
     except: pass
     # print(description)
@@ -107,7 +111,8 @@ def esfmt(prepare_parser:callable=None, description:str=None):
         line(start="###")
 
         print("\n\t{:s}".format(description))
-        print("\n\t{:s}:".format(input_arguments))
+        if documentation is not None: print(documentation)
+        print("\n\t{:s}".format(input_arguments))
         for k in args.__dict__.keys():
             print("\t{:>20s}:".format(k), getattr(args, k))
         print()

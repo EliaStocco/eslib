@@ -8,15 +8,11 @@ from eslib.tools import cart2frac, frac2cart
 from eslib.input import slist
 from typing import List
 from eslib.classes.trajectory import AtomicStructures
-from eslib.input import str2bool
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Wrap hydrogen atoms such that they will be close to an oxygen atoms."
-documentation = \
-"This script is mainly targeted for bulk water systems.\n\
-The options -c/--check checks that the folding procedure does not modify the interatomic distances.\n\
-Pay attention that this flag can slow down a lot the script."
+description = "Divide a system into (water) molecules."
+documentation = "This script is mainly targeted for bulk water systems"
 
 #---------------------------------------#
 def prepare_args(description):
@@ -28,13 +24,13 @@ def prepare_args(description):
     parser.add_argument("-rc", "--cutoff"       , **argv, required=False, type=float, help="cutoff/bond length(default: %(default)s)" , default=1.2)
     parser.add_argument("-n" , "--n_bonds"      , **argv, required=False, type=int  , help="number of bonds (default: %(default)s)", default=2)
     parser.add_argument("-s" , "--species"      , **argv, required=False, type=slist, help="atomic species of the bonds to be fixed (default: %(default)s)", default=['O','H'])
-    parser.add_argument("-c" , "--check"        , **argv, required=False, type=str2bool, help="check that interatomic distances are the same (default: %(default)s)", default=False)
+    parser.add_argument("-m" , "--molecule"     , **argv, required=False, type=str  , help="molecule name (default: %(default)s)", default="molecule")
     parser.add_argument("-o" , "--output"       , **argv, required=True , type=str  , help="output file with the oxidation numbers (default: %(default)s)", default="wrapped.extxyz")
     parser.add_argument("-of", "--output_format", **argv, required=False, type=str  , help="output file format (default: %(default)s)", default=None)
     return parser# .parse_args()
 
 #---------------------------------------#
-@esfmt(prepare_args,description,documentation)
+@esfmt(prepare_args,description)
 def main(args):
 
     #------------------#
@@ -58,29 +54,26 @@ def main(args):
 
 
     #------------------#
-    print("\tFixing bonds:")
+    print("\tDividing into molecules:")
     zeros = np.zeros(3)
     N = len(trajectory)
     for n,atoms in enumerate(trajectory):
-        Natoms = atoms.get_global_number_of_atoms()
         print("\t - atomic structure {:d}/{:d}".format(n+1,N),end="\r")
         oxygens   = [ n for n,a in enumerate(atoms) if a.symbol == args.species[0]]
         hydrogens = [ n for n,a in enumerate(atoms) if a.symbol == args.species[1]]
 
-        if args.check:
-            all_distances = atoms.get_all_distances(mic=True,vector=False)
-
-        wrapped = []
-        for o_index in oxygens:
+        Natoms = atoms.get_global_number_of_atoms()
+        molecule = np.full(Natoms,np.nan)
+        for mm,o_index in enumerate(oxygens):
             # Find neighbors of the current oxygen atom within the cutoff distance
 
-            if args.check:
-                distances = all_distances[hydrogens,o_index]
-                # tmp = atoms.get_distances(o_index,hydrogens,mic=True,vector=False)
-                # assert np.allclose(distances,tmp)
-            else:
-                distances = atoms.get_distances(o_index,hydrogens,mic=True,vector=False)
+            if not np.isnan(molecule[o_index]):
+                raise ValueError("coding error")
+            molecule[o_index] = mm
+            
+            distances = atoms.get_distances(o_index,hydrogens,mic=True,vector=False)
             indices = list(np.argsort(distances)[:args.n_bonds])
+            indices = np.asarray(hydrogens)[indices]
 
             if args.cutoff is not None:
                 distances.sort()
@@ -88,42 +81,20 @@ def main(args):
                 if count != args.n_bonds:
                     pass
 
-            for n in np.asarray(hydrogens)[indices]:
-                # if d > args.cutoff:
-                #     continue
-                delta = atoms.positions[n] - atoms.positions[o_index] 
-                delta:np.ndarray = cart2frac(atoms.get_cell(),delta)
-                # delta = (2*delta).round(0)/2.
-                delta = delta.round(0).astype(int)
-                if not np.allclose(delta,zeros):
-                    # print("\t - wrapping hydrogen {:3d} by [{:>2d},{:>2d},{:>2d}]".format(n,*delta.tolist()),\
-                    #     "(frac. coor.) so that it will be closer to oxygen {:d}".format(o_index))
-                    delta = frac2cart(atoms.get_cell(),delta)
-                    atoms.positions[n,:] -= delta
-                    wrapped.append(n)
-                    # print(n," ",delta)
-            
-        if args.check:
-            new_distances = atoms.get_all_distances(mic=True,vector=False)
-            assert np.allclose(all_distances,new_distances)
+            for i in indices:
+                if not np.isnan(molecule[i]):
+                    raise ValueError("coding error")
+                molecule[i] = mm
 
-        Nwrapping = len(wrapped)
-        Nwrapped  = len(np.unique(wrapped))
-        # print("\n\tNumber of wrapping: ",Nwrapping)
-        # print("\tNumber of wrapped hydrogens: ",Nwrapped)
-
-        if Nwrapping != Nwrapped:
-            print("\t{:s}: the previous two numbers are expected to be the same. Carefully check your input and output files.".format(warning))
-
+        if atoms.arrays is None:
+            atoms.arrays = dict()
+        if np.any(np.isnan(molecule)):
+            raise ValueError("coding error")
+        atoms.arrays[args.molecule] = molecule.astype(int)
 
     print("\n\tWriting (un)wrapped atomic structure to file '{:s}' ... ".format(args.output), end="")
     trajectory.to_file(file=args.output,format=args.output_format)
     print("done")
-    # try:
-    #     write(images=trajectory,filename=args.output,format=args.output_format) # fmt)
-    #     print("done")
-    # except Exception as e:
-    #     print("\n\tError: {:s}".format(e))
 
 #---------------------------------------#
 if __name__ == "__main__":
