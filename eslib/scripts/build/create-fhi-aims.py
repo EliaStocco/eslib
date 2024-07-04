@@ -48,6 +48,11 @@ def main(args):
     print("\tFHI-aims folder: '{:s}'".format(aims_folder))
 
     species_folder = "{:s}/species_defaults/defaults_2020/{:s}".format(aims_folder,args.basis)
+    if not os.path.exists(species_folder):
+        species_folder = "{:s}/../species_defaults/defaults_2020/{:s}".format(aims_folder,args.basis)
+        species_folder = os.path.normpath(species_folder)
+    if not os.path.exists(species_folder):
+        raise ValueError("can not find folder")
     print("\tReading chemical species from '{:s}'".format(species_folder))
 
     if args.output is None :
