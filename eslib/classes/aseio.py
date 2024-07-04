@@ -1,6 +1,7 @@
 from ase import Atoms
 from io import TextIOWrapper
 import re
+import os
 import math
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor
@@ -194,7 +195,17 @@ class aseio(List[Atoms], pickleIO):
         
         Attention: it's recommended to use keyword-only arguments.
         """
-        write(images=self, filename=file, format=format)
+        if format in ["ipi","i-pi"]:
+            if os.path.exists(file):
+                os.remove(file)
+            for atoms in self:
+                params = atoms.get_cell().cellpar()
+                fmt_header = "# CELL(abcABC): %10.5f  %10.5f  %10.5f  %10.5f  %10.5f  %10.5f  %s"
+                string = " positions{angstrom} cell{angstrom}"
+                comment = fmt_header%(*params,string)
+                write(file, atoms, format="xyz", append=True, comment=comment)
+        else:
+            write(images=self, filename=file, format=format)
     
     def to_list(self: T) -> List[Atoms]:
         return list(self)
