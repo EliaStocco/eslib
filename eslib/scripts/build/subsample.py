@@ -25,7 +25,7 @@ def prepare_args(description):
 @esfmt(prepare_args,description)
 def main(args):
    
-    print("\tReading atomic structures from file '{:s}' using the 'ase.io.read' with format '{:s}' ... ".format(args.input,args.input_format), end="")
+    print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
     atoms = AtomicStructures.from_file(file=args.input, format=args.input_format)
     print("done")
 
