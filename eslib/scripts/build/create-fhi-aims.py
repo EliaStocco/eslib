@@ -2,8 +2,8 @@
 import numpy as np
 import os
 import glob
-from ase.io import read
 from eslib.formatting import esfmt
+from eslib.classes.trajectory import AtomicStructures
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -14,12 +14,13 @@ def prepare_args(description):
     import argparse
     # Define the command-line argument parser with a description
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("-s" , "--species"      , action="store", type=str     , help="species"                             , default="light")
-    parser.add_argument("-f" , "--folder"       , action="store", type=str     , help="FHI-aims folder"                     , default=None)
-    parser.add_argument("-v" , "--variable"     , action="store", type=str     , help="bash variable for FHI-aims folder"   , default="AIMS_PATH")
-    parser.add_argument("-i" , "--input"        , action="store", type=str     , help="input file"                          , default="geometry.in")
-    parser.add_argument("-if", "--input_format" , action="store", type=str     , help="input file format (default: %(default)s)" , default='aims')
-    parser.add_argument("-o" , "--output"       , action="store", type=str     , help="output file    "                     , default=None)
+    argv = {"metavar" : "\b",}
+    parser.add_argument("-i" , "--input"        , **argv, type=str     , help="input file (default: %(default)s)"                          , default="geometry.in")
+    parser.add_argument("-if", "--input_format" , **argv, type=str     , help="input file format (default: %(default)s)"                   , default=None)
+    parser.add_argument("-b" , "--basis"        , **argv, type=str     , help="basis set (default: %(default)s)"                           , default="light")
+    parser.add_argument("-f" , "--folder"       , **argv, type=str     , help="FHI-aims folder (default: %(default)s)"                     , default=None)
+    parser.add_argument("-v" , "--variable"     , **argv, type=str     , help="bash variable for FHI-aims folder (default: %(default)s)"   , default="AIMS_PATH")
+    parser.add_argument("-o" , "--output"       , **argv, type=str     , help="output file (default: %(default)s)"                         , default=None)
     return parser
 
 #---------------------------------------#
@@ -28,7 +29,7 @@ def main(args):
 
 
     print("\tReading data from input file '{:s}' ... ".format(args.input), end="")
-    atom = read(args.input,format=args.input_format)
+    atom = AtomicStructures.from_file(file=args.input, format=args.input_format,index=0)[0]
     print("done")
 
     species = np.unique(atom.get_chemical_symbols())
@@ -46,11 +47,11 @@ def main(args):
         raise ValueError("'FHI-aims' folder not found (maybe you should 'source' some bash script ... )")
     print("\tFHI-aims folder: '{:s}'".format(aims_folder))
 
-    species_folder = "{:s}/species_defaults/defaults_2020/{:s}".format(aims_folder,args.species)
-    print("\tReading chemical species species from '{:s}'".format(species_folder))
+    species_folder = "{:s}/species_defaults/defaults_2020/{:s}".format(aims_folder,args.basis)
+    print("\tReading chemical species from '{:s}'".format(species_folder))
 
     if args.output is None :
-        args.output = "species.{:s}.in".format(args.species)
+        args.output = "species.{:s}.in".format(args.basis)
 
     print("\tWriting output file '{:s}' ... ".format(args.output))
     with open(args.output, "w") as target:
