@@ -71,7 +71,6 @@ def main(args):
         from eslib.classes.mace_model import MACEModel
         print("\tLoading eslib MACE model from file '{:s}' ... ".format(args.model), end="")
         calculator = MACEModel.from_pickle(args.model)
-        calculator.summary()
         
     elif args.model_type == "MACE":
         print("\tLoading a MACECalculator based on the model that you provided ... ", end="")
@@ -82,6 +81,11 @@ def main(args):
                                     model_type=args.model_type,\
                                     **kwargv)         
     print("done")
+
+    try:
+        calculator.summary()
+    except:
+        pass
 
     atoms.calc = calculator # atoms.set_calculator(calculator)
 
