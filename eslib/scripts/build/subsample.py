@@ -17,7 +17,7 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"        , required=True , **argv, type=str     , help="input file")
     parser.add_argument("-if", "--input_format" , required=False, **argv, type=str     , help="input file format (default: %(default)s)", default=None)
     parser.add_argument("-n" , "--indices"      , required=False, **argv, type=intype  , help="txt file with the subsampling indices, or list of integers (default: %(default)s)",default='indices.txt')
-    parser.add_argument("-s" , "--sort"         , required=True , **argv, type=str2bool, help="soprt indices (default: %(default)s)", default=None)
+    parser.add_argument("-s" , "--sort"         , required=False, **argv, type=str2bool, help="soprt indices (default: %(default)s)", default=None)
     parser.add_argument("-o" , "--output"       , required=True , **argv, type=str     , help="output file")
     parser.add_argument("-of", "--output_format", required=False, **argv, type=str     , help="output file format (default: %(default)s)", default=None)
     return parser
@@ -25,7 +25,7 @@ def prepare_args(description):
 @esfmt(prepare_args,description)
 def main(args):
    
-    print("\tReading atomic structures from file '{:s}' using the 'ase.io.read' with format '{:s}' ... ".format(args.input,args.format), end="")
+    print("\tReading atomic structures from file '{:s}' using the 'ase.io.read' with format '{:s}' ... ".format(args.input,args.input_format), end="")
     atoms = AtomicStructures.from_file(file=args.input, format=args.input_format)
     print("done")
 
