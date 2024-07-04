@@ -74,8 +74,8 @@ def main(args):
     # Saving the fps selected structure
     if args.output is not None :
         print("\n\tSaving FPS selected structures to file '{:s}' ... ".format(args.output),end="")
-        frames_fps = [frames[i] for i in indices]
-        write(args.output, frames_fps, format=args.output_format) # fmt)
+        frames_fps = frames.subsample(indices) # [frames[i] for i in indices]
+        frames_fps.to_file(file=args.output, format=args.output_format) # fmt)
         print("done")
 
 #---------------------------------------#

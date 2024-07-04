@@ -1,74 +1,61 @@
 #!/usr/bin/env python
-import argparse
-from copy import copy
 import numpy as np
-from ase.io import write, read
 from typing import Union, List
 from eslib.input import union_type
 from eslib.formatting import esfmt
-
+from eslib.classes.trajectory import AtomicStructures
+from eslib.input import str2bool
 
 # Description of the script's purpose
 description = "Subsample an (ASE readable) MD trajectory given a set of indices."
 
-
 def prepare_args(description):
-
-    # Define the command-line argument parser with a description
+    import argparse
     parser = argparse.ArgumentParser(description=description)
-
-    # Define command-line arguments
-
+    intype = lambda s: union_type(s,Union[str,List[int]])
     argv = {"metavar" : "\b"}
-    parser.add_argument("-i", "--input",  type=str, default='i-pi.positions_0.xyz', **argv,
-                        help="input file containing the MD trajectory (default: %(default)s)")
-
-    parser.add_argument("-f", "--format", type=str, default='extxyz', **argv, 
-                        help="file format (default: %(default)s)" )
-    
-    parser.add_argument("-n", "--indices", type=lambda s: union_type(s,Union[str,List[int]]), **argv, default='indices.txt',
-                        help="txt file with the subsampling indices, or list of integers (default: %(default)s)")
-
-    parser.add_argument("-o", "--output", type=str, **argv, 
-                        help="output file")
-
-
-
-    return parser# .parse_args()
+    parser.add_argument("-i" , "--input"        , required=True , **argv, type=str     , help="input file")
+    parser.add_argument("-if", "--input_format" , required=False, **argv, type=str     , help="input file format (default: %(default)s)", default=None)
+    parser.add_argument("-n" , "--indices"      , required=False, **argv, type=intype  , help="txt file with the subsampling indices, or list of integers (default: %(default)s)",default='indices.txt')
+    parser.add_argument("-s" , "--sort"         , required=True , **argv, type=str2bool, help="soprt indices (default: %(default)s)", default=None)
+    parser.add_argument("-o" , "--output"       , required=True , **argv, type=str     , help="output file")
+    parser.add_argument("-of", "--output_format", required=False, **argv, type=str     , help="output file format (default: %(default)s)", default=None)
+    return parser
 
 @esfmt(prepare_args,description)
 def main(args):
    
     print("\tReading atomic structures from file '{:s}' using the 'ase.io.read' with format '{:s}' ... ".format(args.input,args.format), end="")
-    atoms = read(args.input,format=args.format,index=":")
+    atoms = AtomicStructures.from_file(file=args.input, format=args.input_format)
     print("done")
 
     if type(args.indices) == str:
         print("\tReading subsampling indices from file '{:s}' ... ".format(args.indices), end="")
         indices = np.loadtxt(args.indices).astype(int)
-        indices.sort()
         print("done")
     else:
         print("\tSubsampling indices: ",args.indice)
         indices = np.asarray(args.indices).astype(int)
+        print("done")
+
+    if args.sort:
+        print("\tSorting indices: ",end="")
         indices.sort()
         print("done")
 
     print("\tSubsampling atomic structures ... ".format(args.indices), end="")
-    new_atoms = [None]*len(indices)
-    for n,i in enumerate(indices):
-        atoms[i].calc = None # atoms[i].set_calculator(None)
-        new_atoms[n] = copy(atoms[i])
-    # atoms = list(np.array(atoms,dtype=object)[indices])
+    # new_atoms = [None]*len(indices)
+    # for n,i in enumerate(indices):
+    #     atoms[i].calc = None # atoms[i].set_calculator(None)
+    #     new_atoms[n] = copy(atoms[i])
+    # # atoms = list(np.array(atoms,dtype=object)[indices])
+    new_atoms = atoms.subsample(indices)
     print("done")
 
     # Write the data to the specified output file with the specified format
-    print("\tWriting subsampled atomic structures to file '{:s}' with format '{:s}' ... ".format(args.output, args.format), end="")
-    try:
-        write(args.output, new_atoms, format=args.format) # fmt)
-        print("done")
-    except Exception as e:
-        print(f"\n\tError: {e}")
+    print("\tWriting subsampled atomic structures to file '{:s}' with format '{:s}' ... ".format(args.output, args.output_format), end="")
+    new_atoms.to_file(file=args.output, format=args.output_format)
+    print("done")
 
 if __name__ == "__main__":
     main()
