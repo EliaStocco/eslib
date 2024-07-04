@@ -7,6 +7,7 @@ from ase.io import read, write
 from eslib.tools import cart2frac, frac2cart
 from eslib.input import slist
 from typing import List
+from eslib.classes.trajectory import AtomicStructures
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -37,7 +38,7 @@ def main(args):
     
     #------------------#
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    trajectory:List[Atoms] = read(args.input,format=args.input_format,index=":")
+    trajectory = AtomicStructures.from_file(file=args.input, format=args.input_format)
     print("done")
     print("\tNumber atomic structures: ",len(trajectory))
 
@@ -92,11 +93,13 @@ def main(args):
 
 
     print("\n\tWriting (un)wrapped atomic structure to file '{:s}' ... ".format(args.output), end="")
-    try:
-        write(images=trajectory,filename=args.output,format=args.output_format) # fmt)
-        print("done")
-    except Exception as e:
-        print("\n\tError: {:s}".format(e))
+    trajectory.to_file(file=args.output,format=args.output_format)
+    print("done")
+    # try:
+    #     write(images=trajectory,filename=args.output,format=args.output_format) # fmt)
+    #     print("done")
+    # except Exception as e:
+    #     print("\n\tError: {:s}".format(e))
 
 #---------------------------------------#
 if __name__ == "__main__":
