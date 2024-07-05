@@ -145,7 +145,10 @@ def file_pattern(method: M) -> M:
 
                 from classes.trajectory import AtomicStructures            
                 # Process each matched file
+                N = len(matched_files)
+                print()
                 for n, file in enumerate(matched_files):
+                    print(f"\t{n+1}/{N} : {file}                        ", end="\r",flush=True)
                     kwargs['file'] = file  # Update 'file' in kwargs
                     atoms:AtomicStructures = method(cls,*args, **kwargs)  # Call the method with updated 'file'
                     atoms.set("file",np.array([file] * len(atoms)),"info")
