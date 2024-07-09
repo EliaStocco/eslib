@@ -1,11 +1,12 @@
 from ase import Atoms
+from ase.cell import Cell
 from io import TextIOWrapper
 import re
 import os
 import math
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor
-from typing import List, Union, TypeVar, Match, Callable, Any, Dict
+from typing import List, Union, TypeVar, Match, Callable, Any, Dict, cast
 import functools
 import glob
 from ase.io import read, write, string2index
@@ -326,6 +327,8 @@ def read_trajectory(file:str,
                         a, b, c = [float(x) for x in string.group(1).split()[:3]]
                         alpha, beta, gamma = [float(x) * deg2rad for x in string.group(1).split()[3:6]]
                         cells[n] = abc2h(a, b, c, alpha, beta, gamma)
+            else:
+                cells:List[Union[Cell, None]] = FakeList(None,len(atoms))
 
             if remove_replicas:
                 if not read_all_comments:
@@ -346,7 +349,7 @@ def read_trajectory(file:str,
                 for atom,step in zip(atoms,unique_steps):
                     atom.info["step"] = step
 
-            for atom,cell in zip(atoms,cells):
+            for atom, cell in zip(atoms,cells):
                 atom.set_cell(cell.T * factor["cell"] if pbc else None)
                 atom.set_pbc(pbc)
                 atom.positions *= factor["positions"]
@@ -527,14 +530,14 @@ class FakeList:
     """
     A fake list implementation.
     """
-    def __init__(self, value, length):
+    def __init__(self, value: Any, length: int):
         self.value = value
         self.length = length
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.length
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: Union[int, slice]) -> Union[Any, List[Any]]:
         if isinstance(index, slice):
             start, stop, step = index.indices(self.length)
             return [self.value] * ((stop - start + step - 1) // step)
