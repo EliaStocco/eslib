@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Union, Any
 import re
 import numpy as np
 from ase import Atoms
@@ -72,8 +72,8 @@ def bec_from_oxidation_number(atoms:Atoms,on:List[str])->BEC:
     bec = bec.reshape((1,-1,3))
     return BEC.from_numpy(bec)
 
-def compute_dipole_quanta(trajectory:List[Atoms],in_keyword:str="dipole",out_keyword:str="quanta")->Tuple[List[Atoms],np.ndarray]:
-    out = deepcopy(trajectory)
+def compute_dipole_quanta(trajectory:Union[List[Atoms],Any],in_keyword:str="dipole",out_keyword:str="quanta")->Tuple[Union[List[Atoms],Any],np.ndarray]:
+    out:Union[List[Atoms],Any] = deepcopy(trajectory)
     quanta = np.full((len(trajectory),3),np.nan)
     for n,atoms in enumerate(trajectory):
         quanta[n,:] = cart2frac(cell=atoms.get_cell(),v=atoms.info[in_keyword])
