@@ -94,6 +94,8 @@ def main(args):
     im2 = axes[2].imshow(dZ, cmap='Blues', origin='upper', aspect='auto',vmin=dZ.min(), vmax=dZ.max())
     axes[2].set_title('abs. diff.')
     axes[2].set_aspect('equal')
+    axes[2].set_xticks(np.arange(dZ.shape[1]))  # Set x ticks
+    axes[2].set_xticklabels(['x', 'y', 'z'])     # Set x tick labels
     if args.show_numbers:
         for i in range(dZ.shape[0]):
             for j in range(dZ.shape[1]):
@@ -103,19 +105,21 @@ def main(args):
     im3 = axes[3].imshow(Zd, cmap='Blues', origin='upper', aspect='auto', vmin=Zd.min(), vmax=Zd.max())
     axes[3].set_title('perc. diff.')
     axes[3].set_aspect('equal')
+    axes[3].set_xticks(np.arange(Zd.shape[1]))  # Set x ticks
+    axes[3].set_xticklabels(['x', 'y', 'z'])     # Set x tick labels
     if args.show_numbers:
         for i in range(Zd.shape[0]):
             for j in range(Zd.shape[1]):
                 axes[3].text(j, i, '{:.2f}'.format(Zd[i, j]), ha='center', va='center', color='black')
 
     # Add a common colorbar for Za and Zb
-    cbar = fig.colorbar(im1, ax=[axes[0], axes[1]], shrink=shrink)
-
-    # Add a separate colorbar for dZ and Zd
+    cbar0 = fig.colorbar(im0, ax=axes[0], shrink=shrink)
+    cbar1 = fig.colorbar(im1, ax=axes[1], shrink=shrink)
     cbar2 = fig.colorbar(im2, ax=axes[2], shrink=shrink)
     cbar3 = fig.colorbar(im3, ax=axes[3], shrink=shrink)
 
     # Save the plot
+    plt.tight_layout()
     plt.savefig(args.output)
 
 #---------------------------------------#
