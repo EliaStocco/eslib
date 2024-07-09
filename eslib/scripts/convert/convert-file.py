@@ -58,6 +58,9 @@ def main(args):
         if args.input_unit_cell is not None:
             raise ValueError("'i-PI' format support only 'None' as -iuc/--input_unit_cell since the units are automatically read and converted into angstrom.")
 
+    if args.input_format is not None and args.input_format == "xyz":
+        print("\n\t{:s}: 'xyz' format is not optimized in ASE. extxyz' would be preferable.".format(warning))
+
     #------------------#
     if args.input_format is None:
         try:
