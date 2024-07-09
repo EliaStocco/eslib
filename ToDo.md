@@ -13,6 +13,7 @@
 - add automatic printing of user messages in scripts
 - add a `README.md` for each folder
 - use other personal repositories
+- consider using `yield` in `aseio.py` for long trajectories
 
 # Working on 
 - add automatic tests with `pytest`
