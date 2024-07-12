@@ -30,8 +30,10 @@ def main(args):
     model = DipoleModel.from_file(args.model)
     print("done")
     #------------------#
-    print("\n\tmodel summary: ")
-    model.summary(string="\t\t")
+    try:
+        model.summary()
+    except:
+        pass
 
     #------------------#
     # trajectory
@@ -47,7 +49,7 @@ def main(args):
 
     #------------------#
     print("\n\tSetting the dipoles computed by the model as '{:s}' info ... ".format(args.name), end="")
-    structures.set_info(name=args.name,data=output)
+    structures.set(name=args.name,data=output,what="info")
     print("done")
 
     #------------------#

@@ -14,5 +14,7 @@ class DipoleModel(pickleIO):
     # def from_file(cls: Type[T], file_path: str) -> T:
     #     return super().from_pickle(file_path)
     
-    # def summary(self, string="\t"):
-    #     return
+    def summary(self, string="\t"):
+        print("\n{:s}Model type: {:s}".format(string,self.__class__.__name__))
+        print("\tModel summary:")
+        

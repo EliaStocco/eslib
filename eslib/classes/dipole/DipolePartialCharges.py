@@ -74,3 +74,9 @@ class DipolePartialCharges(DipoleModel):
             # if not np.allclose(test,dipole[n]):
             #     raise ValueError("coding error")
         return dipole
+
+    def summary(self, string: str = "\t") -> None:
+        """Print summary of the model."""
+        super().summary(string)        
+        for c in self.charges:
+            print("\t{:s}{:s}: {:>f}".format(string, c, self.charges[c]))
