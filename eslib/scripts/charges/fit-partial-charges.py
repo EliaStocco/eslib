@@ -1,16 +1,10 @@
 #!/usr/bin/env python
-from ase.io import read
 import numpy as np
 from eslib.classes.dipole import DipolePartialCharges
 from eslib.classes.trajectory import AtomicStructures
-from eslib.classes.trajectory import info
-from eslib.formatting import esfmt, float_format, warning
-from eslib.physics import oxidation_number
-from eslib.physics import bec_from_oxidation_number
+from eslib.formatting import esfmt
 from eslib.metrics import metrics
 from scipy.optimize import minimize
-from ase import Atoms
-from typing import List
 from eslib.show import show_dict
 import json
 
@@ -36,7 +30,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    trajectory:List[Atoms] = list(AtomicStructures.from_file(file=args.input))
+    trajectory = AtomicStructures.from_file(file=args.input)
     print("done")
 
     yreal = np.zeros((len(trajectory),3))
