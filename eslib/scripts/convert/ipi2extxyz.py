@@ -210,11 +210,7 @@ def main(args):
     ###
     # writing
     print("\n\tWriting output to file '{:s}' ... ".format(args.output), end="")
-    try:
-        write(args.output, list(atoms), format="extxyz") # fmt)
-        print("done")
-    except Exception as e:
-        print(f"\n\t{error}: {e}")
+    atoms.to_file(file=args.output,format=args.output_format)
 
 if __name__ == "__main__":
     main()
