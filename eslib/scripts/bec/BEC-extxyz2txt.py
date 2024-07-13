@@ -65,6 +65,7 @@ def main(args):
     if args.check:
         if not trajectory.is_there(args.keyword):
             print("\n\t{:s}: '{:s}' not found --> it's not possible to check whether BECs are correctly formatted.".format(warning,args.keyword))
+        else:
             tmp = trajectory.get(args.keyword)
             if not np.allclose(BEC,tmp):
                 print("\t{:s}: '{:s}' and the ones reconstructued differ".format(warning,args.keyword))
