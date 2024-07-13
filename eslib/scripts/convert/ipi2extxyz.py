@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import argparse
 import os
 import numpy as np
 from copy import copy
@@ -23,39 +22,21 @@ description = "Convert the i-PI output files to an extxyz file with the specifie
 
 #---------------------------------------#
 def prepare_args(description):
-
+    import argparse
     parser = argparse.ArgumentParser(description=description)
-
     argv = {"metavar" : "\b",}
-
-    parser.add_argument("-p", "--prefix", type=str, default='i-pi', **argv,
-                        help="prefix of the i-PI output files (default: %(default)s)")
-    
-    parser.add_argument("-f", "--folder", type=str, default='.', **argv,
-                        help="folder (default: %(default)s)")
-    
-    parser.add_argument("-qf", "--positions_file",  type=str, default=None, **argv,
-                        help="input file containing the MD trajectory positions and cells (default: %(default)s)")
-    
-    parser.add_argument("-pbc", "--pbc",  type=str2bool, default=True, **argv,
-                        help="whether the system is periodic (default: %(default)s)")
-
-    parser.add_argument("-pf", "--properties_file",  type=str, default=None, **argv,
-                        help="input file containing the MD trajectory properties (default: %(default)s)")
-
-    parser.add_argument("-if", "--format",  type=str, default='i-pi', **argv,
-                        help="input file format (default: %(default)s)")
-
-    parser.add_argument("-aa", "--additional_arrays",  type=lambda s: size_type(s,dtype=str), default=None, **argv,
-                        help="additional arrays to be added to the output file (example: [velocities,forces], default: [])")
-    
-    parser.add_argument("-ap", "--additional_properties",  type=lambda s: size_type(s,dtype=str), default=["all"], **argv,
-                        help="additional properties to be added to the output file (example: [potential,dipole], default: [all])")
-
-    parser.add_argument("-o", "--output",  type=str, default='output.extxyz', **argv,
-                        help="output file in extxyz format (default: %(default)s)")
-
-    return parser# .parse_args()
+    tmp = lambda s: size_type(s, dtype=str)
+    parser.add_argument("-p"  , "--prefix"               , type=str     , **argv, required=False, help="prefix of the i-PI output files (default: %(default)s)", default='i-pi')
+    parser.add_argument("-f"  , "--folder"               , type=str     , **argv, required=False, help="folder (default: %(default)s)", default='.')
+    parser.add_argument("-qf" , "--positions_file"       , type=str     , **argv, required=False, help="input file containing the MD trajectory positions and cells (default: %(default)s)", default=None)
+    parser.add_argument("-pbc", "--pbc"                  , type=str2bool, **argv, required=False, help="whether the system is periodic (default: %(default)s)", default=True)
+    parser.add_argument("-pf" , "--properties_file"      , type=str     , **argv, required=False, help="input file containing the MD trajectory properties (default: %(default)s)", default=None)
+    parser.add_argument("-if" , "--format"               , type=str     , **argv, required=False, help="input file format (default: %(default)s)", default='i-pi')
+    parser.add_argument("-aa" , "--additional_arrays"    , type=tmp     , **argv, required=False, help="additional arrays to be added to the output file (example: [velocities,forces], default: [])", default=None)
+    parser.add_argument("-ap" , "--additional_properties", type=tmp     , **argv, required=False, help="additional properties to be added to the output file (example: [potential,dipole], default: [all])", default=["all"])
+    parser.add_argument("-o"  , "--output"               , type=str     , **argv, required=False, help="output file in extxyz format (default: %(default)s)", default='output.extxyz')
+    parser.add_argument("-of" , "--output_format"        , type=str     , **argv, required=False, help="output file format (default: %(default)s)", default=None)
+    return parser
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
