@@ -6,8 +6,8 @@ T = TypeVar('T', bound='DipoleModel')
 
 class DipoleModel(pickleIO):
 
-    def compute(self,traj:List[Atoms],**argv):
-        raise ValueError("This method should be overwritten.")
+    # def compute(self,traj:List[Atoms],**argv):
+    #     raise ValueError("This method should be overwritten.")
 
     # @abstractmethod
     def get(self,traj:List[Atoms],**argv):

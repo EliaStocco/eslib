@@ -53,8 +53,8 @@ def main(args):
         raise ValueError("Loaded model is None.")
 
     #------------------#
-    print("\n\tMACE model summary: ")
-    model.summary(string="\t\t")
+    # print("\n\tMACE model summary: ")
+    model.summary()
 
     #------------------#
     # try:

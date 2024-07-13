@@ -18,6 +18,6 @@
 # Working on 
 - add automatic tests with `pytest`
 - implement finite difference methods for vibrational modes exploiting symmetries (as done in `phononpy`) using `spglib`
-- find a way to "standardize" `DipoleModel`, `MACEModel` and `Calculator`
+- find a way to "standardize" `DipoleModel`, `MACEModel` and `Calculator`: I need to build a class on top of `ase.calculator`
 - implement a class to deal with `i-PI` properties
 - add a script to transfrom an atomic structure into its Niggli, Minkowski, and standard form.
