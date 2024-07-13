@@ -6,7 +6,7 @@ from eslib.classes.mace_model import MACEModel
 
 @dataclass
 class DipoleMACECalculator(DipoleModel,MACEModel):
-        
+    
     def get(self,traj:List[Atoms],**argv):
         output = self.compute(traj,raw=True,**argv)
         return output["dipole"]
