@@ -1,10 +1,11 @@
 from dataclasses import dataclass, field
 from ase import Atoms
-from typing import List
+from typing import List, Dict, Any
 import numpy as np
 from eslib.tools import convert
 from eslib.physics import compute_dipole_quanta
 from copy import copy
+from ase.calculators.calculator import all_changes
 from eslib.tools import cart2frac
 from eslib.classes.dipole.DipoleModel import DipoleModel
 
@@ -16,6 +17,7 @@ class DipoleLinearModel(DipoleModel):
     dipole: np.ndarray
     Natoms: int = field(init=False)  # Natoms is set in __post_init__
     # frame: str = field(default="global")
+    implemented_properties:Dict[str, Any] = field(init=False)
 
     def __post_init__(self):
         self.Natoms = self.ref.get_global_number_of_atoms()  # Set Natoms based on the shape of self.ref
@@ -34,6 +36,8 @@ class DipoleLinearModel(DipoleModel):
 
         # if self.frame not in ["global", "eckart"]:
         #     raise ValueError(f"Invalid value for 'frame'. Expected 'global' or 'eckart', got {self.frame}")
+
+        self.implemented_properties = ["dipole", "BEC", "BECx", "BECy", "BECz"]
     
     def _check_bec(self,bec=None):
         if bec is None:
@@ -47,6 +51,17 @@ class DipoleLinearModel(DipoleModel):
     def set_bec(self,bec):
         if self._check_bec(bec):
             self.bec = bec
+
+    def calculate(self, atoms:Atoms=None, properties=None, system_changes=all_changes):
+        self.results = {}
+        dipole = self.compute([atoms],frame="global")
+        assert dipole.shape == (3,), f"Invalid shape for 'dipole'. Expected (3,), got {dipole.shape}"
+        Natoms = self.ref.get_global_number_of_atoms()
+        self.results["dipole"] = dipole
+        self.results["BEC"]    = self.bec.reshape(Natoms,-1)
+        self.results["BECx"]   = self.bec[:,0].flatten()
+        self.results["BECy"]   = self.bec[:,1].flatten()
+        self.results["BECz"]   = self.bec[:,2].flatten()
 
     def compute(self,traj:List[Atoms],frame:str="global"):
         """Compute the dipole according to a linear model in the cartesian displacements."""
