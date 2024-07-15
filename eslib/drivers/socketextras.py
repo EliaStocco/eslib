@@ -2,6 +2,7 @@ import numpy as np
 from ase import Atoms
 from ase.calculators.calculator import Calculator
 import json
+import time
 import ase.units as units
 from ase.calculators.socketio import SocketClient, SocketClosed
 
@@ -88,7 +89,7 @@ class SocketClientExtras(SocketClient):
 
         return energy, forces, virial, extras
     
-    def irun_rank0(self, atoms, use_stress=True):
+    def irun_rank0(self, atoms:Atoms, use_stress:bool=True):
         # For every step we either calculate or quit.  We need to
         # tell other MPI processes (if this is MPI-parallel) whether they
         # should calculate or quit.
@@ -100,8 +101,10 @@ class SocketClientExtras(SocketClient):
                     # Server closed the connection, but we want to
                     # exit gracefully anyway
                     msg = 'EXIT'
+                print(f"\t@Received: {msg}")
 
                 if msg == 'EXIT':
+                    print(f"Closing connection.")
                     # Send stop signal to clients:
                     self.comm.broadcast(np.ones(1, bool), 0)
                     # (When otherwise exiting, things crashed and we should
@@ -116,22 +119,20 @@ class SocketClientExtras(SocketClient):
                     atoms.cell[:] = cell
                     atoms.positions[:] = positions
 
-                    # User may wish to do something with the atoms object now.
-                    # Should we provide option to yield here?
-                    #
-                    # (In that case we should MPI-synchronize *before*
-                    #  whereas now we do it after.)
-
                     # Send signal for other ranks to proceed with calculation:
                     self.comm.broadcast(np.zeros(1, bool), 0)
+                    start_time = time.time()
+                    print(f"\t@Calling function: `calculate`")
                     energy, forces, virial, extras = self.calculate(atoms, use_stress)
-
+                    end_time = time.time()
+                    print(f"\t@Elapsed time in `calculate`: {end_time - start_time:.4f} seconds")
                     self.state = 'HAVEDATA'
                     yield
                 elif msg == 'GETFORCE':
                     assert self.state == 'HAVEDATA', self.state                
                     if extras is None or extras is {}:
                         extras = np.zeros(1, dtype=np.byte)
+                    print(f"\t@Calling function: `self.protocol.sendforce`")
                     self.protocol.sendforce(energy, forces, virial, morebytes=extras)
                     self.state = 'NEEDINIT'
                 elif msg == 'INIT':
