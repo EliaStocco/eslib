@@ -48,8 +48,10 @@ def main(args):
         model.charges_key = args.charges
 
     #------------------#
-    print("\n\tMACE model summary: ")
-    model.summary(string="\t\t")
+    try:
+        model.summary()
+    except: 
+        pass
 
     #------------------#
     # trajectory
