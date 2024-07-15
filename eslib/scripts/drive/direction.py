@@ -4,7 +4,7 @@ from ase.io import read
 import numpy as np
 from eslib.functions import str2bool
 from eslib.input import size_type
-from eslib.formatting import matrix2str
+from eslib.show import matrix2str
 
 description="Return a vector in cartesian coordinates depending on its lattice vector coordinates."
 

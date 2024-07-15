@@ -3,7 +3,7 @@
 # email : elia.stocco@mpsd.mpg.de
 from ase.io import read
 import numpy as np
-from eslib.formatting import matrix2str
+from eslib.show import matrix2str
 from eslib.formatting import esfmt
 
 #---------------------------------------#

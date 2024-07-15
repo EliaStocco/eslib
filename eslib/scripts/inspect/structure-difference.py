@@ -6,7 +6,7 @@ import argparse
 import numpy as np
 from ase.io import read
 from ase.geometry import get_distances
-from eslib.formatting import matrix2str
+from eslib.show import matrix2str
 from eslib.tools import find_transformation
 from eslib.input import str2bool
 from eslib.tools import sort_atoms

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from eslib.classes.normal_modes import NormalModes
-from eslib.formatting import matrix2str
+from eslib.show import matrix2str
 from eslib.tools import convert
 from eslib.output import output_folder
 from eslib.input import size_type

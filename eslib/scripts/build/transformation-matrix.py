@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # author: Elia Stocco
 # email : elia.stocco@mpsd.mpg.de
-from eslib.formatting import matrix2str
+from eslib.show import matrix2str
 from eslib.tools import find_transformation
 from ase import Atoms
 from ase.io import read

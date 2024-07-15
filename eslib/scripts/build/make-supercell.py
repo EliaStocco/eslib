@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 import numpy as np
 from ase.io import read, write
-from eslib.formatting import matrix2str
+from eslib.show import matrix2str
 from ase.build import make_supercell
-from scipy.spatial.transform import Rotation
 from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt
 

@@ -4,7 +4,7 @@ from ase.io import read
 from ase.build import make_supercell
 from ase.build import cut
 from eslib.tools import find_transformation
-from eslib.formatting import matrix2str
+from eslib.show import matrix2str
 
 #---------------------------------------#
 description     = "Determin which atom in structure A is a replica of an atom in structure B."

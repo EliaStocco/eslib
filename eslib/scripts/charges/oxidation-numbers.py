@@ -5,7 +5,7 @@ import json
 from ase import Atoms
 from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt, warning
-from eslib.formatting import matrix2str
+from eslib.show import matrix2str
 from eslib.physics import oxidation_number
 
 #---------------------------------------#
