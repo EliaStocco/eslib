@@ -54,7 +54,10 @@ def main(args):
 
     #------------------#
     # print("\n\tMACE model summary: ")
-    model.summary()
+    try:
+        model.summary()
+    except:
+        pass
 
     #------------------#
     # try:
