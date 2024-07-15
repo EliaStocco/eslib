@@ -1,5 +1,5 @@
 import numpy as np
-from copy import copy
+from copy import copy, deepcopy
 from itertools import product
 # import xarray as xr
 from eslib.functions import get_one_file_in_folder #, nparray2list_in_dict
@@ -15,6 +15,8 @@ from typing import List, Dict
 import pint
 import os
 from eslib.functional import unsafe, improvable
+from eslib.tools import w2_to_w
+from eslib.tools import is_sorted_ascending
 import warnings
 # Disable all UserWarnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -89,7 +91,7 @@ class NormalModes(pickleIO):
     # def to_dict(self)->dict:
     #     return nparray2list_in_dict(vars(self))
 
-    @unsafe
+    # @unsafe
     def to_folder(self,folder,prefix):
 
         outputs = {
@@ -171,7 +173,7 @@ class NormalModes(pickleIO):
 
         return self   
     
-    @unsafe
+    # @unsafe
     def set_dynmat(self,dynmat,mode="phonopy"):
         _dynmat = np.asarray(dynmat)
         if mode == "phonopy":
@@ -187,12 +189,12 @@ class NormalModes(pickleIO):
             raise ValueError("not implemented yet")
         pass
 
-    @unsafe
+    # @unsafe
     def set_modes(self,modes):
         self.mode.values = PhysicalTensor(modes, dims=('dof', 'mode'))
         self.mode /= norm_by(self.mode,"dof")
         
-    @unsafe
+    # @unsafe
     def set_eigvec(self,band,mode="phonopy"):
         if mode == "phonopy":
             N = self.Nmodes
@@ -207,7 +209,7 @@ class NormalModes(pickleIO):
             raise ValueError("not implemented yet")
         pass
 
-    @unsafe
+    # @unsafe
     def set_eigval(self,eigval):
         self.eigval[:] = PhysicalTensor(eigval, dims=('mode'))
     
@@ -221,8 +223,17 @@ class NormalModes(pickleIO):
         # tmp  = np.allclose(self.dynmat,self.dynmat.T)
         pass
 
-    @unsafe
+    # @unsafe
     def diagonalize(self,symmetrize:bool=True):
+        """
+        Diagonalize the dynamical matrix to compute eigenvalues and eigenvectors.
+        
+        Parameters:
+            symmetrize (bool): Flag to symmetrize the dynamical matrix.
+        
+        Returns:
+            None
+        """
         dm = remove_unit(self.dynmat)[0]
         if symmetrize:
             dm = 0.50 * (dm + dm.T)
@@ -231,9 +242,45 @@ class NormalModes(pickleIO):
         self.eigval.values = eigval
         self.eigvec2modes(_test=False)
         self.sort()
+        pass
 
-    @unsafe
+    def copy(self):
+        """
+        Return a deep copy of the current object.
+
+        Returns:
+            NormalModes: A deep copy of the current object.
+        """
+        return deepcopy(self)
+
+    def check(self,threshold=1e-4,**argv):
+        """
+        Check if the eigenvalues, eigenvectors, and normal modes of the current NormalModes object match those of another NormalModes object within a specified threshold.
+        
+        Parameters:
+            threshold (float): The threshold value for the comparison.
+            **argv: Additional keyword arguments.
+        """
+        tmp = self.copy()
+        tmp.diagonalize(symmetrize=False,**argv)
+        if np.linalg.norm(tmp.eigval.data-self.eigval.data)/len(self.eigval.data) > threshold:  warn("Eigenvalues do not match")
+        if np.linalg.norm(tmp.eigvec.data-self.eigvec.data)/len(self.eigvec.data) > threshold:  warn("Eigenvectors do not match")
+        if np.linalg.norm(tmp.mode.data-self.mode.data)    /len(self.mode.data)   > threshold:  warn("Normal modes do not match")
+
+    # @unsafe
     def eigvec2modes(self,_test:bool=True):
+        """
+        Convert the eigenvectors to the normal modes.
+
+        Args:
+            _test (bool, optional): Whether to perform a test to check if the conversion is correct. Defaults to True.
+
+        Raises:
+            ValueError: If the test fails and the conversion is not correct.
+
+        Returns:
+            None
+        """
         self.non_ortho_mode = self.eigvec.copy()
         for i in range(self.non_ortho_mode.sizes['dof']):
             index = {'dof': i}
@@ -578,19 +625,27 @@ class NormalModes(pickleIO):
         # return remove_unit(dZdN)[0]
 
     def sort(self,criterion="value"):
+        values = w2_to_w(self.eigval.data)
         if criterion == "value":
-            sorted_indices = np.argsort(self.eigval)
+            sorted_indices = np.argsort(values)
         elif criterion == "absolute":
-            sorted_indices = np.argsort(np.absolute(self.eigval))
+            sorted_indices = np.argsort(np.absolute(values))
         else:
             raise ValueError("not implemented yet")
-        for attr_name, attr_value in vars(self).items():
-            if isinstance(attr_value, (np.ndarray, PhysicalTensor)):
-                if len(attr_value.shape) == 1:
-                    setattr(self, attr_name, attr_value[sorted_indices])
-                elif len(attr_value.shape) == 2:
-                    setattr(self, attr_name, attr_value[:, sorted_indices])
-        return
+        if not is_sorted_ascending(sorted_indices):
+            known_vars = ["dynmat","eigvec","mode","eigval"]
+            for attr_name, attr_value in vars(self).items():
+                if isinstance(attr_value, (np.ndarray, PhysicalTensor)):
+                    if attr_name in ["eigval"]:
+                        setattr(self, attr_name, attr_value[sorted_indices])
+                    elif attr_name in ["eigvec","mode","non_ortho_mode"]:
+                        setattr(self, attr_name, attr_value[:, sorted_indices])
+                    # elif attr_name in []:
+                    #     setattr(self, attr_name, attr_value[sorted_indices, sorted_indices])
+                    elif attr_name in ["masses","dynmat"]:
+                        pass
+                    else:
+                        raise ValueError("Coding error: I don't know how to sort the attribute '{}'.".format(attr_name))
     
     @unsafe
     def get_characteristic_spring_constants(self):
@@ -641,4 +696,4 @@ class NormalModes(pickleIO):
     
     def get(self,name):
         data = getattr(self,name)
-        return remove_unit(data)[0].to_numpy()
+        return remove_unit(data)[0].to_numpy() 

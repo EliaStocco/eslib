@@ -24,6 +24,7 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"           , **argv, type=str     , required=True , help="file with the atomic configurations [a.u]")
     parser.add_argument("-n" , "--incremental_size", **argv, type=int     , required=False, help="incremental size (default: %(default)s)" , default=100)
+    parser.add_argument("-N" , "--number_of_files" , **argv, type=int     , required=False, help="max number of files (default: %(default)s)" , default=100)
     parser.add_argument("-in", "--initial_size"    , **argv, type=int     , required=False, help="initial size (default: %(default)s)" , default=100)
     parser.add_argument("-p" , "--percentages"     , **argv, type=ilist   , required=False, help="list with the sizes of the subsamples (default: %(default)s)", default=[80,20])
     parser.add_argument("-nl", "--name_list"       , **argv, type=slist   , required=False, help="list with the names of the subsamples (default: %(default)s)", default=["train","test"])
@@ -64,6 +65,8 @@ def main(args):
 
     #------------------#
     sizes = np.arange(args.initial_size, len(trajectory)+1, args.incremental_size)
+    if len(sizes) > args.number_of_files:
+        sizes = sizes[:args.number_of_files]
     print("\tDataset sizes: ",list(sizes))
 
     for n,size in enumerate(sizes):

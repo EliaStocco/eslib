@@ -474,3 +474,26 @@ def element_wise_multiplication(A: np.ndarray, B: np.ndarray, axis: int) -> np.n
     A_reshaped = A.reshape(new_shape)
     return A_reshaped * B
 
+def is_sorted_ascending(arr: np.ndarray) -> bool:
+    """
+    Check if the input array is sorted in ascending order.
+    
+    Args:
+        arr (np.ndarray): Input array to be checked.
+        
+    Returns:
+        bool: True if the array is sorted in ascending order, False otherwise.
+    """
+    return np.all(arr[:-1] <= arr[1:])
+def w2_to_w(w2: np.ndarray) -> np.ndarray:
+    """
+    Compute frequency from frequency squared.
+
+    Args:
+        w2 (np.ndarray): Squared frequencies.
+
+    Returns:
+        np.ndarray: Corresponding frequencies.
+    """
+    return np.sqrt(np.absolute(w2)) * np.sign(w2)
+
