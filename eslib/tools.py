@@ -374,7 +374,17 @@ def is_integer(num: Union[int, float, str]) -> bool:
         
 #---------------------------------------#
 def reshape_info_array(traj:List[Atoms],props:Dict[str,np.ndarray],shapes)->Dict[str,np.ndarray]:
+    """
+    Reshape arrays in a dictionary according to the given shapes.
 
+    Parameters:
+    traj (List[Atoms]): List of ASE Atoms objects representing the trajectory.
+    props (Dict[str,np.ndarray]): Dictionary of properties to be reshaped.
+    shapes (Dict[str,Tuple[int,...]]): Dictionary of shapes of the properties.
+
+    Returns:
+    Dict[str,np.ndarray]: Reshaped dictionary of properties.
+    """
     Nconf  = len(traj)
     Natoms = traj[0].get_global_number_of_atoms()
     # print("N conf.  : {:d}".format(Nconf))
@@ -405,44 +415,22 @@ def reshape_info_array(traj:List[Atoms],props:Dict[str,np.ndarray],shapes)->Dict
 
 #---------------------------------------#
 def add_info_array(traj:List[Atoms],props:Dict[str,np.ndarray],shapes)->List[Atoms]:
+    """
+    Add information and/or array attributes to a trajectory.
 
+    Parameters:
+    traj (List[Atoms]): List of ASE Atoms objects representing the trajectory.
+    props (Dict[str,np.ndarray]): Dictionary of properties to be added.
+    shapes (Dict[str,Tuple[int,...]]): Dictionary of shapes of the properties.
+
+    Returns:
+    List[Atoms]: Trajectory with the added properties.
+    """
     new_traj = copy(traj)
-
     props, whereto = reshape_info_array(traj,props,shapes)
-    
-    # # data:Dict[str,np.ndarray] = {}
-    # # for k in props.keys():
-    # #     data[k] = np.concatenate(props[k], axis=0)
-
-    # Nconf  = len(traj)
-    # Natoms = traj[0].get_global_number_of_atoms()
-    # # print("N conf.  : {:d}".format(Nconf))
-    # # print("N atoms. : {:d}".format(Natoms))
-    # whereto = {}
-    # for k in props.keys():
-    #     # print("reshaping '{:s}' from {}".format(k,data[k].shape),end="")
-    #     if isinstance(shapes[k][1],int) or len(shapes[k][1]) == 1 :
-    #         # info
-    #         whereto[k] = "info"
-    #     elif 'natoms' in shapes[k][1]:
-    #         # arrays
-    #         whereto[k] = "arrays"
-    #     else:
-    #         raise ValueError("coding error")
-        
-    # for k in props.keys():    
-    #     # print("reshaping '{:s}' from {}".format(k,props[k].shape),end="")
-    #     if whereto[k] == "info":
-    #         props[k] = props[k].reshape((Nconf,-1))
-    #     elif whereto[k] == "arrays":
-    #         props[k] = props[k].reshape((Nconf,Natoms,-1))
-    #     else:
-    #         raise ValueError("`whereto[{k}]` can be either `info` or `arrays`.")
-    #     # print(" to {}".format(props[k].shape))
-
     # Store data in atoms objects
     for n,atoms in enumerate(new_traj):
-        atoms.calc = None  # crucial
+        atoms.calc = None  # crucial for writing the info in the file
         for k in props.keys():
             if whereto[k] == "info":
                 atoms.info[k] = props[k][n]
