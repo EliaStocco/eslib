@@ -82,6 +82,9 @@ def main(args):
                                     **kwargv)         
     print("done")
 
+    if calculator is None:
+        raise Exception("Calculator is None. Some errors may have occurred. Please check the input arguments.")
+
     try:
         calculator.summary()
     except:

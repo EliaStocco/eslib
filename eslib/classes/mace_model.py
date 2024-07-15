@@ -45,11 +45,18 @@ class MACEModel(Calculator,pickleIO):
         self.implemented_properties = self.network.implemented_properties
 
     def calculate(self, atoms:Atoms=None, properties=None, system_changes=all_changes):
-        self.results = self.compute([atoms],raw=True)
+        super().calculate(atoms, properties, system_changes)
+        results:Dict[str,np.ndarray] = self.compute([atoms],raw=True)
+        for k in results.keys():
+            assert results[k].shape[0] == 1, f"Invalid shape for '{k}'. Expected (1,), got {results[k].shape}"
+            results[k] = results[k][0]
+        # [ a.shape for _,a in results.items() ]
+        self.results = results
 
     #------------------#
     def compute(self, traj: List[Atoms], prefix: str = "", raw: bool = False, **kwargs) -> Any:
-        """Compute properties for a trajectory.
+        """
+        Compute properties for a trajectory.
 
         Args:
             traj (List[Atoms]): List of ASE Atoms objects representing the trajectory.
@@ -60,45 +67,62 @@ class MACEModel(Calculator,pickleIO):
         Returns:
             Any: Computed properties.
         """
-        # if type(traj) == Atoms:
-        #     traj = [traj]
-        Nconfig = len(traj)
-        # Calculator.calculate(self, traj[0])
+        # If only one structure is provided, convert it to a list
+        # Nconfig = len(traj)
 
+        # Set default dtype
         torch_tools.set_default_dtype(self.default_dtype)
-        data_loader: torch_geometric.dataloader.DataLoader = make_dataloader(atoms_list=traj,
-                                                                             model=self.network,
-                                                                             batch_size=min(self.batch_size,Nconfig),
-                                                                             charges_key=self.charges_key)
+
+        # Create data loader
+        data_loader: torch_geometric.dataloader.DataLoader = make_dataloader(
+            atoms_list=traj,
+            model=self.network,
+            batch_size=min(self.batch_size, len(traj)),  # Use the actual number of structures
+            charges_key=self.charges_key,
+        )
+
+        # Initialize lists to store warnings and outputs
         warnings = []
         outputs: Dict[str, np.ndarray] = dict()
+
+        # Iterate over batches
         for batch in data_loader:
             batch: torch_geometric.batch.Batch = batch.to(self.device)
             data: Dict[str, torch.Tensor] = batch.to_dict()
+
+            # Compute properties for the current batch
             results: Dict[str, torch.Tensor] = self.network(data, compute_stress=False, **kwargs)
+
+            # If derivatives are requested, add them to the results
             if self.dR:
                 results = add_derivatives(self, results, data)
+
+            # Process the results
             for k in results.keys():
                 if k not in self.network.implemented_properties:
+                    # If a property is not implemented, add a warning
                     if k not in warnings:
                         warnings.append(k)
-                        warn("{:s} not in `implemented_properties`".format(k))
+                        warn(f"{k} not in `implemented_properties`")
                 else:
+                    # Convert the tensor to numpy array and append to the outputs
                     data = torch_tools.to_numpy(results[k])
                     if k not in outputs:
                         outputs[k] = data
                     else:
                         outputs[k] = np.append(outputs[k], data)
 
-        new_outputs = dict()
-        shapes = dict()
-        for k in outputs.keys():
-            new_outputs[prefix + k] = outputs[k]
-            shapes[prefix + k] = self.network.implemented_properties[k]
+        # Prepare the outputs for return
+        new_outputs = {prefix + k: outputs[k] for k in outputs.keys()}
+        shapes = {prefix + k: self.network.implemented_properties[k] for k in outputs.keys()}
 
+        # If `raw` is True, return the reshaped numpy arrays (no ASE Atoms objects)
+        # Otherwise, add the properties to the ASE Atoms objects and return the trajectory
         if raw:
+            # `raw` is True: return the reshaped numpy arrays (no ASE Atoms objects)
             return reshape_info_array(traj, new_outputs, shapes)[0]
         else:
+            # `raw` is False: add the properties to the ASE Atoms objects and return the trajectory
             return add_info_array(traj, new_outputs, shapes)
 
     #------------------#
@@ -120,6 +144,8 @@ class MACEModel(Calculator,pickleIO):
         for k, v in args.items():
             # Align the output based on the length of the longest key
             print("{:s}{:<{width}}: {}".format(string, k, v, width=max_key_length))
+        super(self).summary(string=string)
+        pass
 
 #---------------------------------------#
 def compute_dielectric_gradients(dielectric: torch.Tensor, positions: torch.Tensor) -> torch.Tensor:

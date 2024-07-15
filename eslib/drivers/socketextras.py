@@ -17,11 +17,14 @@ class FormatExtras:
     @staticmethod
     def format_bec(name:str,array:np.ndarray,atoms:Atoms)->np.ndarray:
         """Format Born Effective Charge Tensors."""
-        array = np.asarray(array)        # (natoms,3,3)  -->  (atom index   ,pos. coord.   ,dipole coord.)
-        array = np.moveaxis(array, 2, 0) # (3,natoms,3)  -->  (dipole coord., atom index   , pos. coord. )
-        array = np.moveaxis(array, 1, 2) # (3,3,natoms)  -->  (dipole coord., pos. coord.  , atom index  )
-        array = array.reshape((3,-1))    # (3,3xnatoms)  -->  (dipole coord., all coord.                 ) with R1x R1y R1z R2x R2y R2z ....
-        array = array.T                  # (3xnatoms,3)  -->  (all coord.   , dipole coord.              )
+        assert array.ndim == 2, "BEC mush have 2 dimensions"
+        assert array.shape == (atoms.get_global_number_of_atoms(),9), "BEC must have shape (natoms,9)"
+        # array = np.asarray(array)        # (natoms,3,3)  -->  (atom index   ,pos. coord.   ,dipole coord.)
+        # array = np.moveaxis(array, 2, 0) # (3,natoms,3)  -->  (dipole coord., atom index   , pos. coord. )
+        # array = np.moveaxis(array, 1, 2) # (3,3,natoms)  -->  (dipole coord., pos. coord.  , atom index  )
+        # array = array.reshape((3,-1))    # (3,3xnatoms)  -->  (dipole coord., all coord.                 ) with R1x R1y R1z R2x R2y R2z ....
+        # array = array.T                  # (3xnatoms,3)  -->  (all coord.   , dipole coord.              )
+        array = array.reshape(-1,3)
         return "BEC",array
 
 class ProtocolExtras:

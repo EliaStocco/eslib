@@ -76,7 +76,7 @@ class DipolePartialCharges(DipoleModel):
         return dipole
 
     def summary(self, string: str = "\t") -> None:
-        """Print summary of the model."""
-        super().summary(string)        
+        """Print summary of the model."""       
         for c in self.charges:
             print("\t{:s}{:s}: {:>f}".format(string, c, self.charges[c]))
+        super().summary(string=string)

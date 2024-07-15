@@ -11,6 +11,9 @@ class DipoleMACECalculator(DipoleModel,MACEModel):
         output = self.compute(traj,raw=True,**argv)
         return output["dipole"]
     
+    def summary(self, string="\t"):
+        super().summary(string)
+    
     # def get(self,traj:List[Atoms],**argv):
     #     new_traj = self.compute(traj,**argv)
     #     dipole = AtomicStructures(new_traj).get_info("dipole")

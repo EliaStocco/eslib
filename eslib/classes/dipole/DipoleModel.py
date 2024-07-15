@@ -21,4 +21,5 @@ class DipoleModel(pickleIO):
     def summary(self, string="\t"):
         print("\n{:s}Model type: {:s}".format(string,self.__class__.__name__))
         print("\tModel summary:")
+        super(self).summary(string=string)
         
