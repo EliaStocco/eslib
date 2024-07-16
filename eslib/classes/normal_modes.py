@@ -439,20 +439,18 @@ class NormalModes(pickleIO):
         # proj should be real
         if np.any(proj.imag != 0.0):
             warn("'proj' matrix should be real --> discarding its imaginary part.")
+        # Maybe this should remain complex for Gamma modes
         proj = proj.real
 
 
         # #-------------------#
+        # # Maybe this should remain complex for Gamma modes
         # # Normal Modes should be real
         # save = self.mode.copy()
         # if np.any(self.mode.imag != 0.0):
         #     warn("'mode' matrix should be real --> discarding its imaginary part.")
         # # do it anyway
         # self.mode = self.mode.real
-
-        #-------------------#
-        # create the projection operator onto the normal modes
-        # proj = self.mode.T * atomic_unit["dimensionless"]
 
         #-------------------#
         # simple test
@@ -465,26 +463,8 @@ class NormalModes(pickleIO):
 
         #-------------------#
         # project positions and velocities
-        # pint is not compatible with np.tensordot
-        # we need to remove the unit and set them again
-        # q,uq    = remove_unit(q)
-        # v,uv    = remove_unit(v)
-        # proj,up = remove_unit(proj)
-
-        # qn = proj.dot(q,dim="dof")
-        # vn = proj.dot(v,dim="dof")
-
-        # qn   = set_unit(qn,uq*up)
-        # vn   = set_unit(vn,uv*up)
-        # proj = set_unit(vn,up)
-
         qn = dot(proj,q,"dof")
         vn = dot(proj,v,"dof")
-
-        # #-------------------#
-        # # masses
-        # m = proj.dot(self.masses,dim="dof").dot(proj.T,dim="dof")
-        # m = set_unit(m,atomic_unit["mass"])
 
         #-------------------#
         # vib. modes eigenvalues
@@ -498,10 +478,10 @@ class NormalModes(pickleIO):
         #   = 1/2 M V^2 + 1/2 K     X^2
         #   = 1/2 M ( V^2 + W^2 X^2 )
         #
-        # K = 0.5 * m * vn*vn.conjugate()      # kinetic
-        # U = 0.5 * m * w2 * qn*qn.conjugate() # potential
-        K = 0.5 * np.square(vn) # vn*vn.conjugate()      # kinetic
-        U = 0.5 * w2 * np.square(qn) # qn*qn.conjugate() # potential
+        # K = 0.5 * np.square(vn) # vn*vn.conjugate()      # kinetic
+        # U = 0.5 * w2 * np.square(qn) # qn*qn.conjugate() # potential
+        K = 0.5 * np.absolute(vn)**2 # vn*vn.conjugate()      # kinetic
+        U = 0.5 * w2 * np.absolute(qn)**2 # qn*qn.conjugate() # potential
         if not check_dim(K,'[energy]'):
             raise ValueError("the kinetic energy has the wrong unit: ",get_unit(K))
         if not check_dim(U,'[energy]'):
@@ -512,7 +492,7 @@ class NormalModes(pickleIO):
             print("\t{:s}: negative potential energies!".format(warning),end="\n\t")
         # if np.any( remove_unit(K)[0] < threshold ):
         if not all_positive(K):
-            print("\t*{:s}:negative kinetic energies!".format(warning),end="\n\t")
+            print("\t{:s}: negative kinetic energies!".format(warning),end="\n\t")
         
         energy = U + K
         if not check_dim(energy,'[energy]'):
@@ -521,9 +501,6 @@ class NormalModes(pickleIO):
             energy = set_unit(energy,atomic_unit["energy"])
             if not check_dim(energy,'[energy]'):
                 raise ValueError("'energy' has the wrong unit")
-            
-        # if np.any( energy < 0 ):
-        #     raise ValueError("negative energies!")
             
         #-------------------#
         # amplitudes of the vib. modes
@@ -544,22 +521,6 @@ class NormalModes(pickleIO):
         B = dot(invmode,1./Msqrt * dot(self.eigvec,qn,"mode"),"dof")
         if not np.allclose(B,displacements):
             warn("'B' and 'displacements' should be equal.")
-
-        # AtoB = rbc(invmode,1./Msqrt * self.eigvec,"dof")
-        # B2 = dot(AtoB,qn,"mode")
-        # if not np.allclose(B,B2):
-        #     warn("'B' and 'B2' should be equal.")
-
-        # vv = 1/np.sqrt(w2) * vn
-        # A2 = ( np.square(qn) + np.square(vv) )
-        # A  = np.sqrt(A2)
-        # amplitude  = dot(dot(self.mode,1./np.sqrt(M) ,"mode"),eigvec,"dof")* A
-        # if not check_dim(amplitude,'[length]'):
-        #     raise ValueError("'amplitude' have the wrong unit")
-        
-        # amplitude_ = np.sqrt( energy / ( 0.5 * M * w2 ) )
-        # if not np.allclose(amplitude,amplitude_):
-        #     raise ValueError("inconsistent value")
 
         #-------------------#
         # check how much the trajectory 'satisfies' the equipartition theorem
@@ -596,8 +557,6 @@ class NormalModes(pickleIO):
             "occupation"    : occupation,
             # "phases"        : phases
         }
-
-        # self.mode = save
 
         return out
     
