@@ -83,14 +83,14 @@ class TimeCorrelation:
         if self._ready:
             return self._tcf
         else:
-            if axis != 0:
-                self.A = np.moveaxis(self.A, axis, 0)
-                self.B = np.moveaxis(self.B, axis, 0)
-            self._tcf = correlate(self.A, self.B, axis=0)
-            if axis != 0:
-                self.A    = np.moveaxis(self.A, 0, axis)
-                self.B    = np.moveaxis(self.B, 0, axis)
-                self._tcf = np.moveaxis(self._tcf, 0, axis)
+            # if axis != 0:
+            #     self.A = np.moveaxis(self.A, axis, 0)
+            #     self.B = np.moveaxis(self.B, axis, 0)
+            self._tcf = correlate(self.A, self.B, axis=axis)
+            # if axis != 0:
+            #     self.A    = np.moveaxis(self.A, 0, axis)
+            #     self.B    = np.moveaxis(self.B, 0, axis)
+            #     self._tcf = np.moveaxis(self._tcf, 0, axis)
             self._ready = True
             return self._tcf.copy()
 
@@ -143,6 +143,7 @@ class TimeAutoCorrelation(TimeCorrelation):
             raise ValueError("`mode` can be only `half` or `full`")
         arr:np.ndarray = super().tcf(axis)
         arr = arr / np.mean(self.A ** 2, axis=axis,keepdims=True)  # normalized to 1
+        assert np.allclose(np.take(arr,0,axis),1), "The auto-correlation function is not normalized to 1"
         if mode == "half":
             N = int(arr.shape[axis] / 2)  # the second half is noisy
             # arr = arr[:N]      
@@ -171,7 +172,7 @@ def correlate(
         Cross-correlation of the two input arrays.
     """
 
-    assert axis == 0, "not debugged yet with `axis` != 0"
+    # assert axis == 0, "not debugged yet with `axis` != 0"
     assert A.ndim == B.ndim
     shape_a = A.shape
     len_a = shape_a[axis]
@@ -203,7 +204,9 @@ def correlate(
     np.conj(ftA, out=ftA)
     ftB *= ftA
     tmp = np.fft.irfft(ftB, axis=axis, n=len_fft) # (240,1) for Example (1), (340,1) for Example (2)
-    out = tmp[:len_tcf] / norm_tcf # (120,1) for Example (1), (240,1) for Example (2)
+    indices = np.arange(len_tcf)
+    tmp = np.take(tmp, indices, axis=axis)
+    out = tmp / norm_tcf # (120,1) for Example (1), (240,1) for Example (2)
     return out
 
 def append_dims(arr, ndims=1):
