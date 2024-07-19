@@ -7,6 +7,8 @@ from eslib.plot import hzero
 from eslib.classes.physical_tensor import PhysicalTensor
 from eslib.input import str2bool
 from eslib.formatting import esfmt
+from eslib.classes.tcf import TimeAutoCorrelation
+from eslib.classes.spectrum import Spectrum
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -92,7 +94,6 @@ def main(args):
     if args.method == "function":
         autocorr = tacf(data)
     else:
-        from eslib.classes.tcf import TimeAutoCorrelation
         obj = TimeAutoCorrelation(data)
         autocorr = obj.tcf(axis=args.axis_corr)
     print("done")
@@ -114,7 +115,7 @@ def main(args):
         print("\tdata shape: ",data.shape)
 
     #------------------#
-    print("\n\tCompurting the average over the trajectories:")
+    print("\n\tComputing the average over the trajectories:")
     mean = autocorr.mean(axis=0)
     std = autocorr.std(axis=0)
     x = np.arange(autocorr.shape[1])*args.time_step
@@ -150,7 +151,7 @@ def main(args):
         ylow,yhigh = mean - std, mean + std
         axes[1].fill_between(x,ylow,yhigh, color='gray', alpha=alpha, label='$f\\pm\\sigma$')
         ylow,yhigh = mean - 2*std, mean + 2*std
-        axes[1].fill_between(x,ylow,yhigh, color='gray', alpha=0.15, label='$f\\pm2\\sigma$')
+        axes[1].fill_between(x,ylow,yhigh, color='gray', alpha=alpha/2., label='$f\\pm2\\sigma$')
 
         if args.fit:
             axes[1].plot(x,yfit,color="red",label='$e^{-x/\\tau}$',linewidth=1)
@@ -180,8 +181,6 @@ def main(args):
         # raw_autocorr = np.atleast_2d(raw_autocorr)
 
         if args.plot is not None:
-            # window
-            axes[2].plot(x,window,  color="black",label='window')
             # raw TACF
             axes[2].plot(x,mean,color="blue",label='$f$')
             # ylow,yhigh = mean - std, mean + std
@@ -194,6 +193,8 @@ def main(args):
             ylow,yhigh = mean - std, mean + std
             axes[2].fill_between(x,ylow,yhigh, color='gray', alpha=alpha, label='$f_{\\rm cleaned}\\pm\\sigma$')
             axes[2].legend(loc="upper right",facecolor='white', framealpha=1,edgecolor="black")
+            # window
+            axes[2].plot(x,window,  color="black",label='window')
 
 
     #------------------#
@@ -206,6 +207,7 @@ def main(args):
             # ax.set_xlim(1,x.max())
             # ax.set_xscale("log")
         axes[-1].set_xlabel('time [fs]')
+        plt.suptitle("Time Autocorrelation Function")
         plt.tight_layout()
         plt.savefig(args.plot)
         print("done")
@@ -215,6 +217,7 @@ def main(args):
     print("\n\tConverting autocorr into PhysicalTensor ... ", end="")
     autocorr = PhysicalTensor(autocorr)
     print("done")
+    print("\tautocorr shape: ",autocorr.shape)
 
     #------------------#
     print("\tSaving TACF to file '{:s}' ... ".format(args.output), end="")
