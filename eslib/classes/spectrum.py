@@ -12,9 +12,10 @@ T = TypeVar('T', bound='Spectrum')
 class Spectrum(TimeAutoCorrelation):
 
     _spectrum_ready: bool = field(default=False, init=False)
-    _raw_spectrum: np.ndarray = field(default=None, init=False)
+    # _raw_spectrum: np.ndarray = field(default=None, init=False)
     _spectrum: np.ndarray = field(default=None, init=False)
-    _window: np.ndarray = field(default=None, init=False)
+    _spectrum_imag: np.ndarray = field(default=None, init=False)
+    # _window: np.ndarray = field(default=None, init=False)
 
     def __init__(self: T, A: np.ndarray):
         super().__init__(A=A)
@@ -22,7 +23,7 @@ class Spectrum(TimeAutoCorrelation):
     def tcf(self: T, axis: Optional[int] = 0) -> np.ndarray:
         return super().tcf(axis=axis,mode="full")
 
-    def spectrum(self:T,M:int, axis: Optional[int] = 0, autocorr: Optional[np.ndarray] = None, method: Optional[str] = 'hanning',**kwargs)-> np.ndarray:
+    def spectrum(self:T,axis: Optional[int] = 0, autocorr: Optional[np.ndarray] = None)-> np.ndarray:
         """
         Computes the spectrum
         """
@@ -32,26 +33,32 @@ class Spectrum(TimeAutoCorrelation):
             if autocorr is None:
                 autocorr = self.tcf(axis)
             
-            self._raw_spectrum = np.fft.rfft(autocorr,axis=axis).real
+            # self._raw_spectrum = np.fft.rfft(autocorr,axis=axis).real
             
             # apply padding and windowing
-            func = getattr(np, method)
-            window = np.zeros(autocorr.shape[axis])
-            window[:M] = func(M,**kwargs)
-            self._window = window
+            # if method.lower() != "none":
+            #     func = getattr(np, method)
+            #     window = np.zeros(autocorr.shape[axis])
+            #     window[:M] = func(M,**kwargs)
+            #     self._window = window
 
-            autocorr = element_wise_multiplication(window,autocorr,axis)
-            self._spectrum = np.fft.rfft(autocorr,axis=axis).real
+            #     autocorr = element_wise_multiplication(window,autocorr,axis)
+
+            tmp = np.fft.rfft(autocorr,axis=axis)
+            self._spectrum = tmp.real
+            self._spectrum_imag = tmp.imag
+            # else:
+            #     self._spectrum = self._raw_spectrum.copy()
             
             self._spectrum_ready = True
         return self._spectrum.copy()
     
-    def to_json(self:T):
-        return {
-            "spectrum" : self._spectrum.copy(),
-            "raw-spectrum" : self._raw_spectrum.copy(),
-            "window" : self._window.copy(),
-        }
+    # def to_json(self:T):
+    #     return {
+    #         "spectrum" : self._spectrum.copy(),
+    #         # "raw-spectrum" : self._raw_spectrum.copy(),
+    #         "window" : self._window.copy(),
+    #     }
 
 
 

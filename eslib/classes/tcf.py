@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
 import numpy as np
+from scipy.fftpack import dct
+from eslib.tools import convert
 from typing import Optional, TypeVar, Tuple# , Callable, Any
 # from scipy.signal import correlate as scipy_correlate
 # import functools
@@ -281,6 +283,70 @@ def dummy_correlation(A:np.ndarray,B:np.ndarray,std:Optional[bool]=False)->Tuple
     else:
         return tcf,N
 
+def get_freq(dt: float, N: int, input_units: str = "femtosecond", output_units: str = "thz") -> np.ndarray:
+    """
+    Compute the frequency array from the timestep.
+
+    Parameters:
+    -----------
+    dt: float
+        Timestep in femtoseconds.
+    N: int
+        Length of the spectrum array.
+    input_units: str, optional
+        Units of the timestep. Default is "femtoseconds".
+    output_units: str, optional
+        Units of the frequency array. Default is "thz".
+
+    Returns:
+    --------
+    freq: np.ndarray
+        Frequency array.
+    """
+    # Convert timestep to seconds
+    dt = convert(dt, "time", input_units, "second")
+
+    # Compute the sampling rate in Hz
+    sampling_rate = 1 / dt
+
+    # Convert sampling rate to the desired units
+    sampling_rate = convert(sampling_rate, "frequency", "hz", output_units)
+
+    # Compute the frequency array
+    freq = np.linspace(0, sampling_rate / 2, N)
+
+    return freq
+
+def compute_spectrum(
+    autocorr: np.ndarray,
+    axis: int = 1,
+    pad: int = 0,
+) -> np.ndarray:
+    """
+    Compute the spectrum from the autocorrelation function.
+
+    Parameters:
+        autocorr (np.ndarray): The autocorrelation function.
+        axis (int, optional): The axis along which to compute the spectrum. Default is 1.
+        pad (int, optional): The number of zeros to add before the autocorrelation function in units of `autocorr.shape[axis]`. Default is 0.
+
+    Returns:
+        np.ndarray: The spectrum.
+    """
+    # Add padding to the autocorrelation function
+    N = autocorr.shape[axis]*pad
+    padding = np.zeros(N)
+    if axis == 1:
+        autocorr = np.asarray([ np.append(a,padding) for a in autocorr ])
+    else:
+        raise ValueError("not implemented yet") 
+
+    # Compute the discrete cosine transform of the autocorrelation function
+    # along the specified axis
+    spectrum = dct(autocorr, type=1, axis=axis)
+
+    # Return the real part of the spectrum
+    return spectrum.real
 
 def main():
     """

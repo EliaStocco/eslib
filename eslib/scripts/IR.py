@@ -3,6 +3,7 @@
 import numpy as np
 from scipy.fft import rfft, rfftfreq,irfft
 from scipy.signal.windows import kaiser
+import matplotlib.pyplot as plt 
 
 # Number of MD trajectories to be averaged over
 n_runs = 5
@@ -12,7 +13,7 @@ n_pad = 5
 # Read in data
 
 # Assumes data stored with dimensions (nruns, length_of_runs, 3)
-mu = np.load('dipole.npy')
+mu = np.load('dipole.n=0.npy')[None,:,:]
 
 # Define variables
 mu = mu - np.average(mu,axis=1)[:,None,:]
@@ -48,7 +49,7 @@ def spectrum_from_corr(corr):
 
     # Add Padding
 
-    pad = (n_runs,ncorr-1,3)
+    pad = (1,ncorr-1,3)
     for i in range(n_pad):
         corr = np.concatenate((corr,np.zeros(pad)),axis=1)
 
@@ -72,3 +73,16 @@ spec,norm,eb = spectrum_from_corr(corr)
 # Spectrum is output for x, y and z polarized light, in each case, with the mean followed by the errors in the mean at each frequency.
 print(eb.shape,norm.shape,spec.shape)
 np.savetxt('spectrum.out',np.column_stack([freq,np.average(spec[:,:,0],axis=0)/norm[0],eb[:,0]/norm[0],np.average(spec[:,:,1],axis=0)/norm[1],eb[:,1]/norm[1],np.average(spec[:,:,2],axis=0)/norm[2],eb[:,2]/norm[2]]))
+
+spectrum = np.loadtxt('spectrum.out')
+
+fig, ax = plt.subplots(1, figsize=(10, 4))
+
+# ax.plot(freq,y,label="raw",color="red")
+ax.plot(spectrum,color="blue", marker='.', markerfacecolor='blue', markersize=5)
+
+ax.grid()
+plt.tight_layout()
+plt.show()
+
+pass

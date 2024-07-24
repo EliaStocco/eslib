@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 import numpy as np
 from scipy.optimize import curve_fit
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
+from tomlkit import comment 
 from eslib.mathematics import tacf, reshape_into_blocks
 from eslib.plot import hzero
 from eslib.classes.physical_tensor import PhysicalTensor
 from eslib.input import str2bool
 from eslib.formatting import esfmt
-from eslib.classes.tcf import TimeAutoCorrelation
-from eslib.classes.spectrum import Spectrum
+from eslib.classes.tcf import TimeAutoCorrelation, compute_spectrum, get_freq
+# from eslib.classes.spectrum import Spectrum
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Compute the time autocorrelation function (TACF) of an array."
+description = "Compute the time autocorrelation function (TACF) of a dipole time series and compute the Infra Red (IR) spectrum."
+documentation = "This script computes the frequency dependent Beer-Lambert absorption coefficient of IR spectroscopy from the time derivative of dipole."
 
 alpha = 0.5
 
@@ -34,12 +36,19 @@ def prepare_args(description):
     parser.add_argument("-m" , "--method"     , **argv, required=False, type=str     , help="method (default: %(default)s)", default='class', choices=['class','function'])
     # Plot
     parser.add_argument("-p" , "--plot"       , **argv, required=False, type=str     , help="output file for the plot (default: %(default)s)", default='tacf.pdf')
-    parser.add_argument("-tm", "--tmax"       , **argv, required=False, type=float   , help="max time in plot [fs] (default: %(default)s)", default=500)
+    parser.add_argument("-tm", "--tmax"       , **argv, required=False, type=float   , help="max time in TACF plot [fs] (default: %(default)s)", default=500)
     parser.add_argument("-f" , "--fit"        , **argv, required=False, type=str2bool, help="whether to fit the TACF with an exponential (default: %(default)s)", default=True)
     # Window and padding
     parser.add_argument("-w"   , "--window"   , **argv, required=False, type=str     , help="window type (default: %(default)s)", default='hanning', choices=['none','barlett','blackman','hamming','hanning','kaiser'])
     parser.add_argument("-wt"  , "--window_t" , **argv, required=False, type=int     , help="time span of the window [fs] (default: %(default)s)", default=10)
-    # parser.add_argument("-pad" , "--padding"  , **argv, required=False, type=int     , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
+    # Infrared Spectrum
+    parser.add_argument("-ir" , "--infrared"  , **argv, required=False , type=str    , help="output file with the Infrared spectrum (default: %(default)s)", default=None)
+    parser.add_argument("-pad" , "--padding"  , **argv, required=False, type=int     , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
+    # Plot
+    parser.add_argument("-pir" , "--plot_infrared", **argv, required=False, type=str , help="output file for the plot (default: %(default)s)", default='IR.pdf')
+    parser.add_argument("-mf", "--max_freq"       , **argv, required=False, type=float, help="max frequency in IR plot [THz] (default: %(default)s)", default=500)
+    parser.add_argument("-fu", "--freq_unit"      , **argv, required=False, type=str , help="unit of the frequency in IR plot and output file (default: %(default)s)", default="THz")
+    parser.add_argument("-ms", "--marker_size"    , **argv, required=False, type=float , help="marker size (default: %(default)s)", default=0)
     return parser
 
 #---------------------------------------#
@@ -223,6 +232,85 @@ def main(args):
     print("\tSaving TACF to file '{:s}' ... ".format(args.output), end="")
     autocorr.to_file(file=args.output)
     print("done")
+
+    #------------------#
+    if args.infrared is not None:
+        print("\n\tComputing the spectra ... ", end="")
+        spectrum = compute_spectrum(autocorr,axis=args.axis_corr,pad=args.padding)
+        print("done")
+        print("\tspectrum shape: :",spectrum.shape)
+
+        #------------------#
+        print("\n\tNormalizing the spectra ... ", end="")
+        factor   = np.max(spectrum,axis=args.axis_corr)[:, np.newaxis]
+        spectrum = np.divide(spectrum,factor)
+        std      = np.divide(std,factor)
+        print("done")
+        print("\tspectrum shape: :",spectrum.shape)    
+
+        assert np.allclose(np.max(spectrum,axis=args.axis_corr),1), "the spectra are not normalized"
+
+        #------------------#
+        print("\n\tComputing the average over the trajectories ... ", end="")
+        std:np.ndarray = spectrum.std(axis=0)
+        spectrum:np.ndarray = spectrum.mean(axis=0)
+        print("done")
+        print("\tspectrum shape: :",spectrum.shape)
+
+        assert spectrum.ndim == 1, "the spectrum does not have 1 dimension"
+
+
+        #------------------#
+        print("\n\tComputing the frequencies ... ", end="")
+        freq = get_freq(dt=args.time_step, N=len(spectrum),output_units=args.freq_unit)
+        print("done")
+
+        print("\n\tSaving the spectrum and the frequecies to file '{:s}' ... ".format(args.infrared), end="")
+        tmp =  np.vstack((freq,spectrum,std)).T
+        assert tmp.ndim == 2, "thsi array should have 2 dimensions"
+        assert tmp.shape[1] == 3, "this array should have 3 columns"
+        tmp = PhysicalTensor(tmp)
+        if str(args.infrared).endswith("txt"):
+            header = \
+                f"Col 1: frequency in {args.freq_unit}\n" +\
+                f"Col 2: normalized spectrum\n" +\
+                f"Col 3: std (over trajectories) of the spectrum "
+            tmp.to_file(file=args.infrared,header=header)
+        else:
+            tmp.to_file(file=args.infrared)
+        
+        del tmp
+        print("done")
+
+
+        #------------------#
+        if args.plot_infrared:
+            print("\tPreparing plot ... ", end="")
+            fig, ax = plt.subplots(1, figsize=(6, 4))
+            # y = np.linalg.norm(spectrum.mean(axis=args.axis_corr),axis=-1)
+            # y /= np.max(y)
+            # ax.plot(freq,y,label="raw",color="red")
+            ax.plot(freq,spectrum, label="$\\rm S\\left(\\omega\\right)$",color="blue", marker='.', markerfacecolor='blue', markersize=args.marker_size)
+            ylow,yhigh = spectrum - std, spectrum + std
+            ax.fill_between(freq,ylow,yhigh, color='gray', alpha=0.8, label='$\\rm S\\left(\\omega\\right)\\pm\\sigma\\left(\\omega\\right)$')
+            # ylow,yhigh = spectrum - 2*std, spectrum + 2*std
+            # ax.fill_between(freq,ylow,yhigh, color='gray', alpha=0.5, label='$\\pm2\\sigma$')
+            ax.legend(loc="upper left",facecolor='white', framealpha=1,edgecolor="black")
+            ax.set_xlim(0,args.max_freq)
+            ax.set_ylim(0,None)
+            ax.set_yticks(np.arange(0,1.001,0.2))
+            ax.set_xlabel("frequency [THz]")
+            ax.set_ylabel("spectrum [arb. units]")
+            ax.grid()
+            plt.tight_layout()
+            print("done")
+
+            #------------------#
+            print("\tSaving plot to file '{:s}'... ".format(args.plot_infrared), end="")
+            plt.savefig(args.plot_infrared)
+            # plt.show()
+            print("done")
+        
 
     return 0
 
