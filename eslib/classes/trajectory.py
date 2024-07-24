@@ -1,6 +1,8 @@
+import array
 from copy import deepcopy
 from typing import List, Union, TypeVar
 import numpy as np
+import pandas as pd
 from eslib.tools import convert
 from eslib.functional import deprecated
 from eslib.classes.aseio import aseio
@@ -19,6 +21,46 @@ class AtomicStructures(aseio):
         - method for subsampling the AtomicStructures object
     """
 
+    def get_keys(self:T,what:str="all")->List[str]:
+
+        check_info  = dict()
+        check_array = dict()
+        
+        if what in ["all","info"]:
+            keys = self[0].info.keys() 
+            if len(keys) > 0:
+                for k in keys:
+                    for n in range(len(self)):
+                        if k not in self[n].info.keys():
+                            check_info[k] = False
+                            break
+                    else:
+                        check_info[k] = True
+
+        if what in ["all","arrays"]:
+            keys = self[0].arrays.keys()
+            if len(keys) > 0:
+                for k in keys:
+                    for n in range(len(self)):
+                        if k not in self[n].arrays.keys():
+                            check_array[k] = False
+                            break
+                    else:
+                        check_array[k] = True
+
+        if what not in ["all","info","arrays"]:
+            raise ValueError("`what` can be only 'all', 'info', or 'arrays' ")
+        
+        check = {**check_info,**check_array}
+
+        if False in check.values():
+            raise ValueError("Some checks failed")
+        
+        check = {k:v for k,v in check.items() if v is True}
+
+        return list(check.keys())
+       
+
     def get_info(self:T,name:str,default:np.ndarray=None)->np.ndarray:
         """
         Get information attribute values for all structures.
@@ -33,7 +75,10 @@ class AtomicStructures(aseio):
         output = None
         def set_output(output,n,value):
             if output is None:
-                output = np.zeros((len(self),*value.shape))
+                try:
+                    output = np.zeros((len(self),*value.shape))
+                except:
+                    output = np.zeros(len(self),dtype=type(value))
             try:
                 output[n] = np.asarray(value)
             except:
@@ -81,7 +126,7 @@ class AtomicStructures(aseio):
                 output = set_output(output,n,structure.arrays[name])
         return output
 
-    def get(self:T,name:str,default:np.ndarray=None,what:str="unknown")->np.ndarray:
+    def get(self:T,name:str,default:np.ndarray=None,what:str="all")->np.ndarray:
         """
         Get information or array attribute values for all structures.
 
@@ -93,14 +138,62 @@ class AtomicStructures(aseio):
         Returns:
         - np.ndarray: Array of attribute values.
         """
-        if what == "unknown":
+        if what in ["unknown","all"]:
             what = self.search(name)
         if what == "info":
             return self.get_info(name,default)
         elif what == "arrays":
             return self.get_array(name,default)
         else:
-            raise ValueError("can not find {:s}".format(name))
+            message = "Can not find {:s}.\nAvailable infos: {:s}\nAvailable arrays: {:s}".format(
+                    name, ', '.join(self[0].info.keys()), ', '.join(self[0].arrays.keys()))
+            raise ValueError(message)
+        
+    def overview(self: T, string: str = "\t") -> str:
+        """
+        Print overview of the AtomicStructures object.
+
+        Returns:
+            str: Overview of the AtomicStructures object.
+        """
+        infos = ', '.join(self.get_keys("info"))
+        arrays = ', '.join(self.get_keys("arrays"))
+        message = (
+            "\n" 
+            "Available infos: [{infos}]\n"
+            "Available arrays: [{arrays}]"
+        ).format(infos=infos, arrays=arrays)
+        message = message.replace("\n", f"\n{string}")
+        print(message)
+
+    def summary(self: T) -> pd.DataFrame:
+        
+        df = pd.DataFrame(columns=["key","i/a","numeric","dtype","shape"])
+        df["key"] = self.get_keys()
+        info = self.get_keys("info")
+        array = self.get_keys("arrays")
+        for n,key in enumerate(df["key"]):
+            if key == "original-file":
+                pass
+            if key in info:
+                df.at[n,"i/a"] = "info"
+            elif key in array:
+                df.at[n,"i/a"] = "array"
+            
+            value = self.get(key)
+            try:
+                df.at[n,"dtype"] = value.dtype
+                df.at[n,"numeric"] = np.issubdtype(value.dtype, np.number)
+            except:
+                df.at[n,"dtype"] = type(value[0])
+                df.at[n,"numeric"] = False
+
+            if df.at[n,"numeric"]:
+                df.at[n,"shape"] = value.shape
+            else:                
+                df.at[n,"shape"] = None
+
+        return df
 
     @deprecated(reason="Use `set` instead")
     def set_info(self:T,name:str,data:np.ndarray)->None:

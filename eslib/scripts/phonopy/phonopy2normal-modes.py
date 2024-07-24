@@ -101,6 +101,7 @@ def main(args):
     print("\tReading reference atomic structure from input '{:s}' ... ".format(args.reference), end="")
     reference = AtomicStructures.from_file(file=args.reference,format=args.reference_format,index=0)[0]
     print("done")
+    print("\tVolume: {:f} A^3".format(reference.get_volume()))
 
     
     #---------------------------------------#
@@ -122,11 +123,18 @@ def main(args):
     factor = convert(1,"mass","dalton","atomic_unit")
     # mass = factor * np.asarray([ [a["mass"]]*3 for a in info["unit_cell"]["points"] ]).flatten()
 
-    #---------------------------------------#
-    # read input file ('phonopy.yaml')
-    print("\n\tExtracting reference atomic structure ... ", end="")
-    reference = phonopy2atoms(info["supercell"])
+    # #---------------------------------------#
+    # # read input file ('phonopy.yaml')
+    # print("\n\tExtracting reference atomic structure ... ", end="")
+    # reference = phonopy2atoms(info["supercell"])
+    # print("done")
+    # print("\tVolume: {:f} A^3".format(reference.get_volume()))
+
+    print("\n\tConverting reference atomic structure from angstrom to bohr... ", end="")
+    reference.positions *= convert(1,"length","angstrom","atomic_unit")
+    reference.cell *= convert(1,"length","angstrom","atomic_unit")
     print("done")
+    print("\tVolume: {:f} bohr^3".format(reference.get_volume()))
 
     #---------------------------------------#
     # read qpoints file ('qpoints.yaml')
@@ -193,6 +201,7 @@ def main(args):
 
         nm.set_eigval( np.square(pm.at[q,"freq"]) )
         nm.check()
+        nm.eigvec2modes()
 
         tmp = "{:d}-{:d}-{:d}".format(*[ int(i) for i in q])
         file = os.path.normpath("{:s}/{:s}.{:s}.pickle".format(args.output_folder,args.output,tmp))

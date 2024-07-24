@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 from eslib.tools import convert
-from eslib.formatting import esfmt
+from eslib.formatting import esfmt, error
+from eslib.ipi_units import UnitMap
+import json
+from eslib.show import show_dict
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -20,19 +23,29 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-v", "--value", type=float, required=True, **argv, help="value")
-    parser.add_argument("-f", "--family", type=str, required=False,**argv, help="family (default: %(default)s)", default="length")
+    parser.add_argument("-v", "--value", type=float, required=False, **argv, help="value (default: %(default)s)", default=None)
+    parser.add_argument("-f", "--family", type=str, required=False,**argv, help="family (default: %(default)s)", default=None)
     parser.add_argument("-iu", "--in_unit", type=str, required=False,**argv, help="input unit (default: %(default)s)", default="au")
     parser.add_argument("-ou", "--out_unit", type=str, required=False,**argv, help="output unit (default: %(default)s)", default="ang")
+    parser.add_argument("-s", "--save", type=str, required=False,**argv, help="save UnitMap to JSON file (default: %(default)s)", default=None)
     return parser# .parse_args()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
 def main(args):
 
+    if args.save is not None:
+        print("\tSaving UnitMap to file '{:s}' ... ".format(args.save),end="")
+        with open(args.save, 'w') as f:
+            json.dump(UnitMap, f)
+        print("done")
+
     #---------------------------------------#
     if args.family is None:
-        raise ValueError("'family' can not be None")
+        print("\t{:s}: 'family' can not be None".format(error))
+        print("\tList of available families:")
+        show_dict(UnitMap,"\t\t",15)
+        return -1
     
     args.in_unit  = correct(args.in_unit)
     args.out_unit = correct(args.out_unit)

@@ -17,40 +17,11 @@ def prepare_args(description):
     parser.add_argument("-i", "--input" , type=str, **argv, required=True , help='input extxyz file')
     parser.add_argument("-n", "--name"  , type=str, **argv, required=True , help="info keyword to be plotted")
     parser.add_argument("-t", "--time"  , type=str, **argv, required=False, help="time keyword (default: %(default)s)", default=None)
+    parser.add_argument("-s", "--size"  , type=float, **argv, required=False, help="point size (default: %(default)s)", default=1)
+    parser.add_argument("-xl", "--xlabel"  , type=str, **argv, required=False, help="xlabel (default: %(default)s)", default="step")
+    parser.add_argument("-yl", "--ylabel"  , type=str, **argv, required=False, help="ylabel size (default: %(default)s)", default="")
     parser.add_argument("-o", "--output", type=str, **argv, required=False, help="output file (default: %(default)s)", default=None)
     return parser# .parse_args()
-
-#---------------------------------------#
-def plot_array(data, output_file, time=None):
-    # Load the numpy array from the input file
-    data = np.atleast_2d(data)
-
-    # Get the number of rows and columns from the array shape
-    rows, cols = data.shape
-    if rows == 1:
-        data = data.T
-        cols = rows
-
-    # Create a plot for each row in the array
-    fig,ax = plt.subplots(figsize=(15,5))
-    colors = generate_colors(cols,"viridis")
-    for n in range(cols):
-        if time is None:
-            ax.plot(data[:,n], label=str(n+1),marker='o',color=colors[n])
-        else:
-            ax.plot(time,data[:,n], label=str(n+1),marker='o',color=colors[n])
-
-    # Add labels and legend
-    plt.xlabel('time/row index')
-    plt.grid()
-    plt.tight_layout()
-    plt.legend()
-
-    # Save or show the plot
-    if output_file:
-        plt.savefig(output_file)
-    else:
-        plt.show()
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
@@ -88,7 +59,36 @@ def main(args):
     #------------------#
     # plot
     print("\tSaving plot to file '{:s}'".format(file), end="")
-    plot_array(data,file,time=time)
+    # Load the numpy array from the input file
+    data = np.atleast_2d(data)
+
+    # Get the number of rows and columns from the array shape
+    rows, cols = data.shape
+    if rows == 1:
+        data = data.T
+        cols = rows
+
+    # Create a plot for each row in the array
+    fig,ax = plt.subplots(figsize=(15,5))
+    colors = generate_colors(cols,"viridis")
+    for n in range(cols):
+        if time is None:
+            ax.plot(data[:,n], label=str(n+1),marker='o',color=colors[n],markersize=args.size)
+        else:
+            ax.plot(time,data[:,n], label=str(n+1),marker='o',color=colors[n],markersize=args.size)
+
+    # Add labels and legend
+    plt.xlabel(args.xlabel)
+    plt.ylabel(args.ylabel)
+    plt.grid()
+    plt.tight_layout()
+    plt.legend()
+
+    # Save or show the plot
+    if file:
+        plt.savefig(file)
+    else:
+        plt.show()
     print("done")
 
 if __name__ == "__main__":

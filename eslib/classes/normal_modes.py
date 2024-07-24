@@ -285,12 +285,12 @@ class NormalModes(pickleIO):
         for i in range(self.non_ortho_mode.sizes['dof']):
             index = {'dof': i}
             self.non_ortho_mode[index] = self.eigvec[index] / np.sqrt(self.masses[index])
+        # self.old_mode = self.mode.copy()
+        self.mode = self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof")
         if _test:
             test = self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof")
             if not np.allclose(test.data,self.mode.data):
                 raise ValueError('some coding error')
-        # self.old_mode = self.mode.copy()
-        self.mode = self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof")
         pass
     
     @unsafe
@@ -378,7 +378,7 @@ class NormalModes(pickleIO):
 
         #-------------------#
         # reference position
-        ref = trajectory[0] if self.reference is None else self.reference
+        ref = trajectory[0] #  if self.reference is None else self.reference
 
         #-------------------#
         # positions -> displacements

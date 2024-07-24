@@ -33,13 +33,19 @@ def print_info(structure:Atoms,threshold:float,title:str,show_pos:bool):
     print("\t"+info)
 
     print("\tAdditional information:")
-    try:
-        V = structure.get_volume()
-        print("\t{:<30}:".format("volume [ang^3]"),V)
-        factor = convert(1,"length","angstrom","atomic_unit")**3
-        print("\t{:<30}:".format("volume [au^3]"),V*factor)
-    except:
-        pass
+    # try:
+    V = structure.get_volume()
+    print("\t{:<30}:".format("volume [ang^3]"),V)
+    factor = convert(1,"length","angstrom","atomic_unit")**3
+    print("\t{:<30}:".format("volume [au^3]"),V*factor)
+    tot_mass = structure.get_masses().sum()
+    tot_mass = convert(tot_mass,"mass","dalton","atomic_unit")
+    V = V*convert(1,"length","angstrom","atomic_unit")**3
+    density = tot_mass/V
+    density = convert(density,"density","atomic_unit","g/cm3")
+    print("\t{:<30}:".format("density [g/cm^3]"),density)
+    # except:
+    #     pass
     print("\t{:<30}:".format("chemical symbols"),structure.get_chemical_symbols())
 
     # from icecream import ic

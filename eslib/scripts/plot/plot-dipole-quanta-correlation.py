@@ -5,6 +5,7 @@ from eslib.formatting import esfmt
 from eslib.classes.trajectory import AtomicStructures
 from eslib.physics import compute_dipole_quanta
 from eslib.plot import square_plot
+from eslib.input import str2bool
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -18,6 +19,7 @@ def prepare_args(description):
     parser.add_argument("-i", "--input"     , type=str, **argv, required=True , help='input extxyz file')
     parser.add_argument("-a" , "--dipole_A", type=str, **argv, required=True , help="dipole A keyword")
     parser.add_argument("-b" , "--dipole_B", type=str, **argv, required=True , help="dipole B keyword")
+    parser.add_argument("-is" , "--isolated", type=str2bool, **argv, required=True , help="isolated (default: %(default)s)", default=False)
     parser.add_argument("-s", "--size"  , type=float, **argv, required=False, help="point size (default: %(default)s)", default=2)
     parser.add_argument("-o", "--output"    , type=str, **argv, required=False, help="output file (default: %(default)s)", default='corr.pdf')
     return parser# .parse_args()
@@ -33,15 +35,23 @@ def main(args):
     print("done")
 
     #------------------#
-    quanta_A = "quanta-{:s}".format(args.dipole_A)
-    quanta_B = "quanta-{:s}".format(args.dipole_A)
-    print("\tComputing dipole quanta for '{:s}' ... ".format(args.dipole_A), end="")
-    atoms: AtomicStructures = compute_dipole_quanta(atoms,args.dipole_A,quanta_A)[0]
-    print("done")
+    if not args.isolated:
+        try:
+            quanta_A = "quanta-{:s}".format(args.dipole_A)
+            quanta_B = "quanta-{:s}".format(args.dipole_A)
+            print("\tComputing dipole quanta for '{:s}' ... ".format(args.dipole_A), end="")
+            atoms: AtomicStructures = compute_dipole_quanta(atoms,args.dipole_A,quanta_A)[0]
+            print("done")
 
-    print("\tComputing dipole quanta for '{:s}' ... ".format(args.dipole_B), end="")
-    atoms:AtomicStructures = compute_dipole_quanta(atoms,args.dipole_B,quanta_B)[0]
-    print("done")
+            print("\tComputing dipole quanta for '{:s}' ... ".format(args.dipole_B), end="")
+            atoms:AtomicStructures = compute_dipole_quanta(atoms,args.dipole_B,quanta_B)[0]
+            print("done")
+        except:
+            quanta_A = args.dipole_A
+            quanta_B = args.dipole_B
+    else:
+        quanta_A = args.dipole_A
+        quanta_B = args.dipole_B
 
     #------------------#
     A = atoms.get(quanta_A)

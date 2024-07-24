@@ -22,10 +22,33 @@ def straigh_line(ax,shift,get_lim,func,set_lim,**argv):
     return ax
 
 def hzero(ax, shift=0, **argv):
-    return straigh_line(ax,shift,ax.get_xlim,ax.hlines,ax.set_xlim,**argv)
+    """
+    Plot a horizontal line on the given axis.
+
+    Parameters:
+        ax (matplotlib.axes.Axes): The axis to plot on.
+        shift (float): The position of the line.
+        **argv: Additional arguments to be passed to matplotlib.axes.Axes.hlines.
+
+    Returns:
+        matplotlib.axes.Axes: The modified axis.
+    """
+    return straigh_line(ax, shift, ax.get_xlim, ax.hlines, ax.set_xlim, **argv)
+
 
 def vzero(ax, shift=0, **argv):
-    return straigh_line(ax,shift,ax.get_ylim,ax.vlines,ax.set_ylim,**argv)
+    """
+    Plot a vertical line on the given axis.
+
+    Parameters:
+        ax (matplotlib.axes.Axes): The axis to plot on.
+        shift (float): The position of the line.
+        **argv: Additional arguments to be passed to matplotlib.axes.Axes.vlines.
+
+    Returns:
+        matplotlib.axes.Axes: The modified axis.
+    """
+    return straigh_line(ax, shift, ax.get_ylim, ax.vlines, ax.set_ylim, **argv)
 
 def square_plot(ax,lims:tuple=None):
     if lims is None :

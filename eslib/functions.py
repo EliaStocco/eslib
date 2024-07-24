@@ -21,7 +21,7 @@ def phonopy2atoms(data):
     lattice_matrix = data["lattice"]
 
     # Create an ase.Atoms object
-    return Atoms(symbols=symbols, positions=positions, cell=lattice_matrix, pbc=True)
+    return Atoms(symbols=symbols, scaled_positions=positions, cell=lattice_matrix, pbc=True)
 
 # @np.vectorize(signature="'(i),(),()->()'")
 

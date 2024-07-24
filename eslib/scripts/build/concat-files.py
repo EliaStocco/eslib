@@ -10,7 +10,7 @@ from typing import List
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Fold the atomic structures into the primitive cell."
+description = "Concatenate files."
 
 #---------------------------------------#
 def prepare_parser(description):
@@ -45,11 +45,11 @@ def main(args):
     for n,file in enumerate(args.input):
         print("\t\t{:2d}: {:s}".format(n,file))
         for i in range(len(trajectory[n])):
-            trajectory[n][i].info["original-file"] = n
+            trajectory[n][i].info["original-file"] = file
 
     #------------------#
     print("\n\tConcatenating all the trajectories ... ", end="")
-    trajectory = AtomicStructures([item for sublist in trajectory for item in sublist])
+    trajectory:AtomicStructures = AtomicStructures([item for sublist in trajectory for item in sublist])
     print("done")
     print("\tn. of atomic structures: ",len(trajectory))
 

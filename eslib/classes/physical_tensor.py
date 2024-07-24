@@ -1,6 +1,7 @@
 import xarray as xr
 import numpy as np
 import glob
+from eslib.formatting import float_format
 from eslib.classes.io import pickleIO
 from eslib.units import *
 from typing import TypeVar, Union, Any, Callable, Type
@@ -159,11 +160,11 @@ class PhysicalTensor(pickleIO,xr.DataArray):
         elif file.endswith("npy"):
             data = np.load(file,**argv)
         else:
-            raise ValueError("Only `txt` and `npy` files are supported.")
+            raise ValueError("Only `txt`, `pickle`, and `npy` extensions are supported.")
         return cls(data)
     
     @pickleIO.correct_extension_out
-    def to_file(self: T, file: str, fmt: Union[str, None] = None):
+    def to_file(self: T, file: str, fmt: Union[str, None] = float_format,**argv):
         """
         Write atomic structures to file.
         
@@ -171,6 +172,8 @@ class PhysicalTensor(pickleIO,xr.DataArray):
         """
         data = self.to_data()
         if file.endswith("txt"):
-            np.savetxt(file,data,fmt=fmt) # fmt)
+            np.savetxt(file,data,fmt=fmt,**argv) # fmt)
         elif file.endswith("npy"):
-            np.save(file,data)
+            np.save(file,data,**argv)
+        else:
+            raise ValueError("Only `txt`, `pickle`, and `npy` extensions are supported.")

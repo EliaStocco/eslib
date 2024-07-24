@@ -3,6 +3,7 @@ import numpy as np
 from ase.io import write
 from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import warning, error, esfmt
+from eslib.classes.physical_tensor import PhysicalTensor
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -35,7 +36,7 @@ def main(args):
     #---------------------------------------#
     # data
     print("\tReading data from file '{:s}' ... ".format(args.data), end="")
-    data = np.loadtxt(args.data)
+    data = PhysicalTensor.from_file(file=args.data).data # np.loadtxt(args.data)
     print("done")
 
     print("\tData shape: ",data.shape)

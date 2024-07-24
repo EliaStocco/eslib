@@ -4,6 +4,7 @@ from ase.io import write
 from eslib.classes.trajectory import AtomicStructures# , info, array
 from eslib.formatting import esfmt, float_format
 from eslib.input import ilist
+from eslib.classes.physical_tensor import PhysicalTensor
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -36,18 +37,8 @@ def main(args):
     #---------------------------------------#
     # reshape
     print("\tExtracting '{:s}' from the trajectory ... ".format(args.name), end="")
-    # N = len(atoms)
-    # Natoms = atoms[0].positions.shape[0]
-    # if args.what in ['a','arrays','array']:
-    #     data = atoms.get(args.name)
-    # elif args.what in ['i','info']:
-    #     data = atoms.get(args.name)  
-    #     # what = "info"
-    # else:
-    #     raise ValueError("'what' (-w,--what) can be only 'i' (info), or 'a' (array)")
     data = atoms.get(args.name)  
     print("done")
-
     print("\t'{:s}' shape: ".format(args.name),data.shape)
 
     if args.shape is not None:
@@ -57,18 +48,25 @@ def main(args):
         print("done")
 
     #---------------------------------------#
+    print("\n\tConverting data into PhysicalTensor ... ", end="")
+    data = PhysicalTensor(data)
+    print("done")
+
+    #---------------------------------------#
     # store
     if args.output is None:
         file = "{:s}.txt".format(args.name)
     else:
         file = str(args.output)
+
     print("\tStoring '{:s}' to file '{:s}' ... ".format(args.name,file), end="")
-    if file.endswith("txt"):
-        np.savetxt(file,data,fmt=args.output_format) # fmt)
-    elif file.endswith("npy"):
-        np.save(file,data)
-    else:
-        raise ValueError("Only `txt` and `npy` files are supported.")
+    data.to_file(file=file,fmt=args.output_format)
+    # if file.endswith("txt"):
+    #     np.savetxt(file,data,fmt=args.output_format) # fmt)
+    # elif file.endswith("npy"):
+    #     np.save(file,data)
+    # else:
+    #     raise ValueError("Only `txt` and `npy` files are supported.")
     print("done")
 
 #---------------------------------------#

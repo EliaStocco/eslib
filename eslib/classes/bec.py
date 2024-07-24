@@ -19,6 +19,8 @@ class bec(xr.DataArray,pickleIO):
     #     becs = array(atoms,name)
     #     return cls.from_numpy(becs)
 
+    __slots__ = ()
+
     @classmethod
     def from_file(cls:Type[T],file:str,natoms:int=None)->T:
         if file.endswith("txt"):
