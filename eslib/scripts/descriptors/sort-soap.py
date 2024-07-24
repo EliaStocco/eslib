@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from ase.io import read, write
 import numpy as np
 from skmatter.feature_selection import FPS
 from eslib.input import str2bool

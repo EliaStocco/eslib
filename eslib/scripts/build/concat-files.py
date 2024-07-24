@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-from ase.io import read, write
-
 import glob
 from eslib.input import slist
 from eslib.formatting import esfmt, error
@@ -37,7 +35,7 @@ def main(args):
     trajectory:List[List[Atoms]] = [None]*len(args.input)
     for n,file in enumerate(args.input):
         print("\t\t{:d}: '{:s}' ... ".format(n,file), end="")
-        trajectory[n] = read(file,index=":")
+        trajectory[n] = AtomicStructures.from_file(file=file,index=":")
         print("done --> (n. atomic structures: {:d})".format(len(trajectory[n])))
     
     #------------------#

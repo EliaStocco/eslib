@@ -47,7 +47,7 @@ def main(args):
     print("\n\tSummary of the atomic structures: ")
     df = atoms.summary()
     tmp = "\n"+df.to_string(index=False)
-    print(tmp)
+    print(tmp.replace("\n", "\n\t"))
 
     # #---------------------------------------#
     # keys = atoms[0].info.keys()

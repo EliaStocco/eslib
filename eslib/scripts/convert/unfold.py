@@ -27,7 +27,6 @@ def main(args):
 
     #------------------#
     print("\tReading atomic structures from input file '{:s}' ... ".format(args.input), end="")
-    # atoms = read(args.input,index=":",format=args.input_format)
     structures:AtomicStructures = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done")
     

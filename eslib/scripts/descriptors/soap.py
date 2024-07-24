@@ -1,13 +1,10 @@
 #!/usr/bin/env python
-from ase.io import read
 import numpy as np
-import os
 import json
 from rascal.representations import SphericalInvariants as SOAP
 from tqdm.auto import tqdm
 from eslib.functions import add_default
 from eslib.show import show_dict
-from eslib.tools import convert
 from eslib.formatting import esfmt
 from eslib.classes.trajectory import AtomicStructures
 

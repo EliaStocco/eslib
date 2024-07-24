@@ -1,9 +1,6 @@
 #!/usr/bin/env python
-from ase.io import read
 from eslib.formatting import esfmt, warning
-from ase import Atoms
 import numpy as np
-from ase.io import read, write
 from eslib.tools import cart2frac, frac2cart
 from eslib.input import slist
 from typing import List

@@ -17,7 +17,7 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"        , required=True , **argv, type=str     , help="input file")
     parser.add_argument("-if", "--input_format" , required=False, **argv, type=str     , help="input file format (default: %(default)s)", default=None)
     parser.add_argument("-n" , "--indices"      , required=False, **argv, type=intype  , help="txt file with the subsampling indices, or list of integers (default: %(default)s)",default='indices.txt')
-    parser.add_argument("-s" , "--sort"         , required=False, **argv, type=str2bool, help="soprt indices (default: %(default)s)", default=None)
+    parser.add_argument("-s" , "--sort"         , required=False, **argv, type=str2bool, help="sort indices (default: %(default)s)", default=False)
     parser.add_argument("-o" , "--output"       , required=True , **argv, type=str     , help="output file")
     parser.add_argument("-of", "--output_format", required=False, **argv, type=str     , help="output file format (default: %(default)s)", default=None)
     return parser
@@ -53,7 +53,7 @@ def main(args):
     print("done")
 
     # Write the data to the specified output file with the specified format
-    print("\tWriting subsampled atomic structures to file '{:s}' with format '{:s}' ... ".format(args.output, args.output_format), end="")
+    print("\tWriting subsampled atomic structures to file '{:s}' ... ".format(args.output), end="")
     new_atoms.to_file(file=args.output, format=args.output_format)
     print("done")
 
