@@ -71,6 +71,10 @@ def main(args):
         from eslib.classes.mace_model import MACEModel
         print("\tLoading eslib MACE model from file '{:s}' ... ".format(args.model), end="")
         calculator = MACEModel.from_pickle(args.model)
+        try:
+            calculator.to(device=args.device,dtype=args.dtype)
+        except:
+            pass
         
     elif args.model_type == "MACE":
         print("\tLoading a MACECalculator based on the model that you provided ... ", end="")

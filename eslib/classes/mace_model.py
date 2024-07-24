@@ -29,6 +29,24 @@ class MACEModel(Calculator,pickleIO):
     implemented_properties:Dict[str, Any] = field(init=False)
 
     #------------------#
+    def to(self, device: str, dtype: str=None) -> None:
+        """
+        Sets the device for the model.
+
+        Args:
+            device (str): The device to set for the model.
+
+        Returns:
+            None
+        """
+        self.device = torch_tools.init_device(device)
+        self.network = self.network.to(self.device)  # Ensure model is on the specified device
+
+        if dtype is not None:
+            self.default_dtype = dtype
+            torch_tools.set_default_dtype(self.default_dtype)
+
+    #------------------#
     def __post_init__(self) -> None:
         """Initialize MACEModel object."""
         Calculator.__init__(self)
