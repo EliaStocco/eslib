@@ -19,4 +19,4 @@ for dir in "${ESLIB}"/eslib/scripts/* "${ESLIB}"/eslib/* ; do
     fi
 done
 
-chmod +x "${ESLIB}/cluster/*"
+find "${ESLIB}/cluster/" -name "*.py" -type f -exec chmod +x {} \;
