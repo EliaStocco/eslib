@@ -22,6 +22,18 @@ class AtomicStructures(aseio):
     """
 
     def get_keys(self:T,what:str="all")->List[str]:
+        """
+        Get the keys present in all atomic structures, according to the `what` parameter.
+
+        Parameters:
+        - `what` (str): Can be 'all', 'info', or 'arrays'. Default is 'all'.
+
+        Returns:
+        - List[str]: The keys present in all atomic structures, according to the `what` parameter.
+
+        Raises:
+        - ValueError: If `what` is not 'all', 'info', or 'arrays'.
+        """
 
         check_info  = dict()
         check_array = dict()
@@ -50,12 +62,12 @@ class AtomicStructures(aseio):
 
         if what not in ["all","info","arrays"]:
             raise ValueError("`what` can be only 'all', 'info', or 'arrays' ")
-        
+
         check = {**check_info,**check_array}
 
         if False in check.values():
             raise ValueError("Some checks failed")
-        
+
         check = {k:v for k,v in check.items() if v is True}
 
         return list(check.keys())
@@ -167,30 +179,47 @@ class AtomicStructures(aseio):
         print(message)
 
     def summary(self: T) -> pd.DataFrame:
-        
+        """
+        Create a pandas DataFrame summarizing the content of the AtomicStructures object.
+
+        The DataFrame has columns:
+        - key: Name of the attribute.
+        - i/a: 'info' or 'arrays', depending on the type of attribute.
+        - numeric: Boolean indicating if the attribute is numeric.
+        - dtype: Data type of the attribute.
+        - shape: Shape of the attribute, if numeric.
+
+        Returns:
+            pd.DataFrame: DataFrame with the summary.
+        """
         df = pd.DataFrame(columns=["key","i/a","numeric","dtype","shape"])
         df["key"] = self.get_keys()
         info = self.get_keys("info")
         array = self.get_keys("arrays")
+
+        # Iterate over the columns
         for n,key in enumerate(df["key"]):
             if key == "original-file":
-                pass
+                continue
+            # Determine if it is an info or an array attribute
             if key in info:
                 df.at[n,"i/a"] = "info"
             elif key in array:
                 df.at[n,"i/a"] = "array"
-            
+            else:
+                raise ValueError("Unknown attribute type")
+
+            # Get the value of the attribute
             value = self.get(key)
             try:
+                # If the value is numeric, get its dtype and shape
                 df.at[n,"dtype"] = value.dtype
                 df.at[n,"numeric"] = np.issubdtype(value.dtype, np.number)
+                df.at[n,"shape"] = value.shape
             except:
+                # Otherwise, get its type and set shape to None
                 df.at[n,"dtype"] = type(value[0])
                 df.at[n,"numeric"] = False
-
-            if df.at[n,"numeric"]:
-                df.at[n,"shape"] = value.shape
-            else:                
                 df.at[n,"shape"] = None
 
         return df

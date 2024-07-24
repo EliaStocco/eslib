@@ -43,66 +43,73 @@ def main(args):
         print("\tperiodic along axis x,y,z: ", [str(a) for a in np.all(pbc, axis=0) == ~ np.all(~pbc, axis=0)])
 
     #---------------------------------------#
-    keys = atoms[0].info.keys()
-    check = dict()
+    # summary
+    print("\n\tSummary of the atomic structures: ")
+    df = atoms.summary()
+    tmp = "\n"+df.to_string(index=False)
+    print(tmp)
 
-    if len(keys) > 0:
-        max_key_length = max(len(k) for k in keys)
-        max_shape_length = max(len(str(atoms[0].info[k].shape)) for k in keys)
+    # #---------------------------------------#
+    # keys = atoms[0].info.keys()
+    # check = dict()
 
-        for k in keys:
-            for n in range(len(atoms)):
-                if k not in atoms[n].info.keys():
-                    check[k] = False
-                    break
-            else:
-                check[k] = True
+    # if len(keys) > 0:
+    #     max_key_length = max(len(k) for k in keys)
+    #     max_shape_length = max(len(str(atoms[0].info[k].shape)) for k in keys)
 
-        print("\n\tInfo/properties shapes:")
-        line = "\t\t" + "-" * (max_key_length + max_shape_length + 7)
-        print(line)
-        for k in keys:
-            try:
-                shape = str(atoms[0].info[k].shape)
-            except:
-                shape = str(type(atoms[0].info[k]))
-            print("\t\t|{:^{key_width}s}|{:^{shape_width}s}|".format(k, shape, key_width=max_key_length, shape_width=max_shape_length), end="")
-            if not check[k]:
-                print(" not present in all the structures")
-            else:
-                print()
-        print(line)
-    else:
-        print("\n\tNo info/properties found")
+    #     for k in keys:
+    #         for n in range(len(atoms)):
+    #             if k not in atoms[n].info.keys():
+    #                 check[k] = False
+    #                 break
+    #         else:
+    #             check[k] = True
 
-    #---------------------------------------#
-    keys = atoms[0].arrays.keys()
-    if len(keys) > 0:
-        check = dict()
-        max_key_length = max(len(k) for k in keys)
-        max_shape_length = max(len(str(atoms[0].arrays[k].shape)) for k in keys)+2
+    #     print("\n\tInfo/properties shapes:")
+    #     line = "\t\t" + "-" * (max_key_length + max_shape_length + 7)
+    #     print(line)
+    #     for k in keys:
+    #         try:
+    #             shape = str(atoms[0].info[k].shape)
+    #         except:
+    #             shape = str(type(atoms[0].info[k]))
+    #         print("\t\t|{:^{key_width}s}|{:^{shape_width}s}|".format(k, shape, key_width=max_key_length, shape_width=max_shape_length), end="")
+    #         if not check[k]:
+    #             print(" not present in all the structures")
+    #         else:
+    #             print()
+    #     print(line)
+    # else:
+    #     print("\n\tNo info/properties found")
 
-        for k in keys:
-            for n in range(len(atoms)):
-                if k not in atoms[n].arrays.keys():
-                    check[k] = False
-                    break
-            else:
-                check[k] = True
+    # #---------------------------------------#
+    # keys = atoms[0].arrays.keys()
+    # if len(keys) > 0:
+    #     check = dict()
+    #     max_key_length = max(len(k) for k in keys)
+    #     max_shape_length = max(len(str(atoms[0].arrays[k].shape)) for k in keys)+2
 
-        print("\n\tArrays shapes:")
-        line = "\t\t" + "-" * (max_key_length + max_shape_length + 3)
-        print(line)
-        for k in keys:
-            shape = str(atoms[0].arrays[k].shape)
-            print("\t\t|{:^{key_width}s}|{:^{shape_width}s}|".format(k, shape, key_width=max_key_length, shape_width=max_shape_length), end="")
-            if not check[k]:
-                print(" not present in all the structures")
-            else:
-                print()
-        print(line)
-    else:
-        print("\n\tNo arrays found")
+    #     for k in keys:
+    #         for n in range(len(atoms)):
+    #             if k not in atoms[n].arrays.keys():
+    #                 check[k] = False
+    #                 break
+    #         else:
+    #             check[k] = True
+
+    #     print("\n\tArrays shapes:")
+    #     line = "\t\t" + "-" * (max_key_length + max_shape_length + 3)
+    #     print(line)
+    #     for k in keys:
+    #         shape = str(atoms[0].arrays[k].shape)
+    #         print("\t\t|{:^{key_width}s}|{:^{shape_width}s}|".format(k, shape, key_width=max_key_length, shape_width=max_shape_length), end="")
+    #         if not check[k]:
+    #             print(" not present in all the structures")
+    #         else:
+    #             print()
+    #     print(line)
+    # else:
+    #     print("\n\tNo arrays found")
 
 #---------------------------------------#
 if __name__ == "__main__":
