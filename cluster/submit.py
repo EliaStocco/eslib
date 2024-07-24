@@ -3,6 +3,8 @@ import argparse
 import subprocess
 import os
 
+SCRIPT = "main.sh"
+
 def submit_jobs(n, filepath, dependency_type, existing_job_id=None):
     """
     Submit Slurm jobs with optional dependencies.
@@ -64,7 +66,7 @@ def submit_jobs(n, filepath, dependency_type, existing_job_id=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Submit Slurm jobs with dependencies")
     parser.add_argument("-n", type=int, metavar="\b",help="number of jobs to submit (default=%(default)s)", default=1)
-    parser.add_argument("-f", type=str, metavar="\b",help="filepath of the job script (default=%(default)s)", default="main.sh")
+    parser.add_argument("-f", type=str, metavar="\b",help="filepath of the job script (default=%(default)s)", default=SCRIPT)
     parser.add_argument("-d", type=str, metavar="\b",help="dependency type [ok, any, none] (default: %(default)s)", default="any",choices=["ok", "any", "none"])
     parser.add_argument("-e", type=int, metavar="\b",help="slurm job ID to use as a prerequisite (default: %(default)s)",default=None)
     args = parser.parse_args()
