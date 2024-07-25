@@ -2,7 +2,6 @@
 import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
-from tomlkit import comment 
 from eslib.mathematics import tacf, reshape_into_blocks
 from eslib.plot import hzero
 from eslib.classes.physical_tensor import PhysicalTensor
@@ -69,6 +68,8 @@ def exponential(x,tau):
 #---------------------------------------#
 @esfmt(prepare_args,description)
 def main(args):
+
+    assert args.derivative == True, "If derivative == False there is a bug."
 
     #------------------#
     print("\n\tReading the input array from file '{:s}' ... ".format(args.input), end="")
@@ -236,9 +237,10 @@ def main(args):
     #------------------#
     if args.infrared is not None:
         print("\n\tComputing the spectra ... ", end="")
-        spectrum = compute_spectrum(autocorr,axis=args.axis_corr,pad=args.padding)
+        spectrum, _ = compute_spectrum(autocorr,axis=args.axis_corr,pad=args.padding,method="rfft")
         print("done")
         print("\tspectrum shape: :",spectrum.shape)
+        spectrum = spectrum.real
 
         #------------------#
         print("\n\tNormalizing the spectra ... ", end="")
@@ -292,7 +294,7 @@ def main(args):
             # ax.plot(freq,y,label="raw",color="red")
             ax.plot(freq,spectrum, label="$\\rm S\\left(\\omega\\right)$",color="blue", marker='.', markerfacecolor='blue', markersize=args.marker_size)
             ylow,yhigh = spectrum - std, spectrum + std
-            ax.fill_between(freq,ylow,yhigh, color='gray', alpha=0.8, label='$\\rm S\\left(\\omega\\right)\\pm\\sigma\\left(\\omega\\right)$')
+            ax.fill_between(freq,ylow,yhigh, color='gray', alpha=0.8) # , label='$\\rm S\\left(\\omega\\right)\\pm\\sigma\\left(\\omega\\right)$')
             # ylow,yhigh = spectrum - 2*std, spectrum + 2*std
             # ax.fill_between(freq,ylow,yhigh, color='gray', alpha=0.5, label='$\\pm2\\sigma$')
             ax.legend(loc="upper left",facecolor='white', framealpha=1,edgecolor="black")

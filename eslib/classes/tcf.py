@@ -321,6 +321,8 @@ def compute_spectrum(
     autocorr: np.ndarray,
     axis: int = 1,
     pad: int = 0,
+    method: str = "dct",
+    dt: Optional[float] = 1,
 ) -> np.ndarray:
     """
     Compute the spectrum from the autocorrelation function.
@@ -343,10 +345,16 @@ def compute_spectrum(
 
     # Compute the discrete cosine transform of the autocorrelation function
     # along the specified axis
-    spectrum = dct(autocorr, type=1, axis=axis)
-
-    # Return the real part of the spectrum
-    return spectrum.real
+    
+    if method == "dct":
+        spectrum = dct(autocorr, type=1, axis=axis)
+        freq = None
+    elif method == "rfft":
+        # len_fft = int(autocorr.shape[axis]/2)
+        spectrum = np.fft.rfft(autocorr, axis=axis)
+        freq = np.fft.rfftfreq(autocorr.shape[axis],dt)
+        # spectrum = np.take(spectrum,axis=axis,indices=range(len_fft))
+    return spectrum, freq
 
 def main():
     """

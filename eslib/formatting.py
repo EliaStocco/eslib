@@ -90,7 +90,8 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
             print("{:20s}: {:s}".format("working directory",os.getcwd()))
             vscode_args = json.dumps(sys.argv[1:])
             print("{:20}: \"args\" : {:s} ".format("VScode debugging",vscode_args))
-            command_line = ' '.join(sys.argv[1:])   
+            tmp = [f'"{a}"' if '*' in a else a for a in sys.argv[1:]]
+            command_line = ' '.join(tmp)   
             local_path, global_path = get_path(main)
             print("{:20}: {:s} ".format("running script as",local_path),command_line)
         except: 
