@@ -1,7 +1,9 @@
+from cProfile import label
 from dataclasses import dataclass, field
 import numpy as np
 from scipy.fftpack import dct
 from eslib.tools import convert
+import matplotlib.pyplot as plt
 from typing import Optional, TypeVar, Tuple# , Callable, Any
 # from scipy.signal import correlate as scipy_correlate
 # import functools
@@ -70,7 +72,7 @@ class TimeCorrelation:
 
     def tcf(self, axis: Optional[int] = 0) -> np.ndarray:
         """
-        Computes the time correlation function along the specified axis.
+        Computes the time cross-correlation function along the specified axis.
 
         Parameters
         ----------
@@ -125,7 +127,7 @@ class TimeAutoCorrelation(TimeCorrelation):
     def __init__(self: T, A: np.ndarray):
         super().__init__(A=A, B=A.copy())
 
-    def tcf(self: T, axis: Optional[int] = 0, mode: str = "half") -> np.ndarray:
+    def tcf(self: T, axis: Optional[int] = 0, mode: str = "half",normalize:bool=True) -> np.ndarray:
         """
         Computes the time correlation function along the specified axis.
 
@@ -144,8 +146,9 @@ class TimeAutoCorrelation(TimeCorrelation):
         if mode not in ["half","full"]:
             raise ValueError("`mode` can be only `half` or `full`")
         arr:np.ndarray = super().tcf(axis)
-        arr = arr / np.mean(self.A ** 2, axis=axis,keepdims=True)  # normalized to 1
-        assert np.allclose(np.take(arr,0,axis),1), "The auto-correlation function is not normalized to 1"
+        if normalize:
+            arr = arr / np.mean(self.A ** 2, axis=axis,keepdims=True)  # normalized to 1
+            assert np.allclose(np.take(arr,0,axis),1), "The auto-correlation function is not normalized to 1"
         if mode == "half":
             N = int(arr.shape[axis] / 2)  # the second half is noisy
             # arr = arr[:N]      
@@ -271,8 +274,9 @@ def dummy_correlation(A:np.ndarray,B:np.ndarray,std:Optional[bool]=False)->Tuple
         except:
             break
     
+    assert not np.any(np.isnan(tcf)), "The correlation function contains NaN values"
     # Remove NaN values from the arrays
-    tcf = tcf [ ~np.isnan(tcf) ]
+    # tcf = np.take(tcf,indices=~np.isnan(tcf).flatten(),axis=0)
     if std:
         std_tcf = std_tcf[ ~np.isnan(std_tcf) ]
     N = N[ ~np.isnan(N) ]
@@ -319,9 +323,9 @@ def get_freq(dt: float, N: int, input_units: str = "femtosecond", output_units: 
 
 def compute_spectrum(
     autocorr: np.ndarray,
-    axis: int = 1,
-    pad: int = 0,
-    method: str = "dct",
+    axis: int,
+    pad: Optional[int] = 0,
+    method: Optional[str] = "dct",
     dt: Optional[float] = 1,
 ) -> np.ndarray:
     """
@@ -348,13 +352,34 @@ def compute_spectrum(
     
     if method == "dct":
         spectrum = dct(autocorr, type=1, axis=axis)
-        freq = None
+        n = autocorr.shape[axis]
+        freq = np.arange(n) / (2.0 * (n - 1) * dt)
     elif method == "rfft":
-        # len_fft = int(autocorr.shape[axis]/2)
         spectrum = np.fft.rfft(autocorr, axis=axis)
         freq = np.fft.rfftfreq(autocorr.shape[axis],dt)
-        # spectrum = np.take(spectrum,axis=axis,indices=range(len_fft))
+    assert len(freq) == spectrum.shape[axis]
     return spectrum, freq
+
+def compute_cyclic_derivative(arr: np.ndarray, axis: Optional[int]=0) -> np.ndarray:
+    """
+    Compute the derivative of a 1D array with periodic boundary conditions.
+
+    Parameters:
+        arr (numpy.ndarray): Input 1D array of function values.
+        axis (int): Axis along which to take the derivative.
+
+    Returns:
+        numpy.ndarray: The derivative of the array.
+
+    Notes:
+        The derivative is computed using the formula:
+            d/dx f(x) = [f(x+dx) - f(x-dx)] / 2*dx
+        with periodic boundary conditions, i.e. f(x+L) = f(x) where L is the length of the array.
+    """
+    # Ensure arr is a numpy array
+    arr = np.asarray(arr)
+    # Compute the derivative with periodic boundary conditions
+    return np.roll(arr, shift=-1, axis=axis) - arr
 
 def main():
     """
@@ -384,6 +409,7 @@ def main():
         tcf, N = dummy_correlation(A,B,std=False)
     with timing():
         tcf,std_tcf, N = dummy_correlation(A,B,std=True)
+        # tcf = np.atleast_2d(tcf)
     assert tcf_AB.shape == tcf.shape, "Maremma zucchina, le 'shapes' sono diverse!"
     assert np.allclose(tcf_AB,tcf.reshape(-1,1)), "Ostregeta, son' mica uguali qui!"
 
@@ -401,6 +427,171 @@ def main():
         tcf,std_tcf, N = dummy_correlation(A,B,std=True)
     assert tcf_BA.shape == tcf.shape, "Oh 'de! Le 'shapes' sono diverse anche qui!"
     assert np.allclose(tcf_BA,tcf.reshape(-1,1)), "Eh la vacca, qui non va mica meglio!"
+
+    #########################
+    # Fourier Transform or the derivative (in the discrete case)
+    # https://math.stackexchange.com/questions/1657756/is-there-in-discrete-fourier-transform-a-theorem-that-corresponds-to-transforms
+    N      = 3000
+    w      = 10
+    x      = np.arange(N) 
+    A      = np.sin(w*x**2)# +0.1*np.random.random(N)          # signal
+    A     -= A.mean()                     # useful only for the autocorrelation functions
+    fft    = np.fft.rfft(A)               # Fourier Transform of the signal
+    derA   = np.gradient(A) # compute_cyclic_derivative(A) # Derivative of the signal
+    fftder = np.fft.rfft(derA)            # Fourier Transform of the derivative of the signal
+    freq   = np.fft.rfftfreq(N)           # Frequencies
+    phases = np.exp(1.j*2*np.pi*freq)-1   # Phases
+    test   = phases*fft                   # Hypothesis: `phases*fft`` should be equal to `fftder`
+
+    import matplotlib.pyplot as plt
+
+    # Plot of the Fourier Transform of the signal and of its derivative
+    plt.plot(freq,np.abs(fft)   ,color="red"  ,linestyle="solid",alpha=0.5,linewidth=1,label=r'$F\left[f\right]\left(\nu\right)$')
+    plt.plot(freq,np.abs(fftder),color="blue" ,linestyle="solid",alpha=0.5,linewidth=1,label=r'$F\left[\dot{f}\right]\left(\nu\right)$')
+    plt.xlim(min(freq),max(freq))
+    # plt.ylim(0,70)
+    plt.xlabel("Frequency $\\nu$")
+    plt.legend(facecolor='white', framealpha=1,edgecolor="black")
+    plt.grid()
+    plt.show()
+    plt.cla() # clear the axes
+
+    # Plot to show the relation between the Fourier Transform of the signal and the Fourier Transform of the derivative of the signal
+    plt.plot(freq,np.abs(test)  ,color="red"  ,linestyle="solid",alpha=0.5,linewidth=1,label=r'$\left(e^{i2\pi\nu} - 1\right) \cdot F\left[f\right]\left(\nu\right)$')
+    plt.plot(freq,np.abs(fftder),color="blue" ,linestyle="solid",alpha=0.5,linewidth=1,label=r'$F\left[\dot{f}\right]\left(\nu\right)$')
+    plt.plot(freq,np.abs(test-fftder),color="black",linestyle="solid",linewidth=1,label="difference")
+    plt.xlim(min(freq),max(freq))
+    plt.xlabel("Frequency $\\nu$")
+    plt.legend(facecolor='white', framealpha=1,edgecolor="black")
+    plt.grid()
+    plt.show()
+    plt.cla() # clear the axes
+
+    # Plot to show the continous limit
+    tmp = 1.j*2*np.pi*freq
+    plt.plot(freq,tmp.real  ,color="red"   ,linestyle="solid",linewidth=1,label=r'${\rm Re} \left(i2\pi\nu\right)$')
+    plt.plot(freq,tmp.imag  ,color="blue"  ,linestyle="solid",linewidth=1,label=r'${\rm Im} \left(i2\pi\nu\right)$')
+    plt.plot(freq,phases.real,color="red"  ,linestyle="dashed",linewidth=1,label=r'${\rm Re} \left(e^{i2\pi\nu} - 1\right)$')
+    plt.plot(freq,phases.imag,color="blue" ,linestyle="dashed",linewidth=1,label=r'${\rm Im} \left(e^{i2\pi\nu} - 1\right)$')
+    plt.xlim(min(freq),max(freq))
+    plt.xlabel("Frequency $\\nu$")
+    plt.legend(facecolor='white', framealpha=1,edgecolor="black")
+    plt.grid()
+    plt.show()
+    plt.cla() # clear the axes
+
+    # Auto-correlation function
+    tmp      = fft*np.conjugate(fft)         
+    tcf      = np.fft.irfft(tmp)           # Auto-correlation function of the signal
+    tmp      = fftder*np.conjugate(fftder)
+    tcfder   = np.fft.irfft(tmp)           # Auto-correlation function of the derivative of the signal
+
+    # tcf /= tcf.max()
+    # tcfder /= tcfder.max()
+    
+    assert np.allclose(tcf.imag,0), "Auto-correlation function is not real"
+    assert np.allclose(tcfder.imag,0), "Auto-correlation function is not real"
+    # I need to check that it's even too
+
+    plt.plot(tcf   ,color="red"  ,linestyle="solid",alpha=0.5,linewidth=1,label=r'$C\left[f\right]\left(t\right)$')
+    plt.plot(tcfder,color="blue" ,linestyle="solid",alpha=0.5,linewidth=1,label=r'$C\left[\dot{f}\right]\left(t\right)$')
+    # plt.xlim(min(freq),max(freq))
+    # plt.ylim(0,70)
+    # plt.xscale("log")
+    plt.xlabel("Time")
+    plt.legend(facecolor='white', framealpha=1,edgecolor="black")
+    plt.grid()
+    plt.show()
+    plt.cla() # clear the axes
+
+    spectrum     = np.fft.rfft(tcf)
+    spectrum_der = np.fft.rfft(tcfder)
+
+    assert np.allclose(spectrum.imag,0), "Spectrum is not real"
+    assert np.allclose(spectrum_der.imag,0), "Spectrum is not real"
+
+    # plt.plot(freq,spectrum    ,color="red"  ,linestyle="solid",alpha=0.5,linewidth=1,label=r'$S\left[f\right]\left(\omega\right)$')
+    # plt.plot(freq,spectrum_der,color="blue" ,linestyle="solid",alpha=0.5,linewidth=1,label=r'$S\left[\dot{f}\right]\left(\omega\right)$')
+    # # plt.xlim(min(freq),max(freq))
+    # # plt.ylim(0,70)
+    # # plt.xscale("log")
+    # plt.xlabel("Frequency $\\nu$")
+    # plt.legend(facecolor='white', framealpha=1,edgecolor="black")
+    # plt.grid()
+    # plt.show()
+    # plt.cla() # clear the axes
+
+    tmp = spectrum * phases*np.conjugate(phases)
+
+    assert np.allclose(tmp,spectrum_der), "Spectra are not the same"
+    assert np.allclose(tmp.imag,0), "Spectrum is not real"
+
+    plt.plot(freq,tmp.real    ,color="red"  ,linestyle="solid",alpha=0.5,linewidth=1,label=r'${\rm Re} \left(e^{i2\pi\nu} - 1\right)^2 S\left[f\right]\left(\omega\right)$')
+    plt.plot(freq,spectrum_der,color="blue" ,linestyle="solid",alpha=0.5,linewidth=1,label=r'$S\left[\dot{f}\right]\left(\omega\right)$')
+    plt.plot(freq,np.abs(tmp-spectrum_der),color="black",linestyle="solid",linewidth=1,label="difference")
+    plt.xlabel("Frequency $\\nu$")
+    plt.legend(facecolor='white', framealpha=1,edgecolor="black")
+    plt.grid()
+    plt.show()
+    plt.cla() # clear the axes
+
+
+    #########################
+    # spectrum
+    method = "dct"
+    
+    x = np.arange(N)
+    A = np.exp(-x)*np.cos(x)
+    A =  np.random.random((1,N)) # A.reshape((1,N)) # +
+    # A -= A.mean(axis=1)
+
+    A =  np.random.random(N)
+    fft = np.fft.rfft(A)
+    freq = np.fft.rfftfreq(N)
+    assert np.allclose(freq,np.arange(len(fft))/N)
+    phase = np.exp(1.j*2*np.pi/N)
+    discrete_phase = np.exp(1.j*2*np.pi*freq)-1
+    plt.plot(discrete_phase*fft,color="red",label="f")
+    derA = compute_cyclic_derivative(A,axis=0)
+    plt.plot(np.fft.rfft(derA),color="blue",label="$\\nabla$f")
+    plt.legend()
+    plt.show()
+
+    np.allclose(tmp,fftder)
+
+
+    tacf = TimeAutoCorrelation(A.copy())
+    tcf = tacf.tcf(axis=1)
+    spectrum, freq = compute_spectrum(tcf,axis=1,method=method)
+
+    grad = compute_cyclic_derivative(A.copy(),axis=1)
+    tacf_grad = TimeAutoCorrelation(grad)
+    tcf_grad = tacf_grad.tcf(axis=1)
+    spectrum_grad, freq_grad = compute_spectrum(tcf_grad,axis=1,method=method)
+    
+    spectrum2 = (spectrum * (2*np.pi*freq)**2).flatten()
+    spectrum_grad = spectrum_grad.flatten()
+
+    discrete_freq = N*(np.exp(1.j*2*np.pi*freq/N)-1)
+
+
+
+    assert np.allclose(freq,freq_grad), "Frequencies are not the same"
+    # diff = spectrum * freq**2-spectrum_grad
+    # assert np.allclose(spectrum2,spectrum_grad), "Spectrum is not the same"
+
+    
+    # plt.plot(freq,np.absolute(spectrum2),color="blue",linestyle="--",label="f")
+    plt.plot(freq,-2*np.pi*np.absolute(spectrum_grad),color="red",linestyle="dotted",label="$\\nabla$f")
+    # plt.plot(freq,discrete_freq,color="green",label="$1-e^{-i\\omega}$")
+    tmp = (spectrum * discrete_freq**2).flatten()
+    plt.plot(freq,np.absolute(tmp),color="purple",label="good")
+    # plt.plot(freq,np.absolute(tmp-spectrum_grad),color="black",label="diff")
+    # plt.xscale("log")
+    plt.legend()
+    plt.show()
+
+    return 
 
 #---------------------------------------#
 if __name__ == "__main__":
