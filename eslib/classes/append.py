@@ -1,8 +1,9 @@
+from git import Union
 import numpy as np
 from typing import TypeVar
 
 
-T = TypeVar('T')
+T = TypeVar('T',bound="AppendableArray")
 
 
 class AppendableArray:
@@ -11,7 +12,7 @@ class AppendableArray:
     If the array is full, it doubles its size.
     """
 
-    def __init__(self, size: int = 100000) -> None:
+    def __init__(self:T, size: int = 100000) -> None:
         """
         Initialize a new AppendableArray.
 
@@ -23,20 +24,33 @@ class AppendableArray:
         self._max_size: int = size
         self._n_update: int = 0
 
-    def append(self, x: T) -> None:
+    def append(self:T, x: Union[np.ndarray,float]) -> None:
         """
         Append an array to the array.
 
         Args:
-            x (T): The array to append.
+            x (Union[np.ndarray, float]): The array to append. It can be a single float or a numpy array.
 
         """
-        if self._size + len(x) > self._max_size:
-            self._expand()
-        self._arr[self._size:self._size + len(x)] = x
-        self._size += len(x)
+        # Check if x is a single float
+        if np.ndim(x) == 0:
+            # If the array is full, double its size
+            if self._size + 1 > self._max_size:
+                self._expand()
+            # Append the float to the array
+            self._arr[self._size] = x
+            # Increment the size counter
+            self._size += 1
+        else:  # x is an array
+            # If the array is not large enough to hold x, double its size
+            if self._size + len(x) > self._max_size:
+                self._expand()
+            # Append the array to the array
+            self._arr[self._size:self._size + len(x)] = x
+            # Increment the size counter
+            self._size += len(x)
 
-    def _expand(self) -> None:
+    def _expand(self:T) -> None:
         """
         Double the size of the array.
         """
@@ -47,7 +61,7 @@ class AppendableArray:
         self._max_size = new_size
         self._n_update += 1
 
-    def finalize(self) -> T:
+    def finalize(self:T) -> np.ndarray:
         """
         Return the final array.
 
