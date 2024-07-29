@@ -30,10 +30,13 @@ def main(args):
     dipoles = AppendableArray()
     steps = AppendableArray()
     # ------------------#
-    print("\tReading dipoles from file '{:s}' ... ".format(args.input), end="")
+    print("\tReading dipoles from file '{:s}' ... ".format(args.input))
     # Open the input file for reading
+    n = 0 
     with open(args.input, 'r') as f:
+        print("\t - line {:d} ... ".format(n), end="\r")
         line = f.readline()
+        n += 1
         # dipoles = []
         # steps = []
         while line:
@@ -48,12 +51,15 @@ def main(args):
                 # Append the dipole values to the list
                 dipoles.append(dipole_data)
             line = f.readline()
-    print("done")
+    # print("done")
 
+    #------------------#
+    print("\n\tFinalizing data ... ",end="")
     dipoles = dipoles.finalize()
     steps = steps.finalize()
+    print("done")
 
-    # ------------------#
+    #------------------#
     steps= np.asarray(steps)
     test, indices = np.unique(steps, return_index=True)
     if steps.shape != test.shape and not args.remove_replicas:
