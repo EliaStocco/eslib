@@ -32,14 +32,14 @@ def main(args):
     # ------------------#
     print("\tReading dipoles from file '{:s}' ... ".format(args.input))
     # Open the input file for reading
-    n = 0 
-    with open(args.input, 'r') as f:
-        print("\t - line {:d} ... ".format(n), end="\r")
-        line = f.readline()
-        n += 1
+    n = 1
+    with open(args.input, 'r') as f:        
+        line = f.readline()        
         # dipoles = []
         # steps = []
         while line:
+            print("\t - line {:d} ... ".format(n), end="\r")
+            n += 1
             test = step.search(line)
             if test is not None:
                 steps.append(int(test.group(1)))
