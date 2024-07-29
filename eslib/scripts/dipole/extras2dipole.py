@@ -11,6 +11,8 @@ from eslib.classes.append import AppendableArray
 # Description of the script's purpose
 description = "Read the dipoles from a i-PI extras file and save them in a txt file."
 
+regex_dipole = re.compile(r'"dipole":\s*\[([0-9.eE+-]+),\s*([0-9.eE+-]+),\s*([0-9.eE+-]+)\]')
+
 # ---------------------------------------#
 def prepare_args(description):
     import argparse
@@ -22,7 +24,18 @@ def prepare_args(description):
     parser.add_argument("-o" , "--output", **argv, required=False, type=str, help="txt output file with dipoles (default: %(default)s)", default='dipoles.txt')
     return parser# .parse_args()
 
-# ---------------------------------------#
+#---------------------------------------#
+def extract_dipole(json_string:str):
+    # Search for the pattern in the provided string
+    match = regex_dipole.search(json_string)
+    if match:
+        # Extract the values as floats
+        dipole_values = [float(match.group(i)) for i in range(1, 4)]
+        return dipole_values
+    else:
+        raise ValueError("Dipole values not found in the string.")
+    
+#---------------------------------------#
 @esfmt(prepare_args,description)
 def main(args):
 
@@ -47,14 +60,13 @@ def main(args):
                 # Check if the line contains dipole data
                 if '\"{:s}\"'.format(args.keyword) in line:
                     # Extract the dipole values from the line
-                    json_data = json.loads(line.replace("\n","").replace('\x00',""))
-                    dipole_data = json_data[args.keyword]
+                    # json_data = json.loads(line.replace("\n","").replace('\x00',""))
+                    dipole_data = extract_dipole(line.replace("\n","").replace('\x00',"")) #json_data[args.keyword]
                     # Append the dipole values to the list
                     dipoles.append(dipole_data)
                 line = f.readline()
             except Exception as e:
-                print()
-                print(e)
+                print("\n"+e)
     # print("done")
 
     #------------------#
