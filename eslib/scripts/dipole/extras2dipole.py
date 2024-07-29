@@ -52,8 +52,9 @@ def main(args):
                     # Append the dipole values to the list
                     dipoles.append(dipole_data)
                 line = f.readline()
-            except:
+            except Exception as e:
                 print()
+                print(e)
     # print("done")
 
     #------------------#
