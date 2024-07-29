@@ -40,17 +40,20 @@ def main(args):
         while line:
             print("\t - line {:d} ... ".format(n), end="\r")
             n += 1
-            test = step.search(line)
-            if test is not None:
-                steps.append(int(test.group(1)))
-            # Check if the line contains dipole data
-            if '\"{:s}\"'.format(args.keyword) in line:
-                # Extract the dipole values from the line
-                json_data = json.loads(line.replace("\n","").replace('\x00',""))
-                dipole_data = json_data[args.keyword]
-                # Append the dipole values to the list
-                dipoles.append(dipole_data)
-            line = f.readline()
+            try:
+                test = step.search(line)
+                if test is not None:
+                    steps.append(int(test.group(1)))
+                # Check if the line contains dipole data
+                if '\"{:s}\"'.format(args.keyword) in line:
+                    # Extract the dipole values from the line
+                    json_data = json.loads(line.replace("\n","").replace('\x00',""))
+                    dipole_data = json_data[args.keyword]
+                    # Append the dipole values to the list
+                    dipoles.append(dipole_data)
+                line = f.readline()
+            except:
+                print()
     # print("done")
 
     #------------------#
