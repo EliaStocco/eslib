@@ -75,8 +75,8 @@ def main(args):
     steps = steps.finalize()
     print("done")
 
-    print("\tsteps shape: ",steps.shape, end="")
-    print("\tdipoles shape: ",dipoles.shape, end="")
+    print("\tsteps shape: ",steps.shape)
+    print("\tdipoles shape: ",dipoles.shape)
 
     #------------------#
     steps= np.asarray(steps)
@@ -84,7 +84,10 @@ def main(args):
     if steps.shape != test.shape and not args.remove_replicas:
         print("\t{:s}: there could be replicas. Specify '-rr/--remove_replicas true' to remove them.".format(warning))
     if args.remove_replicas:
-        dipoles = [dipoles[index] for index in indices]
+        print("\tRemoving replicas ... ", end="")
+        dipoles = np.take(dipoles,indices=indices,axis=0)
+        print("done")
+        print("\tdipoles shape: ",dipoles.shape, end="")
 
     # ------------------#
     print("\tConverting dipoles to np.array: ... ", end="")
