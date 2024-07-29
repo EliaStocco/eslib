@@ -78,6 +78,12 @@ def main(args):
     print("\tsteps shape: ",steps.shape)
     print("\tdipoles shape: ",dipoles.shape)
 
+    # ------------------#
+    print("\tReshaping dipoles ... ", end="")
+    dipoles = np.asarray(dipoles).reshape((-1,3))
+    print("done")
+    print("\tdipoles shape: ",dipoles.shape, end="")
+
     #------------------#
     steps= np.asarray(steps)
     test, indices = np.unique(steps, return_index=True)
@@ -88,12 +94,6 @@ def main(args):
         dipoles = np.take(dipoles,indices=indices,axis=0)
         print("done")
         print("\tdipoles shape: ",dipoles.shape, end="")
-
-    # ------------------#
-    print("\tConverting dipoles to np.array: ... ", end="")
-    dipoles = np.asarray(dipoles).reshape((-1,3))
-    print("done")
-    print("\tdipoles shape: ",dipoles.shape, end="")
 
     # ------------------#
     print("\n\tConverting data into PhysicalTensor ... ", end="")
