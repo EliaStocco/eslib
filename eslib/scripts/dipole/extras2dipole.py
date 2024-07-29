@@ -4,6 +4,7 @@ from eslib.formatting import esfmt, float_format, warning
 from eslib.input import str2bool
 import numpy as np
 import re
+from eslib.classes.physical_tensor import PhysicalTensor
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -66,12 +67,21 @@ def main(args):
     print("\tdipoles shape: ",dipoles.shape, end="")
 
     #------------------#
+    # print("\n\tWriting dipoles to file '{:s}' ... ".format(args.output), end="")
+    # try:
+    #     np.savetxt(args.output,dipoles,fmt=float_format)
+    #     print("done")
+    # except Exception as e:
+    #     print("\n\tError: {:s}".format(e))
+
+    #---------------------------------------#
+    print("\n\tConverting data into PhysicalTensor ... ", end="")
+    dipoles = PhysicalTensor(dipoles)
+    print("done")
+
     print("\n\tWriting dipoles to file '{:s}' ... ".format(args.output), end="")
-    try:
-        np.savetxt(args.output,dipoles,fmt=float_format)
-        print("done")
-    except Exception as e:
-        print("\n\tError: {:s}".format(e))
+    dipoles.to_file(file=args.output,fmt=float_format)
+    print("done")
 
 
 #---------------------------------------#
