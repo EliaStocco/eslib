@@ -75,6 +75,9 @@ def main(args):
     steps = steps.finalize()
     print("done")
 
+    print("\tsteps shape: ",steps.shape, end="")
+    print("\tdipoles shape: ",dipoles.shape, end="")
+
     #------------------#
     steps= np.asarray(steps)
     test, indices = np.unique(steps, return_index=True)
