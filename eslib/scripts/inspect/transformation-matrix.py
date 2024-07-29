@@ -53,7 +53,7 @@ def find_A2B(file_A,file_B):
     print(line)
 
     # trasformation
-    M = find_transformation(A,B)
+    size,M = find_transformation(A,B)
     print("\tTrasformation matrix M(A->B):")
     line = matrix2str(M.round(2),col_names=["1","2","3"],cols_align="^",width=6)
     print(line)
