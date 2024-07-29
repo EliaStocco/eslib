@@ -5,7 +5,7 @@ import os
 from copy import copy
 import contextlib
 import sys
-from scipy.ndimage import gaussian_filter1d, generic_filter
+# from scipy.ndimage import gaussian_filter1d, generic_filter
 import re
 
 #---------------------------------------#
@@ -25,48 +25,48 @@ def phonopy2atoms(data):
 
 # @np.vectorize(signature="'(i),(),()->()'")
 
-#---------------------------------------#
-def sigma_out_of_target(array, target, sigma):
-    """
-    Compute the 'a' and 'b' arrays by measuring how far the smoothed 'array' is
-    from the 'target' in terms of standard deviations ('sigma').
+# #---------------------------------------#
+# def sigma_out_of_target(array, target, sigma):
+#     """
+#     Compute the 'a' and 'b' arrays by measuring how far the smoothed 'array' is
+#     from the 'target' in terms of standard deviations ('sigma').
 
-    Parameters:
-    - array: The input array of data.
-    - target: The target array or value.
-    - sigma: The standard deviation for smoothing.
+#     Parameters:
+#     - array: The input array of data.
+#     - target: The target array or value.
+#     - sigma: The standard deviation for smoothing.
 
-    Returns:
-    - a: Array 'a' representing how far 'array' is from 'target' in terms of standard deviations.
-    - b: Array 'b' representing how far the smoothed 'array' is from 'target' in terms of standard deviations.
-    """
-    # Apply Gaussian smoothing to the input array
-    shape = array.shape
-    N = array.shape[1]
+#     Returns:
+#     - a: Array 'a' representing how far 'array' is from 'target' in terms of standard deviations.
+#     - b: Array 'b' representing how far the smoothed 'array' is from 'target' in terms of standard deviations.
+#     """
+#     # Apply Gaussian smoothing to the input array
+#     shape = array.shape
+#     N = array.shape[1]
 
-    smooth = np.full(shape, np.nan)
-    for n in range(N):
-        smooth[:, n] = gaussian_filter1d(array[:, n], sigma[n], axis=0)
+#     smooth = np.full(shape, np.nan)
+#     for n in range(N):
+#         smooth[:, n] = gaussian_filter1d(array[:, n], sigma[n], axis=0)
 
-    # Calculate the Euclidean distance between the smoothed array and the input array
-    delta = np.abs(smooth - array)
+#     # Calculate the Euclidean distance between the smoothed array and the input array
+#     delta = np.abs(smooth - array)
 
-    # Apply Gaussian smoothing to the delta values
-    std = np.full(shape, np.nan)
-    for n in range(N):
-        std[:, n] = generic_filter(
-            delta[:, n], lambda x: np.std(x), size=int(sigma[n]), mode="constant"
-        )
-        # gaussian_filter1d(delta[:,n], sigma[n], axis=0)
+#     # Apply Gaussian smoothing to the delta values
+#     std = np.full(shape, np.nan)
+#     for n in range(N):
+#         std[:, n] = generic_filter(
+#             delta[:, n], lambda x: np.std(x), size=int(sigma[n]), mode="constant"
+#         )
+#         # gaussian_filter1d(delta[:,n], sigma[n], axis=0)
 
-    # Calculate 'a' and 'b' arrays representing how far 'array' and 'smooth' are from 'target' in terms of standard deviations
-    a = np.full(shape, np.nan)
-    b = np.full(shape, np.nan)
-    for n in range(N):
-        a[:, n] = (array[:, n] - target[n]) / std[:, n]
-        b[:, n] = (smooth[:, n] - target[n]) / std[:, n]
+#     # Calculate 'a' and 'b' arrays representing how far 'array' and 'smooth' are from 'target' in terms of standard deviations
+#     a = np.full(shape, np.nan)
+#     b = np.full(shape, np.nan)
+#     for n in range(N):
+#         a[:, n] = (array[:, n] - target[n]) / std[:, n]
+#         b[:, n] = (smooth[:, n] - target[n]) / std[:, n]
 
-    return a, b
+#     return a, b
 
 #---------------------------------------#
 def find_files_by_pattern(folder, pattern, expected_count=None, file_extension=None):

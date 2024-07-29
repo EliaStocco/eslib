@@ -1,4 +1,4 @@
-from git import Union
+from typing import Union
 import numpy as np
 from typing import TypeVar
 
