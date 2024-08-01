@@ -27,11 +27,11 @@ def prepare_args(description):
     parser.add_argument("-o" , "--output"     , **argv, required=False, type=str     , help="txt/npy output file (default: %(default)s)", default='tacf.npy')
     # Calculations
     parser.add_argument("-dt", "--time_step"  , **argv, required=False, type=float   , help="time step [fs] (default: %(default)s)", default=1)
-    parser.add_argument("-d" , "--derivative" , **argv, required=False, type=str2bool, help="compute derivative of the input data (default: %(default)s)", default=True)
-    parser.add_argument("-b" , "--blocks"     , **argv, required=False, type=int     , help="number of blocks (default: %(default)s)", default=10)
+    # parser.add_argument("-d" , "--derivative" , **argv, required=False, type=str2bool, help="compute derivative of the input data (default: %(default)s)", default=True)
+    # parser.add_argument("-b" , "--blocks"     , **argv, required=False, type=int     , help="number of blocks (default: %(default)s)", default=10)
     parser.add_argument("-ac", "--axis_corr"  , **argv, required=False, type=int     , help="axis along compute autocorrelation (default: %(default)s)", default=1)
     parser.add_argument("-am", "--axis_mean"  , **argv, required=False, type=int     , help="axis along compute mean (default: %(default)s)", default=2)
-    parser.add_argument("-rm", "--remove_mean", **argv, required=False, type=str2bool, help="whether to remove the e mean (default: %(default)s)", default=False)
+    parser.add_argument("-rm", "--remove_mean", **argv, required=False, type=str2bool, help="whether to remove the e mean (default: %(default)s)", default=True)
     parser.add_argument("-m" , "--method"     , **argv, required=False, type=str     , help="method (default: %(default)s)", default='class', choices=['class','function'])
     # Plot
     parser.add_argument("-p" , "--plot"       , **argv, required=False, type=str     , help="output file for the plot (default: %(default)s)", default='tacf.pdf')
@@ -69,7 +69,7 @@ def exponential(x,tau):
 @esfmt(prepare_args,description)
 def main(args):
 
-    assert args.derivative == True, "If derivative == False there is a bug."
+    # assert args.derivative == True, "If derivative == False there is a bug."
 
     #------------------#
     print("\n\tReading the input array from file '{:s}' ... ".format(args.input), end="")
@@ -78,20 +78,20 @@ def main(args):
     print("done")
     print("\tdata shape: ",data.shape)
 
-    #------------------#
-    if args.blocks > 0 :
-        print("\n\tN. of blocks: ", args.blocks)
-        print("\tBuilding blocks ... ",end="")
-        data = reshape_into_blocks(data,args.blocks)# .T
-        print("done")
-        print("\tdata shape: ",data.shape)
+    # #------------------#
+    # if args.blocks > 0 :
+    #     print("\n\tN. of blocks: ", args.blocks)
+    #     print("\tBuilding blocks ... ",end="")
+    #     data = reshape_into_blocks(data,args.blocks)# .T
+    #     print("done")
+    #     print("\tdata shape: ",data.shape)
 
     #------------------#
-    if args.derivative:
-        print("\n\tComputing the derivative ... ",end="")
-        data = np.gradient(data,axis=args.axis_corr)/args.time_step
-        print("done")
-        print("\tdata shape: ",data.shape)
+    # if args.derivative:
+    print("\n\tComputing the derivative ... ",end="")
+    data = np.gradient(data,axis=args.axis_corr)/args.time_step
+    print("done")
+    print("\tdata shape: ",data.shape)
 
     #------------------#
     if args.remove_mean:
@@ -105,7 +105,7 @@ def main(args):
         autocorr = tacf(data)
     else:
         obj = TimeAutoCorrelation(data)
-        autocorr = obj.tcf(axis=args.axis_corr)
+        autocorr = obj.tcf(axis=args.axis_corr,normalize=True)
     print("done")
     print("\tautocorr shape: ",autocorr.shape)
 
@@ -237,7 +237,7 @@ def main(args):
     #------------------#
     if args.infrared is not None:
         print("\n\tComputing the spectra ... ", end="")
-        spectrum, _ = compute_spectrum(autocorr,axis=args.axis_corr,pad=args.padding,method="rfft")
+        spectrum, freq = compute_spectrum(autocorr,axis=args.axis_corr,pad=args.padding,method="rfft",dt=args.time_step)
         print("done")
         print("\tspectrum shape: :",spectrum.shape)
         spectrum = spectrum.real

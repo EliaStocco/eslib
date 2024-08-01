@@ -1,11 +1,13 @@
 #!/usr/bin/env python
+from eslib.formatting import esfmt
+# Some problems with librascal
+# Import `rascal` after `pandas`
+from rascal.representations import SphericalInvariants as SOAP
 import numpy as np
 import json
-from rascal.representations import SphericalInvariants as SOAP
 from tqdm.auto import tqdm
 from eslib.functions import add_default
-from eslib.show import show_dict
-from eslib.formatting import esfmt
+from eslib.show import show_dict    
 from eslib.classes.trajectory import AtomicStructures
 
 #---------------------------------------#

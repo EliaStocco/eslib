@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import json
 from eslib.formatting import esfmt, float_format, warning
 from eslib.input import str2bool
 import numpy as np
@@ -27,6 +26,7 @@ def prepare_args(description):
 #---------------------------------------#
 def extract_dipole(json_string:str):
     # Search for the pattern in the provided string
+    json_string = json_string.replace(" ","")
     match = regex_dipole.search(json_string)
     if match:
         # Extract the values as floats
@@ -82,7 +82,7 @@ def main(args):
     print("\tReshaping dipoles ... ", end="")
     dipoles = np.asarray(dipoles).reshape((-1,3))
     print("done")
-    print("\tdipoles shape: ",dipoles.shape, end="")
+    print("\tdipoles shape: ",dipoles.shape)
 
     #------------------#
     steps= np.asarray(steps)
@@ -93,7 +93,7 @@ def main(args):
         print("\tRemoving replicas ... ", end="")
         dipoles = np.take(dipoles,indices=indices,axis=0)
         print("done")
-        print("\tdipoles shape: ",dipoles.shape, end="")
+        print("\tdipoles shape: ",dipoles.shape)
 
     # ------------------#
     print("\n\tConverting data into PhysicalTensor ... ", end="")

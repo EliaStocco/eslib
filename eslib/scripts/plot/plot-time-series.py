@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from eslib.formatting import esfmt
+from eslib.classes.physical_tensor import PhysicalTensor
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -14,12 +15,15 @@ def prepare_args(description):
     argv = {"metavar":"\b"}
     parser.add_argument("-i", "--input", type=str, **argv, required=True, help='input txt file')
     parser.add_argument("-o","--output", type=str, **argv, required=True, help='output file for the plot')
-    return parser# .parse_args()
+    return parser
 
 #---------------------------------------#
-def plot_array(input_file, output_file):
-    # Load the numpy array from the input file
-    data = np.atleast_2d(np.loadtxt(input_file))
+@esfmt(prepare_args,description)
+def main(args):
+
+    data = PhysicalTensor.from_file(file=args.input)
+
+    data = np.atleast_2d(data)
 
     # Get the number of rows and columns from the array shape
     rows, cols = data.shape
@@ -39,17 +43,10 @@ def plot_array(input_file, output_file):
     plt.legend()
 
     # Save or show the plot
-    if output_file:
-        plt.savefig(output_file)
+    if args.output:
+        plt.savefig(args.output)
     else:
         plt.show()
-
-#---------------------------------------#
-@esfmt(prepare_args,description)
-def main(args):
-
-    # Call the function with the provided arguments
-    plot_array(args.input, args.output)
 
 
 if __name__ == "__main__":
