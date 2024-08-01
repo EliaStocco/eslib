@@ -56,7 +56,8 @@ class DipolePartialCharges(DipoleModel):
             self.set_charges(neutral_charges)
         return neutral_charges
             
-
+    def get(self,traj:List[Atoms]):
+        return self.compute(traj)
 
     def compute(self,traj:List[Atoms],**argv):
         dipole = np.zeros((len(traj),3))
@@ -77,6 +78,7 @@ class DipolePartialCharges(DipoleModel):
 
     def summary(self, string: str = "\t") -> None:
         """Print summary of the model."""       
+        super().summary(string=string)
         for c in self.charges:
             print("\t{:s}{:s}: {:>f}".format(string, c, self.charges[c]))
-        super().summary(string=string)
+        

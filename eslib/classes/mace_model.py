@@ -9,12 +9,12 @@ from warnings import warn
 from mace.tools import torch_geometric, torch_tools
 from mace.cli.elia_configs import make_dataloader
 from mace.modules.models.general import MACEBaseModel
-from eslib.classes.io import pickleIO
 from eslib.tools import add_info_array, reshape_info_array
+from eslib.classes.eslibModel import eslibModel
 
 #---------------------------------------#
 @dataclass
-class MACEModel(Calculator,pickleIO):
+class MACEModel(eslibModel,Calculator):
     """Class for loading and using MACE models."""
 
     #------------------#
@@ -146,6 +146,7 @@ class MACEModel(Calculator,pickleIO):
     #------------------#
     def summary(self, string: str = "\t") -> None:
         """Print summary of the model."""
+        super().summary(string=string)
         args = {
             "path": self.model_path,
             "device": self.device,
@@ -162,7 +163,7 @@ class MACEModel(Calculator,pickleIO):
         for k, v in args.items():
             # Align the output based on the length of the longest key
             print("{:s}{:<{width}}: {}".format(string, k, v, width=max_key_length))
-        super().summary(string=string)
+        # super().summary(string=string)
         pass
 
 #---------------------------------------#

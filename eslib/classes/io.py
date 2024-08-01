@@ -34,8 +34,10 @@ class pickleIO:
             #     raise ValueError(f"Invalid pickle file format. Expected type: {cls.__name__}")
         except FileNotFoundError:
             print(f"Error loading from pickle file: File not found - {file}")
+            return None
         except Exception as e:
             print(f"Error loading from pickle file: {e}")
+            return obj
 
     @staticmethod
     def correct_extension_out(func):
