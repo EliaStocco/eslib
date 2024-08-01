@@ -4,11 +4,12 @@ import glob
 import matplotlib.pyplot as plt
 from eslib.input import slist
 from eslib.formatting import esfmt
-from eslib.classes.dipole import DipoleModel, DipoleLinearModel
+from eslib.classes.dipole import DipoleModel
 from eslib.plot import plot_bisector
 from eslib.physics import compute_dipole_quanta
 from copy import copy
 from eslib.plot import generate_colors
+from eslib.classes.trajectory import AtomicStructures
 
 #---------------------------------------#
 # To Do:
@@ -38,9 +39,10 @@ def main(args):
     print("\tLoading the dipole linear model from file '{:s}' ... ".format(args.model), end="")
     model = DipoleModel.from_pickle(args.model)
     print("done")
-    if isinstance(model,DipoleLinearModel):
-        print("\tLinear model dipole: ",model.get_dipole())
-        print("\tLinear model quanta: ",model.get_quanta())
+    model.summary()
+    # if isinstance(model,DipoleLinearModel):
+    #     print("\tLinear model dipole: ",model.get_dipole())
+    #     print("\tLinear model quanta: ",model.get_quanta())
 
     #------------------#
     matched_files = glob.glob(args.input[0])
@@ -51,7 +53,7 @@ def main(args):
     trajectories = [None]*len(args.input)
     for n,file in enumerate(args.input):
         print("\t\t{:d}: '{:s}' ... ".format(n,file), end="")
-        trajectories[n] = read(file,format='extxyz',index=":")
+        trajectories[n] = AtomicStructures.from_file(file=file,format='extxyz')
         print("done --> (n. atomic structures: {:d})".format(len(trajectories[n])))
 
     #------------------#
@@ -69,7 +71,7 @@ def main(args):
     print("\n\tComputing the dipoles using the linear model:")
     for n,atoms in enumerate(trajectories):
         print("\t\t{:d}: '{:s}' ... ".format(n,args.input[n]), end="")
-        model_dipoles[n] = model.compute(atoms)
+        model_dipoles[n] = model.get(atoms)
         print("done")
 
     #------------------#
