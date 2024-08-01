@@ -2,7 +2,7 @@
 import json
 from eslib.formatting import esfmt
 from eslib.show import show_dict
-from eslib.classes.dipole import DipoleMACECalculator
+# from eslib.classes.dipole import DipoleMACECalculator
 from eslib.functions import args_to_dict
 from eslib.input import slist, str2bool
 
@@ -31,16 +31,16 @@ def main(args):
 
     raise ValueError("This script should be deprecated")
 
-    print("\n\tCreating dipole model based on the MACE model ... ",end="")
-    kwargs = args_to_dict(args)
-    del kwargs["output"]
-    model = DipoleMACECalculator(**kwargs)
-    print("done")
+    # print("\n\tCreating dipole model based on the MACE model ... ",end="")
+    # kwargs = args_to_dict(args)
+    # del kwargs["output"]
+    # model = DipoleMACECalculator(**kwargs)
+    # print("done")
 
-    #------------------#
-    print("\n\tSaving the dipole model to file '{:s}' ... ".format(args.output),end="")
-    model.to_pickle(args.output)
-    print("done") 
+    # #------------------#
+    # print("\n\tSaving the dipole model to file '{:s}' ... ".format(args.output),end="")
+    # model.to_pickle(args.output)
+    # print("done") 
 
 #---------------------------------------#
 if __name__ == "__main__":

@@ -72,6 +72,9 @@ def main(args):
     print("done")
 
     #------------------#
+    model.summary()
+
+    #------------------#
     if isinstance(model,DipoleLinearModel): 
         print("\tCheck the distances w.r.t. the reference configuration ... ", end="")
         indices = model.control_periodicity(list(trajectory))

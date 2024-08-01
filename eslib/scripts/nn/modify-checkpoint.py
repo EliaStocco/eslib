@@ -2,7 +2,7 @@
 import json
 from eslib.formatting import esfmt
 from eslib.show import show_dict
-from eslib.classes.dipole import DipoleMACECalculator
+# from eslib.classes.dipole import DipoleMACECalculator
 from eslib.functions import args_to_dict
 import torch
 
