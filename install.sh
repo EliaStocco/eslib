@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Installing ESLIB ..."
+
 # Determine the directory of the script
 SCRIPT_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 
@@ -20,3 +22,5 @@ for dir in "${ESLIB}"/eslib/scripts/* "${ESLIB}"/eslib/* ; do
 done
 
 find "${ESLIB}/cluster/" -name "*.py" -type f -exec chmod +x {} \;
+
+echo "Done. All the scripts should be available in the PATH."
