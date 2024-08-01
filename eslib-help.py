@@ -92,8 +92,8 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     folders = [None, "bec","build","charges","convert","descriptors","dipole","drive","inspect","metrics","modes","nn","oxn","plot","properties","text","time-series"]
     parser.add_argument("-f", "--folders"     , **argv,type=slist   , help="folders to search for Python files in (default: %(default)s)", default=None)
-    parser.add_argument("-s", "--show_folders", action='store_true', help="show folders only")
-    parser.add_argument("-d", "--descriptions", **argv, type=str2bool, help="whether to print descriptions (default: %(default)s)", default=True)
+    parser.add_argument("-s", "--show_folders", type=str2bool, help="whether to show folders (default: %(default)s)",default=False)
+    parser.add_argument("-d", "--descriptions", **argv, type=str2bool, help="whether to print descriptions (default: %(default)s)", default=False)
     return parser# .parse_args()
 
 @esfmt(prepare_args,description)
