@@ -42,6 +42,7 @@ def prepare_args(description):
 @esfmt(prepare_args,description)
 def main(args):
 
+    #---------------------------------------#
     if args.positions_file is None:
         if args.prefix is None or args.prefix == "":
             raise ValueError("Please provide a prefix for the i-PI output files (--prefix) or a file with the atomic structures (--positions).")
@@ -65,6 +66,7 @@ def main(args):
     #     atoms = read(args.positions_file,format=args.format,index=":")
     #     print("done")
 
+    #---------------------------------------#
     if not args.pbc:
         print("\n\tRemoving lattice vectors from all the atomic structures ... ", end="")
         for n in range(len(atoms)):
@@ -72,6 +74,7 @@ def main(args):
             atoms[n].set_cell(None)
         print("done")
 
+    #---------------------------------------#
     if args.additional_arrays is not None:
         arrays = dict()
         for k in args.additional_arrays:
@@ -91,7 +94,10 @@ def main(args):
             for n in range(len(arrays[k])):
                 atoms[n].arrays[k] = arrays[k][n]
 
-    if args.additional_properties is not None and "none" not in args.additional_properties:
+    if args.properties_file is not None and \
+        args.additional_properties is not None and\
+        "none" not in args.additional_properties:
+
         properties = list(args.additional_properties)
         print("\n\tYou specified the following properties to be added to the output file: ",properties)
 
@@ -110,90 +116,98 @@ def main(args):
         # elif not os.path.exists(args.properties_file):
         #     raise ValueError("File '{:s}' does not exist.".format(args.properties_file))
 
-        if args.properties_file is not None:
+        
                 
-            print("\tReading properties from file '{:s}' ... ".format(args.properties_file), end="")
-            with suppress_output():
-                allproperties = Properties.from_file(file=args.properties_file)
-                # if str(args.properties_file).endswith(".pickle"):
-                #     allproperties = Properties.from_pickle(file_path=args.properties_file)
-                # else:
-                #     allproperties = Properties.load(file=args.properties_file)
-            print("done")
+        print("\tReading properties from file '{:s}' ... ".format(args.properties_file), end="")
+        with suppress_output():
+            allproperties = Properties.from_file(file=args.properties_file)
+            # if str(args.properties_file).endswith(".pickle"):
+            #     allproperties = Properties.from_pickle(file_path=args.properties_file)
+            # else:
+            #     allproperties = Properties.load(file=args.properties_file)
+        print("done")
+
+        print("\n\tSummary:")
+        print("\tn. of atomic structures: {:d}".format(len(atoms)))
+        print("\t       n. of properties: {:d}".format(len(allproperties)))
+
+        try :
+            if len(allproperties) != len(atoms):
+                print("\n\t{:s}: n. of atomic structures and n. of properties differ.".format(warning))
+                if len(allproperties) == len(atoms)+1 :
+                    information = "You should provide the positions as printed by i-PI."
+                    try:
+                        from colorama import Fore, Style
+                        information = Fore.YELLOW   + Style.NORMAL + information + Style.RESET_ALL
+                    except:
+                        pass
+                    print("\t{:s}\n\tMaybe you provided a 'replay' input file --> discarding the first properties raw.".format(information))
+                    allproperties = allproperties[1:]
+                else:
+                    raise ValueError("I would expect n. of atomic structures to be (n. of properties + 1)")
+        except:
+            print("Fixing with step")
+            prop_steps = allproperties['step'].astype(int)
+            assert np.allclose(prop_steps, np.arange(len(prop_steps)))
+            pos_steps = atoms.get("step").astype(int)
+            assert np.allclose(pos_steps, np.arange(len(pos_steps)))
+            atoms = atoms.subsample(prop_steps)
+            pos_steps = atoms.get("step").astype(int)
+            assert np.allclose(pos_steps, np.arange(len(pos_steps)))
+            assert np.allclose(len(pos_steps), len(atoms))
 
             print("\n\tSummary:")
             print("\tn. of atomic structures: {:d}".format(len(atoms)))
             print("\t       n. of properties: {:d}".format(len(allproperties)))
 
-            try :
-                if len(allproperties) != len(atoms):
-                    print("\n\t{:s}: n. of atomic structures and n. of properties differ.".format(warning))
-                    if len(allproperties) == len(atoms)+1 :
-                        information = "You should provide the positions as printed by i-PI."
-                        try:
-                            from colorama import Fore, Style
-                            information = Fore.YELLOW   + Style.NORMAL + information + Style.RESET_ALL
-                        except:
-                            pass
-                        print("\t{:s}\n\tMaybe you provided a 'replay' input file --> discarding the first properties raw.".format(information))
-                        allproperties = allproperties[1:]
-                    else:
-                        raise ValueError("I would expect n. of atomic structures to be (n. of properties + 1)")
-            except:
-                print("Fixing with step")
-                prop_steps = allproperties['step'].astype(int)
-                assert np.allclose(prop_steps, np.arange(len(prop_steps)))
-                pos_steps = atoms.get("step").astype(int)
-                assert np.allclose(pos_steps, np.arange(len(pos_steps)))
-                atoms = atoms.subsample(prop_steps)
-                pos_steps = atoms.get("step").astype(int)
-                assert np.allclose(pos_steps, np.arange(len(pos_steps)))
-                assert np.allclose(len(pos_steps), len(atoms))
+        print("\n\tSummary of the read properties:\n")
+        df = allproperties.summary()
 
-                print("\n\tSummary:")
-                print("\tn. of atomic structures: {:d}".format(len(atoms)))
-                print("\t       n. of properties: {:d}".format(len(allproperties)))
-
-            print("\n\tSummary of the read properties:\n")
-            df = allproperties.summary()
-
-            def line(): print("\t\t-----------------------------------------")
-            
-            line()
-            print("\t\t|{:^15s}|{:^15s}|{:^7s}|".format("name","unit","shape"))
-            line()
-            for index, row in df.iterrows():
-                print("\t\t|{:^15s}|{:^15s}|{:^7d}|".format(row["name"],row["unit"],row["shape"]))
-            line()
-
-            # all properties
-            if "all" in properties:
-                _properties = list(allproperties.properties.keys())
-                for p in properties:
-                    p = p.replace(" ","")
-                    if p[0] == "~":
-                        _properties.remove(p[1:])
-                properties = copy(_properties)  
-                del _properties
-            
-            print("\n\tStoring the following properties to file: ",properties)
-
-            # 
-            tmp = dict()
-            for k in properties:
-                tmp[k] = allproperties.properties[k]
-            properties = copy(tmp)
-            del allproperties
-            del tmp
+        def line(): print("\t\t-----------------------------------------")
         
-            for k in properties.keys(): 
-                for n in range(len(properties[k])):
-                    atoms[n].info[k] = properties[k][n]
+        line()
+        print("\t\t|{:^15s}|{:^15s}|{:^7s}|".format("name","unit","shape"))
+        line()
+        for index, row in df.iterrows():
+            print("\t\t|{:^15s}|{:^15s}|{:^7d}|".format(row["name"],row["unit"],row["shape"]))
+        line()
 
-    ###
+        # all properties
+        if "all" in properties:
+            _properties = list(allproperties.properties.keys())
+            for p in properties:
+                p = p.replace(" ","")
+                if p[0] == "~":
+                    _properties.remove(p[1:])
+            properties = copy(_properties)  
+            del _properties
+        
+        print("\n\tStoring the following properties to file: ",properties)
+
+        # 
+        tmp = dict()
+        for k in properties:
+            tmp[k] = allproperties.properties[k]
+        properties = copy(tmp)
+        del allproperties
+        del tmp
+    
+        for k in properties.keys(): 
+            for n in range(len(properties[k])):
+                atoms[n].info[k] = properties[k][n]
+
+    #---------------------------------------#
+    # summary
+    print("\n\tSummary of the atomic structures: ")
+    df = atoms.summary()
+    tmp = "\n"+df.to_string(index=False)
+    print(tmp.replace("\n", "\n\t"))
+
+    #---------------------------------------#
     # writing
     print("\n\tWriting output to file '{:s}' ... ".format(args.output), end="")
     atoms.to_file(file=args.output,format=args.output_format)
+    print("done")
 
 if __name__ == "__main__":
     main()
