@@ -10,7 +10,7 @@ from mace.tools import torch_geometric, torch_tools
 from mace.cli.elia_configs import make_dataloader
 from mace.modules.models.general import MACEBaseModel
 from eslib.tools import add_info_array, reshape_info_array
-from eslib.classes.eslibModel import eslibModel
+from eslib.classes.models.eslibModel import eslibModel
 
 #---------------------------------------#
 @dataclass

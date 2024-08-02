@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from eslib.formatting import esfmt
-from eslib.classes.mace_model import MACEModel
-from eslib.classes.dipole import DipoleMACECalculator
+from classes.models.mace_model import MACEModel
+from eslib.classes.models.dipole import DipoleMACECalculator
 from eslib.functions import args_to_dict
 from eslib.input import slist, str2bool
 import json

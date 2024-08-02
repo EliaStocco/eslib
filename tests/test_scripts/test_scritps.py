@@ -18,8 +18,8 @@ def get_main_function(folder:str, file:str)->callable:
     filepath = "eslib.scripts.{:s}.{:s}".format(folder,file).split(".py")[0]
     try:
         return import_from(filepath,"main")
-    except:
-        raise AttributeError("Problem importing 'main' from file '{:s}.py'".format(filepath))
+    except Exception as e:
+        raise AttributeError(f"Problem importing 'main' from file '{filepath}.py': {e}")
     
 @contextmanager
 def change_directory():
