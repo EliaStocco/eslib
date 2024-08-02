@@ -12,7 +12,7 @@ from asap3.analysis.rdf import RadialDistributionFunction
 from sklearn.metrics import pairwise_distances
 from sklearn.metrics import pairwise, log_loss
 from itertools import combinations
-from numba import jit
+# from numba import jit
 import random
 
 

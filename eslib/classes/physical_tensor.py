@@ -129,8 +129,8 @@ def read_from_pattern(func: Callable) -> Callable:
     return wrapper
 
 class PhysicalTensor(pickleIO,xr.DataArray):
-    __slots__ = ()
-    data:np.ndarray
+    # __slots__ = ()
+    # data:np.ndarray
 
     def cdot(self:T,B:T,dim:str)->T:
         return dot(self,B,dim)

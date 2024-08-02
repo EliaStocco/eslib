@@ -10,7 +10,7 @@ icecream
 importlib-metadata
 matplotlib
 numpy
-Pint
+pint
 scikit-learn
 skmatter
 scipy
