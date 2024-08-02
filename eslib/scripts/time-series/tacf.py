@@ -82,6 +82,8 @@ def main(args):
     args.input = str(args.input)
     data:np.ndarray = PhysicalTensor.from_file(file=args.input).to_data()
     print("done")
+    if data.ndim == 2:
+        data = data[np.newaxis,:,:]
     print("\tdata shape: ",data.shape)
 
     # #------------------#
