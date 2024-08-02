@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import json
 import numpy as np
-from eslib.classes.dipole import DipolePartialCharges
+from eslib.classes.models.dipole import DipolePartialCharges
 from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt, warning
 from eslib.show import show_dict

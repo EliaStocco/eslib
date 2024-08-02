@@ -1,4 +1,4 @@
-from eslib.classes.dipole.DipoleModel import DipoleModel
+from eslib.classes.models.dipole.DipoleModel import DipoleModel
 from dataclasses import dataclass
 from ase import Atoms
 from typing import List, Dict

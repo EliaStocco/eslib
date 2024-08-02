@@ -135,7 +135,7 @@ def main(args):
             f"Col 1: index\n" +\
             f"Col 2: lenght of the block\n" +\
             f"Col 3: maximum time considered in the block [ps]\n" +\
-            f"Col 4 onwards: fluctuation of the block"
+            f"Col 4 onwards: fluctuation/variance of the block"
             # f"Col 5: standard deviation of the fluctuation of the block"
         tmp.to_file(file=args.output,header=header)
     else:

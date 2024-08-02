@@ -2,7 +2,7 @@
 import json
 from eslib.formatting import esfmt
 from eslib.show import show_dict
-from eslib.classes.dipole import DipolePartialCharges
+from eslib.classes.models.dipole import DipolePartialCharges
 
 #---------------------------------------#
 description = "Create a dipole model from partial charges."
