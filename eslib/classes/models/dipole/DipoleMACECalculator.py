@@ -1,7 +1,7 @@
 from ase import Atoms
 from typing import List
 from dataclasses import dataclass
-from eslib.classes.models.dipole.DipoleModel import DipoleModel
+from eslib.classes.models.dipole import DipoleModel
 from classes.models.mace_model import MACEModel
 
 @dataclass
