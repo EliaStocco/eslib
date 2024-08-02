@@ -1,7 +1,7 @@
 import xarray as xr
 import numpy as np
 import glob
-from eslib.formatting import float_format
+from eslib.formatting import float_format, complex_format
 from eslib.classes.io import pickleIO
 from eslib.units import *
 from typing import TypeVar, Union, Any, Callable, Type
@@ -164,7 +164,7 @@ class PhysicalTensor(pickleIO,xr.DataArray):
         return cls(data)
     
     @pickleIO.correct_extension_out
-    def to_file(self: T, file: str, fmt: Union[str, None] = float_format,**argv):
+    def to_file(self: T, file: str,**argv):
         """
         Write atomic structures to file.
         
@@ -172,7 +172,11 @@ class PhysicalTensor(pickleIO,xr.DataArray):
         """
         data = self.to_data()
         if file.endswith("txt"):
-            np.savetxt(file,data,fmt=fmt,**argv) # fmt)
+            # fmt = float_format  else complex_format
+            if not np.any(np.iscomplex(data)):
+                np.savetxt(file,data,fmt=float_format,**argv) # fmt)
+            else:
+                np.savetxt(file,data,**argv)
         elif file.endswith("npy"):
             np.save(file,data,**argv)
         else:

@@ -96,8 +96,10 @@ def main(args):
 
    #------------------#
     print("\n\tComputing the average over the trajectories ... ", end="")
+    N = spectrum.shape[0]
     std:np.ndarray = np.std(spectrum.real,axis=0) + 1.j*np.std(spectrum.imag,axis=0)
     spectrum:np.ndarray = spectrum.mean(axis=0)
+    err:np.ndarray = std/np.sqrt(N)
     print("done")
     print("\tspectrum shape: :",spectrum.shape)
 
@@ -125,15 +127,16 @@ def main(args):
 
     #------------------#
     print("\n\tSaving the spectrum and the frequecies to file '{:s}' ... ".format(args.output), end="")
-    tmp =  np.vstack((freq,spectrum,std)).T
+    tmp =  np.vstack((freq,spectrum,std,err)).T
     assert tmp.ndim == 2, "thsi array should have 2 dimensions"
-    assert tmp.shape[1] == 3, "this array should have 3 columns"
+    # assert tmp.shape[1] == 3, "this array should have 3 columns"
     tmp = PhysicalTensor(tmp)
     if str(args.output).endswith("txt"):
         header = \
             f"Col 1: frequency in {args.freq_unit}\n" +\
-            f"Col 2: normalized spectrum\n" +\
-            f"Col 3: std (over trajectories) of the spectrum "
+            f"Col 2: spectrum\n" +\
+            f"Col 3: std (over trajectories) of the spectrum\n"+\
+            f"Col 4: error of the spectrum (std/sqrt(N), with N = n. of trajectories)"
         tmp.to_file(file=args.output,header=header)
     else:
         tmp.to_file(file=args.output)

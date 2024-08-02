@@ -14,6 +14,8 @@ colorama.init(autoreset=True)
 os.environ["XDG_SESSION_TYPE"] = "xcb"
 
 float_format = '%24.12e' # Elia Stocco float format
+complex_format = '%.10f%+.10fj'
+
 
 #---------------------------------------#
 error           = "***Error***"

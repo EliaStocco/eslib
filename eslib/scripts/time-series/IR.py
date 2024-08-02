@@ -76,9 +76,10 @@ def main(args):
 
     #------------------#
     print("\n\tComputing the average over the trajectories ... ", end="")
+    N = spectrum.shape[0]
     std:np.ndarray = spectrum.std(axis=0)
     spectrum:np.ndarray = spectrum.mean(axis=0)
-    err:np.ndarray = std / np.sqrt(spectrum.shape[0])
+    err:np.ndarray = std / np.sqrt(N)
     print("done")
     print("\tspectrum shape: :",spectrum.shape)
 
@@ -116,7 +117,7 @@ def main(args):
         # y /= np.max(y)
         # ax.plot(freq,y,label="raw",color="red")
         ax.plot(freq,spectrum, label="$\\rm S\\left(\\omega\\right)$",color="blue", marker='.', markerfacecolor='blue', markersize=args.marker_size)
-        ylow,yhigh = spectrum - std, spectrum + std
+        ylow,yhigh = spectrum - err, spectrum + err
         ax.fill_between(freq,ylow,yhigh, color='gray', alpha=0.8)
 
         ax.legend(loc="upper left",facecolor='white', framealpha=1,edgecolor="black")
