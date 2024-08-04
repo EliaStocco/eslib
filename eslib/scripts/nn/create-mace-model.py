@@ -59,11 +59,11 @@ def main(args):
     if "model_type" in kwargs: del kwargs["model_type"]
 
     #------------------#
-    print("\n\tInput for the MACE model:",end="")
+    print("\n\tInput for the MACE model:")
     for k, v in kwargs.items():
         max_key_length = max(len(key) for key in kwargs.keys())
         # Align the output based on the length of the longest key
-        print("\t{:s}{:<{width}}: {}".format(k, v, width=max_key_length))        
+        print("\t\t{:<{width}}: {}".format(k, v, width=max_key_length))   
 
     #------------------#
     print("\n\tAllocating the MACE model ... ",end="")

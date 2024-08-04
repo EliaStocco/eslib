@@ -165,7 +165,7 @@ class MACEModel(eslibModel,Calculator):
 
         for k, v in args.items():
             # Align the output based on the length of the longest key
-            print("{:s}{:<{width}}: {}".format(string, k, v, width=max_key_length))
+            print("\t{:s}{:<{width}}: {}".format(string, k, v, width=max_key_length))
         # super().summary(string=string)
         pass
 
