@@ -37,7 +37,7 @@ def write_file(atoms: Atoms, ofile: str,forces_keyword: str = 'forces'):
         f.write("  | Unit cell:\n")
         cell = atoms.get_cell()
         for vector in cell:
-            f.write("  {:18.8f} {:18.8f} {:18.8f}\n".format(*vector))
+            f.write("  |  {:18.8f} {:18.8f} {:18.8f}\n".format(*vector))
         
         # Write atomic positions
         f.write("  | Atomic structure:\n")
