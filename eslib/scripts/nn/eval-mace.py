@@ -2,7 +2,7 @@
 import json
 from ase import Atoms
 from eslib.classes.trajectory import AtomicStructures
-from classes.models.mace_model import MACEModel
+from eslib.classes.models.mace_model import MACEModel
 from eslib.formatting import esfmt
 
 #---------------------------------------#
