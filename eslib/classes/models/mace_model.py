@@ -124,11 +124,14 @@ class MACEModel(eslibModel,Calculator):
                         warn(f"{k} not in `implemented_properties`")
                 else:
                     # Convert the tensor to numpy array and append to the outputs
-                    data = torch_tools.to_numpy(results[k])
-                    if k not in outputs:
-                        outputs[k] = data
+                    if results[k] is not None:
+                        data = torch_tools.to_numpy(results[k])
+                        if k not in outputs:
+                            outputs[k] = data
+                        else:
+                            outputs[k] = np.append(outputs[k], data)
                     else:
-                        outputs[k] = np.append(outputs[k], data)
+                        data = np.nan
 
         # Prepare the outputs for return
         new_outputs = {prefix + k: outputs[k] for k in outputs.keys()}

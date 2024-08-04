@@ -48,10 +48,8 @@ def main(args):
         model.charges_key = args.charges
 
     #------------------#
-    try:
-        model.summary()
-    except: 
-        pass
+    model.summary()
+
 
     #------------------#
     # trajectory

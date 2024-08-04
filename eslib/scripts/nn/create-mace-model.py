@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 from eslib.formatting import esfmt
-from classes.models.mace_model import MACEModel
+from eslib.classes.models.mace_model import MACEModel
 from eslib.classes.models.dipole import DipoleMACECalculator
+from mace.calculators import MACECalculator
 from eslib.functions import args_to_dict
 from eslib.input import slist, str2bool
 import json
@@ -48,6 +49,8 @@ def main(args):
         mtype = MACEModel
     elif args.model_type == "DipoleMACECalculator":
         mtype = DipoleMACECalculator
+    elif args.model_type == "MACECalculator":
+        mtype = MACECalculator
     else:
         raise ValueError("Unknown model type '{:s}'.".format(args.model_type))
     
@@ -55,6 +58,14 @@ def main(args):
     if "output" in kwargs: del kwargs["output"]
     if "model_type" in kwargs: del kwargs["model_type"]
 
+    #------------------#
+    print("\n\tInput for the MACE model:",end="")
+    for k, v in kwargs.items():
+        max_key_length = max(len(key) for key in kwargs.keys())
+        # Align the output based on the length of the longest key
+        print("\t{:s}{:<{width}}: {}".format(k, v, width=max_key_length))        
+
+    #------------------#
     print("\n\tAllocating the MACE model ... ",end="")
     model = mtype(**kwargs)
     print("done")
@@ -63,11 +74,10 @@ def main(args):
         raise ValueError("Loaded model is None.")
 
     #------------------#
-    # print("\n\tMACE model summary: ")
-    # try:
-    model.summary()
-    # except:
-    #     pass
+    try:
+        model.summary()
+    except:
+        pass
 
     #------------------#
     # try:

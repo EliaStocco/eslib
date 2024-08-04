@@ -391,6 +391,8 @@ def reshape_info_array(traj:List[Atoms],props:Dict[str,np.ndarray],shapes)->Dict
     # print("N atoms. : {:d}".format(Natoms))
     whereto = {}
     for k in props.keys():
+        if shapes[k][1] is None:
+            shapes[k][1] = 1
         # print("reshaping '{:s}' from {}".format(k,data[k].shape),end="")
         if isinstance(shapes[k][1],int) or len(shapes[k][1]) == 1 :
             # info
