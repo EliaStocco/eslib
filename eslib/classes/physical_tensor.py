@@ -164,7 +164,7 @@ class PhysicalTensor(pickleIO,xr.DataArray):
         return cls(data)
     
     @pickleIO.correct_extension_out
-    def to_file(self: T, file: str,**argv):
+    def to_file(self: T, file: str,fmt:str=float_format,**argv):
         """
         Write atomic structures to file.
         
@@ -174,10 +174,10 @@ class PhysicalTensor(pickleIO,xr.DataArray):
         if file.endswith("txt"):
             # fmt = float_format  else complex_format
             if not np.any(np.iscomplex(data)):
-                np.savetxt(file,data,fmt=float_format,**argv) # fmt)
+                np.savetxt(file,data,fmt=fmt,**argv) # fmt)
             else:
                 np.savetxt(file,data,**argv)
         elif file.endswith("npy"):
-            np.save(file,data,**argv)
+            np.save(file,data)
         else:
             raise ValueError("Only `txt`, `pickle`, and `npy` extensions are supported.")
