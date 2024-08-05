@@ -41,6 +41,12 @@ def main(args):
     print("done")
     print("\t'{:s}' shape: ".format(args.name),data.shape)
 
+    print("\n\tData type: ",data.dtype)
+
+    if np.issubdtype(data.dtype, np.str_):
+        print("\tData contains strings: -of/--output_format wil be set to '%s'" % "%s")
+        args.output_format = "%s"
+
     if args.shape is not None:
         shape = tuple(args.shape)
         print("\tReshaping data to ",shape," ... ",end="")
