@@ -7,7 +7,7 @@ from eslib.physics import compute_dipole_quanta
 from copy import copy
 from ase.calculators.calculator import all_changes
 from eslib.tools import cart2frac
-from eslib.classes.models.dipole.basics import DipoleModel
+from eslib.classes.models.dipole import DipoleModel
 
 @dataclass
 class DipoleLinearModel(DipoleModel):

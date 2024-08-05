@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from eslib.classes.models.eslibModel import eslibModel
+from eslib.classes.models import eslibModel
 from eslib.formatting import esfmt
 
 #---------------------------------------#

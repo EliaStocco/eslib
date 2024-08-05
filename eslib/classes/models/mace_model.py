@@ -5,12 +5,16 @@ from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
 import numpy as np
 import torch
+import pickle
 from warnings import warn
 from mace.tools import torch_geometric, torch_tools
 from mace.cli.elia_configs import make_dataloader
 from mace.modules.models.general import MACEBaseModel
 from eslib.tools import add_info_array, reshape_info_array
-from eslib.classes.models.eslibModel import eslibModel
+from eslib.classes.models import eslibModel
+from typing import Type, TypeVar
+
+T = TypeVar('T', bound='MACEModel')
 
 #---------------------------------------#
 @dataclass
@@ -18,18 +22,97 @@ class MACEModel(eslibModel,Calculator):
     """Class for loading and using MACE models."""
 
     #------------------#
-    default_dtype: str
-    device: str
-    model_path: str
-    batch_size: int
-    charges_key: str
-    dR: bool
-    to_diff_props: List[str]
-    rename_props: Dict[str, Any]
-    implemented_properties:Dict[str, Any] = field(init=False)
+    default_dtype: str                                          # `torch` default data type used for computation for computation (e.g., 'float32', 'float64').
+    device: str                                                 # `torch` device used for computation (e.g., 'cpu', 'cuda').
+    model_path: str                                             #  path to the MACE (torch.nn.Module) model file.
+    batch_size: int                                             # `batch_size` is the size of the batch of structures used when computing properties.
+    charges_key: str                                            # `charges_key` is the key of the charges in the MACE model.
+    dR: bool                                                    #  a boolean that indicates whether to compute spatial derivatives of properties.
+    to_diff_props: List[str]                                    #  a list of properties to compute the spatial derivatives of.
+    rename_props: Dict[str, Any]                                #  a dictionary that maps the names of properties to new names.
+    implemented_properties: Dict[str, Any] = field(init=False)  #  a dictionary that maps property names to their corresponding functions in the MACE model.
+    network: torch.nn.Module = field(init=False)                # `MACE model.
 
     #------------------#
-    def to(self, device: str, dtype: str=None) -> None:
+    def __post_init__(self:T) -> None:
+        """Initialize MACEModel object."""
+        Calculator.__init__(self)
+        
+        # torch_tools.set_default_dtype(self.default_dtype)
+        # self.device = torch_tools.init_device(self.device)
+        self._set_defaults()
+
+        # self.network: MACEBaseModel = torch.load(f=self.model_path, map_location=self.device)
+        # self.network = self.network.to(self.device)  # Ensure model is on the specified device
+        # for param in self.network.parameters():
+        #     param.requires_grad = False
+        self._load_model()
+
+        # if self.dR:
+        #     new_prop = get_d_prop_dR(self.to_diff_props, type(self.network), self.rename_props)
+        #     self.network.implemented_properties = {**self.network.implemented_properties, **new_prop}
+        # self.network.set_prop()
+        # self.implemented_properties = self.network.implemented_properties
+        self._set_properties()
+
+    #------------------#
+    def __getstate__(self):
+        """"""
+        state = self.__dict__.copy()
+        # Remove the model from the state
+        state['network'] = None
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        # Initialize model to None; it will be set later
+        self.network = None
+
+    #------------------#
+    def to_pickle(self, file: str) -> None:
+        """Save the object to a *.pickle file but not the `self.network`."""
+        with open(file, 'wb') as f:
+            pickle.dump(self, f)
+
+    @classmethod
+    def from_pickle(cls: Type[T], file: str) -> T:
+        """Load an object from a *.pickle file and reattach the model."""
+        with open(file, 'rb') as f:
+            obj:T = pickle.load(f)
+        obj._load_model(obj.model_path)
+        # The following line should not be necessary and indeed it will be kept commented
+        # obj._set_properties()
+        return obj
+
+    #------------------#
+    def _set_defaults(self:T) -> None:
+        """Set default values for the model."""
+        torch_tools.set_default_dtype(self.default_dtype)
+        if self.device == "cuda" and torch.cuda.is_available():
+            self.device = torch_tools.init_device(self.device)
+        else:
+            self.device = torch_tools.init_device("cpu")
+
+    #------------------#
+    def _load_model(self:T) -> None:
+        """Load the torch.nn.Module from file."""
+        self.network: MACEBaseModel = torch.load(f=self.model_path, map_location=self.device)
+        self.network = self.network.to(self.device)  # Ensure model is on the specified device
+        for param in self.network.parameters():
+            param.requires_grad = False
+
+    #------------------#
+    def _set_properties(self:T) -> None:
+        """Set the `implemented_properties` of the model."""
+        if self.dR:
+            new_prop = get_d_prop_dR(self.to_diff_props, type(self.network), self.rename_props)
+            self.network.implemented_properties = {**self.network.implemented_properties, **new_prop}
+        self.network.set_prop()
+        self.implemented_properties = self.network.implemented_properties
+
+
+    #------------------#
+    def to(self:T, device: str, dtype: str=None) -> None:
         """
         Sets the device for the model.
 
@@ -47,22 +130,7 @@ class MACEModel(eslibModel,Calculator):
             torch_tools.set_default_dtype(self.default_dtype)
 
     #------------------#
-    def __post_init__(self) -> None:
-        """Initialize MACEModel object."""
-        Calculator.__init__(self)
-        torch_tools.set_default_dtype(self.default_dtype)
-        self.device = torch_tools.init_device(self.device)
-        self.network: MACEBaseModel = torch.load(f=self.model_path, map_location=self.device)
-        self.network = self.network.to(self.device)  # Ensure model is on the specified device
-        for param in self.network.parameters():
-            param.requires_grad = False
-        if self.dR:
-            new_prop = get_d_prop_dR(self.to_diff_props, type(self.network), self.rename_props)
-            self.network.implemented_properties = {**self.network.implemented_properties, **new_prop}
-        self.network.set_prop()
-        self.implemented_properties = self.network.implemented_properties
-
-    def calculate(self, atoms:Atoms=None, properties=None, system_changes=all_changes):
+    def calculate(self:T, atoms:Atoms=None, properties=None, system_changes=all_changes):
         super().calculate(atoms, properties, system_changes)
         results:Dict[str,np.ndarray] = self.compute([atoms],raw=True)
         for k in results.keys():
@@ -72,7 +140,7 @@ class MACEModel(eslibModel,Calculator):
         self.results = results
 
     #------------------#
-    def compute(self, traj: List[Atoms], prefix: str = "", raw: bool = False, **kwargs) -> Any:
+    def compute(self:T, traj: List[Atoms], prefix: str = "", raw: bool = False, **kwargs) -> Any:
         """
         Compute properties for a trajectory.
 
@@ -117,7 +185,7 @@ class MACEModel(eslibModel,Calculator):
 
             # Process the results
             for k in results.keys():
-                if k not in self.network.implemented_properties:
+                if k not in self.implemented_properties:
                     # If a property is not implemented, add a warning
                     if k not in warnings:
                         warnings.append(k)
@@ -135,7 +203,7 @@ class MACEModel(eslibModel,Calculator):
 
         # Prepare the outputs for return
         new_outputs = {prefix + k: outputs[k] for k in outputs.keys()}
-        shapes = {prefix + k: self.network.implemented_properties[k] for k in outputs.keys()}
+        shapes = {prefix + k: self.implemented_properties[k] for k in outputs.keys()}
 
         # If `raw` is True, return the reshaped numpy arrays (no ASE Atoms objects)
         # Otherwise, add the properties to the ASE Atoms objects and return the trajectory
@@ -147,7 +215,7 @@ class MACEModel(eslibModel,Calculator):
             return add_info_array(traj, new_outputs, shapes)
 
     #------------------#
-    def summary(self, string: str = "\t") -> None:
+    def summary(self:T, string: str = "\t") -> None:
         """Print summary of the model."""
         super().summary(string=string)
         args = {

@@ -2,12 +2,12 @@
 import json
 from ase import Atoms
 from eslib.classes.trajectory import AtomicStructures
-from eslib.classes.models.mace_model import MACEModel
+from eslib.classes.models import eslibModel
 from eslib.formatting import esfmt
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Evaluate a MACE model."
+description = "Evaluate a model."
 
 #---------------------------------------#
 def prepare_args(description):
@@ -34,12 +34,12 @@ def main(args):
             kwargs = json.load(json_file)
         print("done")
 
-        print("\tAllocating MACE model ... ", end="")
-        model = MACEModel(**kwargs)
+        print("\tAllocating the model ... ", end="")
+        model = eslibModel(**kwargs)
         print("done")
     else:
-        print("\tLoading MACE model from file '{:s}' ... ".format(args.model), end="")
-        model = MACEModel.from_pickle(args.model)
+        print("\tLoading model from file '{:s}' ... ".format(args.model), end="")
+        model = eslibModel.from_file(args.model)
         print("done")
 
     #------------------#
