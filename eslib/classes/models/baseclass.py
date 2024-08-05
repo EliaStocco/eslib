@@ -1,7 +1,9 @@
-import numpy as np
-from ase import Atoms
-from typing import List, Dict, Any
+import pickle
+import pickletools
 from eslib.classes.io import pickleIO
+from typing import Type, TypeVar
+
+T = TypeVar('T', bound='eslibModel')
 
 class eslibModel(pickleIO):
     """
@@ -11,7 +13,7 @@ class eslibModel(pickleIO):
     It provides a summary method that prints information about the model.
     """
 
-    def summary(self, string: str = "\t") -> None:
+    def summary(self:T, string: str = "\t") -> None:
         """
         Print summary of the model.
 

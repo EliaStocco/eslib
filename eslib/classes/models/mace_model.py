@@ -53,6 +53,7 @@ class MACEModel(eslibModel,Calculator):
     # Attributes initialized in `__post_init__`
     implemented_properties: Dict[str, Any] = field(init=False)  #  a dictionary that maps property names to their corresponding functions in the MACE model.
     network: torch.nn.Module = field(init=False)                # `MACE model.
+    current_device:str = field(init=False)                      # `torch` device currently used for computation (e.g., 'cpu', 'cuda').
 
     #------------------------------------#
     # Methods for `dataclass` initialization
@@ -81,27 +82,20 @@ class MACEModel(eslibModel,Calculator):
         state['network'] = None
         return state
 
-    def __setstate__(self, state):
+    def __setstate__(self:T, state):
         """Set the state from unpickling, initializing the network to None."""
         self.__dict__.update(state)
         # Initialize model to None; it will be set later
         self.network = None
+        return
 
-    #------------------#
-    def to_pickle(self, file: str) -> None:
-        """Save the object to a *.pickle file but not the `self.network`."""
-        with open(file, 'wb') as f:
-            pickle.dump(self, f)
-
-    @classmethod
-    def from_pickle(cls: Type[T], file: str) -> T:
-        """Load an object from a *.pickle file and reattach the model."""
-        with open(file, 'rb') as f:
-            obj:T = pickle.load(f)
-        obj._load_model(obj.model_path)
+    def __post__from_pickle__(self:T) -> None:
+        """Load the network from a `*.pt` file and save it to `self.network`."""
+        self._set_defaults()
+        self._load_model()
         # The following line should not be necessary and indeed it will be kept commented
         # obj._set_properties()
-        return obj
+        return 
     
     #------------------------------------#
     # Methods for initialization
@@ -112,19 +106,22 @@ class MACEModel(eslibModel,Calculator):
     def _set_defaults(self:T) -> None:
         """Set default values for the model."""
         torch_tools.set_default_dtype(self.default_dtype)
+        # self.device = torch_tools.init_device(self.device)
         if self.device == "cuda" and torch.cuda.is_available():
-            self.device = torch_tools.init_device(self.device)
+            self.current_device = torch_tools.init_device(self.device)
         else:
-            self.device = torch_tools.init_device("cpu")
+            self.current_device = torch_tools.init_device("cpu")
+        return
 
     #------------------#
     def _load_model(self:T) -> None:
         """Load the torch.nn.Module from file."""
-        self.network: MACEBaseModel = torch.load(f=self.model_path, map_location=self.device)
-        self.network = self.network.to(self.device)  # Ensure model is on the specified device
+        self.network: MACEBaseModel = torch.load(f=self.model_path, map_location=self.current_device)
+        self.network = self.network.to(self.current_device)  # Ensure model is on the specified device
         for param in self.network.parameters():
             param.requires_grad = False
-
+        return
+    
     #------------------#
     def _set_properties(self:T) -> None:
         """Set the `implemented_properties` of the model."""
@@ -147,6 +144,10 @@ class MACEModel(eslibModel,Calculator):
             None
         """
         self.device = torch_tools.init_device(device)
+        if self.device == "cuda" and torch.cuda.is_available():
+            device = torch.device(self.device)
+        else:
+            device = torch.device("cpu")
         self.network = self.network.to(self.device)  # Ensure model is on the specified device
 
         if dtype is not None:
@@ -257,6 +258,7 @@ class MACEModel(eslibModel,Calculator):
         args = {
             "path": self.model_path,
             "device": self.device,
+            "current-device": self.current_device,
             "batch size": self.batch_size,
             "charges key": self.charges_key,
             "dtype": self.default_dtype,
@@ -265,7 +267,7 @@ class MACEModel(eslibModel,Calculator):
         }
 
         # Determine the length of the longest key
-        max_key_length = max(len(key) for key in args.keys())
+        max_key_length = max(len(key) for key in args.keys())+1
 
         for k, v in args.items():
             # Align the output based on the length of the longest key

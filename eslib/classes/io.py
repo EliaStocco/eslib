@@ -24,8 +24,12 @@ class pickleIO:
     def from_pickle(cls: Type[T], file: str) -> T:
         """Load an object from a *.pickle file."""
         try:
+            # load the object using `pickle.load`
             with open(file, 'rb') as ff:
-                obj = pickle.load(ff)
+                obj:T = pickle.load(ff)
+            # do extra things after `pickle.load`
+            obj.__post__from_pickle__()
+            # return the object
             if isinstance(obj, cls):
                 return obj
             else:
@@ -38,6 +42,12 @@ class pickleIO:
         except Exception as e:
             print(f"Error loading from pickle file: {e}")
             return obj
+        
+    def __post__from_pickle__(self:T)->None:
+        """Extra work to be done after loading an object from a `*.pickle` file.
+
+        This method can be overloaded in child classes."""
+        return
 
     @staticmethod
     def correct_extension_out(func):
