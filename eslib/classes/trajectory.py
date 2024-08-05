@@ -87,14 +87,15 @@ class AtomicStructures(aseio):
         output = None
         def set_output(output,n,value):
             if output is None:
-                try:
-                    output = np.zeros((len(self),*value.shape))
-                except:
-                    output = np.zeros(len(self),dtype=type(value))
-            try:
-                output[n] = np.asarray(value)
-            except:
-                output[n] = value
+                output = [None]*len(self)
+                # try:
+                #     output = # np.zeros((len(self),*value.shape))
+                # except:
+                #     output = # np.zeros(len(self),dtype=type(value))
+            # try:
+            #     output[n] = np.asarray(value)
+            # except:
+            output[n] = value
             return output
            
         for n,structure in enumerate(self):
@@ -105,7 +106,7 @@ class AtomicStructures(aseio):
                     output = set_output(output,n,default)
             else:
                 output = set_output(output,n,structure.info[name])
-        return output
+        return np.asarray(output)
     
     def get_array(self:T,name:str,default:np.ndarray=None)->np.ndarray:
         """
