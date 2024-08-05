@@ -19,12 +19,12 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-s" , "--structure"    , **argv, required=True , type=str     , help="file with the atomic structure")
     parser.add_argument("-f" , "--format"       , **argv, required=False, type=str     , help="file format of the atomic structure (default: %(default)s)" , default=None)
-    parser.add_argument("-m" , "--model"        , **argv, required=False, type=str     , help="file with the MACE model")
-    parser.add_argument("-mt", "--model_type"   , **argv, required=True , type=str     , help="MACE model data type (default: %(default)s)", default=None)
+    parser.add_argument("-m" , "--model"        , **argv, required=False, type=str     , help="file with the MACE model (default: %(default)s)", default=None)
+    parser.add_argument("-mt", "--model_type"   , **argv, required=True , type=str     , help="MACE model data type")
     parser.add_argument("-p" , "--port"         , **argv, required=False, type=int     , help="TCP/IP port number. Ignored when using UNIX domain sockets.")
     parser.add_argument("-a" , "--address"      , **argv, required=True , type=str     , help="Host name (for INET sockets) or name of the UNIX domain socket to connect to.")
     parser.add_argument("-u" , "--unix"         , **argv, required=False, type=str2bool, help="Use a UNIX domain socket (default: %(default)s)", default=False)
-    parser.add_argument("-d" , "--device"       , **argv, required=False, type=str     , help="device (default: %(default)s)", choices=['cpu','gpu','cuda'], default='cpu')
+    parser.add_argument("-d" , "--device"       , **argv, required=False, type=str     , help="device (default: %(default)s)", choices=['cpu','gpu','cuda'], default='cuda')
     parser.add_argument("-dt", "--dtype"        , **argv, required=False, type=str     , help="dtype (default: %(default)s)", choices=['float64','float32'], default='float64')
     parser.add_argument("-sc", "--socket_client", **argv, required=False, type=str     , help="socket client (default: %(default)s)", choices=['eslib','ase'], default='eslib')
     return parser
