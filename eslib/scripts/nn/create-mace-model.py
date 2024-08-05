@@ -17,7 +17,7 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , **argv, type=str, required=False, help="JSON file with all the following parameters default: %(default)s)", default=None)
     parser.add_argument("-m" , "--model_path"   , **argv, type=str, required=True , help="*.pth file with the MACE model")
-    parser.add_argument("-mt", "--model_type"   , **argv, type=str, required=True , help="eslib model type (default: %(default)s)", choices=["MACEModel", "DipoleMACECalculator"], default="MACEModel")
+    parser.add_argument("-mt", "--model_type"   , **argv, type=str, required=True , help="eslib model type (choices: %(choices)s)", choices=["MACEModel", "DipoleMACECalculator"])
     parser.add_argument("-d" , "--device"       , **argv, type=str, required=False, help="device (default: %(default)s)", choices=["cpu", "cuda"], default="cpu")
     parser.add_argument("-dt", "--default_dtype", **argv, type=str, required=False, help="default dtype (default: %(default)s)", choices=["float32", "float64"], default="float64")
     parser.add_argument("-bs", "--batch_size"   , **argv, type=int, required=False, help="batch size (default: %(default)s)", default=64)
