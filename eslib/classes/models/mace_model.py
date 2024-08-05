@@ -19,51 +19,70 @@ T = TypeVar('T', bound='MACEModel')
 #---------------------------------------#
 @dataclass
 class MACEModel(eslibModel,Calculator):
-    """Class for loading and using MACE models."""
+    """Class for loading and using MACE models as an `ase.Calculator` or in you custom scripts.
+
+    An instance of this class can be saved to a `*.pickle` file but for its correct functioning you need to provide the correct filepath of the MACE model (`*.pt`), i.e. `self.model_path`.
+
+    The class will load from `self.model_path` the network every time it is itself loaded (within `MACEModel.from_file` or `MACEModel.from_pickle` ).
+
+    For this reason, be sure that `self.model_path` is accessible.
+    
+    If you change the location of the `*.pickle` file:
+     - move the `*.pt` MACE model file if `self.model_path` is a relative path;
+     - leave the `*.pt` MACE model file  where it is if `self.model_path` is an absolute path;
+     
+    Be sure that `self.model_path` is a relative path if you are planning to move the `*.pickle` file to another machine.
+    """
+
+    #------------------------------------#
+    # Attributes
+    #------------------------------------#
 
     #------------------#
+    # Attributes initialized by `dataclass`
     default_dtype: str                                          # `torch` default data type used for computation for computation (e.g., 'float32', 'float64').
-    device: str                                                 # `torch` device used for computation (e.g., 'cpu', 'cuda').
-    model_path: str                                             #  path to the MACE (torch.nn.Module) model file.
-    batch_size: int                                             # `batch_size` is the size of the batch of structures used when computing properties.
-    charges_key: str                                            # `charges_key` is the key of the charges in the MACE model.
-    dR: bool                                                    #  a boolean that indicates whether to compute spatial derivatives of properties.
+    device       : str                                          # `torch` device used for computation (e.g., 'cpu', 'cuda').
+    model_path   : str                                          #  path to the MACE (torch.nn.Module) model file.
+    batch_size   : int                                          # `batch_size` is the size of the batch of structures used when computing properties.
+    charges_key  : str                                          # `charges_key` is the key of the charges in the MACE model.
+    dR           : bool                                         #  a boolean that indicates whether to compute spatial derivatives of properties.
     to_diff_props: List[str]                                    #  a list of properties to compute the spatial derivatives of.
-    rename_props: Dict[str, Any]                                #  a dictionary that maps the names of properties to new names.
+    rename_props : Dict[str, Any]                               #  a dictionary that maps the names of properties to new names.
+
+    #------------------#
+    # Attributes initialized in `__post_init__`
     implemented_properties: Dict[str, Any] = field(init=False)  #  a dictionary that maps property names to their corresponding functions in the MACE model.
     network: torch.nn.Module = field(init=False)                # `MACE model.
+
+    #------------------------------------#
+    # Methods for `dataclass` initialization
+    #------------------------------------#
 
     #------------------#
     def __post_init__(self:T) -> None:
         """Initialize MACEModel object."""
         Calculator.__init__(self)
-        
-        # torch_tools.set_default_dtype(self.default_dtype)
-        # self.device = torch_tools.init_device(self.device)
         self._set_defaults()
-
-        # self.network: MACEBaseModel = torch.load(f=self.model_path, map_location=self.device)
-        # self.network = self.network.to(self.device)  # Ensure model is on the specified device
-        # for param in self.network.parameters():
-        #     param.requires_grad = False
         self._load_model()
-
-        # if self.dR:
-        #     new_prop = get_d_prop_dR(self.to_diff_props, type(self.network), self.rename_props)
-        #     self.network.implemented_properties = {**self.network.implemented_properties, **new_prop}
-        # self.network.set_prop()
-        # self.implemented_properties = self.network.implemented_properties
         self._set_properties()
+
+    #------------------------------------#
+    # Methods for `pickle` read/write
+    #
+    # The `eslibModel.to_pickle` and `eslibModel.from_pickle` methods are overwritten 
+    # to properly save and load the `self.network`. 
+    #------------------------------------#
 
     #------------------#
     def __getstate__(self):
-        """"""
+        """Get the state for pickling, excluding the network."""
         state = self.__dict__.copy()
         # Remove the model from the state
         state['network'] = None
         return state
 
     def __setstate__(self, state):
+        """Set the state from unpickling, initializing the network to None."""
         self.__dict__.update(state)
         # Initialize model to None; it will be set later
         self.network = None
@@ -83,6 +102,11 @@ class MACEModel(eslibModel,Calculator):
         # The following line should not be necessary and indeed it will be kept commented
         # obj._set_properties()
         return obj
+    
+    #------------------------------------#
+    # Methods for initialization
+    # used both in `__post_init__` and `from_pickle`
+    #------------------------------------#
 
     #------------------#
     def _set_defaults(self:T) -> None:
@@ -129,6 +153,10 @@ class MACEModel(eslibModel,Calculator):
             self.default_dtype = dtype
             torch_tools.set_default_dtype(self.default_dtype)
 
+    #------------------------------------#
+    # Overloading `ase.Calculator.calculate` method
+    #------------------------------------#
+
     #------------------#
     def calculate(self:T, atoms:Atoms=None, properties=None, system_changes=all_changes):
         super().calculate(atoms, properties, system_changes)
@@ -138,6 +166,10 @@ class MACEModel(eslibModel,Calculator):
             results[k] = results[k][0]
         # [ a.shape for _,a in results.items() ]
         self.results = results
+
+    #------------------------------------#
+    # Method to evaluate the model fpr different structures
+    #------------------------------------#
 
     #------------------#
     def compute(self:T, traj: List[Atoms], prefix: str = "", raw: bool = False, **kwargs) -> Any:
@@ -157,7 +189,7 @@ class MACEModel(eslibModel,Calculator):
         # Nconfig = len(traj)
 
         # Set default dtype
-        torch_tools.set_default_dtype(self.default_dtype)
+        self._set_defaults()
 
         # Create data loader
         data_loader: torch_geometric.dataloader.DataLoader = make_dataloader(
@@ -213,6 +245,10 @@ class MACEModel(eslibModel,Calculator):
         else:
             # `raw` is False: add the properties to the ASE Atoms objects and return the trajectory
             return add_info_array(traj, new_outputs, shapes)
+
+    #------------------------------------#
+    # Overloading `eslibModel.summary` method
+    #------------------------------------#
 
     #------------------#
     def summary(self:T, string: str = "\t") -> None:
