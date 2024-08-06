@@ -28,7 +28,12 @@ class pickleIO:
             with open(file, 'rb') as ff:
                 obj:T = pickle.load(ff)
             # do extra things after `pickle.load`
-            obj.__post__from_pickle__()
+            try:
+                # if the object has a `__post__from_pickle__` method, call it
+                obj.__post__from_pickle__()
+            except:
+                # teh object could have been castes to another class before beeing save to a `*.pickle` file
+                pass
             # return the object
             if isinstance(obj, cls):
                 return obj

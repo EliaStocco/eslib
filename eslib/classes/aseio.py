@@ -213,6 +213,17 @@ class aseio(List[Atoms], pickleIO):
                 write(file, atoms, format="xyz", append=True, comment=comment)
         else:
             write(images=self, filename=file, format=format)
+
+    #------------------#
+    def to_pickle(self:T, file:str)->None:
+        """Save the object to a `*.pickle` file after casting it to `List[Atoms]`.
+
+        This is supposed to help with backward compatibilty and data transferability.
+        
+        In fact the object that is saved to file is only the 'core data structure'.
+        """
+        obj = self.to_list()
+        pickleIO.to_pickle(obj,file)
     
     def to_list(self: T) -> List[Atoms]:
         return list(self)
