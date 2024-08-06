@@ -43,13 +43,13 @@ def main(args):
 
     #------------------#
     print("\tExtracting '{:s}' from the atomic structures... ".format(args.ref_name), end="")
-    real = trajectory.get_info(args.ref_name)
+    real = trajectory.get(args.ref_name)
     print("done")
     print("\t'{:s}' shape: ".format(args.ref_name),real.shape,end="\n\n")
 
     #------------------#
     print("\tExtracting '{:s}' from the atomic structures... ".format(args.pred_name), end="")
-    pred = trajectory.get_info(args.pred_name)
+    pred = trajectory.get(args.pred_name)
     print("done")
     print("\t'{:s}' shape: ".format(args.pred_name),pred.shape,end="\n\n")
 

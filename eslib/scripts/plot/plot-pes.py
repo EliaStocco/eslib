@@ -68,7 +68,7 @@ def main(args):
     #------------------#
     # data
     print("\n\tExtracting '{:s}' from the atomic structures ... ".format(args.energy), end="")
-    energy = atoms.get_info(args.energy)
+    energy = atoms.get(args.energy)
     print("done")
     print("\t'{:s}' shape: ".format(args.energy),energy.shape)
 

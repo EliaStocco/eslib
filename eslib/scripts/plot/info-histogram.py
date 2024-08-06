@@ -65,7 +65,7 @@ def main(args):
     #------------------#
     # data
     print("\tExtracting '{:s}' from the trajectory ... ".format(args.name), end="")
-    data = info(atoms,args.name)  
+    data = atoms.get(args.name)  
     print("done")
 
     print("\t'{:s}' shape: ".format(args.name),data.shape)
