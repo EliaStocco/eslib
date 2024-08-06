@@ -92,9 +92,9 @@ class DipolePartialCharges(DipoleModel):
         dipole = self.get([atoms])
         self.results = {"dipole": dipole}
         if self.compute_BEC:
-            self.results["BEC"] = self._get_BEC()
+            self.results["BEC"] = self._get_BEC(atoms)
 
-    def _get_BEC(self, atoms:Atoms=None):
+    def _get_BEC(self, atoms:Atoms):
         charges = self.get_all_charges(atoms)
         N = atoms.get_global_number_of_atoms()
         BEC = np.zeros((N,3,3))
