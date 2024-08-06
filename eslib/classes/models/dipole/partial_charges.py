@@ -10,10 +10,11 @@ class DipolePartialCharges(DipoleModel):
 
     charges: Dict[str,float]
     compute_BEC: bool                      = field(default=False,init=True)         
-    implemented_properties: Dict[str, Any] = field(default={"dipole" : (float, 3),},init=False) 
+    implemented_properties: Dict[str, Any] = field(init=False) 
 
     def __post_init__(self) -> None:
         """Initialize DipolePartialCharges object."""
+        self.implemented_properties = {"dipole" : (float, 3),}
         if self.compute_BEC:
             self.implemented_properties.update({"BEC": (float, ("natoms", 3,3))})            
 
