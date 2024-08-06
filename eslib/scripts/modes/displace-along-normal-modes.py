@@ -11,7 +11,7 @@ import xarray as xr
 from eslib.formatting import esfmt, error
 from eslib.input import str2bool
 from itertools import product
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 
 #---------------------------------------#
 # example of file for --displacements

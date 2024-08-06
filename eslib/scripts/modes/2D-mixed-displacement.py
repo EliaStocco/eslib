@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import xarray as xr
 from eslib.formatting import esfmt
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 from itertools import product
 import json
 from icecream import ic

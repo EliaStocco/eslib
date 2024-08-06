@@ -4,7 +4,7 @@ import numpy as np
 from scipy.fftpack import dct
 import matplotlib.pyplot as plt 
 
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 
 # vel = AtomicStructures.from_file(file="vel.pickle")
 # observable:np.ndarray = vel.get("positions")

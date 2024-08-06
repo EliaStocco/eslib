@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 from eslib.formatting import esfmt
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 from eslib.plot import histogram
 
 metrics = {

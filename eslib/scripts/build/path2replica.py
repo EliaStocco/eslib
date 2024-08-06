@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 from ase.io import write
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 from eslib.formatting import warning, error, esfmt
 from eslib.input import flist
 from eslib.classes.atoms_selector import AtomSelector

@@ -11,7 +11,7 @@ import yaml
 import pandas as pd
 import os
 from eslib.formatting import esfmt, warning
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 from eslib.tools import is_sorted_ascending, w2_to_w
 from phonopy.units import VaspToTHz
 # import ruamel.yaml

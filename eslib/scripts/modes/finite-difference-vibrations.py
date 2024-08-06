@@ -2,7 +2,7 @@
 from ase.io import write
 from ase import Atoms
 from sympy import symmetrize
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, warning, float_format, error
 from eslib.classes.normal_modes import NormalModes
 from eslib.input import str2bool

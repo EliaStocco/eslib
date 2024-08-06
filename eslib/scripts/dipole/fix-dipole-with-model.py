@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from eslib.plot import plot_bisector
 from eslib.classes.models.dipole.baseclass import DipoleModel, DipoleLinearModel
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 from eslib.tools import frac2cart
 from eslib.output import output_folder
 from eslib.formatting import esfmt, everythingok, warning, float_format

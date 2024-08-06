@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 from eslib.plot import plot_bisector
 from eslib.formatting import esfmt
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 
 #---------------------------------------#
 # Description of the script's purpose

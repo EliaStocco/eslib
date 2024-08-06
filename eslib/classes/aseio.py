@@ -145,7 +145,7 @@ def file_pattern(method: M) -> M:
                 # Initialize a list to hold results from each file
                 structures = [None] * len(matched_files)
 
-                from classes.trajectory import AtomicStructures            
+                from classes.atomic_structures import AtomicStructures            
                 # Process each matched file
                 N = len(matched_files)
                 print()

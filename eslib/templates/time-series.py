@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from eslib.classes.trajectory import AtomicStructures
-from eslib.classes.trajectory import info, array
+from classes.atomic_structures import AtomicStructures
+from classes.atomic_structures import info, array
 from eslib.classes.bec import bec as BEC
 from eslib.tools import convert
 from eslib.plot import plot_bisector, square_plot, align_yaxis, remove_empty_space, hzero

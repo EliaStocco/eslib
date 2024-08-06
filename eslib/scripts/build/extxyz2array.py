@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 from ase.io import write
-from eslib.classes.trajectory import AtomicStructures# , info, array
+from classes.atomic_structures import AtomicStructures# , info, array
 from eslib.formatting import esfmt, float_format
 from eslib.input import ilist
 from eslib.classes.physical_tensor import PhysicalTensor

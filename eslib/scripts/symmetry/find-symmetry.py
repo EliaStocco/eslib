@@ -3,7 +3,7 @@
 # email : elia.stocco@mpsd.mpg.de
 # from ase.io import read
 import numpy as np
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.input import flist
 from ase.spacegroup import get_spacegroup

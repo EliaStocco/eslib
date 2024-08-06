@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from eslib.formatting import esfmt
-from eslib.classes.trajectory import AtomicStructures, info
+from classes.atomic_structures import AtomicStructures, info
 from eslib.plot import generate_colors
 from eslib.plot import histogram
 

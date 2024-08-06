@@ -2,7 +2,7 @@
 import numpy as np
 import random
 from eslib.formatting import esfmt, error
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 from eslib.input import ilist, slist, str2bool
 from typing import List
 from ase import Atoms

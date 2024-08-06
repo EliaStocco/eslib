@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, error
 from eslib.physics import compute_dipole_quanta
 

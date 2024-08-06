@@ -2,7 +2,7 @@
 import numpy as np
 # from copy import copy
 # from eslib.tools import cart2lattice, lattice2cart
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 from eslib.tools import frac2cart, cart2frac
 from eslib.input import flist, str2bool
 from eslib.formatting import esfmt, warning

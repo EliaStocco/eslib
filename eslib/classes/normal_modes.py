@@ -9,7 +9,7 @@ from eslib.units import *
 from eslib.tools import convert
 import pandas as pd
 from ase import Atoms
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 from eslib.classes.physical_tensor import *
 from typing import List, Dict
 import pint

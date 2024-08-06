@@ -8,7 +8,7 @@ import json
 from tqdm.auto import tqdm
 from eslib.functions import add_default
 from eslib.show import show_dict    
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 
 #---------------------------------------#
 # Description of the script's purpose

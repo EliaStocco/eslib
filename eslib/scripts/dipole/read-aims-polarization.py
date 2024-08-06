@@ -8,7 +8,7 @@ from eslib.formatting import esfmt, float_format, warning
 from typing import Tuple
 from ase.io import read
 from eslib.functions import check_pattern_in_file
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 from eslib.functions import extract_number_from_filename
 from eslib.regex import extract_float
 

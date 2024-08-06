@@ -9,7 +9,7 @@ from eslib.plot import plot_bisector
 from eslib.physics import compute_dipole_quanta
 from copy import copy
 from eslib.plot import generate_colors
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 
 #---------------------------------------#
 # To Do:

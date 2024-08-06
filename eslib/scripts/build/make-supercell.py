@@ -3,7 +3,7 @@ import numpy as np
 from ase.io import read, write
 from eslib.show import matrix2str
 from ase.build import make_supercell
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 
 #---------------------------------------#

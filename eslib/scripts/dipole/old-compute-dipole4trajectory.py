@@ -4,7 +4,7 @@ import os
 from eslib.nn.user import get_model
 from eslib.functions import suppress_output
 from eslib.input import str2bool
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, warning
 import torch 
 from tqdm import tqdm

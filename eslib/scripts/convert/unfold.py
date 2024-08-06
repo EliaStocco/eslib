@@ -3,7 +3,7 @@ import argparse
 import numpy as np
 from eslib.formatting import esfmt
 from eslib.tools import cart2frac, frac2cart
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 
 #---------------------------------------#
 # Description of the script's purpose

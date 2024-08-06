@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from eslib.plot import plot_bisector
 from eslib.classes.models.dipole.baseclass import DipoleModel, DipoleLinearModel
 from eslib.classes.models.dipole import DipolePartialCharges
-from eslib.classes.trajectory import info
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import info
+from classes.atomic_structures import AtomicStructures
 from eslib.tools import cart2lattice, cart2frac, frac2cart
 from eslib.output import output_folder
 from ase.io import write

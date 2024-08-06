@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from ase.cell import Cell
 # from elia.functions import str2bool, suppress_output, convert
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 import numpy as np
 import os
 from eslib.formatting import esfmt, warning, error

@@ -8,7 +8,7 @@ from ase.io import write
 from eslib.tools import convert
 import os
 from eslib.formatting import esfmt
-from eslib.classes.trajectory import AtomicStructures
+from classes.atomic_structures import AtomicStructures
 
 #---------------------------------------#
 # Description of the script's purpose
