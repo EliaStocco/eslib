@@ -4,9 +4,9 @@ from copy import copy
 from .functions import getproperty, get_property_header
 from eslib.classes.io import pickleIO
 from typing import Union, TypeVar
-T = TypeVar('T', bound='properties')
+T = TypeVar('T', bound='Properties')
 
-class properties(pickleIO):
+class Properties(pickleIO):
 
     def __init__(self,info:dict=None):
 
@@ -32,7 +32,7 @@ class properties(pickleIO):
 
         Attention: it's recommended to use keyword-only arguments.
         """
-        traj = properties.load(**argv)
+        traj = Properties.load(**argv)
         return cls(traj)
         
     @pickleIO.correct_extension_out
