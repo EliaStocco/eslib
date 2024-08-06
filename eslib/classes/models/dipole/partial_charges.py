@@ -1,13 +1,21 @@
+from ase.calculators.calculator import all_changes
 from classes.models.dipole.baseclass import DipoleModel
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from ase import Atoms
-from typing import List, Dict
+from typing import List, Dict, Any
 import numpy as np
 
 @dataclass
 class DipolePartialCharges(DipoleModel):
 
     charges: Dict[str,float]
+    compute_BEC: bool                      = field(default=False,init=True)         
+    implemented_properties: Dict[str, Any] = field(defaul={"dipole" : (float, 3),},init=False) 
+
+    def __post_init__(self) -> None:
+        """Initialize DipolePartialCharges object."""
+        if self.compute_BEC:
+            self.implemented_properties.update({"BEC": (float, ("natoms", 3,3))})            
 
     def set_charges(self,charges:dict):
         if self.charges.keys() != charges.keys():
@@ -56,7 +64,7 @@ class DipolePartialCharges(DipoleModel):
             self.set_charges(neutral_charges)
         return neutral_charges
             
-    def get(self,traj:List[Atoms]):
+    def get(self,traj:List[Atoms])->np.ndarray:
         return self.compute(traj)
 
     def compute(self,traj:List[Atoms],**argv):
@@ -75,10 +83,34 @@ class DipolePartialCharges(DipoleModel):
             # if not np.allclose(test,dipole[n]):
             #     raise ValueError("coding error")
         return dipole
+    
+    def calculate(self, atoms:Atoms=None, properties=None, system_changes=all_changes):
+        super().calculate(atoms, properties, system_changes)
+        dipole = self.get([atoms])
+        self.results = {"dipole": dipole}
+        if self.compute_BEC:
+            self.results["BEC"] = self._get_BEC()
+
+    def _get_BEC(self, atoms:Atoms=None):
+        charges = self.get_all_charges(atoms)
+        N = atoms.get_global_number_of_atoms()
+        BEC = np.zeros((N,3,3))
+        for n in range(N):
+            for m in range(3):
+                BEC[n,m,m] = charges[n]
+        return BEC
+
 
     def summary(self, string: str = "\t") -> None:
         """Print summary of the model."""       
         super().summary(string=string)
+        args = {
+            "compute_BEC": self.compute_BEC,
+            "properties": list(self.implemented_properties.keys())
+        }
+        max_key_length = max(len(key) for key in args.keys())+1
+        for k, v in args.items():
+            print("\t{:s}{:<{width}}: {}".format(string, k, v, width=max_key_length))
         for c in self.charges:
             print("\t{:s}{:s}: {:>f}".format(string, c, self.charges[c]))
         
