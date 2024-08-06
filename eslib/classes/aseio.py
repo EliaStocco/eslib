@@ -10,6 +10,7 @@ from typing import List, Union, TypeVar, Match, Callable, Any, Dict, cast
 import functools
 import glob
 from ase.io import read, write, string2index
+from ase.io.netcdftrajectory import read_netcdftrajectory, write_netcdftrajectory
 # from classes.trajectory import AtomicStructures
 from eslib.classes.io import pickleIO
 from eslib.tools import convert
@@ -186,7 +187,14 @@ class aseio(List[Atoms], pickleIO):
 
         Attention: it's recommended to use keyword-only arguments.
         """
-        traj = read_trajectory(**argv)
+        if'file' in argv and isinstance(argv['file'], str) and argv['file'].endswith('.nc'):
+            index = argv['index'] if 'index' in argv else slice(None,None,None)
+            index = integer_to_slice_string(index)
+            traj = read_netcdftrajectory(filename=argv['file'],index=index)
+            if not isinstance(traj,list):
+                traj = [traj]
+        else:
+            traj = read_trajectory(**argv)
         return cls(traj)
     
     #------------------#
@@ -212,6 +220,9 @@ class aseio(List[Atoms], pickleIO):
                 string = " positions{angstrom} cell{angstrom}"
                 comment = fmt_header%(*params,string)
                 write(file, atoms, format="xyz", append=True, comment=comment)
+        elif format == "nc":
+            # use NetCDF
+            write_netcdftrajectory(filename=file,images=self.to_list())
         else:
             write(images=self, filename=file, format=format)
 

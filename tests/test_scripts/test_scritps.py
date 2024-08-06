@@ -77,6 +77,24 @@ torun = {
             "output"             : "{:s}/output.extxyz".format(tmp_folder),     
         },
     },
+    "netcdf-write" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : "tests/structures/LiNbO3/long.n=10000.extxyz",   
+            "output"             : "{:s}/output.nc".format(tmp_folder),     
+        },
+    },
+    "netcdf-read" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : "tests/structures/LiNbO3/long.n=10000.nc",   
+            "output"             : "{:s}/output.extxyz".format(tmp_folder),     
+        },
+    },
     "information-and-primitive.py" :
     {
         "folder"  : "inspect",

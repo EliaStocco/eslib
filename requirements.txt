@@ -6,6 +6,7 @@ e3nn
 icecream
 importlib-metadata
 matplotlib
+netCDF4
 nbconvert
 numpy
 pint
