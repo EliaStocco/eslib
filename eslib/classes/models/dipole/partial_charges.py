@@ -101,7 +101,7 @@ class DipolePartialCharges(DipoleModel):
         for n in range(N):
             for m in range(3):
                 BEC[n,m,m] = charges[n]
-        return BEC
+        return BEC.reshape((N,9))
 
 
     def summary(self, string: str = "\t") -> None:
