@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 from eslib.plot import plot_bisector
 from eslib.formatting import esfmt
-from classes.atomic_structures import AtomicStructures
+from eslib.classes import Trajectory
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -27,7 +27,7 @@ def main(args):
     #------------------#
     # atomic structures
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms = AtomicStructures.from_file(file=args.input)
+    atoms = Trajectory.from_file(file=args.input)
     print("done")
 
     #------------------#

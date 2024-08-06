@@ -9,7 +9,7 @@ class pickleIO:
         self.to_pickle(file)
 
     @classmethod
-    def from_file(cls: Type[T], file: str) -> T:
+    def from_file(cls: Type[T], file: str,**argv) -> T:
         return cls.from_pickle(file)
 
     def to_pickle(self:T, file:str)->None:

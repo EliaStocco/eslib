@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 from eslib.formatting import esfmt, warning, everythingok
-from eslib.classes.properties import properties as Properties
+from eslib.classes.properties import Properties
 from eslib.functions import suppress_output
 from eslib.input import str2bool
 
@@ -32,20 +32,12 @@ def main(args):
             allproperties = Properties.load(file=args.input)
     print("done")
 
-    #------------------#
-    print("\n\tSummary of the read properties:")
+    #---------------------------------------#
+    # summary
+    print("\n\tSummary of the properties: ")
     df = allproperties.summary()
-    print("\tNumber of snapshots : {:d}".format(len(allproperties)))
-    print("\tNumber of properties: {:d}".format(len(df)))
-
-    def line(): print("\t\t-----------------------------------------")
-    
-    line()
-    print("\t\t|{:^15s}|{:^15s}|{:^7s}|".format("name","unit","shape"))
-    line()
-    for index, row in df.iterrows():
-        print("\t\t|{:^15s}|{:^15s}|{:^7d}|".format(row["name"],row["unit"],row["shape"]))
-    line()
+    tmp = "\n"+df.to_string(index=False)
+    print(tmp.replace("\n", "\n\t"))
 
     #------------------#
     # check steps

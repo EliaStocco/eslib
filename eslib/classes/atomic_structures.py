@@ -2,6 +2,7 @@ from copy import deepcopy
 from typing import List, Union, TypeVar
 import numpy as np
 import pandas as pd
+from eslib.classes import Trajectory
 from eslib.tools import convert
 from eslib.functional import deprecated
 from eslib.classes.aseio import aseio
@@ -9,7 +10,7 @@ from eslib.classes.aseio import integer_to_slice_string
 T = TypeVar('T', bound='AtomicStructures')
 
 #---------------------------------------#
-class AtomicStructures(aseio):
+class AtomicStructures(Trajectory,aseio):
     """
     Class to handle atomic structures with additional functionality:
         - automatic extraction of `info` and `array` from the list of structures
@@ -267,6 +268,10 @@ class AtomicStructures(aseio):
         # else:
         #     raise ValueError("can not find {:s}".format(name))
         assert len(self) == data.shape[0]
+        if what == "unknown":
+            what = self.search(name)
+            if what not in ["info","arrays"]:
+                raise ValueError("can not find {:s}".format(name))
         for n,atoms in enumerate(self):
             getattr(atoms,what)[name] = data[n]
             # if what not in ["positions"]:
@@ -319,10 +324,10 @@ class AtomicStructures(aseio):
         booleans = [ name in s.arrays for s in self ]
         arrays = np.all(booleans)
 
-        if info and arrays: "both"
+        if info and arrays:         return "both"
         if not info and not arrays: return "none"
-        if info: return "info"
-        if arrays: return "arrays"
+        if info:                    return "info"
+        if arrays:                  return "arrays"
 
     def is_there(self:T,name:str,_all:bool=True,where:str=None)->np.ndarray:
         """
