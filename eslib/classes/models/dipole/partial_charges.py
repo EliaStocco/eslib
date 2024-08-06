@@ -1,3 +1,4 @@
+from ase.calculators.calculator import Calculator
 from ase.calculators.calculator import all_changes
 from classes.models.dipole.baseclass import DipoleModel
 from dataclasses import dataclass, field
@@ -14,6 +15,7 @@ class DipolePartialCharges(DipoleModel):
 
     def __post_init__(self) -> None:
         """Initialize DipolePartialCharges object."""
+        Calculator.__init__(self)
         self.implemented_properties = {"dipole" : (float, 3),}
         if self.compute_BEC:
             self.implemented_properties.update({"BEC": (float, ("natoms", 3,3))})            
