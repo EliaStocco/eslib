@@ -20,6 +20,7 @@ T = TypeVar('T', bound='aseio')
 M = TypeVar('M', bound=Callable[..., Any])
 
 PARALLEL = False
+CAST2LIST = True
 
 #------------------#
 def set_parallel(value: bool):
@@ -222,7 +223,10 @@ class aseio(List[Atoms], pickleIO):
         
         In fact the object that is saved to file is only the 'core data structure'.
         """
-        obj = self.to_list()
+        if CAST2LIST:
+            obj = self.to_list()
+        else:
+            obj = self
         pickleIO.to_pickle(obj,file)
     
     def to_list(self: T) -> List[Atoms]:

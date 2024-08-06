@@ -42,6 +42,14 @@ def change_directory():
 tmp_folder = "tmp"
 
 torun = {
+    "backward compatibility" :
+    {
+        "folder"  : "inspect",
+        "file"   : "trajectory-summary.py",
+        "kwargs"  : {
+            "input" : "tests/structures/back-comp/pos.300K.E=0.00.pickle" ,   
+        },
+    },
     "extras2dipole" :
     {
         "folder"  : "dipole",
