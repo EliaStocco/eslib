@@ -68,9 +68,9 @@ class DipolePartialCharges(DipoleModel):
         return neutral_charges
             
     def get(self,traj:List[Atoms])->np.ndarray:
-        return self.compute(traj)
+        return self.compute(traj)["dipole"]
 
-    def compute(self,traj:List[Atoms],**argv):
+    def compute(self,traj:List[Atoms],prefix:str="dipole"):
         dipole = np.zeros((len(traj),3))
         for n,structure in enumerate(traj):
             if not self.check_charge_neutrality(structure):
@@ -85,7 +85,7 @@ class DipolePartialCharges(DipoleModel):
             # test  = ( charges * ( positions + np.random.rand(3) )).sum(axis=0)
             # if not np.allclose(test,dipole[n]):
             #     raise ValueError("coding error")
-        return dipole
+        return {f"{prefix}": dipole}
     
     def calculate(self, atoms:Atoms=None, properties=None, system_changes=all_changes):
         super().calculate(atoms, properties, system_changes)
