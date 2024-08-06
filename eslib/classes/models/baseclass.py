@@ -1,11 +1,10 @@
-import pickle
-import pickletools
+from ase.calculators.calculator import Calculator
 from eslib.classes.io import pickleIO
 from typing import Type, TypeVar
 
 T = TypeVar('T', bound='eslibModel')
 
-class eslibModel(pickleIO):
+class eslibModel(pickleIO,Calculator):
     """
     Class for models using the eslib framework.
 

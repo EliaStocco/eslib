@@ -5,20 +5,19 @@ from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
 import numpy as np
 import torch
-import pickle
 from warnings import warn
 from mace.tools import torch_geometric, torch_tools
 from mace.cli.elia_configs import make_dataloader
 from mace.modules.models.general import MACEBaseModel
 from eslib.tools import add_info_array, reshape_info_array
 from eslib.classes.models import eslibModel
-from typing import Type, TypeVar
+from typing import TypeVar
 
 T = TypeVar('T', bound='MACEModel')
 
 #---------------------------------------#
 @dataclass
-class MACEModel(eslibModel,Calculator):
+class MACEModel(eslibModel):
     """Class for loading and using MACE models as an `ase.Calculator` or in you custom scripts.
 
     An instance of this class can be saved to a `*.pickle` file but for its correct functioning you need to provide the correct filepath of the MACE model (`*.pt`), i.e. `self.model_path`.
