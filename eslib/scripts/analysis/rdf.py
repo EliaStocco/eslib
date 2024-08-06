@@ -2,13 +2,11 @@
 import numpy as np
 import pandas as pd
 from ase.geometry.rdf import get_rdf
-from ase.geometry.analysis import Analysis
-from classes import trajectory
 from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.input import slist
 import matplotlib.pyplot as plt
-from ase.data import chemical_symbols, atomic_numbers
+from ase.data import atomic_numbers
 
 #---------------------------------------#
 description = "Compute and plot the Radial Distribution Function (RDF)."
