@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from ase.io import read
 import numpy as np
-from eslib.classes.dipole import DipoleModel
+from eslib.classes.models.dipole.baseclass import DipoleModel
 from eslib.classes.trajectory import AtomicStructures
 from eslib.classes.trajectory import info
 from eslib.formatting import esfmt, float_format, warning

@@ -4,7 +4,7 @@ import glob
 import matplotlib.pyplot as plt
 from eslib.input import slist
 from eslib.formatting import esfmt
-from eslib.classes.dipole import DipoleModel
+from eslib.classes.models.dipole.baseclass import DipoleModel
 from eslib.plot import plot_bisector
 from eslib.physics import compute_dipole_quanta
 from copy import copy

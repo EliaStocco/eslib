@@ -2,7 +2,7 @@
 from ase.io import read
 import numpy as np
 from ase import Atoms
-from eslib.classes.dipole import DipoleLinearModel
+from eslib.classes.models.dipole import DipoleLinearModel
 from eslib.classes.trajectory import AtomicStructures
 from eslib.input import flist
 from eslib.tools import lattice2cart, frac2cart

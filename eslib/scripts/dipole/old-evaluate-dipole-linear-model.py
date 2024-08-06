@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 from ase.io import read
-from eslib.classes.dipole import DipoleModel
+from eslib.classes.models.dipole.baseclass import DipoleModel
 # from elia.classes.trajectory import trajectory as Trajectory
 
 #---------------------------------------#

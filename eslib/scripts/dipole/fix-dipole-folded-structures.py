@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from eslib.plot import plot_bisector
-from eslib.classes.dipole import DipoleModel, DipoleLinearModel
+from eslib.classes.models.dipole.baseclass import DipoleModel, DipoleLinearModel
 from eslib.classes.models.dipole import DipolePartialCharges
 from eslib.classes.trajectory import info
 from eslib.classes.trajectory import AtomicStructures
