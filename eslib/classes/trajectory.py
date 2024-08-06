@@ -1,4 +1,3 @@
-import array
 from copy import deepcopy
 from typing import List, Union, TypeVar
 import numpy as np
