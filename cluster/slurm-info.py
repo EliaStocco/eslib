@@ -4,11 +4,8 @@
 This script shows SLURM environment variables.
 
 Usage:
-    python slurm-info.py [-h] [-o OUTPUT]
-
-
-Example:
     python slurm-info.py > slurm_info.txt
+
 """
 
 import os
@@ -16,7 +13,7 @@ from datetime import datetime
 
 def print_slurm_info():
     """
-    Prints SLURM environment variables to the screen.
+    Prints SLURM environment variables.
 
     Args:
         None

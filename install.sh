@@ -22,5 +22,7 @@ for dir in "${ESLIB}"/eslib/scripts/* "${ESLIB}"/eslib/* ; do
 done
 
 find "${ESLIB}/cluster/" -name "*.py" -type f -exec chmod +x {} \;
+export PATH="${PATH}:${ESLIB}/cluster/"
+export PYTHONPATH="${PYTHONPATH}:${ESLIB}/cluster/"
 
 echo "Done. All the scripts should be available in the PATH."
