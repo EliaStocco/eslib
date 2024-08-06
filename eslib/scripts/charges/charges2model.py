@@ -2,6 +2,7 @@
 import json
 from eslib.formatting import esfmt
 from eslib.show import show_dict
+from eslib.input import str2bool
 from eslib.classes.models.dipole import DipolePartialCharges
 
 #---------------------------------------#
@@ -13,6 +14,7 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-c", "--charges", **argv, type=str, required=True , help="JSON file with the partial charges")
+    parser.add_argument("-z", "--compute_BEC", **argv, type=str2bool, required=False , help="whether to compute BEC (default: %(default)s)", default=False)
     parser.add_argument("-o", "--output" , **argv, type=str, required=False, help="pickle output file with the dipole model (default: %(default)s)", default="DipolePC.pickle")
     return parser
 
@@ -32,7 +34,7 @@ def main(args):
 
     #------------------#
     print("\n\tCreating dipole model based on the partial charges ... ",end="")
-    model = DipolePartialCharges(charges)
+    model = DipolePartialCharges(charges=charges,compute_BEC=args.compute_BEC)
     print("done")
 
     #------------------#
