@@ -1,6 +1,7 @@
 from ase.calculators.calculator import Calculator
 from ase.calculators.calculator import all_changes
 from classes.models.dipole.baseclass import DipoleModel
+from eslib.tools import add_info_array
 from dataclasses import dataclass, field
 from ase import Atoms
 from typing import List, Dict, Any
@@ -68,9 +69,9 @@ class DipolePartialCharges(DipoleModel):
         return neutral_charges
             
     def get(self,traj:List[Atoms])->np.ndarray:
-        return self.compute(traj)["dipole"]
+        return self.compute(traj,raw=True)["dipole"]
 
-    def compute(self,traj:List[Atoms],prefix:str="dipole"):
+    def compute(self,traj:List[Atoms],prefix:str="dipole",raw:bool=False):
         dipole = np.zeros((len(traj),3))
         for n,structure in enumerate(traj):
             if not self.check_charge_neutrality(structure):
@@ -85,8 +86,14 @@ class DipolePartialCharges(DipoleModel):
             # test  = ( charges * ( positions + np.random.rand(3) )).sum(axis=0)
             # if not np.allclose(test,dipole[n]):
             #     raise ValueError("coding error")
-        return {f"{prefix}": dipole}
-    
+        data = {f"{prefix}": dipole}
+        if raw:
+            return data
+        else:
+            shapes = {prefix + k: self.implemented_properties[k] for k in data.keys()}
+            return add_info_array(traj,data,shapes)
+
+        
     def calculate(self, atoms:Atoms=None, properties=None, system_changes=all_changes):
         super().calculate(atoms, properties, system_changes)
         dipole = self.get([atoms])
