@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 from ase.io import write
-from classes.atomic_structures import AtomicStructures# , info, array
+from eslib.classes.unify_traj import Trajectory
 from eslib.formatting import esfmt, float_format
 from eslib.input import ilist
 from eslib.classes.physical_tensor import PhysicalTensor
@@ -31,7 +31,7 @@ def main(args):
     #---------------------------------------#
     # atomic structures
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms = AtomicStructures.from_file(file=args.input,format=args.input_format)
+    atoms = Trajectory.from_file(file=args.input,format=args.input_format)
     print("done")
 
     #---------------------------------------#
