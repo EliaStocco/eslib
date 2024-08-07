@@ -71,7 +71,7 @@ class DipolePartialCharges(DipoleModel):
     def get(self,traj:List[Atoms])->np.ndarray:
         return self.compute(traj,raw=True)["dipole"]
 
-    def compute(self,traj:List[Atoms],prefix:str="dipole",raw:bool=False):
+    def compute(self,traj:List[Atoms],prefix:str="",raw:bool=False):
         dipole = np.zeros((len(traj),3))
         for n,structure in enumerate(traj):
             if not self.check_charge_neutrality(structure):
@@ -86,12 +86,20 @@ class DipolePartialCharges(DipoleModel):
             # test  = ( charges * ( positions + np.random.rand(3) )).sum(axis=0)
             # if not np.allclose(test,dipole[n]):
             #     raise ValueError("coding error")
-        data = {f"{prefix}": dipole}
+        data = {f"dipole": None}
+        new_data = {f"{prefix}dipole": dipole}
+        if self.compute_BEC:
+            BEC = [None]*len(traj)
+            for n,structure in enumerate(traj):
+                BEC[n] = self._get_BEC(structure)
+            data["BEC"] = None
+            new_data[f"{prefix}BEC"] = np.asarray(BEC)
+        shapes = {prefix + k: self.implemented_properties[k] for k in data.keys()}
         if raw:
-            return data
+            return new_data
         else:
-            shapes = {prefix + k: self.implemented_properties[k] for k in data.keys()}
-            return add_info_array(traj,data,shapes)
+            # shapes = {prefix + k: self.implemented_properties[k] for k in data.keys()}
+            return add_info_array(traj,new_data,shapes)
 
         
     def calculate(self, atoms:Atoms=None, properties=None, system_changes=all_changes):

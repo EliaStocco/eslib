@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import json
 from ase import Atoms
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.classes.models import eslibModel
 from eslib.formatting import esfmt
 
