@@ -15,6 +15,7 @@ from ase.io.netcdftrajectory import read_netcdftrajectory, write_netcdftrajector
 from eslib.classes.io import pickleIO
 from eslib.tools import convert
 from eslib.functions import extract_number_from_filename
+from ase.io.formats import filetype
 # from eslib.formatting import float_format
 
 T = TypeVar('T', bound='aseio')
@@ -210,6 +211,11 @@ class aseio(List[Atoms], pickleIO):
         
         Attention: it's recommended to use keyword-only arguments.
         """
+        if format is None:
+            try:
+                format = filetype(file, read=False)
+            except:
+                _,format = os.path.splitext(file)
         if format in ["ipi","i-pi"]:
             if os.path.exists(file):
                 os.remove(file)
@@ -220,7 +226,7 @@ class aseio(List[Atoms], pickleIO):
                 string = " positions{angstrom} cell{angstrom}"
                 comment = fmt_header%(*params,string)
                 write(file, atoms, format="xyz", append=True, comment=comment)
-        elif format == "nc":
+        elif format.lower() in ["nc","netcdf","netcdftrajectory"]:
             # use NetCDF
             write_netcdftrajectory(filename=file,images=self.to_list())
         else:

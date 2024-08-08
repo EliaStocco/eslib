@@ -2,6 +2,7 @@
 import numpy as np
 from classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
+from ase.io.formats import filetype
 
 #---------------------------------------#
 description = "Summary of an MD trajectory."
@@ -21,6 +22,11 @@ def main(args):
 
     #---------------------------------------#
     # atomic structures
+    if args.input_format is None:
+        format = filetype(args.input, read=False)
+        print("\texpected file format from ASE: {:s}".format(format))
+
+
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
     atoms = AtomicStructures.from_file(file=args.input, format=args.input_format)
     print("done\n")
