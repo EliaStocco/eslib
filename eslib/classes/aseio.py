@@ -470,6 +470,8 @@ def integer_to_slice_string(index):
     Returns:
         slice: Converted slice.
     """
+    if isinstance(index, slice):
+        return index
     
     if is_convertible_to_integer(index):
         index=int(index)
@@ -483,8 +485,8 @@ def integer_to_slice_string(index):
             return string2index(index)
         except:
             raise ValueError("error creating slice from string {:s}".format(index))
-    elif isinstance(index, slice):
-        return index
+    # elif isinstance(index, slice):
+    #     return index
     else:
         raise ValueError("`index` can be int, str, or slice, not {}".format(index))
 

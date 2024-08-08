@@ -3,9 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from itertools import product
 
-def generate_colors(N,map='tab10'):
+def generate_colors(N,map='tab10',shift=0):
     cmap = plt.get_cmap(map)  # You can choose other colormaps as well
-    colors = [cmap(i) for i in np.linspace(0, 1, N)]
+    colors = [cmap(i) for i in np.linspace(0, 1-shift, N)]
     return colors
 
 def straigh_line(ax,shift,get_lim,func,set_lim,**argv):
