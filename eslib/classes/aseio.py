@@ -23,6 +23,7 @@ M = TypeVar('M', bound=Callable[..., Any])
 
 PARALLEL = False
 CAST2LIST = True
+ADD_FILE = False
 
 #------------------#
 def set_parallel(value: bool):
@@ -155,7 +156,8 @@ def file_pattern(method: M) -> M:
                     print(f"\t{n+1}/{N} : {file}                        ", end="\r",flush=True)
                     kwargs['file'] = file  # Update 'file' in kwargs
                     atoms:AtomicStructures = method(cls,*args, **kwargs)  # Call the method with updated 'file'
-                    atoms.set("file",np.array([file] * len(atoms)),"info")
+                    if ADD_FILE:
+                        atoms.set("file",np.array([file] * len(atoms)),"info")
                     structures[n] = atoms.copy()
                 
                 # Flatten the list of results
