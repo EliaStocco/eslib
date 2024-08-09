@@ -45,7 +45,7 @@ class FormatExtras:
             becz = calc.get_property("BECz").flatten()
             assert len(becx) == len(becy) == len(becz), "Invalid shape for 'bec'. Expected (natoms,), got ({},{}), ({},{})".format(len(becx),len(becy),len(becx),len(becz))
             N = len(becx)
-            final["BEC"] = np.array((N,3))
+            final["BEC"] = np.zeros((N,3))
             final["BEC"][:,0] = becx
             final["BEC"][:,1] = becy
             final["BEC"][:,2] = becz
