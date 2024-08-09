@@ -31,9 +31,9 @@ class pickleIO:
             try:
                 # if the object has a `__post__from_pickle__` method, call it
                 obj.__post__from_pickle__()
-            except:
-                # teh object could have been castes to another class before beeing save to a `*.pickle` file
-                pass
+            except Exception as e:
+                # the object could have been casted to another class before beeing save to a `*.pickle` file
+                print(f"Error loading from pickle file: {e}")
             # return the object
             if isinstance(obj, cls):
                 return obj
