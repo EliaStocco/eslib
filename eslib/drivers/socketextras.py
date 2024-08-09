@@ -7,7 +7,7 @@ import ase.units as units
 from ase.calculators.socketio import SocketClient, SocketClosed
 from eslib.tools import convert
 
-ang2ebohr = convert(1,"length","eang","atomic_unit")
+ang2ebohr = convert(1,"electric-dipole","eang","atomic_unit")
 class FormatExtras:
     """Class to properly format extras string such that they will be compatible with i-PI."""
 
