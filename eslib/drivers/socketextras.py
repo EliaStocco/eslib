@@ -5,28 +5,56 @@ import json
 import time
 import ase.units as units
 from ase.calculators.socketio import SocketClient, SocketClosed
+from eslib.tools import convert
 
+ang2ebohr = convert(1,"length","eang","atomic_unit")
 class FormatExtras:
     """Class to properly format extras string such that they will be compatible with i-PI."""
 
     @staticmethod
     def format(name:str,array:np.ndarray,atoms:Atoms)->np.ndarray:
-        if name.lower() in ["bec","dipole_dr"]:
-            return FormatExtras.format_bec(name,array,atoms)
+        # if name.lower() in ["bec","dipole_dr"]:
+        #     return FormatExtras.format_bec(name,array,atoms)
+        if name.lower() in ["dipole"]:
+            return FormatExtras.format_dipole(name,array,atoms)
         return name, array
     
     @staticmethod
     def format_bec(name:str,array:np.ndarray,atoms:Atoms)->np.ndarray:
-        """Format Born Effective Charge Tensors."""
+        """Format Born Effective Charge Tensors: mainly reshape these tensors."""
         assert array.ndim == 2, "BEC mush have 2 dimensions"
         assert array.shape == (atoms.get_global_number_of_atoms(),9), "BEC must have shape (natoms,9)"
-        # array = np.asarray(array)        # (natoms,3,3)  -->  (atom index   ,pos. coord.   ,dipole coord.)
-        # array = np.moveaxis(array, 2, 0) # (3,natoms,3)  -->  (dipole coord., atom index   , pos. coord. )
-        # array = np.moveaxis(array, 1, 2) # (3,3,natoms)  -->  (dipole coord., pos. coord.  , atom index  )
-        # array = array.reshape((3,-1))    # (3,3xnatoms)  -->  (dipole coord., all coord.                 ) with R1x R1y R1z R2x R2y R2z ....
-        # array = array.T                  # (3xnatoms,3)  -->  (all coord.   , dipole coord.              )
+        # array = np.asarray(array)        # (natoms,3,3)  -->  (atom index    ,pos. coord.  , dipole coord.)
+        # array = np.moveaxis(array, 2, 0) # (3,natoms,3)  -->  (dipole coord., atom index   , pos. coord.  )
+        # array = np.moveaxis(array, 1, 2) # (3,3,natoms)  -->  (dipole coord., pos. coord.  , atom index   )
+        # array = array.reshape((3,-1))    # (3,3xnatoms)  -->  (dipole coord., all coord.                  ) with R1x R1y R1z R2x R2y R2z ....
+        # array = array.T                  # (3xnatoms,3)  -->  (all coord.   , dipole coord.               )
         array = array.reshape(-1,3)
         return "BEC",array
+    
+    @staticmethod
+    def format_final(calc:Calculator)->dict:
+        """Format final results.
+        Mainly used to properly convert the Born Effective Charge Tensors in a safer way based on BECx, BECy, BECz."""
+        final = {}
+        implemented_properties:dict = calc.implemented_properties
+        props = [ str(name).lower() for name in implemented_properties.keys() ]
+        if "becx" in props and "becy" in props and "becz" in props:
+            becx = calc.get_property("becx").flatten()
+            becy = calc.get_property("becy").flatten()
+            becz = calc.get_property("becz").flatten()
+            assert len(becx) == len(becy) == len(becz), "Invalid shape for 'bec'. Expected (natoms,), got ({},{}), ({},{})".format(len(becx),len(becy),len(becx),len(becz))
+            N = len(becx)
+            final["BEC"] = np.array((N,3))
+            final["BEC"][:,0] = becx
+            final["BEC"][:,1] = becy
+            final["BEC"][:,2] = becz
+            final["BEC"] = final["BEC"].tolist()
+        return final
+    @staticmethod
+    def format_dipole(name:str,array:np.ndarray,atoms:Atoms)->np.ndarray:
+        """Format dipoles: mainly convert from e*angstrom to e*bohr."""
+        return "dipole",array*ang2ebohr
 
 class ProtocolExtras:
 
@@ -85,6 +113,8 @@ class SocketClientExtras(SocketClient):
             array:np.ndarray = calc.get_property(name=name,atoms=atoms)
             name,array = FormatExtras.format(name,array,atoms)
             extras[name] = array.tolist()            
+        final = FormatExtras.format_final(calc)
+        extras = {**extras, **final}
         extras = json.dumps(extras)
 
         return energy, forces, virial, extras

@@ -115,7 +115,10 @@ class MACEModel(eslibModel):
     #------------------#
     def _load_model(self:T) -> None:
         """Load the torch.nn.Module from file."""
-        self.network: MACEBaseModel = torch.load(f=self.model_path, map_location=self.current_device)
+        try:
+            self.network: MACEBaseModel = torch.load(f=self.model_path, map_location=self.current_device)
+        except Exception as e:
+            raise ValueError(f"Could not load model from {self.model_path}.") from e
         self.network = self.network.to(self.current_device)  # Ensure model is on the specified device
         for param in self.network.parameters():
             param.requires_grad = False
@@ -319,16 +322,20 @@ def add_derivatives(model: MACEModel, output: Dict[str, torch.Tensor], data: Dic
     """
     for prop in model.to_diff_props:
         array = compute_dielectric_gradients(
-            dielectric=output[prop],
+            dielectric=output[prop], # [:,0][np.newaxis,:] --> should give only BECx
             positions=data["positions"],
         )
         name = "{:s}_dR".format(prop)
         name = name if name not in model.rename_props else model.rename_props[name]
 
-        output[name] = array
+        
         if output[prop].shape[1] == 3:
+            output[name] = array.permute(0, 2, 1)
             for n, i in enumerate(["x", "y", "z"]):
                 output["{:s}{:s}".format(name, i)] = array[:, n, :]
+            # del output[name] # This could be deleted if workig with i-PI
+        else:
+            output[name] = array
 
     return output
 

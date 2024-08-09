@@ -64,6 +64,13 @@ def main(args):
     print("done")
 
     #------------------#
+    print("\n\tSummary of the output atomic structures: ")
+    df = output.summary()
+    tmp = "\n"+df.to_string(index=False)
+    print(tmp.replace("\n", "\n\t"))
+    
+
+    #------------------#
     print("\n\tSaving atomic structures to file '{:s}' ... ".format(args.output), end="")
     output.to_file(file=args.output,format=args.output_format)
     print("done")

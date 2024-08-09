@@ -1,6 +1,7 @@
+from ase import Atoms
 from ase.calculators.calculator import Calculator
 from eslib.classes.io import pickleIO
-from typing import Type, TypeVar
+from typing import List, TypeVar, Any
 
 T = TypeVar('T', bound='eslibModel')
 
@@ -28,3 +29,5 @@ class eslibModel(pickleIO,Calculator):
         # Print the summary of the model
         print(f"{string}Model summary:")
 
+    def compute(self:T, traj: List[Atoms], prefix: str = "", raw: bool = False, **kwargs) -> Any:
+        raise ValueError("this method should be overloaded")
