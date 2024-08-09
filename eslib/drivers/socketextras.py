@@ -38,11 +38,11 @@ class FormatExtras:
         Mainly used to properly convert the Born Effective Charge Tensors in a safer way based on BECx, BECy, BECz."""
         final = {}
         implemented_properties:dict = calc.implemented_properties
-        props = [ str(name).lower() for name in implemented_properties.keys() ]
-        if "becx" in props and "becy" in props and "becz" in props:
-            becx = calc.get_property("becx").flatten()
-            becy = calc.get_property("becy").flatten()
-            becz = calc.get_property("becz").flatten()
+        props = [ str(name) for name in implemented_properties.keys() ]
+        if "BECx" in props and "BECy" in props and "BECz" in props:
+            becx = calc.get_property("BECx").flatten()
+            becy = calc.get_property("BECy").flatten()
+            becz = calc.get_property("BECz").flatten()
             assert len(becx) == len(becy) == len(becz), "Invalid shape for 'bec'. Expected (natoms,), got ({},{}), ({},{})".format(len(becx),len(becy),len(becx),len(becz))
             N = len(becx)
             final["BEC"] = np.array((N,3))
