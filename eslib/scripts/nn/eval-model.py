@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import json
+import torch
 from ase import Atoms
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.classes.models import eslibModel
@@ -26,6 +27,9 @@ def prepare_args(description):
 #---------------------------------------#
 @esfmt(prepare_args,description)
 def main(args):
+
+    #------------------#
+    print("\tCuda available: ",torch.cuda.is_available())
 
     #------------------#
     if str(args.model).endswith(".json"):

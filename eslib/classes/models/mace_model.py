@@ -192,7 +192,7 @@ class MACEModel(eslibModel):
         # Nconfig = len(traj)
 
         # Set default dtype
-        # self._set_defaults()
+        self._set_defaults()
 
         # Create data loader
         data_loader: torch_geometric.dataloader.DataLoader = make_dataloader(
