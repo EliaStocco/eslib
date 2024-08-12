@@ -4,8 +4,21 @@ import re
 from copy import copy
 from eslib.classes import Trajectory
 from eslib.classes.io import pickleIO
+from eslib.tools import convert
 from typing import Union, TypeVar
 T = TypeVar('T', bound='Properties')
+
+def find_key_by_value(family_map, value):
+    for key, values in family_map.items():
+        if value in values:
+            return key
+    return None  # Return None if the value is not found in any of the lists
+
+FamilyMap = {
+    "energy" : ["conserved","energy","potential","kinetic_md","Econserved"],
+    "length" : ["positions"],
+    "time"   : ["time"]
+}
 
 class Properties(Trajectory):
 
@@ -125,11 +138,20 @@ class Properties(Trajectory):
         assert np.allclose(np.arange(len(out)),out.properties[keyword])
         return out
     
-    def set(self:T, name:str, data:np.ndarray, **argv) -> None:
+    def set(self:T, name:str, data:np.ndarray,unit:str="atomic_unit", **argv) -> None:
         self.properties[name] = data
+        self.units[name] = unit
+        self.header = self.header + [name]
 
-    def get(self:T, name:str, default:np.ndarray=None, **argv) -> np.ndarray:
-        return self.properties[name] 
+
+    def get(self:T, name:str, unit=None,**argv) -> np.ndarray:
+        out = self.properties[name]
+        if unit is None:
+            return out
+        else:
+            family = find_key_by_value(FamilyMap,name)
+            return convert(out,family,self.units[name],unit)
+
     
 def get_property_header(inputfile, N=1000, search=True):
     names = [None] * N
