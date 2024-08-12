@@ -150,7 +150,7 @@ class MACEModel(eslibModel):
             device = torch.device(self.device)
         else:
             device = torch.device("cpu")
-        self.network = self.network.to(self.device)  # Ensure model is on the specified device
+        self.network = self.network.to(device)  # Ensure model is on the specified device
 
         if dtype is not None:
             self.default_dtype = dtype
@@ -193,6 +193,7 @@ class MACEModel(eslibModel):
 
         # Set default dtype
         self._set_defaults()
+        self.network = self.network.to(self.current_device)
 
         # Create data loader
         data_loader: torch_geometric.dataloader.DataLoader = make_dataloader(
