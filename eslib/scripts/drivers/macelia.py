@@ -2,6 +2,7 @@
 # from mace.calculators import MACECalculator
 from mace.calculators import MACEliaCalculator, MACECalculator
 from ase.io import read
+import torch
 from eslib.formatting import esfmt
 from eslib.functions import suppress_output
 from eslib.input import str2bool
@@ -35,7 +36,7 @@ def main(args):
     
     #------------------#
     print("\tCuda available: ",torch.cuda.is_available())
-    
+
     #------------------#
     print("\tReading the first atomic structure from file '{:s}' ... ".format(args.structure), end="")
     atoms = read(args.structure,format=args.format,index=0)
