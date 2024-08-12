@@ -14,11 +14,12 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i" , "--input"     ,   **argv,type=str      , help="input file with the cell")
-    parser.add_argument("-v" , "--vector"    ,   **argv,type=size_type, help="vector components in lattice coordinates")
-    parser.add_argument("-n" , "--normalize" ,   **argv,type=str2bool , help="whether the vectors is expressed w.r.t. normalized lattice vectors (default: %(default)s)",default=True)
-    parser.add_argument("-a" , "--amplitude" ,   **argv,type=float    , help="amplitude of the output vector (default: %(default)s)",default=1.)
-    parser.add_argument("-d" , "--digit"     ,   **argv,type=int      , help="digit of the final result (default: %(default)s)",default=8)
+    parser.add_argument("-i" , "--input"           ,   **argv,type=str      , help="input file with the cell")
+    parser.add_argument("-v" , "--vector"          ,   **argv,type=size_type, help="vector components in lattice coordinates")
+    parser.add_argument("-n" , "--normalize_cell"  ,   **argv,type=str2bool , help="whether the vectors is expressed w.r.t. normalized lattice vectors (default: %(default)s)",default=True)
+    parser.add_argument("-n" , "--normalize_vector",   **argv,type=str2bool , help="whether to normalize the input vector (default: %(default)s)",default=True)
+    parser.add_argument("-a" , "--amplitude"       ,   **argv,type=float    , help="amplitude of the output vector (default: %(default)s)",default=1.)
+    parser.add_argument("-d" , "--digit"           ,   **argv,type=int      , help="digit of the final result (default: %(default)s)",default=8)
     return parser# .parse_args(
 
 #---------------------------------------#
@@ -37,7 +38,7 @@ def main(args):
     print(line)
 
     #------------------#
-    if args.normalize:
+    if args.normalize_cell:
         cell /= np.linalg.norm(cell,axis=0)
         print("\tLattice vectors normalized:")
         line = matrix2str(cell,col_names=["1","2","3"],cols_align="^",width=6)
@@ -45,13 +46,21 @@ def main(args):
 
     out = cell[:,0]*args.vector[0] + cell[:,1]*args.vector[1] + cell[:,2]*args.vector[2]
 
+    if args.normalize_vector:
+        print("\tNormalizing the input vector:")
+        norm = np.linalg.norm(out)
+        print("\t - original norm: ",norm)
+        out /= norm
+        print("\t - current norm: ",np.linalg.norm(out))
+        assert not np.allclose(norm,1), "coding error"
+
     #------------------#
-    print("\t{:>20s}:".format("Required vector"),out)
+    print("\t{:>20s}:".format("Vector"),out)
 
     #------------------#
     if args.amplitude != 1.:
         out *= args.amplitude
-        print("\t{:>20s}:".format("Scaled vector"),out)
+        print("\t{:>20s}:".format("Amp * vector"),out)
 
     out = np.round(out,args.digit)
     print("\t{:>20s}:".format("Rounded vector"),out)
