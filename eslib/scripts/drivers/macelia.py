@@ -34,6 +34,9 @@ def prepare_args(description):
 def main(args):
     
     #------------------#
+    print("\tCuda available: ",torch.cuda.is_available())
+    
+    #------------------#
     print("\tReading the first atomic structure from file '{:s}' ... ".format(args.structure), end="")
     atoms = read(args.structure,format=args.format,index=0)
     print("done")

@@ -9,46 +9,9 @@ import os
 from eslib.tools import convert
 from eslib.formatting import esfmt
 from eslib.show import show_dict
+from eslib.classes.efield import ElectricField
 
 description = "Plot the electric field E(t) into a pdf file."
-
-class ElectricField:
-
-    def __init__(self, amp=None, freq=None, phase=None, peak=None, sigma=None):
-        self.amp = amp if amp is not None else np.zeros(3)
-        self.freq = freq if freq is not None else 0.0
-        self.phase = phase if phase is not None else 0.0
-        self.peak = peak if peak is not None else 0.0
-        self.sigma = sigma if sigma is not None else np.inf
-
-    def Efield(self,time):
-        """Get the value of the external electric field (cartesian axes)"""
-        if hasattr(time, "__len__"):
-            return np.outer(self._get_Ecos(time) * self.Eenvelope(time), self.amp)
-        else:
-            return self._get_Ecos(time) * self.Eenvelope(time) * self.amp
-
-    def _Eenvelope_is_on(self):
-        return self.peak > 0.0 and self.sigma != np.inf
-
-    def Eenvelope(self,time):
-        """Get the gaussian envelope function of the external electric field"""
-        # https://en.wikipedia.org/wiki/Normal_distribution
-        if self._Eenvelope_is_on():
-            x = time  # indipendent variable
-            u = self.peak  # mean value
-            s = self.sigma  # standard deviation
-            return np.exp(
-                -0.5 * ((x - u) / s) ** 2
-            )  # the returned maximum value is 1, when x = u
-        else:
-            return 1.0
-
-    def _get_Ecos(self, time):
-        """Get the sinusoidal part of the external electric field"""
-        # it's easier to define a function and compute this 'cos'
-        # again everytime instead of define a 'depend_value'
-        return np.cos(self.freq * time + self.phase)
 
 def Ef_plot(Ef:ElectricField,data:dict,output):
 

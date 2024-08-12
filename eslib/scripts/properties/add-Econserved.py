@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 import numpy as np
+import xml.etree.ElementTree as xmlet
 from eslib.classes.properties import Properties
 from eslib.formatting import esfmt
 from eslib.input import flist
 from eslib.tools import convert
+from eslib.classes.efield import ElectricField
 
 #---------------------------------------#
 description = "Compute the actual conserved quantity of the system when an electric field is applied."
@@ -15,6 +17,7 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     # Input
     parser.add_argument("-i" , "--input"          , **argv, type=str  , required=True , help="input file")
+    parser.add_argument("-xml" , "--xml"          , **argv, type=str  , required=True , help="xml i-PI input file (default: %(default)s)", default=None)
     # Keywords
     parser.add_argument("-c" , "--conserved"      , **argv, type=str  , required=False, help="`conserved` keyword (default: %(default)s)", default="conserved")
     parser.add_argument("-d" , "--dipole"         , **argv, type=str  , required=False, help="`dipole` keyword (default: %(default)s)", default="dipole")
@@ -30,6 +33,62 @@ def prepare_args(description):
     parser.add_argument("-on", "--output_name"    , **argv, type=str  , required=False, help="output `Econserved` keyword (default: %(default)s)", default="Econserved")
     parser.add_argument("-o" , "--output"         , **argv, type=str  , required=True , help="output file")
     return parser
+
+def extract(keys,families,scope):
+
+    data = {}
+    for key,family in zip(keys,families):
+
+        data[key] = None
+        
+        element = scope.find(key)
+
+        if element is not None:
+            #value = ast.literal_eval(element.text)
+            text =  element.text
+            try :
+                value = text.split('[')[1].split(']')[0].split(',')
+                value = [ float(i) for i in value ]
+                if len(value) == 1:
+                    value = float(value)
+                else :
+                    value = np.asarray(value)
+            except :
+                value = float(text)
+            
+            try :
+                unit = element.attrib["units"]
+                if unit is None :
+                    unit = "atomic_unit"
+            except:
+                unit = "atomic_unit"
+
+            # print(key,value,unit)
+
+            value = convert(value,family,unit,"atomic_unit")
+            data[key] = value
+
+    return data
+
+def get_Efield(file)->ElectricField:
+
+    data = xmlet.parse(file).getroot()
+    efield = None
+    for element in data.iter():
+        if element.tag == "efield":
+            efield = element
+
+    data     = {}
+    keys     = [ "amp"           , "freq"     , "phase"    , "peak", "sigma" ]
+    families = [ "electric-field", "frequency", "undefined", "time", "time"  ]
+    
+    data = extract(keys,families,efield)
+
+    return ElectricField( amp=data["amp"],\
+                        phase=data["phase"],\
+                        freq=data["freq"],\
+                        peak=data["peak"],\
+                        sigma=data["sigma"])
 
 #---------------------------------------#
 @esfmt(prepare_args, description)
@@ -102,8 +161,30 @@ def main(args):
     # Computation
     print("\tComputing 'Econserved' ... ", end="")
     eda = (dipole * efield).sum(axis=1)
-    Econserved = conserved - eda
+    Econserved = conserved - eda # + Tdep
     print("done")
+
+    time = np.arange(len(conserved))*convert(args.time_step,"time","femtosecond","atomic_unit") 
+
+    if args.xml is not None:
+        print("\tAdding time-dependent part to 'Econserved':")
+        print("\t - reading {:s} file ... ".format(args.xml),end="")
+        Ef:ElectricField = get_Efield(args.xml)
+        print("done")
+        assert np.allclose(efield,Ef.Efield(time)), "efield and Ef.efield must be the same"
+
+        print("\t - computing integrand ... ",end="")
+        integrand = ( dipole * Ef.derivative(time) ).sum(axis=1)
+        print("done")
+        
+        print("\t - integrating integrand ... ",end="")
+        Tdep = np.cumsum(integrand)*args.time_step
+        print("done")
+
+        print("\t - adding new term to 'Econserved' ... ",end="")
+        Econserved = Econserved + Tdep
+        print("done")
+
 
     #------------------#
     # Drift
@@ -112,10 +193,10 @@ def main(args):
     Econserved = convert(Econserved,"energy","atomic_unit","millielectronvolt")
 
     print("\n\tFitting 'conserved and 'Econserved' with a line ... ", end="")
-    x = np.arange(len(conserved))*args.time_step
-    x = convert(x,"time","femtosecond","picosecond")
-    slope, _ = np.polyfit(x, conserved, 1)
-    Eslope, _ = np.polyfit(x, Econserved, 1)
+    
+    time = convert(time,"time","atomic_unit","picosecond")
+    slope, _ = np.polyfit(time, conserved, 1)
+    Eslope, _ = np.polyfit(time, Econserved, 1)
     print("done")
     print(f"\t conserved slope: {slope:.6f} meV/ps")
     print(f"\tEconserved slope: {Eslope:.6f} meV/ps")
