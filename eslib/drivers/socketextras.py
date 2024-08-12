@@ -7,6 +7,7 @@ import ase.units as units
 from ase.calculators.socketio import SocketClient, SocketClosed
 from eslib.tools import convert
 
+PRINT_MSG = False
 ang2ebohr = convert(1,"electric-dipole","eang","atomic_unit")
 class FormatExtras:
     """Class to properly format extras string such that they will be compatible with i-PI."""
@@ -131,10 +132,10 @@ class SocketClientExtras(SocketClient):
                     # Server closed the connection, but we want to
                     # exit gracefully anyway
                     msg = 'EXIT'
-                print(f"\t@Received: {msg}")
+                if PRINT_MSG: print(f"\t@Received: {msg}")
 
                 if msg == 'EXIT':
-                    print(f"Closing connection.")
+                    if PRINT_MSG: print(f"Closing connection.")
                     # Send stop signal to clients:
                     self.comm.broadcast(np.ones(1, bool), 0)
                     # (When otherwise exiting, things crashed and we should
@@ -152,17 +153,17 @@ class SocketClientExtras(SocketClient):
                     # Send signal for other ranks to proceed with calculation:
                     self.comm.broadcast(np.zeros(1, bool), 0)
                     start_time = time.time()
-                    print(f"\t@Calling function: `calculate`")
+                    if PRINT_MSG: print(f"\t@Calling function: `calculate`")
                     energy, forces, virial, extras = self.calculate(atoms, use_stress)
                     end_time = time.time()
-                    print(f"\t@Elapsed time in `calculate`: {end_time - start_time:.4f} seconds")
+                    if PRINT_MSG: print(f"\t@Elapsed time in `calculate`: {end_time - start_time:.4f} seconds")
                     self.state = 'HAVEDATA'
                     yield
                 elif msg == 'GETFORCE':
                     assert self.state == 'HAVEDATA', self.state                
                     if extras is None or extras is {}:
                         extras = np.zeros(1, dtype=np.byte)
-                    print(f"\t@Calling function: `self.protocol.sendforce`")
+                    if PRINT_MSG: print(f"\t@Calling function: `self.protocol.sendforce`")
                     self.protocol.sendforce(energy, forces, virial, morebytes=extras)
                     self.state = 'NEEDINIT'
                 elif msg == 'INIT':
