@@ -71,6 +71,8 @@ def main(args):
     string = "[{:s},{:s},{:s}]".format(string,string,string)
     print("\n\t{:>20s}: ".format("Final vector")+string.format(out[0],out[1],out[2]))
 
+    print("\n\tThe vector has norm: ",np.linalg.norm(out))
+
 
 #---------------------------------------#
 if __name__ == "__main__":
