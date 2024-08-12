@@ -16,8 +16,8 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"           ,   **argv,type=str      , help="input file with the cell")
     parser.add_argument("-v" , "--vector"          ,   **argv,type=size_type, help="vector components in lattice coordinates")
-    parser.add_argument("-n" , "--normalize_cell"  ,   **argv,type=str2bool , help="whether the vectors is expressed w.r.t. normalized lattice vectors (default: %(default)s)",default=True)
-    parser.add_argument("-n" , "--normalize_vector",   **argv,type=str2bool , help="whether to normalize the input vector (default: %(default)s)",default=True)
+    parser.add_argument("-nc" , "--normalize_cell"  ,   **argv,type=str2bool , help="whether the vectors is expressed w.r.t. normalized lattice vectors (default: %(default)s)",default=True)
+    parser.add_argument("-nv" , "--normalize_vector",   **argv,type=str2bool , help="whether to normalize the input vector (default: %(default)s)",default=True)
     parser.add_argument("-a" , "--amplitude"       ,   **argv,type=float    , help="amplitude of the output vector (default: %(default)s)",default=1.)
     parser.add_argument("-d" , "--digit"           ,   **argv,type=int      , help="digit of the final result (default: %(default)s)",default=8)
     return parser# .parse_args(
