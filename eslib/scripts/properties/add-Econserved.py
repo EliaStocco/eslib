@@ -112,13 +112,26 @@ def main(args):
     Econserved = convert(Econserved,"energy","atomic_unit","millielectronvolt")
 
     print("\n\tFitting 'conserved and 'Econserved' with a line ... ", end="")
-    x = np.arange(len(Econserved))*args.time_step
+    x = np.arange(len(conserved))*args.time_step
     x = convert(x,"time","femtosecond","picosecond")
     slope, _ = np.polyfit(x, conserved, 1)
     Eslope, _ = np.polyfit(x, Econserved, 1)
     print("done")
     print(f"\t conserved slope: {slope:.6f} meV/ps")
     print(f"\tEconserved slope: {Eslope:.6f} meV/ps")
+
+    #------------------#
+    # Setting
+    print("\n\tAdding 'Econserved as '{:s}' to the properties ... ".format(args.output_name), end="")
+    Econserved = convert(Econserved,"energy","millielectronvolt","atomic_unit")
+    properties.set(args.output_name, Econserved)
+    print("done")
+
+    #------------------#
+    # Saving
+    print("\n\tSaving properties to '{:s}' ... ".format(args.output), end="")
+    properties.to_file(file=args.output)
+    print("done")
 
 
 
