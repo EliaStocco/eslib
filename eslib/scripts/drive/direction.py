@@ -51,11 +51,12 @@ def main(args):
         norm = np.linalg.norm(out)
         print("\t - original norm: ",norm)
         out /= norm
-        print("\t - current norm: ",np.linalg.norm(out))
+        print("\t -  current norm: ",np.linalg.norm(out))
         assert not np.allclose(norm,1), "coding error"
 
     #------------------#
-    print("\t{:>20s}:".format("Vector"),out)
+    print("\n\tResults:")
+    print("\t{:>20s}:".format("(norm.) vector"),out)
 
     #------------------#
     if args.amplitude != 1.:
@@ -68,7 +69,7 @@ def main(args):
     #------------------#
     string = "{:>" + "{:d}".format(args.digit+8) + ".{:d}".format(args.digit) + "e}"
     string = "[{:s},{:s},{:s}]".format(string,string,string)
-    print("\t{:>20s}: ".format("Final vector")+string.format(out[0],out[1],out[2]))
+    print("\n\t{:>20s}: ".format("Final vector")+string.format(out[0],out[1],out[2]))
 
 
 #---------------------------------------#
