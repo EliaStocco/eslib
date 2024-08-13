@@ -40,7 +40,7 @@ class MACEModel(eslibModel):
     #------------------#
     # Attributes initialized by `dataclass`
     default_dtype: str                                          # `torch` default data type used for computation for computation (e.g., 'float32', 'float64').
-    device       : torch.device                                          # `torch` device used for computation (e.g., 'cpu', 'cuda').
+    device       : torch.device                                 # `torch` device used for computation (e.g., 'cpu', 'cuda').
     model_path   : str                                          #  path to the MACE (torch.nn.Module) model file.
     batch_size   : int                                          # `batch_size` is the size of the batch of structures used when computing properties.
     charges_key  : str                                          # `charges_key` is the key of the charges in the MACE model.
@@ -52,7 +52,7 @@ class MACEModel(eslibModel):
     # Attributes initialized in `__post_init__`
     implemented_properties: Dict[str, Any] = field(init=False)  #  a dictionary that maps property names to their corresponding functions in the MACE model.
     network: torch.nn.Module = field(init=False)                # `MACE model.
-    current_device:torch.device = field(init=False)                      # `torch` device currently used for computation (e.g., 'cpu', 'cuda').
+    current_device:torch.device = field(init=False)             # `torch` device currently used for computation (e.g., 'cpu', 'cuda').
 
     #------------------------------------#
     # Methods for `dataclass` initialization

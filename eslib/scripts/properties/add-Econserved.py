@@ -17,7 +17,7 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     # Input
     parser.add_argument("-i" , "--input"          , **argv, type=str  , required=True , help="input file")
-    parser.add_argument("-xml" , "--xml"          , **argv, type=str  , required=True , help="xml i-PI input file (default: %(default)s)", default=None)
+    parser.add_argument("-xml" , "--xml"          , **argv, type=str  , required=False, help="xml i-PI input file (default: %(default)s)", default=None)
     # Keywords
     parser.add_argument("-c" , "--conserved"      , **argv, type=str  , required=False, help="`conserved` keyword (default: %(default)s)", default="conserved")
     parser.add_argument("-d" , "--dipole"         , **argv, type=str  , required=False, help="`dipole` keyword (default: %(default)s)", default="dipole")

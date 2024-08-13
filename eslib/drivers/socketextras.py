@@ -8,7 +8,7 @@ from ase.calculators.socketio import SocketClient, SocketClosed
 from eslib.tools import convert
 
 PRINT_MSG = False
-ang2ebohr = convert(1,"electric-dipole","eang","atomic_unit")
+eang2au = convert(1,"electric-dipole","eang","atomic_unit")
 class FormatExtras:
     """Class to properly format extras string such that they will be compatible with i-PI."""
 
@@ -55,7 +55,7 @@ class FormatExtras:
     @staticmethod
     def format_dipole(name:str,array:np.ndarray,atoms:Atoms)->np.ndarray:
         """Format dipoles: mainly convert from e*angstrom to e*bohr."""
-        return "dipole",array*ang2ebohr
+        return "dipole",array*eang2au
 
 class ProtocolExtras:
 
