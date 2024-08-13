@@ -115,8 +115,9 @@ class DipolePartialCharges(DipoleModel):
         self.results = {"dipole": dipole}
         if self.compute_BEC:
             Z = self._get_BEC(atoms)
-            assert Z.shape == (atoms.get_global_number_of_atoms(),3,3), f"Invalid shape for 'BEC'. Expected ({atoms.get_global_number_of_atoms()},3,3), got {Z.shape}"
+            assert Z.shape == (atoms.get_global_number_of_atoms(),9), f"Invalid shape for 'BEC'. Expected ({atoms.get_global_number_of_atoms()},9), got {Z.shape}"
             self.results["BEC"]  = Z
+            Z = Z.reshape(atoms.get_global_number_of_atoms(),3,3)
             self.results["BECx"] = Z[:,0,:]
             self.results["BECy"] = Z[:,1,:]
             self.results["BECz"] = Z[:,2,:]
