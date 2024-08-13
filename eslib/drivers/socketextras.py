@@ -24,8 +24,8 @@ class FormatExtras:
     def format_bec(name:str,array:np.ndarray,atoms:Atoms)->np.ndarray:
         """Format Born Effective Charge Tensors: mainly reshape these tensors."""
         # raise ValueError("`format_bec` is going to be dismissed.")
-        assert array.ndim == 3, "BEC mush have 3 dimensions"
-        assert array.shape == (atoms.get_global_number_of_atoms(),3,3), "BEC must have shape (natoms,3,3)"
+        assert array.ndim == 2, f"Invalid shape for '{name}'. Expected (natoms,9), got {array.shape}"
+        assert array.shape == (atoms.get_global_number_of_atoms(),9), f"Invalid shape for '{name}'. Expected ({atoms.get_global_number_of_atoms()},9), got {array.shape}"
         # array = np.asarray(array)        # (natoms,3,3)  -->  (atom index    ,pos. coord.  , dipole coord.)
         # array = np.moveaxis(array, 2, 0) # (3,natoms,3)  -->  (dipole coord., atom index   , pos. coord.  )
         # array = np.moveaxis(array, 1, 2) # (3,3,natoms)  -->  (dipole coord., pos. coord.  , atom index   )

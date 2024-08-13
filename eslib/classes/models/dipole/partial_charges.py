@@ -19,7 +19,13 @@ class DipolePartialCharges(DipoleModel):
         Calculator.__init__(self)
         self.implemented_properties = {"dipole" : (float, 3),}
         if self.compute_BEC:
-            self.implemented_properties.update({"BEC": (float, ("natoms", 3,3))})            
+            new_prop = {
+                "BEC" : (float, ("natoms", 9)),
+                "BECx": (float, ("natoms", 3)),
+                "BECy": (float, ("natoms", 3)),
+                "BECz": (float, ("natoms", 3))
+            }
+            self.implemented_properties.update(new_prop)            
 
     def set_charges(self,charges:dict):
         if self.charges.keys() != charges.keys():
