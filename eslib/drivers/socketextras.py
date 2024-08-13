@@ -14,8 +14,8 @@ class FormatExtras:
 
     @staticmethod
     def format(name:str,array:np.ndarray,atoms:Atoms)->np.ndarray:
-        # if name.lower() in ["bec","dipole_dr"]:
-        #     return FormatExtras.format_bec(name,array,atoms)
+        if name.lower() in ["bec","dipole_dr"]:
+            return FormatExtras.format_bec(name,array,atoms)
         if name.lower() in ["dipole"]:
             return FormatExtras.format_dipole(name,array,atoms)
         return name, array
@@ -23,8 +23,9 @@ class FormatExtras:
     @staticmethod
     def format_bec(name:str,array:np.ndarray,atoms:Atoms)->np.ndarray:
         """Format Born Effective Charge Tensors: mainly reshape these tensors."""
-        assert array.ndim == 2, "BEC mush have 2 dimensions"
-        assert array.shape == (atoms.get_global_number_of_atoms(),9), "BEC must have shape (natoms,9)"
+        # raise ValueError("`format_bec` is going to be dismissed.")
+        assert array.ndim == 3, "BEC mush have 3 dimensions"
+        assert array.shape == (atoms.get_global_number_of_atoms(),3,3), "BEC must have shape (natoms,3,3)"
         # array = np.asarray(array)        # (natoms,3,3)  -->  (atom index    ,pos. coord.  , dipole coord.)
         # array = np.moveaxis(array, 2, 0) # (3,natoms,3)  -->  (dipole coord., atom index   , pos. coord.  )
         # array = np.moveaxis(array, 1, 2) # (3,3,natoms)  -->  (dipole coord., pos. coord.  , atom index   )
@@ -44,7 +45,7 @@ class FormatExtras:
             becx = calc.get_property("BECx").flatten()
             becy = calc.get_property("BECy").flatten()
             becz = calc.get_property("BECz").flatten()
-            assert len(becx) == len(becy) == len(becz), "Invalid shape for 'bec'. Expected (natoms,), got ({},{}), ({},{})".format(len(becx),len(becy),len(becx),len(becz))
+            assert len(becx) == len(becy) == len(becz), "Invalid shape for 'bec'. Expected (3xnatoms,), got {}, {}, {}".format(becx.shape,becy.shape,becz.shape)
             N = len(becx)
             final["BEC"] = np.zeros((N,3))
             final["BEC"][:,0] = becx

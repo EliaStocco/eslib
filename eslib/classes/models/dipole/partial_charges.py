@@ -104,10 +104,17 @@ class DipolePartialCharges(DipoleModel):
         
     def calculate(self, atoms:Atoms=None, properties=None, system_changes=all_changes):
         super().calculate(atoms, properties, system_changes)
-        dipole = self.get([atoms])
+        dipole = self.get([atoms]).flatten()
+        assert dipole.shape == (3,), f"Invalid shape for 'dipole'. Expected (3,), got {dipole.shape}"
         self.results = {"dipole": dipole}
         if self.compute_BEC:
-            self.results["BEC"] = self._get_BEC(atoms)
+            Z = self._get_BEC(atoms)
+            assert Z.shape == (atoms.get_global_number_of_atoms(),3,3), f"Invalid shape for 'BEC'. Expected ({atoms.get_global_number_of_atoms()},3,3), got {Z.shape}"
+            self.results["BEC"]  = Z
+            self.results["BECx"] = Z[:,0,:]
+            self.results["BECy"] = Z[:,1,:]
+            self.results["BECz"] = Z[:,2,:]
+
 
     def _get_BEC(self, atoms:Atoms):
         charges = self.get_all_charges(atoms)

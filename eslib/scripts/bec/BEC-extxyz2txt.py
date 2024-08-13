@@ -70,6 +70,7 @@ def main(args):
             tmp = tmp.reshape((tmp.shape[0],-1,3))
             if not np.allclose(BEC,tmp):
                 print("\t{:s}: '{:s}' and the ones reconstructued differ".format(warning,args.keyword))
+            np.savetxt("TEST.txt",tmp[0],fmt=float_format)
     
     #------------------#
     print("\n\tWriting the BEC tensors to file '{:s}' ... ".format(args.output), end="")

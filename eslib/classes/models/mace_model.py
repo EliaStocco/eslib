@@ -334,7 +334,7 @@ def add_derivatives(model: MACEModel, output: Dict[str, torch.Tensor], data: Dic
             output[name] = array.permute(0, 2, 1)
             for n, i in enumerate(["x", "y", "z"]):
                 output["{:s}{:s}".format(name, i)] = array[:, n, :]
-            # del output[name] # This could be deleted if workig with i-PI
+            # del output[name] # This could be deleted if working with i-PI
         else:
             output[name] = array
 
