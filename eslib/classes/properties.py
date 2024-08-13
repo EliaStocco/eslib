@@ -165,6 +165,8 @@ def get_property_header(inputfile, N=1000, search=True):
             if not line:
                 break
             elif "#" in line:
+                if "-->" not in line:
+                    continue
                 line = line.split("-->")[1]
                 line = line.split(":")[0]
                 line = line.split(" ")[1]
