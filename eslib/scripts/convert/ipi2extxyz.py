@@ -160,17 +160,21 @@ def main(args):
             print("\tn. of atomic structures: {:d}".format(len(atoms)))
             print("\t       n. of properties: {:d}".format(len(allproperties)))
 
-        print("\n\tSummary of the read properties:\n")
+        print("\n\tSummary of the read properties:")
         df = allproperties.summary()
+        tmp = "\n"+df.to_string(index=False)
+        print(tmp.replace("\n", "\n\t"))
 
-        def line(): print("\t\t-----------------------------------------")
+
+
+        # def line(): print("\t\t-----------------------------------------")
         
-        line()
-        print("\t\t|{:^15s}|{:^15s}|{:^7s}|".format("name","unit","shape"))
-        line()
-        for index, row in df.iterrows():
-            print("\t\t|{:^15s}|{:^15s}|{:^7d}|".format(row["name"],row["unit"],row["shape"]))
-        line()
+        # line()
+        # print("\t\t|{:^15s}|{:^15s}|{:^7s}|".format("name","unit","shape"))
+        # line()
+        # for index, row in df.iterrows():
+        #     print("\t\t|{:^15s}|{:^15s}|{:^7d}|".format(row["name"],row["unit"],row["shape"]))
+        # line()
 
         # all properties
         if "all" in properties:
