@@ -36,10 +36,11 @@ class pickleIO:
             #     # the object could have been casted to another class before beeing save to a `*.pickle` file
             #     print(f"Error loading from pickle file: {e}")
             # return the object
-            if isinstance(obj, cls):
-                return obj
-            else:
-                return cls(obj)
+            return obj
+            # if issubclass(obj, cls):
+            #     return obj
+            # else:
+            #     return cls(obj)
             # else:
             #     raise ValueError(f"Invalid pickle file format. Expected type: {cls.__name__}")
         except FileNotFoundError:
