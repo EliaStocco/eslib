@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # from mace.calculators import MACECalculator
-from mace.calculators import MACEliaCalculator, MACECalculator
-from ase.io import read
 import torch
+from ase.io import read
+from mace.calculators import MACEliaCalculator, MACECalculator
 from eslib.formatting import esfmt
 from eslib.functions import suppress_output
-from eslib.input import str2bool
+from eslib.input import str2bool, slist
 from eslib.drivers.socketextras import SocketClientExtras
 from ase.calculators.socketio import SocketClient
 
@@ -13,21 +13,27 @@ from ase.calculators.socketio import SocketClient
 # Description of the script's purpose
 description = "MACE socket driver."
 
+choices = ["foundation_mp","mp","mace_mp",\
+           "foundation_anicc","anicc","mace_anicc",\
+           "foundation_off","off","mace_off",\
+            "eslib","MACE", "MACElia"  ]
+
 #---------------------------------------#
 def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-s" , "--structure"    , **argv, required=True , type=str     , help="file with the atomic structure")
-    parser.add_argument("-f" , "--format"       , **argv, required=False, type=str     , help="file format of the atomic structure (default: %(default)s)" , default=None)
-    parser.add_argument("-m" , "--model"        , **argv, required=False, type=str     , help="file with the MACE model (default: %(default)s)", default=None)
-    parser.add_argument("-mt", "--model_type"   , **argv, required=True , type=str     , help="MACE model data type")
-    parser.add_argument("-p" , "--port"         , **argv, required=False, type=int     , help="TCP/IP port number. Ignored when using UNIX domain sockets.")
-    parser.add_argument("-a" , "--address"      , **argv, required=True , type=str     , help="Host name (for INET sockets) or name of the UNIX domain socket to connect to.")
-    parser.add_argument("-u" , "--unix"         , **argv, required=False, type=str2bool, help="Use a UNIX domain socket (default: %(default)s)", default=False)
-    parser.add_argument("-d" , "--device"       , **argv, required=False, type=str     , help="device (default: %(default)s)", choices=['cpu','gpu','cuda'], default='cuda')
-    parser.add_argument("-dt", "--dtype"        , **argv, required=False, type=str     , help="dtype (default: %(default)s)", choices=['float64','float32'], default='float64')
-    parser.add_argument("-sc", "--socket_client", **argv, required=False, type=str     , help="socket client (default: %(default)s)", choices=['eslib','ase'], default='eslib')
+    parser.add_argument("-s" , "--structure"          , **argv, required=True , type=str     , help="file with the atomic structure")
+    parser.add_argument("-f" , "--format"             , **argv, required=False, type=str     , help="file format of the atomic structure (default: %(default)s)" , default=None)
+    parser.add_argument("-m" , "--model"              , **argv, required=False, type=str     , help="file with the MACE model (default: %(default)s)", default=None)
+    parser.add_argument("-mt", "--model_type"         , **argv, required=True , type=str     , help="MACE model data type", choices=choices)
+    parser.add_argument("-p" , "--port"               , **argv, required=False, type=int     , help="TCP/IP port number. Ignored when using UNIX domain sockets.")
+    parser.add_argument("-a" , "--address"            , **argv, required=True , type=str     , help="Host name (for INET sockets) or name of the UNIX domain socket to connect to.")
+    parser.add_argument("-u" , "--unix"               , **argv, required=False, type=str2bool, help="Use a UNIX domain socket (default: %(default)s)", default=False)
+    parser.add_argument("-d" , "--device"             , **argv, required=False, type=str     , help="device (default: %(default)s)", choices=['cpu','gpu','cuda'], default='cuda')
+    parser.add_argument("-dt", "--dtype"              , **argv, required=False, type=str     , help="dtype (default: %(default)s)", choices=['float64','float32'], default='float64')
+    parser.add_argument("-sc", "--socket_client"      , **argv, required=False, type=str     , help="socket client (default: %(default)s)", choices=['eslib','ase'], default='eslib')
+    parser.add_argument("-sp", "--suppress_properties", **argv, required=True , type=slist   , help="list of the properties to suppress (default: %(default)s)", default=None)
     return parser
 
 #---------------------------------------#
@@ -83,7 +89,7 @@ def main(args):
     elif args.model_type == "MACE":
         print("\tLoading a MACECalculator based on the model that you provided ... ", end="")
         calculator = MACECalculator(model_paths=args.model,**kwargv)         
-    else:
+    elif args.model_type == "MACElia":
         print("\tLoading a MACEliaCalculator based on the model that you provided ... ", end="")
         calculator = MACEliaCalculator(model_paths=args.model,\
                                     model_type=args.model_type,\
@@ -97,6 +103,19 @@ def main(args):
         calculator.summary()
     except:
         pass
+
+    #------------------#
+    if args.suppress_properties is not None:
+        print(f"\tSuppressing properties:")
+        for prop in args.suppress_properties:
+            print(f"\t - '{prop}' ... ", end="")
+            calculator.implemented_properties.pop(prop)
+            print("done")
+
+        try:
+            calculator.summary()
+        except:
+            pass
 
     atoms.calc = calculator # atoms.set_calculator(calculator)
 
