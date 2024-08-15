@@ -5,6 +5,8 @@ from eslib.formatting import esfmt
 from eslib.input import str2bool
 import seekpath
 from ase import Atoms
+from eslib.functions import suppress_output
+
 # # import matplotlib.pyplot as plt
 # import warnings
 
@@ -34,6 +36,38 @@ def prepare_args(description):
     # parser.add_argument("-of", "--output_format" , **argv, required=False, type=str, help="output file format (default: %(default)s)", default=None)
     return parser# .parse_args()
 
+def point2LaTeX(point):
+    if point == "GAMMA":
+        return r"$\Gamma$"
+    elif point in  ["X","T","L","W","M","F"]:
+        return point
+    elif point == "H_0":
+        return r"${\rm H}_0$"
+    elif point == "H_1":
+        return r"${\rm H}_1$"
+    elif point == "H_2":
+        return r"${\rm H}_2$"
+    elif point == "S_0":
+        return r"${\rm S}_0$"
+    elif point == "S_1":
+        return r"${\rm S}_1$"
+    elif point == "S_2":
+        return r"${\rm S}_2$"
+    else:
+        raise ValueError("unknown point: '{:s}'".format(point))
+    
+def band_path2labels(band_path):
+    labels = []
+    last = None
+    for path in band_path:
+        if len(labels) == 0:
+            labels.append(point2LaTeX(path[0]))
+        elif last != path[0]:
+            labels[-1] = "{}|{}".format(labels[-1],point2LaTeX(path[0]))
+        labels.append(point2LaTeX(path[1]))
+        # print("\t{:>8s} --- {:<8s}".format(path[0],path[1]))
+        last = path[1]
+    return labels
 #---------------------------------------#
 @esfmt(prepare_args,description)
 def main(args):
@@ -58,7 +92,9 @@ def main(args):
     #------------------#
     print("\tInvoking SeeK-path ... ", end="")
     # Step 3: Use Seekpath to standardize the cell and get the band path
-    seekpath_output = seekpath.get_explicit_k_path_orig_cell(primitive_structure,with_time_reversal=args.time_reversal)
+    with suppress_output():
+        # warnings.filterwarnings("ignore", category=DeprecationWarning, module="spglib")
+        seekpath_output = seekpath.get_explicit_k_path_orig_cell(primitive_structure,with_time_reversal=args.time_reversal)
     print("done")
 
     # Extract band path information
@@ -70,9 +106,41 @@ def main(args):
     for point, coord in point_coords.items():
         print("\t{:>8s}: [{:>8.3f}, {:>8.3f}, {:>8.3f}]".format(point,coord[0],coord[1],coord[2]))
 
-    print("\n\tBand path:")
-    for path in band_path:
-        print("\t{:>8s} --- {:<8s}".format(path[0],path[1]))
+    #------------------#
+    print("\n\tBand path (from seekpath):")
+    for n,path in enumerate(band_path):
+        print("\t{:>3d}:{:>8s} --- {:<8s}".format(n+1,path[0],path[1]))
+
+    labels = band_path2labels(band_path)
+    print("\tLabels: ",labels)
+
+    assert len(labels) - 1 == len(band_path), "coding error"
+
+    #------------------#
+    print("\n\tBand path (to be used in phonopy):")
+    labels = []
+    last = None
+    phonopy_band_path = []
+    for n,path in enumerate(band_path):
+        if n == 0 :
+            phonopy_band_path.append(path)
+        elif path[0] == last:
+            phonopy_band_path.append(path)
+        else:
+            phonopy_band_path.append((last,path[0]))
+            phonopy_band_path.append(path)
+        last = path[1]
+
+    for n,path in enumerate(phonopy_band_path):
+        print("\t{:>3d}:{:>8s} --- {:<8s}".format(n+1,path[0],path[1]))
+        
+    phonopy_labels = band_path2labels(phonopy_band_path)
+    print("\tLabels: ",phonopy_labels)
+
+    assert len(phonopy_labels) - 1 == len(phonopy_band_path), "coding error"
+
+    labels = phonopy_labels
+    band_path = phonopy_band_path
 
     #------------------#
     print("\n\tPreparing BAND and QPOINTS ... ", end="")
@@ -100,33 +168,6 @@ def main(args):
         f.write("BAND = " + band_string + "\n")
         f.write("\nQPOINTS = " + qpoints_string + "\n")
     print("done")
-   
-    # #------------------#
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111, projection='3d')
-    # ax.set_title('Band Path in 3D k-space')
-    # ax.set_xlabel('kx')
-    # ax.set_ylabel('ky')
-    # ax.set_zlabel('kz')
-
-    # # Plot high-symmetry points
-    # for k, v in point_coords.items():
-    #     ax.scatter(v[0], v[1], v[2], color='red')  # Red dot for high-symmetry point
-    #     ax.text(v[0], v[1], v[2], k)
-
-    # # Plot paths between high-symmetry points
-    # for segment in band_path:
-    #     start_coord = point_coords[segment[0]]
-    #     end_coord = point_coords[segment[1]]
-        
-    #     # Draw a line between the points
-    #     ax.plot([start_coord[0], end_coord[0]], 
-    #             [start_coord[1], end_coord[1]], 
-    #             [start_coord[2], end_coord[2]], 
-    #             color='blue')  # Blue line for path
-        
-    # plt.savefig(args.plot)
-   
 
 #---------------------------------------#
 if __name__ == "__main__":
