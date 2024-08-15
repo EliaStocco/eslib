@@ -180,25 +180,6 @@ def main(args):
             % (args.input[wrong_file_i], args.input[0])
         )
 
-    # Decoration of figure
-    # max_frequencies = [_get_max_frequency(data[2]) for data in plots_data]
-    # plot_data = plots_data[np.argmax(max_frequencies)]
-    # _, path_connections, _, _ = plot_data
-    # n = len([x for x in path_connections if not x])
-    # fig, ax = plt.subplots(figsize=(5,5))
-    # axs = ImageGrid(
-    #     fig,
-    #     111,  # similar to subplot(111)
-    #     nrows_ncols=(1, n),
-    #     axes_pad=0.11,
-    #     label_mode="L",
-    # )
-    # for ax in axs:
-
-    # band_plot = BandPlot([ax])
-    # band_plot.set_xscale_from_data(plot_data[2], plot_data[3])
-    # band_plot.xscale = band_plot.xscale * args.factor
-    # band_plot.decorate(*plot_data)
 
     # Plot band structures
     fmts = [
