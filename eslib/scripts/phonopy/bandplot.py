@@ -251,6 +251,7 @@ def main(args):
 
     
     ax.set_xlim(0,xmax)
+    ax.set_ylabel("Frequency [THz]")
     plt.grid(axis="y")
     # plt.show()
 
