@@ -33,7 +33,7 @@ def prepare_args(description):
     parser.add_argument("-d" , "--device"             , **argv, required=False, type=str     , help="device (default: %(default)s)", choices=['cpu','gpu','cuda'], default='cuda')
     parser.add_argument("-dt", "--dtype"              , **argv, required=False, type=str     , help="dtype (default: %(default)s)", choices=['float64','float32'], default='float64')
     parser.add_argument("-sc", "--socket_client"      , **argv, required=False, type=str     , help="socket client (default: %(default)s)", choices=['eslib','ase'], default='eslib')
-    parser.add_argument("-sp", "--suppress_properties", **argv, required=True , type=slist   , help="list of the properties to suppress (default: %(default)s)", default=None)
+    parser.add_argument("-sp", "--suppress_properties", **argv, required=False, type=slist   , help="list of the properties to suppress (default: %(default)s)", default=None)
     return parser
 
 #---------------------------------------#
