@@ -1,26 +1,14 @@
 #!/usr/bin/env python
 import os
 import sys
-import matplotlib
 import numpy as np
-
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import ImageGrid
-import gzip
-import sys
-import warnings
-from typing import Union
-import numpy as np
-import yaml
-from phonopy.harmonic.dynamical_matrix import DynamicalMatrix, DynamicalMatrixNAC
-from phonopy.units import VaspToTHz
 from eslib.formatting import esfmt
 from eslib.input import slist
 from eslib.plot import vzero
-# matplotlib.use("Agg")
 
 #---------------------------------------#
-description="Phonopy bandplot command-line-tool"
+description="Create a band plot as in phonopy"
 
 #---------------------------------------#
 def get_options(description):
