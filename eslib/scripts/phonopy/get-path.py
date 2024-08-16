@@ -37,22 +37,13 @@ def prepare_args(description):
     return parser# .parse_args()
 
 def point2LaTeX(point):
-    if point == "GAMMA":
+    if point in  ["GAMMA","G"]:
         return r"$\Gamma$"
-    elif point in  ["X","T","L","W","M","F"]:
+    elif len(point) == 1:
+        # in  ["X","T","L","W","M","F","Y","Z"]:
         return point
-    elif point == "H_0":
-        return r"${\rm H}_0$"
-    elif point == "H_1":
-        return r"${\rm H}_1$"
-    elif point == "H_2":
-        return r"${\rm H}_2$"
-    elif point == "S_0":
-        return r"${\rm S}_0$"
-    elif point == "S_1":
-        return r"${\rm S}_1$"
-    elif point == "S_2":
-        return r"${\rm S}_2$"
+    elif len(point) == 3:
+        return "${\\rm {:s}}_{{{:s}}}".format(point[0], point[2])
     else:
         raise ValueError("unknown point: '{:s}'".format(point))
     
