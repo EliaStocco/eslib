@@ -1,4 +1,4 @@
-import abc
+
 from ase import Atoms
 from ase.calculators.calculator import Calculator
 from eslib.classes.io import pickleIO
@@ -6,7 +6,7 @@ from typing import List, TypeVar, Any
 
 T = TypeVar('T', bound='eslibModel')
 
-class eslibModel(abc.ABC,pickleIO,Calculator):
+class eslibModel(pickleIO,Calculator):
     """
     Class for models using the eslib framework.
 
@@ -30,7 +30,7 @@ class eslibModel(abc.ABC,pickleIO,Calculator):
         # Print the summary of the model
         print(f"{string}Model summary:")
 
-    @abc.abstractmethod
+    # @abc.abstractmethod
     def compute(self:T, traj: List[Atoms], prefix: str = "", raw: bool = False, **kwargs) -> Any:
         """
         Compute properties for a trajectory.
