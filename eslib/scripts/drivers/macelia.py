@@ -106,7 +106,7 @@ def main(args):
 
     #------------------#
     if args.suppress_properties is not None:
-        print(f"\tSuppressing properties:")
+        print(f"\n\tSuppressing properties:")
         for prop in args.suppress_properties:
             print(f"\t - '{prop}' ... ", end="")
             calculator.implemented_properties.pop(prop)
