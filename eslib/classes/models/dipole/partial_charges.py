@@ -73,11 +73,53 @@ class DipolePartialCharges(DipoleModel):
         if inplace:
             self.set_charges(neutral_charges)
         return neutral_charges
-            
-    def get(self,traj:List[Atoms])->np.ndarray:
-        return self.compute(traj,raw=True)["dipole"]
+        
+    def calculate(self, atoms: Atoms = None, properties: list = None,system_changes: str = all_changes) -> None:
+        """
+        Calculate the results for the given atoms.
+
+        This method is necessary when using `ase`.
+
+        Args:
+            atoms (Atoms, optional): The atoms for which to calculate the results.
+                Defaults to None.
+            properties (list, optional): The properties to calculate.
+                Defaults to None.
+            system_changes (str, optional): The changes in the system.
+                Defaults to all_changes.
+
+        Returns:
+            None
+        """
+        # Call the parent class's calculate method
+        super().calculate(atoms, properties, system_changes)
+
+        # Get the dipole for the given atoms
+        self.results = self.compute([atoms])# .flatten()
 
     def compute(self,traj:List[Atoms],prefix:str="",raw:bool=False):
+        """
+        Compute the dipole moment and the Born-Electron-Cloud (BEC) for a given trajectory of atomic structures.
+
+        Parameters:
+            traj (List[Atoms]): The trajectory of atomic structures.
+            prefix (str, optional): A prefix to be added to the keys in the returned dictionary. Defaults to "".
+            raw (bool, optional): If True, return the raw data without any additional processing. Defaults to False.
+
+        Returns:
+            Union[Dict[str, np.ndarray], Dict[str, np.ndarray], List[np.ndarray]]: A dictionary containing the dipole moment and the BEC for each structure in the trajectory. If `raw` is True, return a dictionary with the raw data.
+
+        Raises:
+            ValueError: If a structure in the trajectory is not charge neutral.
+
+        Notes:
+            - The dipole moment is computed as the sum of the atomic dipoles.
+            - The Born-Effective-Charges (BEC) are computed using the `self._get_BEC` method.
+            - The BEC is stored as a 3D array with shape (N, 9), where N is the number of atoms in the structure.
+            - The BEC is reshaped into three separate arrays: BECx, BECy, and BECz.
+            - The prefix is added to the keys in the returned dictionary.
+
+        """
         dipole = np.zeros((len(traj),3))
         for n,structure in enumerate(traj):
             if not self.check_charge_neutrality(structure):
@@ -99,31 +141,51 @@ class DipolePartialCharges(DipoleModel):
             for n,structure in enumerate(traj):
                 BEC[n] = self._get_BEC(structure)
             data["BEC"] = None
-            new_data[f"{prefix}BEC"] = np.asarray(BEC)
+            data["BECx"] = None
+            data["BECy"] = None
+            data["BECz"] = None
+            BEC = np.asarray(BEC)
+            new_data[f"{prefix}BEC"]  = BEC
+            new_data[f"{prefix}BECx"] = [None]*len(traj)
+            new_data[f"{prefix}BECy"] = [None]*len(traj)
+            new_data[f"{prefix}BECz"] = [None]*len(traj)
+            for n,atoms in enumerate(traj):
+                Z = np.asarray(BEC[n]).reshape(atoms.get_global_number_of_atoms(),3,3)
+                new_data[f"{prefix}BECx"][n] = Z[:,0,:]
+                new_data[f"{prefix}BECy"][n] = Z[:,1,:]
+                new_data[f"{prefix}BECz"][n] = Z[:,2,:]
+            new_data[f"{prefix}BECx"] = np.asarray(new_data[f"{prefix}BECx"])
+            new_data[f"{prefix}BECy"] = np.asarray(new_data[f"{prefix}BECy"])
+            new_data[f"{prefix}BECz"] = np.asarray(new_data[f"{prefix}BECz"])
         shapes = {prefix + k: self.implemented_properties[k] for k in data.keys()}
         if raw:
             return new_data
         else:
             # shapes = {prefix + k: self.implemented_properties[k] for k in data.keys()}
             return add_info_array(traj,new_data,shapes)
-
         
-    def calculate(self, atoms:Atoms=None, properties=None, system_changes=all_changes):
-        super().calculate(atoms, properties, system_changes)
-        dipole = self.get([atoms]).flatten()
-        assert dipole.shape == (3,), f"Invalid shape for 'dipole'. Expected (3,), got {dipole.shape}"
-        self.results = {"dipole": dipole}
-        if self.compute_BEC:
-            Z = self._get_BEC(atoms)
-            assert Z.shape == (atoms.get_global_number_of_atoms(),9), f"Invalid shape for 'BEC'. Expected ({atoms.get_global_number_of_atoms()},9), got {Z.shape}"
-            self.results["BEC"]  = Z
-            Z = Z.reshape(atoms.get_global_number_of_atoms(),3,3)
-            self.results["BECx"] = Z[:,0,:]
-            self.results["BECy"] = Z[:,1,:]
-            self.results["BECz"] = Z[:,2,:]
+    def get(self,traj:List[Atoms])->np.ndarray:
+        """
+        Calculate the dipole moment for a given trajectory of atomic structures.
 
+        Args:
+            traj (List[Atoms]): The trajectory of atomic structures.
+
+        Returns:
+            np.ndarray: The dipole moment for each structure in the trajectory.
+        """
+        return self.compute(traj,raw=True)["dipole"]
 
     def _get_BEC(self, atoms:Atoms):
+        """
+        Calculate the Born Effective Charges (BEC) tensor for a given Atoms object.
+
+        Parameters:
+            atoms (Atoms): The Atoms object for which to calculate the BEC tensor.
+
+        Returns:
+            np.ndarray: The BEC tensor with shape (N, 9), where N is the number of atoms.
+        """
         charges = self.get_all_charges(atoms)
         N = atoms.get_global_number_of_atoms()
         BEC = np.zeros((N,3,3))

@@ -28,7 +28,7 @@ class Trajectory(abc.ABC,pickleIO):
         - data (np.ndarray): Array of values to set.
         - what (str): 'info' or 'arrays', if known. Default is 'unknown'.
         """
-        pass
+        raise NotImplementedError("this method should be overwritten by a child class.")
 
     @abc.abstractmethod
     def get(self:T, name:str, default:np.ndarray=None, what:str="all") -> np.ndarray:
@@ -43,7 +43,7 @@ class Trajectory(abc.ABC,pickleIO):
         Returns:
         - np.ndarray: Array of attribute values.
         """
-        pass
+        raise NotImplementedError("this method should be overwritten by a child class.")
     
     @abc.abstractmethod
     def summary(self:T)->pd.DataFrame:

@@ -1,3 +1,4 @@
+import abc
 from ase import Atoms
 from ase.calculators.calculator import Calculator
 from eslib.classes.io import pickleIO
@@ -5,7 +6,7 @@ from typing import List, TypeVar, Any
 
 T = TypeVar('T', bound='eslibModel')
 
-class eslibModel(pickleIO,Calculator):
+class eslibModel(abc.ABC,pickleIO,Calculator):
     """
     Class for models using the eslib framework.
 
@@ -29,5 +30,18 @@ class eslibModel(pickleIO,Calculator):
         # Print the summary of the model
         print(f"{string}Model summary:")
 
+    @abc.abstractmethod
     def compute(self:T, traj: List[Atoms], prefix: str = "", raw: bool = False, **kwargs) -> Any:
-        raise ValueError("this method should be overloaded")
+        """
+        Compute properties for a trajectory.
+
+        Args:
+            traj (List[Atoms]): List of ASE Atoms objects representing the trajectory.
+            prefix (str, optional): Prefix to add to property names. Defaults to "".
+            raw (bool, optional): If True, return raw numpy arrays. Defaults to False.
+            **kwargs: Additional arguments to pass to compute function.
+
+        Returns:
+            Any: Computed properties.
+        """
+        raise NotImplementedError("this method should be overwritten.")

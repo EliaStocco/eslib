@@ -6,6 +6,7 @@ from eslib.classes.models.mace_model import MACEModel
 
 @dataclass
 class DipoleMACECalculator(DipoleModel,MACEModel):
+    """A class to handle MACE models predicting dipoles."""
     
     def get(self,traj:List[Atoms],**argv):
         output = self.compute(traj,raw=True,**argv)

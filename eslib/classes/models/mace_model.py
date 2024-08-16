@@ -162,6 +162,22 @@ class MACEModel(eslibModel):
 
     #------------------#
     def calculate(self:T, atoms:Atoms=None, properties=None, system_changes=all_changes):
+        """
+        Calculate the results for the given atoms.
+
+        This method is necessary when using `ase`.
+        
+        Args:
+            atoms (Atoms, optional): The atoms for which to calculate the results. Defaults to None.
+            properties (list, optional): The properties to calculate. Defaults to None.
+            system_changes (str, optional): The changes in the system. Defaults to all_changes.
+        
+        Returns:
+            None
+        
+        Raises:
+            AssertionError: If the shape of a result is not (1,).
+        """
         super().calculate(atoms, properties, system_changes)
         results:Dict[str,np.ndarray] = self.compute([atoms],raw=True)
         for k in results.keys():
