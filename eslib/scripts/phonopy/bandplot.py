@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from eslib.formatting import esfmt
 from eslib.input import slist
 from eslib.plot import vzero
+from ast import literal_eval
 
 #---------------------------------------#
 description="Create a band plot as in phonopy"
@@ -19,7 +20,7 @@ def get_options(description):
     parser.add_argument("-i","--input"  , **argv, required=True , type=slist, help="*yaml input files")
     parser.add_argument("-f1","--fmin"  , **argv, required=False, type=float, help="minimum frequency (default: %(default)s)", default=0)
     parser.add_argument("-f2","--fmax"  , **argv, required=False, type=float, help="maximum frequency (default: %(default)s)", default=32)    
-    parser.add_argument("-xtl","--xticklabels", **argv, required=False, type=slist, help="x marks (default: %(default)s)", default=['$\\Gamma$', 'T', '${\\rm H}_2$','${\\rm H}_0$', 'L', '$\\Gamma$', '${\\rm S}_0$','${\\rm S}_2$', 'F', '$\\Gamma$'])
+    parser.add_argument("-xtl","--xticklabels", **argv, required=False, type=str, help="x tick labels (default: %(default)s)", default="['$\\Gamma$', 'X', 'Y', '$\\Gamma$', 'Z', '${\\rm R}_2$', '$\\Gamma$', '${\\rm T}_2$', '${\\rm U}_2$', '$\\Gamma$', '${\\rm V}_2$']")
     parser.add_argument("-o" ,"--output", **argv, required=False, type=str  , help="output file (default: %(default)s)", default="bandplot.pdf")
     return parser
 
@@ -155,6 +156,8 @@ def _read_band_yaml(filename):
 @esfmt(get_options,description)
 def main(args):
 
+    args.xticklabels = literal_eval(args.xticklabels)
+    
     bands_data = [None]*len(args.input)
     print("\tReading the input files:")
     for n,file in enumerate(args.input):
