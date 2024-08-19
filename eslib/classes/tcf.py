@@ -1,9 +1,8 @@
-from cProfile import label
 from dataclasses import dataclass, field
 import numpy as np
 from scipy.fftpack import dct
 from eslib.tools import convert
-import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
 from typing import Optional, TypeVar, Tuple# , Callable, Any
 # from scipy.signal import correlate as scipy_correlate
 # import functools
@@ -381,6 +380,28 @@ def compute_cyclic_derivative(arr: np.ndarray, axis: Optional[int]=0) -> np.ndar
     # Compute the derivative with periodic boundary conditions
     return np.roll(arr, shift=-1, axis=axis) - arr
 
+def compute_corr_time(arr: np.ndarray) -> np.ndarray:
+    
+    assert arr.ndim == 1, "Input array must be 1D"
+    
+    def func(time,A,tau,omega,phi):
+        return A*np.exp(-time/tau)*np.sin(omega*time+phi)
+    
+    # def func(time,tau):
+    #     return np.exp(-time/tau)# *np.sin(omega*time+phi)
+    
+    time = np.arange(len(arr))
+    lb = [0, 0, 0, -np.pi]                  #  lower bounds
+    ub = [np.inf, len(arr), np.inf, +np.pi] # higher bounds
+    popt, pcov = curve_fit(func,time,arr,p0=[arr[0],10,10,0],bounds=(lb,ub))
+    return popt[1], np.sqrt(pcov[1,1])
+    
+    lb = [0]                  #  lower bounds
+    ub = [np.inf] # higher bounds
+    popt, pcov = curve_fit(func,time,arr,p0=[10],bounds=(lb,ub))
+    return popt[0], np.sqrt(pcov[0,0])
+        
+    
 def main():
     """
     Main function to demonstrate the computation of time correlation functions.
