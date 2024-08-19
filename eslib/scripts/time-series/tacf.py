@@ -6,7 +6,7 @@ from eslib.mathematics import tacf
 from eslib.plot import hzero
 from eslib.classes.physical_tensor import PhysicalTensor
 from eslib.input import str2bool
-from eslib.formatting import esfmt
+from eslib.formatting import esfmt, warning
 from eslib.classes.tcf import TimeAutoCorrelation
 
 #---------------------------------------#
@@ -38,7 +38,7 @@ def prepare_args(description):
     parser.add_argument("-f" , "--fit"        , **argv, required=False, type=str2bool, help="whether to fit the TACF with an exponential (default: %(default)s)", default=True)
     # Window and padding
     parser.add_argument("-w"   , "--window"   , **argv, required=False, type=str     , help="window type (default: %(default)s)", default='hanning', choices=['none','barlett','blackman','hamming','hanning','kaiser'])
-    parser.add_argument("-wt"  , "--window_t" , **argv, required=False, type=int     , help="time span of the window [fs] (default: %(default)s)", default=10)
+    parser.add_argument("-wt"  , "--window_t" , **argv, required=False, type=int     , help="time span of the window [fs] (default: %(default)s)", default=5000)
     return parser
 
 #---------------------------------------#
@@ -205,6 +205,8 @@ def main(args):
         # window = np.atleast_2d(window)
         print("done")
         print("\twindow shape: ",window.shape)
+        
+        print("\n\t{:s}: the autocorrelation function that will be saved to file is the one with the window applied.".format(warning))
 
         autocorr = raw_autocorr * window
 

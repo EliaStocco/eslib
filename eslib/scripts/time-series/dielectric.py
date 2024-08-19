@@ -5,6 +5,7 @@ from eslib.classes.physical_tensor import PhysicalTensor
 from eslib.input import str2bool, flist
 from eslib.formatting import esfmt
 from eslib.classes.tcf import  compute_spectrum, get_freq
+from eslib.tools import convert
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -25,11 +26,11 @@ def prepare_args(description):
     parser.add_argument("-a"  , "--axis"        , **argv, required=False, type=int     , help="axis along compute the FFT (default: %(default)s)", default=1)
     parser.add_argument("-pad", "--padding"     , **argv, required=False, type=int     , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
     parser.add_argument("-p"  , "--plot"        , **argv, required=False, type=str     , help="output file for the plot (default: %(default)s)", default='dielectric.pdf')
-    parser.add_argument("-mf" , "--max_freq"    , **argv, required=False, type=float   , help="max frequency in IR plot [THz] (default: %(default)s)", default=500)
+    # parser.add_argument("-mf" , "--max_freq"    , **argv, required=False, type=float   , help="max frequency in IR plot [THz] (default: %(default)s)", default=NOne)
     parser.add_argument("-fu" , "--freq_unit"   , **argv, required=False, type=str     , help="unit of the frequency in IR plot and output file (default: %(default)s)", default="THz")
     parser.add_argument("-ms" , "--marker_size" , **argv, required=False, type=float   , help="marker size (default: %(default)s)", default=0)
-    parser.add_argument("-xl", "--xlim"       , **argv, required=False, type=flist, help="x limits in frequency (default: %(default)s)", default=[30,160])
-    parser.add_argument("-yl", "--ylim"       , **argv, required=False, type=flist, help="y limits in frequency (default: %(default)s)", default=[-5,10])
+    parser.add_argument("-xl", "--xlim"       , **argv, required=False, type=flist, help="x limits in frequency (default: %(default)s)", default=[None,None])
+    parser.add_argument("-yl", "--ylim"       , **argv, required=False, type=flist, help="y limits in frequency (default: %(default)s)", default=[None,None])
     parser.add_argument("-xs", "--x_scale"       , **argv, required=False, type=str, help="x scale (default: %(default)s)", default="log", choices=['linear','log','symlog','logit'])
     return parser
 
@@ -120,7 +121,8 @@ def main(args):
 
     #------------------#
     print("\n\tComputing the frequencies ... ", end="")
-    freq = get_freq(dt=args.time_step, N=len(spectrum),output_units=args.freq_unit)
+    freq = get_freq(dt=args.time_step, N=len(spectrum),output_units="THz")
+    freq = convert(freq,'frequency','thz',args.freq_unit)
     print("done")
 
     # assert np.allclose(freq_old,freq), "the frequencies are not the same"
@@ -154,7 +156,10 @@ def main(args):
         # ax.plot(freq,y,label="raw",color="red")
         mask = ~np.isnan(spectrum.real) & ~np.isnan(spectrum.real)
 
-        xlim_mask = (freq >= args.xlim[0]) & (freq <= args.xlim[1])
+        if args.xlim is not None:
+            xlim_mask = (freq >= args.xlim[0]) & (freq <= args.xlim[1])
+        else:
+            xlim_mask = np.ones_like(freq,dtype=bool)
         valid_mask = ~np.isnan(spectrum.real) & ~np.isnan(spectrum.imag)
         mask = xlim_mask & valid_mask
 
@@ -162,7 +167,7 @@ def main(args):
         ax.plot(freq[mask],spectrum[mask].imag, label="$\\rm \\mathcal{Im} \\chi\\left(\\omega\\right)$",color="red") #, marker='.', markerfacecolor='red', markersize=args.marker_size)
         # hzero(ax,np.mean(fluctuation),label="fluc.",color="black")
 
-        ylow,yhigh = spectrum - std, spectrum + std
+        ylow,yhigh = spectrum - err, spectrum + err
         valid_mask = ~np.isnan(ylow) & ~np.isnan(yhigh)
         mask = xlim_mask & valid_mask
         freq_filtered = freq[mask]
@@ -176,13 +181,19 @@ def main(args):
         ax.set_xlim(args.xlim[0],args.xlim[1])
         # ax.relim()
         # ax.autoscale_view()
-        # ax.set_ylim(args.ylim[0],args.ylim[1])
+        ax.set_ylim(args.ylim[0],args.ylim[1])
         # ax.set_yticks(np.arange(0,1.001,0.2))
         ax.set_xscale(args.x_scale)
         # ax.relim()            # Recompute the data limits for the new xlim
         # ax.autoscale_view()   # Update the view to fit the new data limits
         # ax.set_yscale("log")
-        ax.set_xlabel("frequency [THz]")
+        if str(args.freq_unit).lower() == "thz": 
+            label = "frequency [THz]"
+        elif  str(args.freq_unit).lower() == "inversecm":
+            label = r"frequency [cm$^{-1}$]"
+        else:
+             label = r"frequency [unknown]"
+        ax.set_xlabel(label)
         ax.set_ylabel("electric susceptibility [arb. units]")
         ax.grid()
         plt.tight_layout()

@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from eslib.classes.physical_tensor import PhysicalTensor
-from eslib.input import str2bool
+from eslib.input import str2bool, flist
 from eslib.formatting import esfmt
 from eslib.classes.tcf import compute_spectrum, get_freq
 
@@ -26,8 +26,10 @@ def prepare_args(description):
     parser.add_argument("-pad", "--padding"    , **argv, required=False, type=int     , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
     parser.add_argument("-n"  , "--normalize"  , **argv, required=False, type=str2bool, help="whether to normalize the spectrum (default: %(default)s)", default=False)
     parser.add_argument("-p"  , "--plot"       , **argv, required=False, type=str     , help="output file for the plot (default: %(default)s)", default='IR.pdf')
-    parser.add_argument("-mf" , "--max_freq"   , **argv, required=False, type=float   , help="max frequency in IR plot [THz] (default: %(default)s)", default=500)
+    # parser.add_argument("-mf" , "--max_freq"   , **argv, required=False, type=float   , help="max frequency in IR plot [THz] (default: %(default)s)", default=500)
     parser.add_argument("-fu" , "--freq_unit"  , **argv, required=False, type=str     , help="unit of the frequency in IR plot and output file (default: %(default)s)", default="THz")
+    parser.add_argument("-xl", "--xlim"        , **argv, required=False, type=flist   , help="x limits in frequency (default: %(default)s)", default=[0,None])
+    parser.add_argument("-yl", "--ylim"        , **argv, required=False, type=flist   , help="y limits in frequency (default: %(default)s)", default=[0,None])
     parser.add_argument("-ms" , "--marker_size", **argv, required=False, type=float   , help="marker size (default: %(default)s)", default=0)
     return parser
 
@@ -121,8 +123,10 @@ def main(args):
         ax.fill_between(freq,ylow,yhigh, color='gray', alpha=0.8)
 
         ax.legend(loc="upper left",facecolor='white', framealpha=1,edgecolor="black")
-        ax.set_xlim(0,args.max_freq)
-        ax.set_ylim(0,None)
+        # ax.set_xlim(0,args.max_freq)
+        # ax.set_ylim(0,None)
+        ax.set_xlim(args.xlim[0],args.xlim[1])
+        ax.set_ylim(args.ylim[0],args.ylim[1])
         if args.normalize:
             ax.set_yticks(np.arange(0,1.001,0.2))
         ax.set_ylabel("spectrum [arb. units]")
