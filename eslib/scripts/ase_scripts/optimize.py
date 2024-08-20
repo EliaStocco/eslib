@@ -91,19 +91,23 @@ def main(args):
     log = args.logger
 
     print("\tRunning BFGS optimizer  ... ")
-    with SocketIOCalculator(log=log,
-                            port=port,
-                            unixsocket=unixsocket) as calc:
-        # Server is now running and waiting for connections.
-        # If you want to launch the client process here directly,
-        # instead of manually in the terminal, uncomment these lines:
-        #
-        # from subprocess import Popen
-        # proc = Popen([sys.executable, 'example_client_gpaw.py'])
+    try:
+        with SocketIOCalculator(log=log,
+                                port=port,
+                                unixsocket=unixsocket) as calc:
+            # Server is now running and waiting for connections.
+            # If you want to launch the client process here directly,
+            # instead of manually in the terminal, uncomment these lines:
+            #
+            # from subprocess import Popen
+            # proc = Popen([sys.executable, 'example_client_gpaw.py'])
 
-        atoms.calc = calc
-        opt.run(fmax=args.fmax, 
-                steps=args.maxstep)
+            atoms.calc = calc
+            opt.run(fmax=args.fmax, 
+                    steps=args.maxstep)
+    except Exception as e:
+        print("\tError: {:s}".format(e))
+        return -1
         
     print("\tFinished running BFGS optimizer")    
 

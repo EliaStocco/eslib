@@ -34,6 +34,7 @@ def prepare_args(description):
     parser.add_argument("-dt", "--dtype"              , **argv, required=False, type=str     , help="dtype (default: %(default)s)", choices=['float64','float32'], default='float64')
     parser.add_argument("-sc", "--socket_client"      , **argv, required=False, type=str     , help="socket client (default: %(default)s)", choices=['eslib','ase'], default='eslib')
     parser.add_argument("-sp", "--suppress_properties", **argv, required=False, type=slist   , help="list of the properties to suppress (default: %(default)s)", default=None)
+    parser.add_argument("-us" , "--use_stress"        , **argv, required=False, type=str2bool, help="use stress (default: %(default)s)", default=False)
     return parser
 
 #---------------------------------------#
@@ -129,7 +130,7 @@ def main(args):
 
     #------------------#
     print("\n\tRunning ... ", end="")
-    client.run(atoms)
+    client.run(atoms,use_stress=False)
     print("done")
 
 #---------------------------------------#
