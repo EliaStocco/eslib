@@ -43,7 +43,7 @@ def point2LaTeX(point):
         # in  ["X","T","L","W","M","F","Y","Z"]:
         return point
     elif len(point) == 3:
-        return "${\\rm {:s}}_{{{:s}}}".format(point[0], point[2])
+        return "$\\rm " + "{:s}".format(point[0]) + "_{" + "{:s}".format(point[2]) + "}$"
     else:
         raise ValueError("unknown point: '{:s}'".format(point))
     
