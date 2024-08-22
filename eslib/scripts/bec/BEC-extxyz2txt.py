@@ -2,7 +2,7 @@
 from ase.io import write
 from ase import Atoms
 from classes.atomic_structures import AtomicStructures
-from eslib.formatting import esfmt, warning, float_format
+from eslib.formatting import esfmt, warning, dec_format
 from eslib.tools import convert
 from eslib.input import str2bool
 import numpy as np
@@ -70,14 +70,14 @@ def main(args):
             tmp = tmp.reshape((tmp.shape[0],-1,3))
             if not np.allclose(BEC,tmp):
                 print("\t{:s}: '{:s}' and the ones reconstructued differ".format(warning,args.keyword))
-            np.savetxt("TEST.txt",tmp[0],fmt=float_format)
+            # np.savetxt("TEST.txt",tmp[0],fmt=dec_format)
     
     #------------------#
     print("\n\tWriting the BEC tensors to file '{:s}' ... ".format(args.output), end="")
     #try:
     with open(args.output,"w") as file:
         for n,bec in enumerate(BEC):
-            np.savetxt(file,bec,fmt=float_format,header="structure {:d}".format(n))
+            np.savetxt(file,bec,fmt=dec_format,header="structure {:d}".format(n))
     print("done")
     # except Exception as e:
     #     print("\n\tError: {:s}".format(e))
