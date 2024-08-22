@@ -3,7 +3,8 @@
 # email : elia.stocco@mpsd.mpg.de
 # from ase.io import read
 import numpy as np
-from classes.atomic_structures import AtomicStructures
+from ase.spacegroup.spacegroup import Spacegroup
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.input import flist
 from ase.spacegroup import get_spacegroup
@@ -44,7 +45,7 @@ def main(args):
     print("\t"+line)
     print("\t|"+"-"*N+"|")
     for symprec in args.threshold:
-        spacegroup = get_spacegroup(atoms,symprec=symprec)
+        spacegroup:Spacegroup = get_spacegroup(atoms,symprec=symprec)
         line = "|{:>12.2e}   |{:^15s}|{:^15d}|{:^15d}|".format(symprec,spacegroup.symbol,spacegroup.no,spacegroup.nsymop)
         print("\t"+line)
         # print("\tThreshold: {:>.2e}  Spacegroup: {:>6s}".format(symprec,spacegroup.symbol,spacegroup.no,spacegroup.nsymop))

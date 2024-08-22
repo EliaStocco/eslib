@@ -106,7 +106,7 @@ def main(args):
     
     #---------------------------------------#
     # read input file ('phonopy.yaml')
-    print("\tReading data from input file '{:s}' ... ".format(args.input), end="")
+    print("\n\tReading data from input file '{:s}' ... ".format(args.input), end="")
     with open(args.input) as f:
         info = yaml.safe_load(f)
     # yaml = ruamel.yaml.YAML(typ='safe', pure=True)
@@ -199,7 +199,8 @@ def main(args):
         pm.at[q,"q"]     = tuple(q)
         pm.at[q,"freq"]  = [ a["frequency"]*freq_factor  for a in phonon["band"] ] # frequencies are in THz
 
-        nm.set_eigval( np.square(pm.at[q,"freq"]) )
+        eigval = np.square(pm.at[q,"freq"]) * np.sign(pm.at[q,"freq"])
+        nm.set_eigval( eigval )
         nm.check()
         nm.eigvec2modes()
 

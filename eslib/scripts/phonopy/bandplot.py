@@ -18,9 +18,10 @@ def get_options(description):
     argv = {"metavar" : "\b",}
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("-i","--input"  , **argv, required=True , type=slist, help="*yaml input files")
+    parser.add_argument("-l","--labels"  , **argv, required=True , type=slist, help="labels")
     parser.add_argument("-f1","--fmin"  , **argv, required=False, type=float, help="minimum frequency (default: %(default)s)", default=0)
     parser.add_argument("-f2","--fmax"  , **argv, required=False, type=float, help="maximum frequency (default: %(default)s)", default=32)    
-    parser.add_argument("-xtl","--xticklabels", **argv, required=False, type=str, help="x tick labels (default: %(default)s)", default="['$\\Gamma$', 'X', 'Y', '$\\Gamma$', 'Z', '${\\rm R}_2$', '$\\Gamma$', '${\\rm T}_2$', '${\\rm U}_2$', '$\\Gamma$', '${\\rm V}_2$']")
+    parser.add_argument("-xtl","--xticklabels", **argv, required=False, type=str, help="x tick labels (default: %(default)s)", default="[r'$\\Gamma$', 'T', r'$\\rm H_{2}$', r'$\\rm H_{0}$', 'L', r'$\\Gamma$', r'$\\rm S_{0}$', r'$\\rm S_{2}$', 'F', r'$\\Gamma$']")
     parser.add_argument("-o" ,"--output", **argv, required=False, type=str  , help="output file (default: %(default)s)", default="bandplot.pdf")
     return parser
 
@@ -183,31 +184,15 @@ def main(args):
             % (args.input[wrong_file_i], args.input[0])
         )
 
-
     # Plot band structures
-    fmts = [
-        "r-",
-        "b-",
-        "g-",
-        "c-",
-        "m-",
-        "y-",
-        "k-",
-        "r--",
-        "b--",
-        "g--",
-        "c--",
-        "m--",
-        "y--",
-        "k--",
-    ]
+    fmts = ["r-","b-","g-","c-","m-","y-","k-","r--","b--","g--","c--","m--","y--","k--"]
 
     fig, ax = plt.subplots(figsize=(5,5))
     ax.set_ylim(args.fmin,args.fmax)
     xmin = +np.inf
     xmax = -np.inf
     vertical_lines = []
-    for n, label in enumerate(args.input):
+    for n, label in enumerate(args.labels):
         _, path_connections, frequencies, distances, qpath = plots_data[n]
         fmt = fmts[n % len(fmts)]
         # _f = [f_seg  for f_seg in frequencies]
