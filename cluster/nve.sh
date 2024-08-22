@@ -146,22 +146,22 @@ eval "${NN_COMMAND}"
 PES_PID=$!
 echo "PES ID: ${PES_PID}"
 
-# Dipole
-script="macelia.py"
-model_type="eslib"
-model="../../../LiNbO3.dipole.pickle"
-device="cuda"
-args="-s start.extxyz"
-args="${args} -a ${HOST}  -u false -p 20603"
-args="${args} -mt ${model_type} -m ${model}"
-args="${args} -d ${device} -dt float64 -sc eslib"
-args="${args} -sp ['delta-dipole','baseline','atomic_dipoles','delta-atomic_dipoles','baseline-atomic_dipoles','BEC','BECx','BECy','BECz']"
-NN_COMMAND="${script} ${args} &> ${DIPOLE_OUTPUT_FILE} &"
-echo "${NN_COMMAND}"
-eval "${NN_COMMAND}"
+# # Dipole
+# script="macelia.py"
+# model_type="eslib"
+# model="../../../LiNbO3.dipole.pickle"
+# device="cuda"
+# args="-s start.extxyz"
+# args="${args} -a ${HOST}  -u false -p 20603"
+# args="${args} -mt ${model_type} -m ${model}"
+# args="${args} -d ${device} -dt float64 -sc eslib"
+# args="${args} -sp ['delta-dipole','baseline','atomic_dipoles','delta-atomic_dipoles','baseline-atomic_dipoles','BEC','BECx','BECy','BECz']"
+# NN_COMMAND="${script} ${args} &> ${DIPOLE_OUTPUT_FILE} &"
+# echo "${NN_COMMAND}"
+# eval "${NN_COMMAND}"
 
-DIP_PID=$!
-echo "Dipole ID: ${DIP_PID}"
+# DIP_PID=$!
+# echo "Dipole ID: ${DIP_PID}"
 
 
 ###################################################################
@@ -175,9 +175,9 @@ eval "${sleep_cmd}"
 
 ###################################################################
 # Check if each process is still running
-check_process_running $IPI_PID "i-PI"   "$PES_PID $DIP_PID"
-check_process_running $PES_PID "PES"    "$IPI_PID $DIP_PID"
-check_process_running $DIP_PID "Dipole" "$IPI_PID $PES_PID"
+check_process_running $IPI_PID "i-PI"   "$PES_PID" # $DIP_PID"
+check_process_running $PES_PID "PES"    "$IPI_PID" # $DIP_PID"
+# check_process_running $DIP_PID "Dipole" "$IPI_PID $PES_PID"
 
 ###################################################################
 # Wait for all processes to complete
