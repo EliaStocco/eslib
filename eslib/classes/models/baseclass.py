@@ -25,7 +25,7 @@ class eslibModel(pickleIO,Calculator):
             if hasattr(obj, '__post__from_pickle__'):
                 obj.__post__from_pickle__()
             if not issubclass(type(obj),cls):
-                raise ValueError(f"Invalid pickle file format. Expected type: {cls.__name__}")
+                raise ValueError(f"Invalid pickle file format. Expected type: {cls.__name__}, got {type(obj)}")
             return obj
         except FileNotFoundError:
             print(f"Error loading from pickle file: File not found - {file}")
