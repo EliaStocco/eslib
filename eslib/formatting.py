@@ -116,30 +116,30 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
         print("{:20s}: {:s}".format("start time",start_time))
         line(start="###")
         
-        try:
-            print("{:20s}".format("SLURM information"))
-            print("{:20s}: {:s}".format("Job ID",os.environ['SLURM_JOB_ID']))
-            print("{:20s}: {:s}".format("Job name",os.environ['SLURM_JOB_NAME']))
-            print("{:20s}: {:s}".format("Node name",os.environ['SLURM_NODE']))
-            print("{:20s}: {:s}".format("Number of nodes",os.environ['SLURM_NNODES']))
-            print("{:20s}: {:s}".format("Number of tasks",os.environ['SLURM_NPROCS']))
-            print("{:20s}: {:s}".format("Node list",os.environ['SLURM_NODELIST']))
-            print("{:20s}: {:s}".format("Partition",os.environ['SLURM_PARTITION']))
-            line(start="###")
-        except: 
-            pass 
+        # try:
+        #     print("{:20s}".format("SLURM information"))
+        #     print("{:20s}: {:s}".format("Job ID",os.environ['SLURM_JOB_ID']))
+        #     print("{:20s}: {:s}".format("Job name",os.environ['SLURM_JOB_NAME']))
+        #     print("{:20s}: {:s}".format("Node name",os.environ['SLURM_NODE']))
+        #     print("{:20s}: {:s}".format("Number of nodes",os.environ['SLURM_NNODES']))
+        #     print("{:20s}: {:s}".format("Number of tasks",os.environ['SLURM_NPROCS']))
+        #     print("{:20s}: {:s}".format("Node list",os.environ['SLURM_NODELIST']))
+        #     print("{:20s}: {:s}".format("Partition",os.environ['SLURM_PARTITION']))
+        #     line(start="###")
+        # except: 
+        #     pass 
         
-        try:
-            print("{:20s}".format("Cores information"))
-            print("{:20s}: {:d}".format("Number of cores", os.cpu_count()))
-            print("{:20s}: {:d}".format("Number of CPU threads", psutil.cpu_count(logical=False)))
-            print("{:20s}: {:d}".format("Number of GPUs", len(os.environ.get('CUDA_VISIBLE_DEVICES', '').split(','))))
-            print("{:20s}: {:d}".format("Number of GPU devices", len(os.environ.get('CUDA_VISIBLE_DEVICES', '').split(','))))
-            print("{:20s}: {:d}".format("Number of CPU cores per socket", psutil.cpu_count(logical=False)))
-            print("{:20s}: {:d}".format("Number of CPU threads per core", psutil.cpu_count(logical=True) // psutil.cpu_count(logical=False)))
-            line(start="###")
-        except: 
-            pass 
+        # try:
+        #     print("{:20s}".format("Cores information"))
+        #     print("{:20s}: {:d}".format("Number of cores", os.cpu_count()))
+        #     print("{:20s}: {:d}".format("Number of CPU threads", psutil.cpu_count(logical=False)))
+        #     print("{:20s}: {:d}".format("Number of GPUs", len(os.environ.get('CUDA_VISIBLE_DEVICES', '').split(','))))
+        #     print("{:20s}: {:d}".format("Number of GPU devices", len(os.environ.get('CUDA_VISIBLE_DEVICES', '').split(','))))
+        #     print("{:20s}: {:d}".format("Number of CPU cores per socket", psutil.cpu_count(logical=False)))
+        #     print("{:20s}: {:d}".format("Number of CPU threads per core", psutil.cpu_count(logical=True) // psutil.cpu_count(logical=False)))
+        #     line(start="###")
+        # except: 
+        #     pass 
 
         print("\n\t{:s}".format(description))
         if documentation is not None: print(documentation)

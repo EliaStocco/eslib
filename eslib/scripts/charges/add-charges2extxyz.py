@@ -49,7 +49,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\n\tReading the atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms:AtomicStructures = AtomicStructures.from_file(file=args.input,format=args.input_format)
+    atoms = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done")
 
     #------------------#
@@ -64,6 +64,13 @@ def main(args):
             raise ValueError("structure . {:d} is not charge neutral".format(n))
         structure.arrays[args.name] = model.get_all_charges(structure)
     print("done")
+    
+    #------------------#
+    # summary
+    print("\n\tSummary of the properties: ")
+    df = atoms.summary()
+    tmp = "\n"+df.to_string(index=False)
+    print(tmp.replace("\n", "\n\t"))
 
     
     #------------------#
