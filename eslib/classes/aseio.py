@@ -10,7 +10,7 @@ from typing import List, Union, TypeVar, Match, Callable, Any, Dict, cast
 import functools
 import glob
 from ase.io import read, write, string2index
-from ase.io.netcdftrajectory import read_netcdftrajectory, write_netcdftrajectory
+from eslib.classes.netcdf import read_netcdftrajectory, write_netcdftrajectory
 # from classes.trajectory import AtomicStructures
 from eslib.classes.io import pickleIO
 from eslib.tools import convert
@@ -190,7 +190,7 @@ class aseio(List[Atoms], pickleIO):
 
         Attention: it's recommended to use keyword-only arguments.
         """
-        if'file' in argv and isinstance(argv['file'], str) and argv['file'].endswith('.nc'):
+        if 'file' in argv and isinstance(argv['file'], str) and argv['file'].endswith('.nc'):
             index = argv['index'] if 'index' in argv else slice(None,None,None)
             index = integer_to_slice_string(index)
             traj = read_netcdftrajectory(filename=argv['file'],index=index)

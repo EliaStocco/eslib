@@ -74,7 +74,7 @@ def main(args):
 
     
     #------------------#
-    print("\tWriting the atomic structures to file '{:s}' ... ".format(args.output), end="")
+    print("\n\tWriting the atomic structures to file '{:s}' ... ".format(args.output), end="")
     atoms.to_file(file=args.output,format=args.output_format)
     print("done")
 

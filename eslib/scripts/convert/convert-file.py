@@ -192,6 +192,13 @@ def main(args):
             atoms[n].info = {}
             if 'initial_magmoms' in atoms[n].arrays:
                 del atoms[n].arrays['initial_magmoms']
+                
+    #------------------#
+    # summary
+    print("\n\tSummary of the properties: ")
+    df = atoms.summary()
+    tmp = "\n"+df.to_string(index=False)
+    print(tmp.replace("\n", "\n\t"))
 
 
     #------------------#

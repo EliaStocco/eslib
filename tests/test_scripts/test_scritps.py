@@ -95,6 +95,34 @@ torun = {
             "output"             : "{:s}/output.extxyz".format(tmp_folder),     
         },
     },
+    "pickle-write" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : "tests/structures/LiNbO3/long.n=10000.extxyz",   
+            "output"             : "{:s}/output.pickle".format(tmp_folder),     
+        },
+        "clean" : False
+    },
+    "pickle-inspect" : {
+        "folder"  : "inspect",
+        "file"   : "trajectory-summary.py",
+        "kwargs"  : {
+            "input" : "{:s}/output.pickle".format(tmp_folder) ,   
+        },
+        "clean" : False
+    },
+    "pickle-read" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : "{:s}/output.pickle".format(tmp_folder),   
+            "input_format"       : "pickle",
+            "output"             : "{:s}/output.nc".format(tmp_folder),     
+        },
+    },
     "information-and-primitive.py" :
     {
         "folder"  : "inspect",
@@ -169,32 +197,32 @@ torun = {
             "output"             : "{:s}/output.extxyz".format(tmp_folder),     
         },
     },
-    # "rmse-dipole" :
-    # {
-    #     "folder"  : "metrics",
-    #     "file"   : "compute-metrics",
-    #     "kwargs"  : {
-    #         "input"              : "tests/structures/LiNbO3/geometries.extxyz",   
-    #         "expected"           : "dipole",
-    #         "predicted"          : "MACE_dipole",
-    #         "metrics"            : "rmse",
-    #         "statistics"         : "True",
-    #         "output"             : "{:s}/rmse.json".format(tmp_folder),     
-    #     },
-    # },
-    # "rmse-bec" :
-    # {
-    #     "folder"  : "metrics",
-    #     "file"   : "compute-metrics",
-    #     "kwargs"  : {
-    #         "input"              : "tests/structures/LiNbO3/geometries.extxyz",   
-    #         "expected"           : "BEC",
-    #         "predicted"          : "MACE_BEC",
-    #         "metrics"            : "rmse",
-    #         "statistics"         : "True",
-    #         "output"             : "{:s}/bec.json".format(tmp_folder),     
-    #     },
-    # },
+    "rmse-dipole" :
+    {
+        "folder"  : "metrics",
+        "file"   : "compute-metrics",
+        "kwargs"  : {
+            "input"              : "tests/structures/LiNbO3/geometries.extxyz",   
+            "expected"           : "dipole",
+            "predicted"          : "MACE_dipole",
+            "metrics"            : "rmse",
+            "statistics"         : "True",
+            "output"             : "{:s}/rmse.json".format(tmp_folder),     
+        },
+    },
+    "rmse-bec" :
+    {
+        "folder"  : "metrics",
+        "file"   : "compute-metrics",
+        "kwargs"  : {
+            "input"              : "tests/structures/LiNbO3/geometries.extxyz",   
+            "expected"           : "BEC",
+            "predicted"          : "MACE_BEC",
+            "metrics"            : "rmse",
+            "statistics"         : "True",
+            "output"             : "{:s}/bec.json".format(tmp_folder),     
+        },
+    },
 }
 
 
