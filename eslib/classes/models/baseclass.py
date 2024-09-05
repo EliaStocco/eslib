@@ -2,6 +2,7 @@
 from ase import Atoms
 from ase.calculators.calculator import Calculator
 from eslib.classes.io import pickleIO
+from warnings import warn
 import pickle
 from typing import List, TypeVar, Any, Type
 
@@ -25,7 +26,7 @@ class eslibModel(pickleIO,Calculator):
             if hasattr(obj, '__post__from_pickle__'):
                 obj.__post__from_pickle__()
             if not issubclass(type(obj),cls):
-                raise ValueError(f"Invalid pickle file format. Expected type: {cls.__name__}, got {type(obj)}")
+                warn(f"Invalid pickle file format. Expected type: {cls.__name__}, got {type(obj).__name__}")
             return obj
         except FileNotFoundError:
             print(f"Error loading from pickle file: File not found - {file}")
