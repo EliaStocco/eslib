@@ -2,7 +2,8 @@
 from ase import Atoms
 from ase.calculators.calculator import Calculator
 from eslib.classes.io import pickleIO
-from typing import List, TypeVar, Any
+import pickle
+from typing import List, TypeVar, Any, Type
 
 T = TypeVar('T', bound='eslibModel')
 
@@ -13,6 +14,25 @@ class eslibModel(pickleIO,Calculator):
     This class is designed to be a base class for models that use the eslib framework.
     It provides a summary method that prints information about the model.
     """
+    
+    @classmethod
+    def from_pickle(cls: Type[T], file: str) -> T:
+        """Load an object from a *.pickle file."""
+        # overloaded method from `pickleIO`
+        try:
+            with open(file, 'rb') as ff:
+                obj:T = pickle.load(ff)
+            if hasattr(obj, '__post__from_pickle__'):
+                obj.__post__from_pickle__()
+            if not issubclass(type(obj),cls):
+                raise ValueError(f"Invalid pickle file format. Expected type: {cls.__name__}")
+            return obj
+        except FileNotFoundError:
+            print(f"Error loading from pickle file: File not found - {file}")
+            return None
+        except Exception as e:
+            print(f"Error loading from pickle file: {e}")
+            return obj
 
     def summary(self:T, string: str = "\t") -> None:
         """
