@@ -5,6 +5,7 @@ from eslib.functions import add_default
 from datetime import datetime
 import inspect
 import json
+import psutil
 from eslib.show import dict_to_list
 import colorama
 from colorama import Fore, Style
@@ -113,6 +114,25 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
             print("not using conda env")
         print("{:20s}: {:s}".format("start date",start_date))
         print("{:20s}: {:s}".format("start time",start_time))
+        line(start="###")
+        
+        print("{:20s}".format("SLURM information"))
+        print("{:20s}: {:s}".format("Job ID",os.environ['SLURM_JOB_ID']))
+        print("{:20s}: {:s}".format("Job name",os.environ['SLURM_JOB_NAME']))
+        print("{:20s}: {:s}".format("Node name",os.environ['SLURM_NODE']))
+        print("{:20s}: {:s}".format("Number of nodes",os.environ['SLURM_NNODES']))
+        print("{:20s}: {:s}".format("Number of tasks",os.environ['SLURM_NPROCS']))
+        print("{:20s}: {:s}".format("Node list",os.environ['SLURM_NODELIST']))
+        print("{:20s}: {:s}".format("Partition",os.environ['SLURM_PARTITION']))
+
+        line(start="###")
+        print("{:20s}: {:d}".format("Number of cores", os.cpu_count()))
+        print("{:20s}: {:d}".format("Number of CPU threads", psutil.cpu_count(logical=False)))
+        print("{:20s}: {:d}".format("Number of GPUs", len(os.environ.get('CUDA_VISIBLE_DEVICES', '').split(','))))
+        print("{:20s}: {:d}".format("Number of GPU devices", len(os.environ.get('CUDA_VISIBLE_DEVICES', '').split(','))))
+        print("{:20s}: {:d}".format("Number of CPU cores per socket", psutil.cpu_count(logical=False)))
+        print("{:20s}: {:d}".format("Number of CPU threads per core", psutil.cpu_count(logical=True) // psutil.cpu_count(logical=False)))
+
         line(start="###")
 
         print("\n\t{:s}".format(description))
