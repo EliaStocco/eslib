@@ -148,7 +148,7 @@ torun = {
         "folder"  : "inspect",
         "file"   : "trajectory-summary.py",
         "kwargs"  : {
-            "input"              : "{:s}/output.h5",   
+            "input"              : "{:s}/output.h5".format(tmp_folder),   
         },
     },
     "information-and-primitive.py" :
