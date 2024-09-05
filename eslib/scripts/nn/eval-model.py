@@ -58,9 +58,14 @@ def main(args):
     #------------------#
     # trajectory
     print("\n\tReading the atomic structures from file '{:s}' ... ".format(args.input), end="")
-    structures:Atoms = AtomicStructures.from_file(file=args.input,format=args.input_format)
+    structures = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done")
     print("\tn. of structures: {:d}".format(len(structures)))
+    
+    #------------------#
+    if hasattr(model,"charges_key"):
+        if not structures.is_there(model.charges_key):
+            raise ValueError("The atomic structures do not have the key '{:s}'".format(model.charges_key))
 
     #------------------#
     print("\n\tEvaluating the MACE model ... ", end="")
