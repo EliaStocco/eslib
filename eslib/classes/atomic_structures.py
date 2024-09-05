@@ -20,6 +20,13 @@ class AtomicStructures(Trajectory,aseio):
         - method for checking the presence of an attribute in `info`, `array`, or both
         - method for subsampling the AtomicStructures object
     """
+    
+    def num_atoms(self:T):
+        n_atoms = [s.get_global_number_of_atoms(s) for s in self]
+        n_atoms = np.unique(n_atoms)
+        if len(n_atoms) > 1:
+            raise ValueError("Not all atomic structures have the same number of atoms")
+        return n_atoms[0]
 
     def get_keys(self:T,what:str="all")->List[str]:
         """

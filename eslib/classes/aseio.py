@@ -10,7 +10,8 @@ from typing import List, Union, TypeVar, Match, Callable, Any, Dict, cast
 import functools
 import glob
 from ase.io import read, write, string2index
-from eslib.classes.netcdf import read_netcdftrajectory, write_netcdftrajectory
+from ase.io.netcdftrajectory import read_netcdftrajectory, write_netcdftrajectory
+from eslib.classes.hdf5 import write_hdf5, read_hdf5
 # from classes.trajectory import AtomicStructures
 from eslib.classes.io import pickleIO
 from eslib.tools import convert
@@ -190,12 +191,19 @@ class aseio(List[Atoms], pickleIO):
 
         Attention: it's recommended to use keyword-only arguments.
         """
-        if 'file' in argv and isinstance(argv['file'], str) and argv['file'].endswith('.nc'):
+        
+        if 'file' in argv and isinstance(argv['file'], str):
+            file = argv['file']
+            _,format = os.path.splitext(file)
+            format = format[1:]
+        if format.lower() in ["h5","hdf5"]:
+            traj = read_hdf5(file)
+        elif format.lower() in ["nc","netcdf","netcdftrajectory"]:
             index = argv['index'] if 'index' in argv else slice(None,None,None)
             index = integer_to_slice_string(index)
-            traj = read_netcdftrajectory(filename=argv['file'],index=index)
+            traj = read_netcdftrajectory(filename=argv['file'],index=index)    
             if not isinstance(traj,list):
-                traj = [traj]
+                traj = [traj]                
         else:
             traj = read_trajectory(**argv)
         return cls(traj)
@@ -231,6 +239,9 @@ class aseio(List[Atoms], pickleIO):
         elif format.lower() in ["nc","netcdf","netcdftrajectory"]:
             # use NetCDF
             write_netcdftrajectory(filename=file,images=self.to_list())
+        elif format.lower() in ["h5","hdf5"]:
+            # use NetCDF
+            write_hdf5(file,self.to_list())
         else:
             write(images=self, filename=file, format=format)
 

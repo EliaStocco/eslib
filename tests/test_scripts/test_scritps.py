@@ -123,6 +123,34 @@ torun = {
             "output"             : "{:s}/output.nc".format(tmp_folder),     
         },
     },
+    "hdf5-write" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : "tests/structures/LiNbO3/long.n=10000.extxyz",   
+            "output"             : "{:s}/output.h5".format(tmp_folder),     
+        },
+        "clean" : False
+    },
+    "hdf5-read" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : "{:s}/output.h5".format(tmp_folder),   
+            "output"             : "{:s}/output.extxyz".format(tmp_folder),     
+        },
+        "clean" : False
+    },
+    "hdf5-test" :
+    {
+        "folder"  : "inspect",
+        "file"   : "trajectory-summary.py",
+        "kwargs"  : {
+            "input"              : "{:s}/output.h5",   
+        },
+    },
     "information-and-primitive.py" :
     {
         "folder"  : "inspect",
