@@ -11,7 +11,7 @@ import pandas as pd
 from ase import Atoms
 from classes.atomic_structures import AtomicStructures
 from eslib.classes.physical_tensor import *
-from typing import List, Dict
+from typing import List, Dict, TypeVar
 import pint
 import os
 from eslib.functional import unsafe, improvable
@@ -21,12 +21,14 @@ import warnings
 # Disable all UserWarnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
+T = TypeVar('T', bound='NormalModes')
+
 class NormalModes(pickleIO):
 
     # To DO :
     # - replace ref with as ase.Atoms and then initialize masses with that
 
-    def to_pickle(self, file):
+    def to_pickle(self:T, file)->None:
         pint.get_application_registry()
         super().to_pickle(file)
 
@@ -37,7 +39,7 @@ class NormalModes(pickleIO):
         return super().from_pickle(file_path)
      
 
-    def __init__(self,Nmodes:int,Ndof:int=None,ref:Atoms=None):
+    def __init__(self:T,Nmodes:int,Ndof:int=None,ref:Atoms=None):
 
         # Nmodes
         self.Nmodes = int(Nmodes)
@@ -65,7 +67,7 @@ class NormalModes(pickleIO):
 
         pass
 
-    def set_reference(self,ref:Atoms):
+    def set_reference(self:T,ref:Atoms):
         if ref is None:
             self.reference = Atoms()
             # self.masses = PhysicalTensor(np.full(self.Ndof,np.nan), dims=('dof'))
@@ -92,7 +94,7 @@ class NormalModes(pickleIO):
     #     return nparray2list_in_dict(vars(self))
 
     # @unsafe
-    def to_folder(self,folder,prefix):
+    def to_folder(self:T,folder,prefix):
 
         outputs = {
             "dynmat" : {
@@ -174,7 +176,7 @@ class NormalModes(pickleIO):
         return self   
     
     # @unsafe
-    def set_dynmat(self,dynmat,mode="phonopy"):
+    def set_dynmat(self:T,dynmat,mode="phonopy"):
         _dynmat = np.asarray(dynmat)
         if mode == "phonopy":
             # https://phonopy.github.io/phonopy/setting-tags.html
@@ -190,12 +192,12 @@ class NormalModes(pickleIO):
         pass
 
     # @unsafe
-    def set_modes(self,modes):
+    def set_modes(self:T,modes):
         self.mode.values = PhysicalTensor(modes, dims=('dof', 'mode'))
         self.mode /= norm_by(self.mode,"dof")
         
     # @unsafe
-    def set_eigvec(self,band,mode="phonopy"):
+    def set_eigvec(self:T,band,mode="phonopy"):
         if mode == "phonopy":
             N = self.Nmodes
             eigvec = np.full((N,N),np.nan,dtype=np.complex64)
@@ -210,11 +212,11 @@ class NormalModes(pickleIO):
         pass
 
     # @unsafe
-    def set_eigval(self,eigval):
+    def set_eigval(self:T,eigval):
         self.eigval[:] = PhysicalTensor(eigval, dims=('mode'))
     
     @unsafe
-    def set_force_constants(self,force_constant):
+    def set_force_constants(self:T,force_constant):
         Msqrt = diag_matrix(self.masses,exp="-1/2")
         MsqrtLeft  = PhysicalTensor(Msqrt, dims=('dof-A','dof-a'))
         MsqrtRight = PhysicalTensor(Msqrt, dims=('dof-B','dof-b'))
@@ -224,7 +226,7 @@ class NormalModes(pickleIO):
         pass
 
     # @unsafe
-    def diagonalize(self,symmetrize:bool=True):
+    def diagonalize(self:T,symmetrize:bool=True):
         """
         Diagonalize the dynamical matrix to compute eigenvalues and eigenvectors.
         
@@ -244,7 +246,7 @@ class NormalModes(pickleIO):
         self.sort()
         pass
 
-    def copy(self):
+    def copy(self:T)->T:
         """
         Return a deep copy of the current object.
 
@@ -253,7 +255,7 @@ class NormalModes(pickleIO):
         """
         return deepcopy(self)
 
-    def check(self,threshold=1e-4,**argv):
+    def check(self:T,threshold=1e-4,**argv):
         """
         Check if the eigenvalues, eigenvectors, and normal modes of the current NormalModes object match those of another NormalModes object within a specified threshold.
         
@@ -268,7 +270,7 @@ class NormalModes(pickleIO):
         if np.linalg.norm(tmp.mode.data-self.mode.data)    /len(self.mode.data)   > threshold:  warn("Normal modes do not match")
 
     # @unsafe
-    def eigvec2modes(self,_test:bool=True):
+    def eigvec2modes(self:T,_test:bool=True):
         """
         Convert the eigenvectors to the normal modes.
 
@@ -294,7 +296,7 @@ class NormalModes(pickleIO):
         pass
     
     @unsafe
-    def build_supercell_displacement(self,size,q):
+    def build_supercell_displacement(self:T,size,q):
 
         q = np.asarray(q)
 
@@ -327,19 +329,19 @@ class NormalModes(pickleIO):
 
         return supercell
     
-    def nmd2cp(self,A:PhysicalTensor)->Atoms:
+    def nmd2cp(self:T,A:PhysicalTensor)->Atoms:
         """Normal Modes Displacements to Cartesian Positions (nmd2cp)."""
         D = self.nmd2cd(A)
         P = self.cd2cp(D)
         return P
     
-    def ed2cp(self,A:PhysicalTensor)->Atoms:
+    def ed2cp(self:T,A:PhysicalTensor)->Atoms:
         """eigenvector displacements to cartesian positions (ed2cp)."""
         B = self.ed2nmd(A)
         D = self.nmd2cd(B)
         return self.cd2cp(D)
         
-    def ed2nmd(self,A:PhysicalTensor)->PhysicalTensor:
+    def ed2nmd(self:T,A:PhysicalTensor)->PhysicalTensor:
         """eigenvector displacements to normal modes displacements (ed2nd).
         Convert the coeffients ```A``` [length x mass^{-1/2}] of the ```eigvec``` into the coeffients ```B``` [length] of the ```modes```."""
         invmode = inv(self.mode)
@@ -354,7 +356,7 @@ class NormalModes(pickleIO):
         B = dot(invmode,1./Msqrt * dot(self.eigvec,A,"mode"),"dof")
         return remove_unit(B)[0]
     
-    def nmd2cd(self,coeff:PhysicalTensor)->Atoms:
+    def nmd2cd(self:T,coeff:PhysicalTensor)->Atoms:
         """Normal Modes Displacements to Cartesian Displacements (nmd2cd).
         Return the cartesian displacements as an ```ase.Atoms``` object given the displacement [length] of the normal modes"""
         displ = dot(self.mode,coeff,"mode")
@@ -366,7 +368,7 @@ class NormalModes(pickleIO):
         structure.set_positions(displ)
         return structure
     
-    def cd2cp(self,displ:Atoms)->Atoms:
+    def cd2cp(self:T,displ:Atoms)->Atoms:
         """cartesian displacements to cartesian positions (cd2cp).
         Return the cartesian positions as an ```ase.Atoms``` object given the cartesian displacement."""
         structure = self.reference.copy()
@@ -374,7 +376,7 @@ class NormalModes(pickleIO):
         return structure
 
     @improvable
-    def project(self,trajectory:List[Atoms],warning="**Warning**")->Dict[str,PhysicalTensor]:       
+    def project(self:T,trajectory:List[Atoms],warning="**Warning**")->Dict[str,PhysicalTensor]:       
 
         #-------------------#
         # reference position
@@ -560,7 +562,7 @@ class NormalModes(pickleIO):
 
         return out
     
-    def Zmodes(self,Z:PhysicalTensor)->PhysicalTensor:
+    def Zmodes(self:T,Z:PhysicalTensor)->PhysicalTensor:
         """Compute the Born Effective Charges of each Normal Mode."""
         # correction = Z.data.reshape((-1,3,3)).mean(axis=0)
         # Z -= np.tile(correction,int(Z.shape[0]/3)).T
@@ -583,7 +585,7 @@ class NormalModes(pickleIO):
         # dZdN = xr.concat([dZdN, PhysicalTensor(norm, dims='mode')], dim='dir')
         # return remove_unit(dZdN)[0]
 
-    def sort(self,criterion="value"):
+    def sort(self:T,criterion="value"):
         values = w2_to_w(self.eigval.data)
         if criterion == "value":
             sorted_indices = np.argsort(values)
@@ -607,7 +609,7 @@ class NormalModes(pickleIO):
                         raise ValueError("Coding error: I don't know how to sort the attribute '{}'.".format(attr_name))
     
     @unsafe
-    def get_characteristic_spring_constants(self):
+    def get_characteristic_spring_constants(self:T):
         Nleft  = inv(self.mode.rename({"dof": "dof-a","mode":"mode-a"}))
         Nright = self.mode.rename({"dof": "dof-b","mode":"mode-b"})
         D = self.dynmat# .rename({"mode":"mode-a","mode":"mode-b"})
@@ -616,7 +618,7 @@ class NormalModes(pickleIO):
         return dM
     
     @improvable
-    def get_characteristic_scales(self):
+    def get_characteristic_scales(self:T):
         """Returns a `pandas.DataFrame` with the characteristic scales of the normal modes, intended as quantum harmonic oscillators.
         
         The scales depend on:
@@ -646,13 +648,13 @@ class NormalModes(pickleIO):
         return scales
     
     @unsafe
-    def potential_energy(self,structure:List[Atoms]):
+    def potential_energy(self:T,structure:List[Atoms]):
         """Compute the harmonic energy of list of atomic structures."""
         results = self.project(structure)
         # assert np.linalg.norm((results['energy'] - results['potential']).to_numpy()) < 1e-8
         potential = results['potential'].to_numpy()
         return potential.sum(axis=0)
     
-    def get(self,name):
+    def get(self:T,name):
         data = getattr(self,name)
         return remove_unit(data)[0].to_numpy() 
