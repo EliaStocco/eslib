@@ -16,7 +16,7 @@ import pint
 import os
 from eslib.functional import unsafe, improvable
 from eslib.tools import w2_to_w
-from eslib.tools import is_sorted_ascending
+from eslib.tools import is_sorted_ascending, cart2frac
 import warnings
 # Disable all UserWarnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -54,7 +54,7 @@ class NormalModes(pickleIO):
         self.dynmat = PhysicalTensor(np.full((self.Ndof,self.Ndof),np.nan), dims=('dof-a', 'dof-b'))
 
         # normal modes and eigenvectors
-        empty = PhysicalTensor(np.full((self.Ndof,self.Nmodes),np.nan,dtype=np.complex128), dims=('dof', 'mode'))
+        empty = PhysicalTensor(np.full((self.Ndof,self.Nmodes),np.nan+1j*np.nan,dtype=np.complex128), dims=('dof', 'mode'))
         self.eigvec = empty.copy()
         self.mode   = empty.copy()
         
@@ -295,8 +295,8 @@ class NormalModes(pickleIO):
                 raise ValueError('some coding error')
         pass
     
-    @unsafe
-    def build_supercell_displacement(self:T,size,q):
+    # @unsafe
+    def build_supercell_displacement(self:T,size,q,info:dict)->T:
 
         q = np.asarray(q)
 
@@ -306,24 +306,65 @@ class NormalModes(pickleIO):
         r_point = list(product(*values))
         
         size = np.asarray(size)
-        N = size.prod()
-        supercell = NormalModes(self.Nmodes,self.Ndof*N)
-        supercell.masses[:] = np.asarray(list(self.masses)*N)
-        # supercell.eigvec.fill(np.nan)
-        for i,r in enumerate(r_point):
+        # N = size.prod()
+        
+        cell = np.asarray(info['supercell']['lattice'])
+        sc = np.asarray([a['coordinates']  for a in info['supercell']['points']])
+        sym = np.asarray([a['symbol']  for a in info['supercell']['points']])
+        ref = Atoms(cell=cell,scaled_positions=sc,symbols=sym)
+        
+        # mapping from supercell to supercell
+        index = np.asarray([a['reduced_to']  for a in info['supercell']['points']]) -1
+        v,i = np.unique(index,return_index=True)
+        assert np.allclose(v,i), "some coding error"
+        # mapping from supercell to unit cell
+        _,indexuc = np.unique(index,return_inverse=True)
+        
+        cell = np.asarray(info['unit_cell']['lattice'])
+        sc = np.asarray([a['coordinates']  for a in info['unit_cell']['points']])
+        sym = np.asarray([a['symbol']  for a in info['unit_cell']['points']])
+        prim = Atoms(cell=cell,scaled_positions=sc,symbols=sym)
+        
+        assert np.allclose(prim.positions , ref.positions[i,:]), "wrong mapping from supercell to unit cell"
+        
+        N = ref.get_global_number_of_atoms()
+        delta = np.zeros((N,3))
+        for i in range(N):
+            delta[i] = ref.positions[i] - ref.positions[index[i]]
+            
+        displ = cart2frac(prim.get_cell(),delta) 
+        
+        ref_au = ref.copy()
+        ref_au.positions *= convert(1,"length","angstrom","atomic_unit")
+        ref_au.cell *= convert(1,"length","angstrom","atomic_unit")
+        supercell = NormalModes(self.Nmodes,self.Ndof*size.prod(),ref=ref_au)
+        
+        for i,r in enumerate(displ):
             kr = np.asarray(r) / size @ q
             phase = np.exp(1.j * 2 * np.pi * kr )
             # phi = int(cmath.phase(phase)*180/np.pi)
             # ic(k,r,phi)
-            supercell.eigvec[i*self.Ndof:(i+1)*self.Ndof,:] = ( self.eigvec * phase).real
+            j = indexuc[i]
+            supercell.eigvec[3*i:3*i+3,:] = self.eigvec[3*j:3*j+3,:] * phase
+            
+        assert not np.any(np.isnan(supercell.eigvec.data)), "some coding error"
+        
+        # # supercell.masses[:] = np.asarray(list(self.masses)*N)
+        # # supercell.eigvec.fill(np.nan)
+        # for i,r in enumerate(r_point):
+        #     kr = np.asarray(r) / size @ q
+        #     phase = np.exp(1.j * 2 * np.pi * kr )
+        #     # phi = int(cmath.phase(phase)*180/np.pi)
+        #     # ic(k,r,phi)
+        #     supercell.eigvec[i*self.Ndof:(i+1)*self.Ndof,:] = ( self.eigvec * phase).real
                 
-        if np.isnan(supercell.eigvec).sum() != 0:
-            raise ValueError("error")
+        # if np.isnan(supercell.eigvec).sum() != 0:
+        #     raise ValueError("error")
         
         supercell.eigvec /= np.linalg.norm(supercell.eigvec,axis=0)
         supercell.eigval = self.eigval.copy()
         
-        raise ValueError("Elia Stocco, this is a message for yourself of the past. Check again this script, please!")
+        # raise ValueError("Elia Stocco, this is a message for yourself of the past. Check again this script, please!")
         supercell.eigvec2modes()
         # supercell.eigvec2proj()
 

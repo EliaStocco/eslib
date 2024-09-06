@@ -7,6 +7,7 @@ from eslib.formatting import esfmt
 from eslib.classes.normal_modes import NormalModes
 from eslib.tools import convert
 from eslib.show import print_df
+from eslib.show import matrix2str
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -52,6 +53,19 @@ def main(args):
     print("\tReading phonon modes from file '{:s}' ... ".format(args.input), end="")
     nm = NormalModes.from_pickle(args.input)
     print("done")
+    print("\tn. of modes:",nm.Nmodes)  
+    print("\tn. of dof  :",nm.Ndof)  
+    
+    structure = nm.reference
+    Natoms = structure.get_global_number_of_atoms()
+    print("\tn. of atoms:",Natoms)    
+    if Natoms*3 == nm.Nmodes:
+        print("\tsupercell  : false --> these are vibrational modes")        
+    else:
+        print("\tsupercell  : true --> these are phonon modes")    
+    print("\tunit cell  :")    
+    line = matrix2str(structure.cell.array.T,col_names=["1","2","3"],cols_align="^",width=10,digits=4)
+    print(line)
 
     #---------------------------------------#
     # dataframe

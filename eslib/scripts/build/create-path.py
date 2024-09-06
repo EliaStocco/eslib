@@ -33,6 +33,7 @@ def prepare_parser():
     parser.add_argument("-a", "--structure_A",  type=str,**argv,help="atomic structure A")
     parser.add_argument("-b", "--structure_B",  type=str,**argv,help="atomic structure B")
     parser.add_argument("-n", "--number"     ,  type=int,**argv,help="number of inner structures")
+    parser.add_argument("-e", "--external"     ,  type=float,**argv,help="external structures [between 0 and 1] (default: %(default)s)", default=0)
     parser.add_argument("-o", "--output"     ,  type=str,**argv,help="output file with the path", default="path.xyz")
     options = parser.parse_args()
     return options
@@ -72,9 +73,9 @@ def main():
     # pm = np.full(A.positions.shape,1)
     As = A.get_scaled_positions()
     Bs = B.get_scaled_positions()
-    As[( As - Bs ) > +0.5] -= 1
-    As[( As - Bs ) < -0.5] += 1
-    T = np.linspace(0, 1, N + 2)
+    Bs[( As - Bs ) > +0.5] += 1
+    Bs[( As - Bs ) < -0.5] -= 1
+    T = np.linspace(0-args.external, 1+args.external, N + 2)
     # N = 0 -> t=0,1
     # N = 1 -> t=0,0.5,1
     for n, t in enumerate(T):
