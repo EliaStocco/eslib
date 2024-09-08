@@ -17,6 +17,7 @@
 
 # To Do
 - save `Properties` to `netcdf` files in stead of `pickle`
+- `dot` and `rbc` in `physical_tensor.py` should be made the same function (debugging necessary)
 
 # Working on 
 - implement finite difference methods for vibrational modes exploiting symmetries (as done in `phononpy`) using `spglib`

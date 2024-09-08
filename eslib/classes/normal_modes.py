@@ -548,22 +548,33 @@ class NormalModes(pickleIO):
         #-------------------#
         # amplitudes of the vib. modes
         mode, unit = remove_unit(self.mode)
-        invmode = inv(mode)
-        invmode = set_unit(invmode,1/unit)
-        for dim in ["dof","mode"]:
-            test = rbc(invmode,mode,dim)
-            if np.any(test.imag != 0.0):
-                warn("'test' matrix should be real.")
-            if not np.allclose(test.to_numpy(),np.eye(len(test))):
-                warn("problem with inverting 'mode' matrix.")
+        if mode.shape[0] == mode.shape[1]:
+            # square matrix
+            invmode = inv(mode)
+            invmode = set_unit(invmode,1/unit)
+            for dim in ["dof","mode"]:
+                test = rbc(invmode,mode,dim)
+                if np.any(test.imag != 0.0):
+                    warn("'test' matrix should be real.")
+                if not np.allclose(test.to_numpy(),np.eye(len(test))):
+                    warn("problem with inverting 'mode' matrix.")
+                    
+            displacements = dot(invmode,q,"dof").real
+            
+            B = dot(invmode,1./Msqrt * dot(self.eigvec,qn,"mode"),"dof")
+            if not np.allclose(B,displacements):
+                warn("'B' and 'displacements' should be equal.")
+            
+        else:
+            # rectagular matrix
+            _A = rbc(mode,mode,"dof") # mode.T @ mode
+            assert np.allclose(np.diag(_A),1), "The matrix should contain normalized vectors."
+            assert np.allclose(_A.data,_A.data.T), "The matrix should be symmetric."
+            _b = dot(mode,q,"dof") # rbc(mode,q,"dof")
+            displacements = np.linalg.solve(_A.data,_b.data)
 
-        displacements = dot(invmode,q,"dof").real
         if not check_dim(displacements,"[length]"):
-            raise ValueError("'displacements' has the wrong unit.")
-        
-        B = dot(invmode,1./Msqrt * dot(self.eigvec,qn,"mode"),"dof")
-        if not np.allclose(B,displacements):
-            warn("'B' and 'displacements' should be equal.")
+                raise ValueError("'displacements' has the wrong unit.")
 
         #-------------------#
         # check how much the trajectory 'satisfies' the equipartition theorem

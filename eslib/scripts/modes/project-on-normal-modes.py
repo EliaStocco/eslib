@@ -12,7 +12,7 @@ from eslib.formatting import esfmt, warning
 # warnings.filterwarnings("error")
 #---------------------------------------#
 # Description of the script's purpose
-description = "Project a trajectory onto the normal modes computed by i-PI."
+description = "Project a trajectory onto the normal modes."
 
 #---------------------------------------#
 def prepare_args(description):
