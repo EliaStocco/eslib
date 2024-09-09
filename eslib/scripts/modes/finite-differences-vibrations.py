@@ -6,6 +6,7 @@ from classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, warning, float_format, error
 from eslib.classes.normal_modes import NormalModes
 from eslib.input import str2bool
+from eslib.tools import convert
 import numpy as np
 from typing import List, Tuple
 
@@ -20,19 +21,20 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-p" , "--positions"       , **argv, required=True , type=str  , help="xyz/extxyz file with the displaced atomic structures (default: %(default)s)", default='replay.xyz')
-    parser.add_argument("-r" , "--reference"       , **argv, required=True , type=str  , help="xyz/extxyz file with the reference structure (default: %(default)s)", default='ref.au.xyz')
-    parser.add_argument("-f" , "--forces"          , **argv, required=False, type=str  , help="xyz/extxyz file with the forces (default: %(default)s)", default=None)
-    parser.add_argument("-n" , "--name"            , **argv, required=False, type=str  , help="name of the forces array in the positions file (default: %(default)s)", default=None)
-    parser.add_argument("-pf", "--positions_format", **argv, required=False, type=str  , help="positions file format (default: %(default)s)", default=None)
-    parser.add_argument("-rf", "--reference_format", **argv, required=False, type=str  , help="reference file format (default: %(default)s)", default=None)
-    parser.add_argument("-ff", "--forces_format"   , **argv, required=False, type=str  , help="forces file format (default: %(default)s)", default=None)
-    parser.add_argument("-pu", "--positions_unit"  , **argv, required=False, type=str  , help="positions unit (default: %(default)s)", default='atomic_unit')
-    parser.add_argument("-ru", "--reference_unit"  , **argv, required=False, type=str  , help="reference unit (default: %(default)s)", default='atomic_unit')
-    parser.add_argument("-fu", "--forces_unit"     , **argv, required=False, type=str  , help="forces unit (default: %(default)s)", default='atomic_unit')
-    parser.add_argument("-d" , "--displacement"    , **argv, required=True , type=float, help="displacement [same unit of positions]")
-    parser.add_argument("-s" , "--symmetrize"      , **argv, required=False, type=str2bool, help="symmetrize dynamical matrix (default: %(default)s)", default=True)
-    parser.add_argument("-o" , "--output"          , **argv, required=False, type=str  , help="pickle output file with the vibrations (default: %(default)s)", default='vibrations.pickle')
+    parser.add_argument("-p" , "--positions"        , **argv, required=True , type=str  , help="xyz/extxyz file with the displaced atomic structures (default: %(default)s)", default='replay.xyz')
+    parser.add_argument("-r" , "--reference"        , **argv, required=True , type=str  , help="xyz/extxyz file with the reference structure (default: %(default)s)", default='ref.au.xyz')
+    parser.add_argument("-f" , "--forces"           , **argv, required=False, type=str  , help="xyz/extxyz file with the forces (default: %(default)s)", default=None)
+    parser.add_argument("-n" , "--name"             , **argv, required=False, type=str  , help="name of the forces array in the positions file (default: %(default)s)", default=None)
+    parser.add_argument("-d" , "--displacement"     , **argv, required=True , type=float, help="displacement")
+    parser.add_argument("-pf", "--positions_format" , **argv, required=False, type=str  , help="positions file format (default: %(default)s)", default=None)
+    parser.add_argument("-rf", "--reference_format" , **argv, required=False, type=str  , help="reference file format (default: %(default)s)", default=None)
+    parser.add_argument("-ff", "--forces_format"    , **argv, required=False, type=str  , help="forces file format (default: %(default)s)", default=None)
+    parser.add_argument("-pu", "--positions_unit"   , **argv, required=False, type=str  , help="positions unit (default: %(default)s)", default='atomic_unit')
+    parser.add_argument("-ru", "--reference_unit"   , **argv, required=False, type=str  , help="reference unit (default: %(default)s)", default='atomic_unit')
+    parser.add_argument("-fu", "--forces_unit"      , **argv, required=False, type=str  , help="forces unit (default: %(default)s)", default='atomic_unit')
+    parser.add_argument("-du", "--displacement_unit", **argv, required=False, type=str  , help="displacement unit (default: %(default)s)", default='atomic_unit')
+    parser.add_argument("-s" , "--symmetrize"       , **argv, required=False, type=str2bool, help="symmetrize dynamical matrix (default: %(default)s)", default=True)
+    parser.add_argument("-o" , "--output"           , **argv, required=False, type=str  , help="pickle output file with the vibrations (default: %(default)s)", default='vibrations.pickle')
     return parser
 
 #---------------------------------------#
@@ -138,7 +140,14 @@ def main(args):
     if not check_off_diagonal(left-right):
         raise ValueError("coding error: off diagonal displacements")
     
+    #------------------#
     displacement = args.displacement
+    if args.displacement_unit is not None and args.displacement_unit not in ["au","atomic_unit"]:
+        print("\tConverting displacement from '{:s}' to '{:s}' ... ".format(args.displacement_unit,"atomic_unit"),end="")
+        displacement = displacement*convert(1,family="length",_from=args.displacement_unit,_to="atomic_unit")
+        print("done")
+        
+        
     tmp = np.mean(displacements)/2.0
     if not np.allclose( tmp , displacement):
         raise ValueError("Computed displacement differ from the provided one: {:2e} != {:2e} ".format(tmp , displacement))
