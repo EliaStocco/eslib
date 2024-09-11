@@ -421,7 +421,7 @@ class NormalModes(pickleIO):
 
         #-------------------#
         # reference position
-        ref = trajectory[0] #  if self.reference is None else self.reference
+        ref = trajectory[0] if self.reference is None else self.reference
 
         #-------------------#
         # positions -> displacements
