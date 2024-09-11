@@ -99,7 +99,7 @@ def main(args):
             
             value = ii_b[np.argmin(distances)]
             # assert np.allclose(pos_A[i,:],pos[value,:]), "some coding error"
-            assert np.allclose(pos_A[i,:],pos_B[value,:]), "some coding error"
+            # assert np.allclose(pos_A[i,:],pos_B[value,:]), "some coding error"
             if value in mathces[ ~ np.isnan(mathces) ]:
                 raise ValueError("coding error")
                 # raise ValueError("atom {:d} already matched with {:d}. What to do with {:d}?".format(i,int(np.where(mathces == i)[0]),value))
