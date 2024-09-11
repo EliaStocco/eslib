@@ -1,18 +1,12 @@
 #!/usr/bin/env python
-from sqlite3 import converters
 from eslib.classes.normal_modes import NormalModes
 from eslib.show import matrix2str
 from eslib.tools import convert
-from eslib.output import output_folder
-from eslib.input import size_type
-from eslib.functions import phonopy2atoms
 import numpy as np
 import yaml
 import pandas as pd
 import os
-from eslib.formatting import esfmt, warning
-from classes.atomic_structures import AtomicStructures
-from eslib.tools import is_sorted_ascending, w2_to_w
+from eslib.formatting import esfmt
 from phonopy.units import VaspToTHz
 from ase import Atoms
 
@@ -31,7 +25,7 @@ def prepare_args(description):
     # parser.add_argument("-rf", "--reference_format", **argv, required=False, type=str  , help="reference file format (default: %(default)s)" , default=None)
     parser.add_argument("-q" , "--qpoints"         , **argv, required=False, type=str  , help="qpoints file (default: %(default)s)", default="qpoints.yaml")
     parser.add_argument("-i" , "--input"           , **argv, required=False, type=str  , help="general phonopy file (default: %(default)s)", default="phonopy.yaml")
-    parser.add_argument("-f" , "--factor"          , **argv, required=False, type=float, help="conversion factor to THz for the frequencies ω", default=VaspToTHz)
+    parser.add_argument("-f" , "--factor"          , **argv, required=False, type=float, help="conversion factor to THz for the frequencies ω (default: %(default)s)", default=VaspToTHz)
     parser.add_argument("-o" , "--output"          , **argv, required=False, type=str  , help="output prefix file (default: %(default)s)", default="phonons")
     parser.add_argument("-of", "--output_folder"   , **argv, required=False, type=str  , help="output folder (default: %(default)s)", default="phonons")
     return parser
