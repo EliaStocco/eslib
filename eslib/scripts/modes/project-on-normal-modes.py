@@ -33,11 +33,9 @@ def main(args):
     print("done")
 
     #---------------------------------------#
-    # read phonon modes ('phonon-modes.pickle')
     print("\tReading phonon modes from file '{:s}' ... ".format(args.normal_modes), end="")
     with open(args.normal_modes,'rb') as f:
         nm = pickle.load(f)
-    # pm = NormalModes.read(args.normal_modes,"pickle") # pd.read_pickle(args.normal_modes)
     print("done")
 
     if type(nm) != NormalModes:
@@ -47,29 +45,8 @@ def main(args):
     # project on phonon modes
     print("\n\tProjecting the trajectory:")
     results = nm.project(trajectory,warning)
-    # results.at[q,"q"] = q
-    # for c in out.keys():
-    #     if c not in results.columns:
-    #         results[c] = None
-    #     results.at[q,c] = out[c]
     print("done")
-    # results = pd.DataFrame(index=pm.index,columns=["q"])
-    # k = 0
-    # for n,row in pm.iterrows():
-    #     q = row["q"]
-    #     print("\t\t- phonon modes {:d} with q-point {:s} ... ".format(k,str(q)), end="")
-    #     if type(row["supercell"]) != NormalModes:
-    #         raise TypeError("'supercell' element is of wrong type, it should be a 'NormalModes' object")     
-    #     # row["modes"].write("test.yaml","yaml")   
-    #     out = row["supercell"].project(trajectory)
-    #     results.at[q,"q"] = q
-    #     for c in out.keys():
-    #         if c not in results.columns:
-    #             results[c] = None
-    #         results.at[q,c] = out[c]
-    #     print("done")
-    #     k += 1
-        
+    
     #---------------------------------------#
     # save result to file
     print("\n\tWriting results to file '{:s}' in pickle format ... ".format(args.output), end="")
@@ -84,15 +61,9 @@ def main(args):
         output_folder(args.output_folder,show=False)
         for k in results.keys():
             arr = xr.DataArray(results[k])
-            # if not isinstance(results[k],xr.DataArray):
-            #     raise TypeError("results[{:s}] is of wrong type, it should be a 'xarray.DataArray' object".format(k))
             file = "{:s}/{:s}.csv".format(args.output_folder,k)
             print("\t\tsaving '{:s}' to file '{:s}' ... ".format(k,file), end="")
             arr = remove_unit(arr)[0]
-            # dims = list(arr.dims)
-            # dims.remove('time')
-            # arr = arr.reorder_levels(['time',*dims])
-
             df = arr.T.to_pandas()
             df.to_csv(file,index=False,header=False,na_rep="nan",float_format="%24.16f")
             print("done")
