@@ -63,7 +63,7 @@ def main(args):
         print("\tsupercell  : false --> these are vibrational modes")        
     else:
         print("\tsupercell  : true --> these are phonon modes")    
-    print("\tunit cell  :")    
+    print("\tunit cell [au] :")    
     line = matrix2str(structure.cell.array.T,col_names=["1","2","3"],cols_align="^",width=10,digits=4)
     print(line)
 
