@@ -3,10 +3,38 @@ import numpy as np
 import matplotlib.pyplot as plt
 from itertools import product
 
+
+legend_options = {
+    "facecolor":'white', 
+    "framealpha":1,
+    "edgecolor":"black"
+}
+
 def generate_colors(N,map='tab10',shift=0):
     cmap = plt.get_cmap(map)  # You can choose other colormaps as well
     colors = [cmap(i) for i in np.linspace(0, 1-shift, N)]
     return colors
+
+def get_continous_colors_map(vmin:float,vmax:float,map:str)->callable:
+    """
+    Returns a callable that maps a continuous value to a color.
+
+    Parameters:
+    vmin (float): The minimum value of the range to be mapped.
+    vmax (float): The maximum value of the range to be mapped.
+    map (str): The name of the colormap to use.
+
+    Returns:
+    callable: A function that takes a value and returns a color.
+    """
+    from matplotlib.colors import Normalize
+    from matplotlib.colors import Colormap
+    norm = Normalize(vmin=vmin, vmax=vmax)
+    colormap:Colormap = plt.get_cmap(map)
+    def return_color(x:float)->tuple:
+        return colormap(norm(x))
+    return return_color
+    
 
 def straigh_line(ax,shift,get_lim,func,set_lim,**argv):
 
