@@ -6,6 +6,22 @@ from eslib.tools import is_integer
 from typing import Tuple
 from typing import List
 
+def modular_norm(numbers: np.ndarray, modulus: float = 1, threshold: float = 0.01) -> np.ndarray:
+    """
+    Calculate the modular norm between a list of numbers and a given modulus.
+
+    Parameters:
+    numbers (List[float]): A list of numbers.
+    modulus (float, optional): The modulus value. Defaults to 1.
+    threshold (float, optional): The threshold value for the distances. Defaults to 0.01.
+
+    Returns:
+    numpy.ndarray: An array of distances between the numbers and the modulus.
+    """
+    numbers = np.mod(numbers, modulus)
+    distances = np.minimum(numbers % 1, 1 - (numbers % 1))  # Map to closest distance to 0
+    return distances
+
 def angle_between_vectors(array1: List[float], array2: List[float]) -> float:
     """
     Compute the angle in radians between two vectors of the same length.
