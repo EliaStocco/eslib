@@ -37,7 +37,7 @@ def main(args):
     if file.endswith("pickle"):
         atoms = Trajectory.from_file(file=file,format=args.input_format)
     elif file.endswith("txt") or file.endswith("out"):
-        atoms = AtomicStructures.from_file(file=file,format=args.input_format)
+        atoms = Properties.from_file(file=file)
     else:
         atoms = AtomicStructures.from_file(file=file,format=args.input_format)
     print("done")
