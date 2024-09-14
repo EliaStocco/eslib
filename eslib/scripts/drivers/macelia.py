@@ -117,6 +117,11 @@ def main(args):
             calculator.summary()
         except:
             pass
+        
+    #------------------#
+    if hasattr(calculator,"charges_key"):
+        if calculator.charges_key not in atoms.arrays:
+            raise ValueError("The atomic structures do not have the key '{:s}'".format(calculator.charges_key))
 
     atoms.calc = calculator # atoms.set_calculator(calculator)
 
