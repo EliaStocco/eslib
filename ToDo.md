@@ -16,7 +16,8 @@
 - consider using `yield` in `aseio.py` for long trajectories
 
 # To Do
-- save `Properties` to `netcdf` files in stead of `pickle`
+- save `Properties` to `hdf5` files in stead of `pickle`
+- optimize `hdf5` `IO`
 - `dot` and `rbc` in `physical_tensor.py` should be made the same function (debugging necessary)
 
 # Working on 

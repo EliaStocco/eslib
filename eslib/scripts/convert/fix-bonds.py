@@ -45,13 +45,13 @@ def main(args):
     print("done")
     print("\tNumber atomic structures: ",len(trajectory))
 
-    #------------------#
-    # Select oxygen and hydrogen atoms
-    oxygens   = [ n for n,a in enumerate(trajectory[0]) if a.symbol == args.species[0]]
-    hydrogens = [ n for n,a in enumerate(trajectory[0]) if a.symbol == args.species[1]]
-    print()
-    print("\tNumber of {:s} atoms: {:d}".format(args.species[0],len(oxygens)))
-    print("\tNumber of {:s} atoms: {:d}".format(args.species[1],len(hydrogens)))
+    # #------------------#
+    # # Select oxygen and hydrogen atoms
+    # oxygens   = [ n for n,a in enumerate(trajectory[0]) if a.symbol == args.species[0]]
+    # hydrogens = [ n for n,a in enumerate(trajectory[0]) if a.symbol == args.species[1]]
+    # print()
+    # print("\tNumber of {:s} atoms: {:d}".format(args.species[0],len(oxygens)))
+    # print("\tNumber of {:s} atoms: {:d}".format(args.species[1],len(hydrogens)))
 
 
     #------------------#

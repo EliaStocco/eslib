@@ -93,6 +93,10 @@ def add_conversion(family:str,unit:str,value:float)->None:
 value = convert(1,"charge","coulomb","atomic_unit")/( convert(1,"length","meter","atomic_unit")**2)
 add_conversion("polarization","C/m^2",value)
 
+value = convert(1,"electric-field","V/ang","atomic_unit")*convert(1,"length","centimeter","angstrom")# *convert(1,"length","centimeter","atomic_unit"))
+add_conversion("electric-field","V/cm",value)
+add_conversion("electric-field","MV/cm",1e6*value)
+
 #---------------------------------------#
 # Decorator to convert ase.Cell to np.array and transpose
 def ase_cell_to_np_transpose(func):
@@ -182,6 +186,15 @@ def cart2frac(cell:Union[np.ndarray,Cell],v:np.ndarray=None)->np.ndarray:
 def max_pbc_distance(cell:Union[np.ndarray,Cell])->float:
     vec = frac2cart(cell,np.asarray([0.5,0.5,0.5]))
     return np.linalg.norm(vec)
+
+#---------------------------------------#
+def project_on_Miller(cell:np.ndarray, Miller:np.ndarray,array:np.ndarray)->np.ndarray:
+    Miller= np.asarray(Miller,dtype=float)
+    assert Miller.ndim == 1, "Miller must be a 1D array"
+    Miller /= np.linalg.norm(Miller)
+    array = cart2frac(cell,array)
+    array = np.dot(array,Miller)
+    return frac2cart(cell,array)
 
 def relative_vectors(structure:Atoms,_all=False):
     columns = ["i","j","Si","Sj", # indices and symbols

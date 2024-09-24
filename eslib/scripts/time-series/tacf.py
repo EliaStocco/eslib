@@ -249,7 +249,7 @@ def main(args):
 
     #------------------#
     print("\n\tConverting autocorr into PhysicalTensor ... ", end="")
-    autocorr = PhysicalTensor(autocorr)
+    autocorr = PhysicalTensor(autocorr.T)
     print("done")
     print("\tautocorr shape: ",autocorr.shape)
 

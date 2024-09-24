@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from ase import Atoms
+from numpy import require
 from classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.input import str2bool
@@ -31,6 +32,7 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"         , **argv, required=True , type=str, help="file with an atomic structure")
     parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-tr", "--time_reversal" , **argv, required=False, type=str2bool, help="time reversal (default: %(default)s)", default=True)
+    parser.add_argument("-s" , "--symprec"       , **argv, required=False, type=float,  help="spglib symprec (default: %(default)s)" , default=1e-3)
     parser.add_argument("-o" , "--output"        , **argv, required=False, type=str, help="output file (default: %(default)s)", default="phonopy.conf")
     # parser.add_argument("-p" , "--plot"          , **argv, required=False, type=str, help="plot (default: %(default)s)", default="band.pdf")
     # parser.add_argument("-of", "--output_format" , **argv, required=False, type=str, help="output file format (default: %(default)s)", default=None)
@@ -85,7 +87,7 @@ def main(args):
     # Step 3: Use Seekpath to standardize the cell and get the band path
     with suppress_output():
         # warnings.filterwarnings("ignore", category=DeprecationWarning, module="spglib")
-        seekpath_output = seekpath.get_explicit_k_path_orig_cell(primitive_structure,with_time_reversal=args.time_reversal)
+        seekpath_output = seekpath.get_explicit_k_path_orig_cell(primitive_structure,with_time_reversal=args.time_reversal,symprec=args.symprec)
     print("done")
 
     # Extract band path information

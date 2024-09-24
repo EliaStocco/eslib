@@ -41,7 +41,7 @@ def main(args):
     #------------------#
     print("\n\tReading the autocorrelation from file '{:s}' ... ".format(args.input), end="")
     args.input = str(args.input)
-    autocorr:np.ndarray = PhysicalTensor.from_file(file=args.input).to_data()
+    autocorr:np.ndarray = PhysicalTensor.from_file(file=args.input).to_data().T
     print("done")
     print("\tautocorr shape: ",autocorr.shape)
 

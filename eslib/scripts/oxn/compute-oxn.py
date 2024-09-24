@@ -5,8 +5,10 @@ from classes.atomic_structures import AtomicStructures# , info, array
 from eslib.formatting import esfmt
 from eslib.physics import compute_dipole_quanta
 import matplotlib.pyplot as plt
-from eslib.tools import frac2cart
+from eslib.tools import frac2cart, cart2frac
+from eslib.geometry import modular_norm
 from eslib.input import str2bool
+import pandas as pd
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -22,7 +24,8 @@ def prepare_args(description):
     parser.add_argument("-if", "--input_format", **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-f" , "--fix"     , **argv, required=False, type=str2bool, help="fix branch", default=False)
     parser.add_argument("-k" , "--keyword"     , **argv, required=False, type=str, help="keyword the dipoles (default: %(default)s)", default="dipole")
-    parser.add_argument("-o", "--output", **argv, required=False, type=str, help="output file (default: %(default)s)" , default=None)
+    parser.add_argument("-p", "--plot", **argv, required=False, type=str, help="plot file (default: %(default)s)" , default=None)
+    parser.add_argument("-o", "--output", **argv, required=False, type=str, help="*.csv output file with the data to reproduce the same plot (default: %(default)s)" , default=None)
     return parser
 
 #---------------------------------------#
@@ -48,6 +51,8 @@ def main(args):
     print("\n\tIndices of displaced atoms: ",np.arange(Natoms)[non_zero_indices].astype(int))
     print("\tSymbols of displaced atoms: ",symbols)
     assert all(elem == symbols[0] for elem in symbols) , "You displaced atoms of different species."
+    
+    Ndisplatoms = len(np.arange(Natoms)[non_zero_indices])
     
     #---------------------------------------#
     # dipole = atoms.get(args.keyword)
@@ -123,12 +128,61 @@ def main(args):
     # Use the filtered R2 and R for further calculations
     N = np.divide(DeltaD @ R_filtered.T, R2_filtered)
     assert np.std(N) < 1e-3
+    
+    # Miller = cart2frac(atoms[0].get_cell(),R_filtered)
+    # assert np.allclose(Miller.std(axis=0),0), "Miller vector are not all the same."
+    # Miller = np.asarray(np.mean(Miller,axis=0))
+    # dist = modular_norm(Miller)
+    # assert np.allclose(dist,0), "Miller vector are not integer."
+    
+    # Function to project a Cartesian vector onto a Miller vector
+    # def project_cartesian_to_miller(cartesian_vector, miller_indices, cell):
+    #     # Get the reciprocal lattice vectors (corresponding to Miller indices directions)
+    #     # miller_indices /= np.linalg.norm(miller_indices)
+    #     h, k, l = miller_indices
+    #     a, b, c = cell
+        
+    #     # Convert Miller indices to a vector in Cartesian coordinates
+    #     miller_vector = h * a + k * b + l * c
+        
+    #     miller_vector /= np.linalg.norm(miller_vector)
+        
+    #     # Calculate the dot product of the Cartesian vector and the Miller vector
+    #     return np.dot(cartesian_vector, miller_vector)
+        
+    #     # # Calculate the magnitude squared of the Miller vector
+    #     # miller_magnitude_squared = np.dot(miller_vector, miller_vector)
+        
+    #     # # Calculate the projection (scalar * Miller vector)
+    #     # # projection = (dot_product / miller_magnitude_squared) * miller_vector
+    #     # projection = np.outer(dot_product / miller_magnitude_squared,miller_vector)
+        
+    #     # return np.linalg.norm(projection, axis=1)
+
+
+
+    # print("\n\tMiller indices: ",Miller.astype(int).tolist())
+    # # Miller /= np.linalg.norm(Miller)
+    # proj_dipole =  dipole @ Miller
+    # dipole_quanta = atoms[0].get_cell().cellpar()[:3]
+    # test = proj_dipole / (dipole_quanta @ Miller)
+    
+    # # Perform the projection
+    # d = project_cartesian_to_miller(dipole, Miller, atoms[0].get_cell())
+    # q = project_cartesian_to_miller(atoms[0].get_cell().array.T @ Miller, Miller, atoms[0].get_cell())
+    
+    
+    
 
     DeltaN = np.mean(N)
     N = DeltaN / len(N)
-    print("\n\tOxidation number for '{:s}': {:f}".format(symbols[0],np.round(N,1)))
+    print("\n\tOxidation number for '{:s}': {:f}".format(symbols[0],N))
+    
+    # test = quanta @ Miller
+    # test = (test[-1] - test[0]) /(3*Ndisplatoms)
+    # print("\tOxidation number for '{:s}': {:f} (using Miller indices)".format(symbols[0],test))
 
-    if args.output is not None:
+    if args.plot is not None:
 
         print("\n\tCreating plot ...  ",end="")
         quanta *= np.sign(R_filtered[0,:]) # just to have the correct slope in the plot
@@ -151,12 +205,23 @@ def main(args):
         plt.tight_layout()
         print("done")
 
-        print("\tSaving plot to file '{:s}' ... ".format(args.output), end="")
-        plt.savefig(args.output)
+        print("\tSaving plot to file '{:s}' ... ".format(args.plot), end="")
+        plt.savefig(args.plot)
         print("done")
         
-        
-    
+    if args.output is not None:
+        print("\n\tSaving output data to file '{:s}' ... ".format(args.output), end="")   
+        df = pd.DataFrame(columns=["path","Q1","Q2","Q3","Dx","Dy","Dz"])
+        df["path"] = np.linspace(0,1,len(quanta),endpoint=True)
+        df["Q1"] = quanta[:,0]
+        df["Q2"] = quanta[:,1]
+        df["Q3"] = quanta[:,2]
+        df["Dx"] = dipole[:,0]
+        df["Dy"] = dipole[:,1]
+        df["Dz"] = dipole[:,2]
+        df.to_csv(args.output, index=False)
+        print("done")
+
     return 0
 
 #---------------------------------------#

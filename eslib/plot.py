@@ -2,6 +2,7 @@ from eslib.functions import add_default
 import numpy as np
 import matplotlib.pyplot as plt
 from itertools import product
+from matplotlib.colors import Normalize, LinearSegmentedColormap
 
 
 legend_options = {
@@ -9,6 +10,33 @@ legend_options = {
     "framealpha":1,
     "edgecolor":"black"
 }
+
+def generate_continuous_color_map(vmin: float, vmax: float, color1: str = 'red', color2: str = 'blue') -> callable:
+    """
+    Returns a callable that maps a continuous value to a color between two colors.
+
+    Parameters:
+    vmin (float): The minimum value of the range to be mapped.
+    vmax (float): The maximum value of the range to be mapped.
+    color1 (str): The color for the minimum value (default: 'red').
+    color2 (str): The color for the maximum value (default: 'blue').
+
+    Returns:
+    callable: A function that takes a value and returns a color.
+    """
+    
+    # Create a custom colormap from color1 to color2
+    cmap = LinearSegmentedColormap.from_list("custom_cmap", [color1, color2])
+
+    # Normalize the input range
+    norm = Normalize(vmin=vmin, vmax=vmax)
+
+    # The function that will return the color for a given value
+    def return_color(x: float) -> tuple:
+        return cmap(norm(x))
+    
+    return return_color
+
 
 def generate_colors(N,map='tab10',shift=0):
     cmap = plt.get_cmap(map)  # You can choose other colormaps as well
