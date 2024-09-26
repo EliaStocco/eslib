@@ -4,10 +4,12 @@ import numpy as np
 import torch
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.classes.models import eslibModel
-from eslib.formatting import esfmt, float_format
+from eslib.formatting import esfmt, float_format, warning
 from eslib.input import slist, nilist, literal
 from eslib.classes.physical_tensor import PhysicalTensor
 import pandas as pd
+from eslib.show import show_dict
+from eslib.tools import is_integer
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -23,6 +25,7 @@ def prepare_args(description):
     parser.add_argument("-if", "--input_format" , **argv, type=str, required=False, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-m" , "--model"        , **argv, type=str, required=True , help="*.pth file with the MACE model of JSON file with instructions")
     parser.add_argument("-c" , "--charges"      , **argv, required=False, type=str, help="charges name (default: %(default)s)", default=None)
+    parser.add_argument("-cf", "--charges_file" , **argv, required=False, type=str, help="charges file (default: %(default)s)", default=None)
     parser.add_argument("-p" , "--prefix"       , **argv, type=str, required=False, help="prefix to be prepended to the properties evaluated by the MACE model (default: %(default)s)", default="MACE_")
     parser.add_argument("-o" , "--output"       , **argv, type=str, required=False, help="output file with the atomic structures and the predicted properties (default: %(default)s)", default="mace.extxyz")
     parser.add_argument("-of", "--output_format", **argv, type=str, required=False, help="output file format (default: %(default)s)", default=None)
@@ -70,6 +73,41 @@ def main(args):
     structures = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done")
     print("\tn. of structures: {:d}".format(len(structures)))
+    
+    #------------------#
+    if args.charges_file is not None:
+        
+        from eslib.classes.models.dipole import DipolePartialCharges
+        
+        #------------------#
+        # charges
+        print("\tReading the charges from file '{:s}' ... ".format(args.charges_file), end="")
+        with open(args.charges_file, 'r') as json_file:
+            charges:dict = json.load(json_file)
+        print("done")
+        
+        #------------------#
+        print("\n\tCharges: ")
+        show_dict(charges,"\t\t",2)
+        
+        for k,c in charges.items():
+            if not is_integer(c):
+                print("\t{:s}: '{:s}' charge is not an integer".format(warning,k))
+            charges[k] = np.round(c,0)
+            
+            
+        #------------------#
+        print("\n\tCreating dipole model based on the charges ... ",end="")
+        model = DipolePartialCharges(charges)
+        print("done")
+
+        #------------------#
+        print("\n\tAdding charges as '{:s}' to the 'arrays' of the atomic structures ... ".format(args.name),end="")
+        for n,structure in enumerate(structures):
+            if not model.check_charge_neutrality(structure):
+                raise ValueError("structure . {:d} is not charge neutral".format(n))
+            structure.arrays[args.charges] = model.get_all_charges(structure)
+        print("done")        
     
     #------------------#
     if hasattr(model,"charges_key"):
@@ -120,6 +158,7 @@ def main(args):
             if np.issubdtype(data.dtype, np.str_):
                 data_format = "%s"
             elif data_format is None:
+                data_format = "%r"
                 data_format = float_format
             if shape is not None:
                 data = data.reshape(shape)
