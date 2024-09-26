@@ -27,7 +27,7 @@ def prepare_args(description):
     parser.add_argument("-c" , "--charges"      , **argv, required=False, type=str, help="charges name (default: %(default)s)", default=None)
     parser.add_argument("-cf", "--charges_file" , **argv, required=False, type=str, help="charges file (default: %(default)s)", default=None)
     parser.add_argument("-p" , "--prefix"       , **argv, type=str, required=False, help="prefix to be prepended to the properties evaluated by the MACE model (default: %(default)s)", default="MACE_")
-    parser.add_argument("-o" , "--output"       , **argv, type=str, required=False, help="output file with the atomic structures and the predicted properties (default: %(default)s)", default="mace.extxyz")
+    parser.add_argument("-o" , "--output"       , **argv, type=str, required=False, help="output file with the atomic structures and the predicted properties (default: %(default)s)", default=None)
     parser.add_argument("-of", "--output_format", **argv, type=str, required=False, help="output file format (default: %(default)s)", default=None)
     # Save data to txt/npy files
     parser.add_argument("-n" , "--names"        , **argv, type=literal, required=False, help="names for the info/arrays to be saved to txt/npy files (default: %(default)s)", default=None)
@@ -127,9 +127,10 @@ def main(args):
     
 
     #------------------#
-    print("\n\tSaving atomic structures to file '{:s}' ... ".format(args.output), end="")
-    output.to_file(file=args.output,format=args.output_format)
-    print("done")
+    if args.output is not None:
+        print("\n\tSaving atomic structures to file '{:s}' ... ".format(args.output), end="")
+        output.to_file(file=args.output,format=args.output_format)
+        print("done")
     
     #------------------#
     print("\n\tSaving info/arrays to file:")
