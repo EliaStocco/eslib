@@ -52,7 +52,7 @@ def main(args):
     print("\n\tData type: ",data.dtype)
 
     if np.issubdtype(data.dtype, np.str_):
-        print("\tData contains strings: -of/--output_format wil be set to '%s'" % "%s")
+        print("\tData contains strings: -of/--output_format will be set to '%s'" % "%s")
         args.output_format = "%s"
 
     if args.shape is not None:

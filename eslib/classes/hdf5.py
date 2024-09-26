@@ -27,28 +27,30 @@ from ase import Atoms
 from typing import List
 
 
-def read_hdf5(filename: str) -> List[Atoms]:
+def read_hdf5(filename: str, index: slice = None) -> List[Atoms]:
     """
-    Read a list of Atoms objects from an HDF5 file.
+    Read a list of Atoms objects from an HDF5 file, allowing for slicing.
 
     Parameters:
     filename (str): The name of the HDF5 file to read from.
+    index (slice): A slice object to select a subset of the structures.
 
     Returns:
     List[Atoms]: A list of Atoms objects read from the HDF5 file.
     """
-
-    # atoms_list = []
-
-    # Open the HDF5 file for reading
     with h5py.File(filename, 'r') as f:
         atoms_group = f['atoms']
-        # num_atoms = f['num_atoms'][:]
         num_structures = len(atoms_group)
-        atoms_list = [None]*num_structures
         
-        # Iterate over the stored Atoms objects
-        for n,atom_key in enumerate(atoms_group):
+        # Apply slicing if provided
+        atom_keys = list(atoms_group.keys())  # get all keys (which are typically strings)
+        if index is not None:
+            atom_keys = atom_keys[index]  # Apply the slice to the keys
+        
+        atoms_list = [None] * len(atom_keys)
+        
+        # Iterate over the selected Atoms objects
+        for n, atom_key in enumerate(atom_keys):
             atom_group = atoms_group[atom_key]
 
             # Extract the stored positions, atomic numbers, cell, and PBC
@@ -59,22 +61,25 @@ def read_hdf5(filename: str) -> List[Atoms]:
 
             # Create the Atoms object
             atoms = Atoms(positions=positions, numbers=numbers, cell=cell, pbc=pbc)
+            
+            # Extract additional info and arrays
             for key in atom_group.keys():
                 key = str(key)
                 if key in ["positions", "atomic_numbers", "cell", "pbc"]:
                     continue
                 elif "_info_" in key:
-                    _key = key.replace("_info_","")
+                    _key = key.replace("_info_", "")
                     atoms.info[_key] = np.asarray(atom_group[key])
                     if atoms.info[_key].ndim == 0:
                         atoms.info[_key] = float(atoms.info[_key])
                 elif "_arrays_" in key:
-                    _key = key.replace("_arrays_","")
+                    _key = key.replace("_arrays_", "")
                     atoms.arrays[_key] = np.asarray(atom_group[key])
                 else:
-                    raise ValueError("Unknown key: {:s}".format(key))
-            atoms_list[n] = atoms
+                    raise ValueError(f"Unknown key: {key}")
             
+            atoms_list[n] = atoms
+        
         return atoms_list
 
 

@@ -19,6 +19,7 @@ from eslib.tools import convert
 from eslib.functions import extract_number_from_filename
 from ase.io.formats import filetype
 # from eslib.formatting import float_format
+from warnings import warn
 
 T = TypeVar('T', bound='aseio')
 M = TypeVar('M', bound=Callable[..., Any])
@@ -198,14 +199,18 @@ class aseio(List[Atoms], pickleIO):
             _,format = os.path.splitext(file)
             format = format[1:]
         if format.lower() in ["h5","hdf5"]:
-            traj = read_hdf5(file)
+            index = argv['index'] if 'index' in argv else slice(None,None,None)
+            index = integer_to_slice_string(index)
+            traj = read_hdf5(filename=file,index=index)
         elif format.lower() in ["nc","netcdftrajectory"]:
+            warn("NetCDF trajectory format is deprecated. Use 'hdf5/h5' format instead.",DeprecationWarning)
             index = argv['index'] if 'index' in argv else slice(None,None,None)
             index = integer_to_slice_string(index)
             traj = read_netcdftrajectory(filename=argv['file'],index=index)    
             if not isinstance(traj,list):
                 traj = [traj]             
         elif format.lower() in ["netcdf"]: 
+            warn("NetCDF trajectory format is deprecated. Use 'hdf5/h5' format instead.",DeprecationWarning)
             traj = read_netcdf(file)
         else:
             traj = read_trajectory(**argv)

@@ -42,7 +42,7 @@ def dict_to_list(d:dict):
         return None
     result = []
     for key, value in d.items():
-        result.extend([f'--{key}', value])
+        result.extend([f'--{key}', str(value)])
     return result
 
 def matrix2str(matrix,

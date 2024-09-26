@@ -14,6 +14,7 @@
 - add a `README.md` for each folder
 - use other personal repositories
 - consider using `yield` in `aseio.py` for long trajectories
+- add documentations ad `pdf` (e.g. `phonon projection`)
 
 # To Do
 - save `Properties` to `hdf5` files in stead of `pickle`

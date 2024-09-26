@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 import json
+import numpy as np
 import torch
-from ase import Atoms
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.classes.models import eslibModel
-from eslib.formatting import esfmt
+from eslib.formatting import esfmt, float_format
+from eslib.input import slist, nilist, literal
+from eslib.classes.physical_tensor import PhysicalTensor
+import pandas as pd
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -15,6 +18,7 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
+    # Input
     parser.add_argument("-i" , "--input"        , **argv, type=str, required=True , help="file with the atomic structures")
     parser.add_argument("-if", "--input_format" , **argv, type=str, required=False, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-m" , "--model"        , **argv, type=str, required=True , help="*.pth file with the MACE model of JSON file with instructions")
@@ -22,6 +26,11 @@ def prepare_args(description):
     parser.add_argument("-p" , "--prefix"       , **argv, type=str, required=False, help="prefix to be prepended to the properties evaluated by the MACE model (default: %(default)s)", default="MACE_")
     parser.add_argument("-o" , "--output"       , **argv, type=str, required=False, help="output file with the atomic structures and the predicted properties (default: %(default)s)", default="mace.extxyz")
     parser.add_argument("-of", "--output_format", **argv, type=str, required=False, help="output file format (default: %(default)s)", default=None)
+    # Save data to txt/npy files
+    parser.add_argument("-n" , "--names"        , **argv, type=literal, required=False, help="names for the info/arrays to be saved to txt/npy files (default: %(default)s)", default=None)
+    parser.add_argument("-s" , "--shapes"       , **argv, type=nilist         , required=False, help="data reshapes (default: %(default)s", default=None)  
+    parser.add_argument("-do", "--data_output"  , **argv, type=literal, required=False, help="data output files (default: %(default)s)", default=None)
+    parser.add_argument("-df", "--data_format"  , **argv, type=literal, required=False, help="output format for np.savetxt (default: %(default)s)", default=None)
     return parser
 
 #---------------------------------------#
@@ -83,7 +92,51 @@ def main(args):
     print("\n\tSaving atomic structures to file '{:s}' ... ".format(args.output), end="")
     output.to_file(file=args.output,format=args.output_format)
     print("done")
-     
+    
+    #------------------#
+    print("\n\tSaving info/arrays to file:")
+    # args.names = slist(args.names)
+    if args.names is not None and len(args.names) > 0 :
+        if isinstance(args.names, str):
+            args.names = [args.names]             
+            args.shapes      = [args.shapes]      if args.shapes       is not None else [None]
+            args.data_output = [args.data_output] if args.data_output is not None else [None]
+            args.data_format = [args.data_format] if args.data_format is not None else [None]
+        elif isinstance(args.names, list) or isinstance(args.names, np.ndarray):
+            args.shapes      = args.shapes      if args.shapes       is not None else [None]*len(args.names)
+            args.data_output = args.data_output if args.data_output is not None else [None]*len(args.names)
+            args.data_format = args.data_format if args.data_format is not None else [None]*len(args.names)
+        else:
+            raise TypeError("args.names must be either a string or a list of strings, but got '{:s}'".format(type(args.names)))
+        
+        # args.data_output = slist(args.data_output)
+        # args.data_format = slist(args.data_format)
+        
+        df = pd.DataFrame(columns=["name","shape","file","format"])
+        # try:
+        for name,shape,file,data_format in zip(args.names,args.shapes,args.data_output,args.data_format):
+            print("\t - '{:s}' ... ".format(name), end="")
+            data = output.get(name)
+            if np.issubdtype(data.dtype, np.str_):
+                data_format = "%s"
+            elif data_format is None:
+                data_format = float_format
+            if shape is not None:
+                data = data.reshape(shape)
+            data = PhysicalTensor(data)
+            data.to_file(file=file,fmt=data_format)
+            print("done")
+            df = pd.concat([df,\
+                    pd.DataFrame([{"name":name,"shape":str(data.shape),"file":file,"format":str(data_format)}])],\
+                    ignore_index=True)
+        # except Exception as e:
+        #    print(e)
+        
+    print("\n\tSummary of the info/arrays saved to file:")
+    df = "\n"+df.to_string(index=False)
+    print(df.replace("\n", "\n\t"))
+    
+    return 0
 
 #---------------------------------------#
 if __name__ == "__main__":

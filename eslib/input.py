@@ -1,5 +1,12 @@
 import numpy as np
 import argparse
+import re
+import ast
+
+#---------------------------------------#
+def literal(value):
+    return ast.literal_eval(value)
+
 #---------------------------------------#
 def union_type(s:str,dtype):
     return s
@@ -29,3 +36,20 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError("Boolean value expected.")
+    
+    
+#---------------------------------------#
+# Function to parse nested lists of specific data types
+def nested_list_type(s: str, dtype=int):
+    # Remove outer brackets, split by '],[' and then process each inner list
+    s = s.strip().replace(" ", "")  # Remove all whitespace
+    # Regex to extract the list components
+    s = re.findall(r'\[(.*?)\]', s)
+    
+    # Parse the string into nested lists
+    parsed = [size_type(inner, dtype=dtype) for inner in s]
+    
+    return np.array(parsed)
+
+# nested int list
+nilist = lambda s: nested_list_type(s, int)
