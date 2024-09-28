@@ -31,7 +31,7 @@ def prepare_args(description):
     parser.add_argument("-of", "--output_format", **argv, type=str, required=False, help="output file format (default: %(default)s)", default=None)
     # Save data to txt/npy files
     parser.add_argument("-n" , "--names"        , **argv, type=literal, required=False, help="names for the info/arrays to be saved to txt/npy files (default: %(default)s)", default=None)
-    parser.add_argument("-s" , "--shapes"       , **argv, type=nilist         , required=False, help="data reshapes (default: %(default)s", default=None)  
+    parser.add_argument("-s" , "--shapes"       , **argv, type=nilist         , required=False, help="data reshapes (default: %(default)s)", default=None)  
     parser.add_argument("-do", "--data_output"  , **argv, type=literal, required=False, help="data output files (default: %(default)s)", default=None)
     parser.add_argument("-df", "--data_format"  , **argv, type=literal, required=False, help="output format for np.savetxt (default: %(default)s)", default=None)
     return parser
@@ -102,7 +102,7 @@ def main(args):
         print("done")
 
         #------------------#
-        print("\n\tAdding charges as '{:s}' to the 'arrays' of the atomic structures ... ".format(args.name),end="")
+        print("\n\tAdding charges as '{:s}' to the 'arrays' of the atomic structures ... ".format(args.charges),end="")
         for n,structure in enumerate(structures):
             if not model.check_charge_neutrality(structure):
                 raise ValueError("structure . {:d} is not charge neutral".format(n))
