@@ -6,6 +6,7 @@ e3nn
 icecream
 importlib-metadata
 matplotlib
+matscipy
 netCDF4
 nbconvert
 numpy

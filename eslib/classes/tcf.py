@@ -52,6 +52,7 @@ class TimeCorrelation:
     B: np.ndarray
     _ready: bool = field(default=False, init=False)
     _tcf: np.ndarray = field(default=None, init=False)
+    _norm: np.ndarray = field(default=None, init=False)
 
     def __post_init__(self: T):
         """
@@ -126,7 +127,7 @@ class TimeAutoCorrelation(TimeCorrelation):
     def __init__(self: T, A: np.ndarray):
         super().__init__(A=A, B=A.copy())
 
-    def tcf(self: T, axis: Optional[int] = 0, mode: str = "half",normalize:bool=True) -> np.ndarray:
+    def tcf(self: T, axis: Optional[int] = 0, mode: str = "half",normalize:str="none",axis_sum:Optional[int]=-1) -> np.ndarray:
         """
         Computes the time correlation function along the specified axis.
 
@@ -145,9 +146,21 @@ class TimeAutoCorrelation(TimeCorrelation):
         if mode not in ["half","full"]:
             raise ValueError("`mode` can be only `half` or `full`")
         arr:np.ndarray = super().tcf(axis)
-        if normalize:
-            arr = arr / np.mean(self.A ** 2, axis=axis,keepdims=True)  # normalized to 1
-            assert np.allclose(np.take(arr,0,axis),1), "The auto-correlation function is not normalized to 1"
+        if normalize == "component":
+            norm = np.mean(self.A ** 2, axis=axis,keepdims=True) # normalized to 1 each component
+            arr /= norm 
+            test = np.take(arr,0,axis)
+            assert np.allclose(test,1), "The auto-correlation function is not normalized to 1"
+            self._norm = norm
+        elif normalize == "all":
+            norm = np.sum(np.mean(self.A ** 2, axis=axis),axis=axis_sum) # normalized to 1 the sum fo all the components
+            norm = np.expand_dims(norm, axis=(axis,axis_sum))
+            arr /= norm
+            test = np.sum(np.take(arr,0,axis),axis=axis_sum-1 if axis_sum>axis else axis_sum)
+            assert np.allclose(test,1), "The auto-correlation function is not normalized to 1"
+            self._norm = norm
+        else:
+            pass
         if mode == "half":
             N = int(arr.shape[axis] / 2)  # the second half is noisy
             # arr = arr[:N]      

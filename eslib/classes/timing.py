@@ -71,8 +71,19 @@ class MyClass:
             pass
 
 def main():
+    # Example using the `timing` class as a method decorator
     instance = MyClass()
-    instance.my_method()
+    instance.my_method()  # This will print the elapsed time for `my_method` if enabled=True
+
+    # Example using the `timing` class as a context manager
+    with timing(enabled=True):
+        # Code block to be timed
+        total = sum(i for i in range(1000000))
+        print(f"Total: {total}")
+
+if __name__ == "__main__":
+    main()
+
 
 if __name__ == "__main__":
     main()

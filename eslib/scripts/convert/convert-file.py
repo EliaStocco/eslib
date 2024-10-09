@@ -5,7 +5,7 @@ from classes.atomic_structures import AtomicStructures
 import numpy as np
 import os
 from eslib.formatting import esfmt, warning, error
-from eslib.input import str2bool
+from eslib.input import str2bool, itype
 from eslib.functions import suppress_output
 from eslib.tools import convert
 from eslib.classes.aseio import integer_to_slice_string
@@ -21,8 +21,6 @@ keywords = "It's up to you to modify the required keywords."
 # If the parser used in ASE automatically modify the unit of the cell and/or positions,
 # then you should add this file format to the list at line 55 so that the user will be warned.
 #---------------------------------------#
-def itype(x:str):
-    return int(x) if x.isdigit() else x
 
 #---------------------------------------#
 def prepare_args(description):

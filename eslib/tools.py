@@ -512,3 +512,27 @@ def w2_to_w(w2: np.ndarray) -> np.ndarray:
     """
     return np.sqrt(np.absolute(w2)) * np.sign(w2)
 
+
+def FWHM2sigma(FWHM: float) -> float:
+    """
+    Convert FWHM to sigma.
+
+    Args:
+        FWHM (float): FWHM.
+
+    Returns:
+        float: Sigma.
+    """
+    return FWHM / (2*np.sqrt(2*np.log(2)))
+
+def sigma2FWHM(sigma: float) -> float:
+    """
+    Convert sigma to FWHM.
+
+    Args:
+        sigma (float): Sigma.
+
+    Returns:
+        float: FWHM.
+    """
+    return 2*np.sqrt(2*np.log(2)) * sigma

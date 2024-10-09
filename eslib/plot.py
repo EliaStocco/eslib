@@ -4,6 +4,65 @@ import matplotlib.pyplot as plt
 from itertools import product
 from matplotlib.colors import Normalize, LinearSegmentedColormap
 
+def draw_sphere(ax, center, radius, color='blue',**kwargs):
+    """
+    Draws a sphere on the given axis.
+
+    Parameters:
+    ax : Axes3D
+        The 3D axis to draw the sphere on.
+    center : list
+        The [x, y, z] coordinates of the sphere's center.
+    radius : float
+        The radius of the sphere.
+    color : str
+        The color of the sphere.
+    """
+    # Create a grid of points for the sphere
+    u = np.linspace(0, 2 * np.pi, 100)  # Azimuthal angle
+    v = np.linspace(0, np.pi, 100)       # Polar angle
+    x = center[0] + radius * np.outer(np.cos(u), np.sin(v))  # X coordinates
+    y = center[1] + radius * np.outer(np.sin(u), np.sin(v))  # Y coordinates
+    z = center[2] + radius * np.outer(np.ones(np.size(u)), np.cos(v))  # Z coordinates
+
+    # Plot the surface of the sphere
+    ax.plot_surface(x, y, z, color=color, edgecolor='none', alpha=1,**kwargs)
+    
+# Cube specifications
+def draw_cube(ax, position, length):
+    """
+    Draws a cube on the given axis.
+
+    Parameters:
+    ax : Axes3D
+        The 3D axis to draw the cube on.
+    position : list
+        The [x, y, z] coordinates of the cube's bottom-left-back corner.
+    length : float
+        The length of the cube's edges.
+    """
+    # Calculate the vertices of the cube
+    l = length / 2
+    cube_vertices = np.array([
+        [position[0] - l, position[1] - l, position[2] - l],
+        [position[0] - l, position[1] - l, position[2] + l],
+        [position[0] - l, position[1] + l, position[2] - l],
+        [position[0] - l, position[1] + l, position[2] + l],
+        [position[0] + l, position[1] - l, position[2] - l],
+        [position[0] + l, position[1] - l, position[2] + l],
+        [position[0] + l, position[1] + l, position[2] - l],
+        [position[0] + l, position[1] + l, position[2] + l]
+    ])
+
+    # Define the 12 edges of the cube
+    cube_edges = [
+        (0, 1), (0, 2), (0, 4), (1, 3), (1, 5), (2, 3),
+        (2, 6), (3, 7), (4, 5), (4, 6), (5, 7), (6, 7)
+    ]
+
+    # Plot cube edges
+    for edge in cube_edges:
+        ax.plot3D(*zip(cube_vertices[edge[0]], cube_vertices[edge[1]]), color="black",linewidth=1)
 
 legend_options = {
     "facecolor":'white', 

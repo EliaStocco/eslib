@@ -4,6 +4,10 @@ import re
 import ast
 
 #---------------------------------------#
+def itype(x:str):
+    return int(x) if x.isdigit() else x
+
+#---------------------------------------#
 def literal(value):
     return ast.literal_eval(value)
 
@@ -53,3 +57,4 @@ def nested_list_type(s: str, dtype=int):
 
 # nested int list
 nilist = lambda s: nested_list_type(s, int)
+nslist = lambda s: nested_list_type(s, str)
