@@ -93,9 +93,10 @@ def add_conversion(family:str,unit:str,value:float)->None:
 value = convert(1,"charge","coulomb","atomic_unit")/( convert(1,"length","meter","atomic_unit")**2)
 add_conversion("polarization","C/m^2",value)
 
-value = convert(1,"electric-field","V/ang","atomic_unit")*convert(1,"length","centimeter","angstrom")# *convert(1,"length","centimeter","atomic_unit"))
-add_conversion("electric-field","V/cm",value)
-add_conversion("electric-field","MV/cm",1e6*value)
+# value = convert(1,"electric-field","V/ang","atomic_unit")*convert(1,"length","centimeter","angstrom")# *convert(1,"length","centimeter","atomic_unit"))
+# add_conversion("electric-field","V/cm",value)
+value = convert(1,"electric-field","V/ang","atomic_unit")
+add_conversion("electric-field","MV/cm",1e-2*value)
 
 #---------------------------------------#
 # Decorator to convert ase.Cell to np.array and transpose
@@ -511,28 +512,3 @@ def w2_to_w(w2: np.ndarray) -> np.ndarray:
         np.ndarray: Corresponding frequencies.
     """
     return np.sqrt(np.absolute(w2)) * np.sign(w2)
-
-
-def FWHM2sigma(FWHM: float) -> float:
-    """
-    Convert FWHM to sigma.
-
-    Args:
-        FWHM (float): FWHM.
-
-    Returns:
-        float: Sigma.
-    """
-    return FWHM / (2*np.sqrt(2*np.log(2)))
-
-def sigma2FWHM(sigma: float) -> float:
-    """
-    Convert sigma to FWHM.
-
-    Args:
-        sigma (float): Sigma.
-
-    Returns:
-        float: FWHM.
-    """
-    return 2*np.sqrt(2*np.log(2)) * sigma
