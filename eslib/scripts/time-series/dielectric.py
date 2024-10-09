@@ -11,6 +11,8 @@ from eslib.tools import convert
 # Description of the script's purpose
 description = "Compute the frequency dependent electric susceptibility (defined as dielectric constant -1) from a dipole time series."
 
+documentation = "It's better that in `tacf.py` you used:\n - `--derivative true`\n - `--normalize anti-derivative-all`"
+
 alpha = 0.5
 
 #---------------------------------------#
@@ -19,7 +21,10 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i"  , "--input"       , **argv, required=True , type=str     , help="txt/npy input file with the dipole TACF")
+    parser.add_argument("-n" , "--normalize" , **argv, required=False, type=str2bool, help="whether to normalize the autocorrelation (default: %(default)s)", default=False)
     parser.add_argument("-id" , "--input_dipole", **argv, required=False, type=str     , help="txt/npy input file with the dipoles (provide only if TACF was not normalized)", default=None)
+    parser.add_argument("-in" , "--input_norm", **argv, required=False, type=str       , help="txt/npy input file with the normalizing constant (default: %(default)s)", default=None)
+    parser.add_argument("-rz"  , "--remove_zero", **argv, required=False, type=str2bool, help="remove zero frequency contribution (default: %(default)s)", default=True)
     parser.add_argument("-o"  , "--output"      , **argv, required=False, type=str     , help="output file with the freq. dep. dielectric constant (default: %(default)s)", default="dielectric.txt")
     parser.add_argument("-dt" , "--time_step"   , **argv, required=False, type=float   , help="time step [fs] (default: %(default)s)", default=1)
     parser.add_argument("-d"  , "--derivative"  , **argv, required=False, type=str2bool, help="whether the TACF has been computed from time derivatives or dipoles (default: %(default)s)", default=True)
@@ -44,6 +49,11 @@ def main(args):
     autocorr:np.ndarray = PhysicalTensor.from_file(file=args.input).to_data().T
     print("done")
     print("\tautocorr shape: ",autocorr.shape)
+    
+    if args.normalize:
+        print("\tNormalizing the autocorrelation ... ", end="")
+        autocorr = autocorr / autocorr[:,0][:,np.newaxis]
+        print("done")
 
     #------------------#
     if autocorr.ndim == 1:
@@ -62,14 +72,27 @@ def main(args):
 
         #------------------#
         print("\n\tComputing the dipole fluctuations ... ",end="")
-        fluctuation:np.ndarray = np.var(dipoles,axis=args.axis).sum(axis=-1)
+        fluctuation:np.ndarray = np.mean(dipoles**2,axis=args.axis)# .sum(axis=-1)
         print("done")
         print("\tfluctuation shape: ",fluctuation.shape)
-        print("\tfluctuation value: {:.2e} +- {:.2e}".format(fluctuation.mean(),fluctuation.std()))
+        # print("\tfluctuation value: {:.2e} +- {:.2e}".format(fluctuation.mean(),fluctuation.std()))
     else:
         print("\n\tTACF is supposed to be normalized and no dipole fluctuations will be computed.")
         # assert np.allclose(autocorr[0,:],3), "TACF is supposed to be normalized."
-        fluctuation = np.zeros(1)
+        fluctuation = None
+        
+    if args.input_norm is not None:
+        print("\n\tReading the normalization constants from file '{:s}' ... ".format(args.input_norm), end="")
+        norm = np.loadtxt(args.input_norm)
+        print("done")
+    else:
+        norm = None
+        
+    if norm is not None and fluctuation is not None:
+        assert np.allclose(fluctuation,norm), "Normalization constants are not consistent with the dipole fluctuations."
+        
+    if fluctuation is None and norm is not None:
+        fluctuation = norm
 
     #------------------#
     print("\n\tComputing the spectrum ... ", end="")
@@ -82,16 +105,40 @@ def main(args):
     print("\n\tComputing the whole spectrum ... ", end="")
     # spectrum = fluctuation[:,np.newaxis] + 1.j 2*np.pi * freq * spectrum
     omega = 2*np.pi*freq#/args.time_step
-    phases = np.exp(1.j*2*np.pi*freq)-1
+    # phases = np.exp(1.j*2*np.pi*freq)-1
     
-    if args.derivative:
-        # spectrum = fluctuation[:,np.newaxis] + 1.j* omega * spectrum / (phases*np.conjugate(phases))
-        with np.errstate(divide='ignore', invalid='ignore'):
-            spectrum = fluctuation[:,np.newaxis] + 1.j * np.divide(spectrum , omega)
-        # spectrum = 1 + 1.j * spectrum / omega
+    if args.remove_zero:
+        if fluctuation is not None:
+            raise ValueError("Do not provide fluctuation when removing zero frequency.")
+            return -1
+        if args.derivative:
+            with np.errstate(divide='ignore', invalid='ignore'):
+                spectrum = 1.j * np.divide(spectrum , omega)
+                # spectrum -= np.mean(spectrum[:,1].real)# [:,np.newaxis]
+        else:
+            spectrum = 1.j* omega*spectrum * fluctuation
+            # spectrum -= np.mean(spectrum[:,0].real)# [:,np.newaxis]
     else:
-        # spectrum = fluctuation[:,np.newaxis] + 1.j* omega * spectrum
-        spectrum = (1 + 1.j* omega*spectrum) * fluctuation[:,np.newaxis]
+    
+        if args.derivative:
+            # spectrum = fluctuation[:,np.newaxis] + 1.j* omega * spectrum / (phases*np.conjugate(phases))
+            with np.errstate(divide='ignore', invalid='ignore'):
+                spectrum = 1 +1.j * np.divide(spectrum , omega)
+            if fluctuation is not None:
+                fluctuation = np.sum(fluctuation,axis=-1)[:,np.newaxis]
+                spectrum *= fluctuation
+            # else:
+            #     fluctuation = fluctuation[:,np.newaxis]
+            
+            #     spectrum = fluctuation + tmp
+            #     # plt.plot(np.mean(spectrum,axis=0).real,color="red")
+            #     # plt.plot(np.mean(spectrum,axis=0).imag,color="blue")
+            #     # plt.show()
+            # # spectrum = 1 + 1.j * spectrum / omega
+        else:
+            # spectrum = fluctuation[:,np.newaxis] + 1.j* omega * spectrum
+            spectrum = (1 + 1.j* omega*spectrum) * fluctuation
+            
     print("done")
     print("\tspectrum shape: :",spectrum.shape)
 
@@ -177,7 +224,7 @@ def main(args):
         ax.fill_between(freq_filtered,ylow_filtered.imag,yhigh_filtered.imag, color='gray', alpha=0.8)#, label='$\\rm \\mathcal{Im}\\left[ \\epsilon \\left(\\omega\\right)\\pm\\sigma\\left(\\omega\\right)\\right]$')
         # ylow,yhigh = spectrum - 2*std, spectrum + 2*std
         # ax.fill_between(freq,ylow,yhigh, color='gray', alpha=0.5, label='$\\pm2\\sigma$')
-        ax.legend(loc="upper left",facecolor='white', framealpha=1,edgecolor="black")
+        ax.legend(facecolor='white', framealpha=1,edgecolor="black") #loc="upper left"
         ax.set_xlim(args.xlim[0],args.xlim[1])
         # ax.relim()
         # ax.autoscale_view()

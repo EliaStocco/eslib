@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from random import choice
 import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
@@ -6,7 +7,7 @@ from eslib.mathematics import tacf
 from eslib.plot import hzero
 from eslib.classes.physical_tensor import PhysicalTensor
 from eslib.input import str2bool
-from eslib.formatting import esfmt, warning
+from eslib.formatting import esfmt, warning, float_format
 from eslib.classes.tcf import TimeAutoCorrelation
 
 #---------------------------------------#
@@ -15,23 +16,34 @@ description = "Compute the time autocorrelation function (TACF) of a dipole time
 
 alpha = 0.5
 
+choices = [
+    # applied to the TACF
+    "all"      ,                  # the norm of all the components will be normalized to 1
+    "component",                  # each component will be normalized to one
+    "no"       ,                  # no normalization
+    # applied to the TACF anti-derivative (which is however not computed)
+    "anti-derivative-all" ,       # the norm of all the components will be normalized to 1
+    "anti-derivative-component" , # each component will be normalized to one
+]
+
 #---------------------------------------#
 def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     # I/O
-    parser.add_argument("-i" , "--input"      , **argv, required=True , type=str     , help="txt/npy input file")
-    parser.add_argument("-o" , "--output"     , **argv, required=False, type=str     , help="txt/npy output file (default: %(default)s)", default='tacf.npy')
+    parser.add_argument("-i" , "--input"       , **argv, required=True , type=str     , help="txt/npy input file")
+    parser.add_argument("-o" , "--output"      , **argv, required=False, type=str     , help="txt/npy output file (default: %(default)s)", default='tacf.npy')
     # Calculations
-    parser.add_argument("-dt", "--time_step"  , **argv, required=False, type=float   , help="time step [fs] (default: %(default)s)", default=1)
-    parser.add_argument("-d" , "--derivative" , **argv, required=False, type=str2bool, help="compute derivative of the input data (default: %(default)s)", default=False)
-    parser.add_argument("-n" , "--normalize" , **argv, required=False, type=str2bool, help="whether to normalize the autocorrelation (default: %(default)s)", default=False)
+    parser.add_argument("-dt", "--time_step"   , **argv, required=False, type=float   , help="time step [fs] (default: %(default)s)", default=1)
+    parser.add_argument("-d" , "--derivative"  , **argv, required=False, type=str2bool, help="compute derivative of the input data (default: %(default)s)", default=False)
+    parser.add_argument("-n" , "--normalize"   , **argv, required=False, type=str     , help="whether to normalize the autocorrelation (default: %(default)s)", default="all", choices=choices)
+    parser.add_argument("-on" , "--output_norm", **argv, required=False, type=str     , help="txt/npy output file for the normalizing constant (default: %(default)s)", default='norm.txt')
     # parser.add_argument("-b" , "--blocks"     , **argv, required=False, type=int     , help="number of blocks (default: %(default)s)", default=10)
     parser.add_argument("-ac", "--axis_corr"  , **argv, required=False, type=int     , help="axis along compute autocorrelation (default: %(default)s)", default=1)
     parser.add_argument("-as", "--axis_sum"  , **argv, required=False, type=int     , help="axis along compute the sum (default: %(default)s)", default=2)
-    parser.add_argument("-rm", "--remove_mean", **argv, required=False, type=str2bool, help="whether to remove the mean (default: %(default)s)", default=True)
-    parser.add_argument("-m" , "--method"     , **argv, required=False, type=str     , help="method (default: %(default)s)", default='class', choices=['class','function'])
+    parser.add_argument("-rm", "--remove_mean", **argv, required=False, type=str2bool, help="whether to remove the mean (default: %(default)s)", default=False)
+    # parser.add_argument("-m" , "--method"     , **argv, required=False, type=str     , help="method (default: %(default)s)", default='class', choices=['class','function'])
     # Plot
     parser.add_argument("-p" , "--plot"       , **argv, required=False, type=str     , help="output file for the plot (default: %(default)s)", default=None)
     parser.add_argument("-tm", "--tmax"       , **argv, required=False, type=float   , help="max time in TACF plot [fs] (default: %(default)s)", default=None)
@@ -99,6 +111,30 @@ def main(args):
         print("\n\tRemoving mean ... ",end="")
         data -= np.mean(data,axis=args.axis_corr,keepdims=True)
         print("done")
+        
+    #------------------#
+    if args.normalize in ["anti-derivative-all","anti-derivative-component"]:
+        print("\n\tComputing the norm of the data ... ",end="")
+        if args.normalize == "anti-derivative-all":
+            norm = np.mean(data ** 2, axis=args.axis_corr,keepdims=True)
+        elif args.normalize == "anti-derivative-component":
+            norm = np.mean(data ** 2, axis=args.axis_corr,keepdims=True).sum(axis=1)
+        print("done")
+        print("\tnorm shape: ",norm.shape)
+        
+        print("\tNormalizing data ... ",end="")
+        data /= norm
+        print("done")
+        print("\tdata shape: ",data.shape)
+        
+        if args.output_norm is not None:
+            print("\n\tSqueezing the normalizing constant ... ",end="")
+            norm = np.squeeze(norm)
+            print("done")
+            print("\tnorm shape: ",norm.shape)
+            print("\tWriting the normalizing constant to file '{:s}' ... ".format(args.output_norm),end="")
+            np.savetxt(args.output_norm,norm,fmt=float_format)
+            print("done")
 
     #------------------#
     if args.derivative:
@@ -109,13 +145,19 @@ def main(args):
 
     #------------------#
     print("\n\tComputing the autocorrelation function ... ", end="")
-    if args.method == "function":
-        autocorr = tacf(data)
-    else:
-        obj = TimeAutoCorrelation(data)
-        autocorr = obj.tcf(axis=args.axis_corr,normalize=args.normalize)
+    # if args.method == "function":
+    #     autocorr = tacf(data)
+    # else:
+    # normalize = args.normalize in ["all","component"] 
+    obj = TimeAutoCorrelation(data)
+    autocorr = obj.tcf(axis=args.axis_corr,normalize=args.normalize)
+    
+    # if args.normalize == "all":
+    #     autocorr /= autocorr.sum(axis=args.axis_sum,keepdims=True)
     print("done")
     print("\tautocorr shape: ",autocorr.shape)
+    if args.normalize:
+        print("\t{:s}: the normalizing constant is not printed to file.".format(warning))
 
     #------------------#
     if not args.normalize and not args.derivative:
@@ -202,6 +244,7 @@ def main(args):
         window = np.zeros(raw_autocorr.shape[args.axis_corr])
         M = int(args.window_t / args.time_step)
         window[:M] = func(2*M)[M:]
+        window /= window[0] # small correction so that the first value is 1
         # window = np.atleast_2d(window)
         print("done")
         print("\twindow shape: ",window.shape)
@@ -227,7 +270,7 @@ def main(args):
             axes[2].fill_between(x,ylow,yhigh, color='gray', alpha=alpha, label='$f_{\\rm cleaned}\\pm\\sigma$')
             axes[2].legend(loc="upper right",facecolor='white', framealpha=1,edgecolor="black")
             # window
-            axes[2].plot(x,window,  color="black",label='window')
+            axes[2].plot(x,window*autocorr.max(),  color="black",label='window')
 
 
     #------------------#

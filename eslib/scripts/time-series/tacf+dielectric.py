@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 import numpy as np
-from scipy.optimize import curve_fit
-import matplotlib.pyplot as plt
-from eslib.plot import hzero
 from eslib.classes.physical_tensor import PhysicalTensor
-from eslib.input import str2bool
-from eslib.formatting import esfmt, warning, float_format
+from eslib.formatting import esfmt
 from eslib.classes.tcf import TimeAutoCorrelation
 from eslib.classes.tcf import  compute_spectrum, get_freq
 from eslib.tools import convert
-import matplotlib
-# matplotlib.use('Agg')
+from eslib.input import str2bool
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -21,25 +16,17 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    # I/O
-    parser.add_argument("-i" , "--input"       , **argv, required=True , type=str     , help="txt/npy input file")
-    parser.add_argument("-o" , "--output"      , **argv, required=False, type=str     , help="txt/npy output file (default: %(default)s)", default='dielectric.txt')
-    # Calculations
-    parser.add_argument("-dt", "--time_step"   , **argv, required=False, type=float   , help="time step [fs] (default: %(default)s)", default=1)
-    # parser.add_argument("-d" , "--derivative"  , **argv, required=False, type=str2bool, help="compute derivative of the input data (default: %(default)s)", default=True)
-    parser.add_argument("-pad", "--padding"     , **argv, required=False, type=int     , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
-    # parser.add_argument("-on" , "--output_norm", **argv, required=False, type=str     , help="txt/npy output file for the normalizing constant (default: %(default)s)", default='norm_der.txt')
-    # parser.add_argument("-b" , "--blocks"     , **argv, required=False, type=int     , help="number of blocks (default: %(default)s)", default=10)
-    parser.add_argument("-as", "--axis_samples"  , **argv, required=False, type=int     , help="axis corresponding to independent trajectories/samples (default: %(default)s)", default=0)
-    parser.add_argument("-at", "--axis_time"  , **argv, required=False, type=int     , help="axis corresponding to time (default: %(default)s)", default=1)
-    parser.add_argument("-ac", "--axis_components"  , **argv, required=False, type=int     , help="axis corresponding to dipole components (default: %(default)s)", default=2)
-    # parser.add_argument("-rm", "--remove_mean", **argv, required=False, type=str2bool, help="whether to remove the mean (default: %(default)s)", default=False)
-    # parser.add_argument("-m" , "--method"     , **argv, required=False, type=str     , help="method (default: %(default)s)", default='class', choices=['class','function'])
-    # Plot
-    parser.add_argument("-fu" , "--freq_unit"   , **argv, required=False, type=str     , help="unit of the frequency in IR plot and output file (default: %(default)s)", default="inversecm")
-    # Window and padding
-    parser.add_argument("-w"   , "--window"   , **argv, required=False, type=str     , help="window type (default: %(default)s)", default='hanning', choices=['none','barlett','blackman','hamming','hanning','kaiser'])
-    parser.add_argument("-wt"  , "--window_t" , **argv, required=False, type=int     , help="time span of the window [fs] (default: %(default)s)", default=5000)
+    parser.add_argument("-i"  , "--input"          , **argv, required=True , type=str     , help="txt/npy input file")
+    parser.add_argument("-o"  , "--output"         , **argv, required=False, type=str     , help="txt/npy output file (default: %(default)s)", default='dielectric.txt')
+    parser.add_argument("-dt" , "--time_step"      , **argv, required=False, type=float   , help="time step [fs] (default: %(default)s)", default=1)
+    parser.add_argument("-d"  , "--delta"          , **argv, required=False, type=str2bool, help="wheter to return the difference w.r.t. the zero frequency contribution (default: %(default)s)", default=True)
+    parser.add_argument("-pad", "--padding"        , **argv, required=False, type=int     , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
+    parser.add_argument("-as" , "--axis_samples"   , **argv, required=False, type=int     , help="axis corresponding to independent trajectories/samples (default: %(default)s)", default=0)
+    parser.add_argument("-at" , "--axis_time"      , **argv, required=False, type=int     , help="axis corresponding to time (default: %(default)s)", default=1)
+    parser.add_argument("-ac" , "--axis_components", **argv, required=False, type=int     , help="axis corresponding to dipole components (default: %(default)s)", default=2)
+    parser.add_argument("-fu" , "--freq_unit"      , **argv, required=False, type=str     , help="unit of the frequency in IR plot and output file (default: %(default)s)", default="inversecm")
+    parser.add_argument("-w"  , "--window"         , **argv, required=False, type=str     , help="window type (default: %(default)s)", default='hanning', choices=['none','barlett','blackman','hamming','hanning','kaiser'])
+    parser.add_argument("-wt" , "--window_t"       , **argv, required=False, type=int     , help="time span of the window [fs] (default: %(default)s)", default=5000)
     return parser
     
 #---------------------------------------#
@@ -56,24 +43,30 @@ def main(args):
     print("\tdata shape: ",data.shape)
     
     #------------------#
-    # norm_der is the average value of the time derivative of the dipole
-    print("\n\tComputing the average value of the dipole squared ... ",end="")
-    norm_dip = np.mean(data ** 2, axis=args.axis_time,keepdims=True)# *data.shape[args.axis_components]
-    # norm_dip = np.squeeze(norm_dip)
-    norm_dip = float(np.mean(np.sum(norm_dip,axis=args.axis_components)))
+    # This is strictly necessary 
+    print("\n\tRemoving the mean ... ",end="")
+    data -= np.mean(data, axis=args.axis_time,keepdims=True)
     print("done")
-    print("\tdipole square: ",norm_dip)
-    data /= np.sqrt(norm_dip)
+    
+    # #------------------#
+    # # norm is the average value of the time derivative of the dipole
+    # print("\n\tComputing the average value of the dipole squared ... ",end="")
+    # norm_dip = np.mean(data ** 2, axis=args.axis_time,keepdims=True)# *data.shape[args.axis_components]
+    # # norm_dip = np.squeeze(norm_dip)
+    # norm_dip = float(np.mean(np.sum(norm_dip,axis=args.axis_components)))
+    # print("done")
+    # print("\tdipole square: ",norm_dip)
+    # data /= np.sqrt(norm_dip)
     
     # obj = TimeAutoCorrelation(data)
     # autocorr = obj.tcf(axis=args.axis_time)
     # np.mean(np.sum(autocorr,axis=2),axis=0)[0] == 1
 
-    #------------------#
-    print("\n\tComputing the derivative ... ",end="")
-    data = np.gradient(data,axis=args.axis_time)/args.time_step
-    print("done")
-    print("\tdata shape: ",data.shape)    
+    # #------------------#
+    # print("\n\tComputing the derivative ... ",end="")
+    # data = np.gradient(data,axis=args.axis_time)/args.time_step
+    # print("done")
+    # print("\tdata shape: ",data.shape)    
 
     #------------------#
     print("\n\tComputing the autocorrelation function ... ", end="")
@@ -84,21 +77,22 @@ def main(args):
 
     #------------------#
     print("\n\tComputing the average value of the time derivative of the dipole squared ... ",end="")
-    # norm_der is the average value of the time derivative of the dipole
-    norm_der = np.mean(data ** 2, axis=args.axis_time,keepdims=True)# *data.shape[args.axis_components]
+    # norm is the average value of the time derivative of the dipole
+    norm = np.mean(data ** 2, axis=args.axis_time,keepdims=True)# *data.shape[args.axis_components]
+    norm = np.sum(norm,axis=args.axis_components,keepdims=True)
     print("done")
-    print("\tnorm shape: ",norm_der.shape)
+    print("\tnorm shape: ",norm.shape)
     
     print("\tNormalizing autocorr ... ",end="")
-    autocorr /= norm_der
+    autocorr /= norm
     print("done")
     print("\tautocorr shape: ",autocorr.shape)
     
     #------------------#
     print("\tComputing normalizing factor ... ",end="")
-    norm_der = float(np.mean(np.sum(norm_der,axis=args.axis_components)))
+    norm = float(np.mean(np.sum(norm,axis=args.axis_components)))
     print("done")
-    print("\tnormalizing factor: ",norm_der)
+    print("\tnormalizing factor: ",norm)
 
     #------------------#
     if args.axis_components is not None:
@@ -154,19 +148,23 @@ def main(args):
     print("\n\tComputing the whole spectrum ... ", end="")
     omega = 2*np.pi*freq
     with np.errstate(divide='ignore', invalid='ignore'):
-        spectrum = 1.j * np.divide(spectrum , omega) 
+        spectrum = 1.j * np.multiply(np.conjugate(spectrum) , omega) 
     print("done")
     print("\tspectrum shape: :",spectrum.shape)
     
     #------------------#
-    print("\n\tMultiplying the spectrum by the normalizing factor  ... ", end="")
-    spectrum *= norm_der
-    print("done")
+    if not args.delta:
+        spectrum += 1
     
     #------------------#
-    print("\n\tMultiplying the spectrum by the average value of the dipole squared  ... ", end="")
-    spectrum *= norm_dip
+    print("\n\tMultiplying the spectrum by the normalizing factor  ... ", end="")
+    spectrum = spectrum * norm
     print("done")
+    
+    # #------------------#
+    # print("\n\tMultiplying the spectrum by the average value of the dipole squared  ... ", end="")
+    # spectrum *= norm_dip
+    # print("done")
 
    #------------------#
     print("\n\tComputing the average over the trajectories ... ", end="")

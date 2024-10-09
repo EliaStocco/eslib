@@ -86,6 +86,16 @@ def main(args):
     print("\tspectrum shape: :",spectrum.shape)
 
     assert spectrum.ndim == 1, "the spectrum does not have 1 dimension"
+    
+    if args.normalize:
+        print("\n\tNormalizing the spectra ... ", end="")
+        factor   = np.max(spectrum)
+        spectrum = spectrum/factor
+        # std      = np.divide(std,factor)
+        print("done")
+        print("\tspectrum shape: :",spectrum.shape)    
+
+        # assert np.allclose(np.max(spectrum,axis=args.axis),1), "the spectra are not normalized"
 
     #------------------#
     print("\n\tComputing the frequencies ... ", end="")
@@ -127,8 +137,8 @@ def main(args):
         # ax.set_ylim(0,None)
         ax.set_xlim(args.xlim[0],args.xlim[1])
         ax.set_ylim(args.ylim[0],args.ylim[1])
-        if args.normalize:
-            ax.set_yticks(np.arange(0,1.001,0.2))
+        # if args.normalize:
+        #     ax.set_yticks(np.arange(0,1.001,0.2))
         ax.set_ylabel("spectrum [arb. units]")
         ax.set_xlabel(f"frequency [{args.freq_unit}]")        
         ax.grid()
