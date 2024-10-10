@@ -25,6 +25,7 @@ class Constants(object):
 
 
 # these are the conversion FROM the unit stated to internal (atomic) units
+# "angstrom": 1.8897261 MEANS 1 angstrom = 1.8897261 atomic_unit
 UnitMap = {
     "undefined": {"": 1.00, "automatic": 1.00, "atomic_unit": 1.00},
     "energy": {
@@ -60,7 +61,8 @@ UnitMap = {
         "hz": 1.5198298e-16,
         "thz": 1.5198298e-4,
     },
-    "electric-field": {  # Hartree/Bohr radius
+    "electric-field": {  # Hartree/Bohr radius\
+        # https://physics.nist.gov/cgi-bin/cuu/Value?auefld
         # 1Hartree = 27.2113862459 eV
         #    1Bohr = 0.5291772109  A
         "": 1.00,

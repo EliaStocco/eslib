@@ -3,7 +3,7 @@ from ase.io import read
 from eslib.formatting import esfmt
 from eslib.input import str2bool
 from ase.calculators.socketio import SocketClient
-from eslib.drivers.LJwall_calculator import LennardJonesWall
+from eslib.classes.potentials.LJwall_calculator import LennardJonesWall
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -17,7 +17,7 @@ def prepare_args(description):
     parser.add_argument("-s" , "--structure"   , **argv, required=True , type=str     , help="file with the atomic structure")
     parser.add_argument("-f" , "--format"      , **argv, required=False, type=str     , help="file format of the atomic structure (default: %(default)s)" , default=None)
     parser.add_argument("-i" , "--instructions", **argv, required=True , type=str     , help="file with the instuctions for the calulator")
-    parser.add_argument("-l" , "--logger"     , **argv, required=False, type=str     , help="logging file (default: %(default)s)", default=None)
+    parser.add_argument("-l" , "--logger"      , **argv, required=False, type=str     , help="logging file (default: %(default)s)", default=None)
     parser.add_argument("-p" , "--port"        , **argv, required=False, type=int     , help="TCP/IP port number. Ignored when using UNIX domain sockets.")
     parser.add_argument("-a" , "--address"     , **argv, required=True , type=str     , help="Host name (for INET sockets) or name of the UNIX domain socket to connect to.")
     parser.add_argument("-u" , "--unix"        , **argv, required=False, type=str2bool, help="Use a UNIX domain socket (default: %(default)s)", default=False)

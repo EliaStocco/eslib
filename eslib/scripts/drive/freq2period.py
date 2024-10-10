@@ -12,9 +12,9 @@ def prepare_parser(description):
     import argparse
     argv = {"metavar" : "\b",}
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("-w" , "--omega"      , required=True , type=float, help="angular frequency", default="input.xml")
-    parser.add_argument("-wu", "--omega_unit" , required=False, type=str  , help="angular frequency unit (default: %(default)s)", default="THz")
-    parser.add_argument("-tu", "--period_unit", required=False, type=str  , help="period unit (default: %(default)s)", default="femtosecond")
+    parser.add_argument("-w" , "--omega"      , **argv, required=True , type=float, help="angular frequency", default="input.xml")
+    parser.add_argument("-wu", "--omega_unit" , **argv, required=False, type=str  , help="angular frequency unit (default: %(default)s)", default="THz")
+    parser.add_argument("-tu", "--period_unit", **argv, required=False, type=str  , help="period unit (default: %(default)s)", default="femtosecond")
     return parser
 
 #---------------------------------------#
