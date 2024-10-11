@@ -11,8 +11,9 @@ import functools
 import glob
 from ase.io import read, write, string2index
 from ase.io.netcdftrajectory import read_netcdftrajectory, write_netcdftrajectory
-from eslib.classes.hdf5 import write_hdf5, read_hdf5
-from eslib.classes.netcdf import write_netcdf, read_netcdf
+from eslib.classes.file_formats.hdf5 import write_hdf5, read_hdf5
+from eslib.classes.file_formats.netcdf import write_netcdf, read_netcdf
+from eslib.classes.file_formats.pdb import read_pdb
 # from classes.trajectory import AtomicStructures
 from eslib.classes.io import pickleIO
 from eslib.tools import convert
@@ -212,6 +213,8 @@ class aseio(List[Atoms], pickleIO):
         elif format.lower() in ["netcdf"]: 
             warn("NetCDF trajectory format is deprecated. Use 'hdf5/h5' format instead.",DeprecationWarning)
             traj = read_netcdf(file)
+        elif format.lower() in ["pdb"]:
+            traj = [read_pdb(file)]
         else:
             traj = read_trajectory(**argv)
         return cls(traj)
