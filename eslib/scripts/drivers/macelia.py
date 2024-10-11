@@ -18,6 +18,8 @@ choices = ["foundation_mp","mp","mace_mp",\
            "foundation_off","off","mace_off",\
             "eslib","MACE", "MACElia"  ]
 
+CHECK_QS = False
+
 #---------------------------------------#
 def prepare_args(description):
     import argparse
@@ -83,7 +85,11 @@ def main(args):
         print("\tLoading eslib MACE model from file '{:s}' ... ".format(args.model), end="")
         calculator = MACEModel.from_pickle(args.model)
         try:
-            calculator.to(device=args.device,dtype=args.dtype)
+            calculator.to(device=args.device)
+        except:
+            pass
+        try:
+            calculator.to(dtype=args.dtype)
         except:
             pass
         
@@ -119,9 +125,10 @@ def main(args):
             pass
         
     #------------------#
-    if hasattr(calculator,"charges_key"):
-        if calculator.charges_key not in atoms.arrays:
-            raise ValueError("The atomic structures do not have the key '{:s}'".format(calculator.charges_key))
+    if CHECK_QS:
+        if hasattr(calculator,"charges_key"):
+            if calculator.charges_key not in atoms.arrays:
+                raise ValueError("The atomic structures do not have the key '{:s}'".format(calculator.charges_key))
 
     atoms.calc = calculator # atoms.set_calculator(calculator)
 
