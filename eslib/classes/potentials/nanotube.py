@@ -8,6 +8,8 @@ from eslib.tools import convert
 from dataclasses import dataclass
 from ase.io import write
 
+DTYPE = torch.float64
+
 def distance_from_line(point: torch.Tensor, direction: torch.Tensor, pos: torch.Tensor, is_normalized: bool = False) -> torch.Tensor:
     """
     Compute the distance of a set of points from a line defined by a point and a direction.
@@ -50,12 +52,12 @@ class NanoTube:
         """
         self.device       = torch.device('cuda' if torch.cuda.is_available() and str(self.device).lower() == "cuda" else 'cpu')
         
-        self.point        = torch.tensor(self.point, requires_grad=False, dtype=torch.float, device=self.device)
-        self.direction    = torch.tensor(self.direction, requires_grad=False, dtype=torch.float, device=self.device)
+        self.point        = torch.tensor(self.point, requires_grad=False, dtype=DTYPE, device=self.device)
+        self.direction    = torch.tensor(self.direction, requires_grad=False, dtype=DTYPE, device=self.device)
         self.direction    = self.direction / torch.linalg.norm(self.direction)
 
         self.degrees      = torch.as_tensor(self.degrees, dtype=torch.int32, device=self.device)
-        self.coefficients = torch.as_tensor(self.coefficients, dtype=torch.float, device=self.device)
+        self.coefficients = torch.as_tensor(self.coefficients, dtype=DTYPE, device=self.device)
         
         assert self.point.shape     == (3,), "Point must be a 3D vector."
         assert self.direction.shape == (3,), "Direction must be a 3D vector."
@@ -104,7 +106,7 @@ class NanoTube:
             tuple: A tuple containing the nanotube potential energy and forces.
         """
         indices = np.isin(atoms.get_chemical_symbols(), self.symbols)
-        positions = torch.tensor(atoms.positions[indices, :], dtype=torch.float64, requires_grad=True, device=self.device)
+        positions = torch.tensor(atoms.positions[indices, :], dtype=DTYPE, requires_grad=True, device=self.device)
         
         potential, forces_ii = self.potential_and_forces(positions)
         forces = np.zeros((atoms.get_global_number_of_atoms(), 3))
