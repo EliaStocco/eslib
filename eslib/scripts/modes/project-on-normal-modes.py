@@ -28,10 +28,6 @@ def prepare_args(description):
 @esfmt(prepare_args,description)
 def main(args):
 
-    print("\tReading trajectory from file '{:s}' ... ".format(args.trajectory), end="")
-    trajectory = AtomicStructures.from_file(file=args.trajectory)
-    print("done")
-
     #---------------------------------------#
     print("\tReading phonon modes from file '{:s}' ... ".format(args.normal_modes), end="")
     with open(args.normal_modes,'rb') as f:
@@ -40,11 +36,21 @@ def main(args):
 
     if type(nm) != NormalModes:
         raise TypeError("Loaded object is of wrong type, it should be a 'NormalModes' object")
+    
+    if nm.reference is None:
+        print(f"\t{warning}: the normal modes file does not have a reference structure.\n\tThe first structure of the trajectory will be used as reference.")
+    else:
+        print("\tThe normal modes file has a reference structure.")
+    
+    #---------------------------------------#
+    print("\n\tReading trajectory from file '{:s}' ... ".format(args.trajectory), end="")
+    trajectory = AtomicStructures.from_file(file=args.trajectory)
+    print("done")
 
     #---------------------------------------#
     # project on phonon modes
-    print("\n\tProjecting the trajectory:")
-    results = nm.project(trajectory,warning)
+    print("\n\tProjecting the trajectory ... ",end="")
+    results = nm.project(trajectory)
     print("done")
     
     #---------------------------------------#
@@ -55,6 +61,11 @@ def main(args):
         # Use pickle.dump() to serialize and save the object to the file
         pickle.dump(results, file)
     print("done")
+    
+    comment_lines = [
+        "# column: normal mode",
+        "# row: MD step"
+    ]
 
     if args.output_folder is not None:
         print("\n\tWriting results to folder '{:s}' in separated csv files:".format(args.output_folder))
@@ -65,7 +76,13 @@ def main(args):
             print("\t\tsaving '{:s}' to file '{:s}' ... ".format(k,file), end="")
             arr = remove_unit(arr)[0]
             df = arr.T.to_pandas()
-            df.to_csv(file,index=False,header=False,na_rep="nan",float_format="%24.16f")
+            
+            # Open the file in write mode
+            with open(file, 'w') as f:
+                # Write the comments first
+                for line in comment_lines:
+                    f.write(line + "\n")
+                df.to_csv(f,index=False,header=False,na_rep="nan",float_format="%24.16f")
             print("done")
 
         print("\n\tHow to read the csv files:")

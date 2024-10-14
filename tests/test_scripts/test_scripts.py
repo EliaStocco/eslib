@@ -162,6 +162,7 @@ torun = {
         "file"   : "convert-file",
         "kwargs"  : {
             "input"              : f"{tmp_folder}/output.h5",   
+            "index"              : "120::10",
             "output"             : f"{tmp_folder}/output.extxyz",    
         },
         "clean" : False

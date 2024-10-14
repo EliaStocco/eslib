@@ -10,7 +10,7 @@ T = TypeVar('T', bound='PhysicalTensor')
 threshold = 1e-18
 
 def all_positive(x):
-    return np.any(np.logical_and( remove_unit(x)[0] < threshold , np.abs(remove_unit(x)[0]) > threshold ))
+    return np.any(np.logical_or( remove_unit(x)[0] < threshold , np.abs(remove_unit(x)[0]) > threshold ))
 
 def corrected_sqrt(x):
     return np.sqrt(np.abs(x)) * np.sign(x)

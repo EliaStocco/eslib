@@ -62,7 +62,7 @@ def main(args):
     
     cell = np.asarray(info['unit_cell']['lattice'])
     sc = np.asarray([a['coordinates']  for a in info['unit_cell']['points']])
-    reference = Atoms(cell=cell,scaled_positions=sc)
+    reference = Atoms(cell=cell,scaled_positions=sc,pbc=True)
     
     print("\n\tPrimitive unit cell: ")
     print("\t - n. of atoms: ",reference.get_global_number_of_atoms())    

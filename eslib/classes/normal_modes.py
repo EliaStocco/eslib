@@ -1,25 +1,22 @@
-import numpy as np
-from copy import copy, deepcopy
-from itertools import product
-# import xarray as xr
-from eslib.functions import get_one_file_in_folder #, nparray2list_in_dict
-from .io import pickleIO
-from warnings import warn
-from eslib.units import *
-from eslib.tools import convert
-import pandas as pd
-from ase import Atoms
-from classes.atomic_structures import AtomicStructures
-from eslib.classes.physical_tensor import *
-from typing import List, Dict, TypeVar
 import pint
 import os
+import numpy as np
+from copy import deepcopy
+from itertools import product
+from warnings import warn
+import pandas as pd
+from ase import Atoms
+from typing import List, Dict, TypeVar
+
+from eslib.classes.io import pickleIO
 from eslib.functional import unsafe, improvable
-from eslib.tools import w2_to_w
-from eslib.tools import is_sorted_ascending, cart2frac
-import warnings
-# Disable all UserWarnings
-warnings.filterwarnings("ignore", category=RuntimeWarning)
+from eslib.tools import is_sorted_ascending, cart2frac, w2_to_w
+from eslib.formatting import warning
+from eslib.classes.physical_tensor import *
+from eslib.units import *
+from eslib.tools import convert
+from eslib.functions import get_one_file_in_folder #, nparray2list_in_dict
+from eslib.classes.atomic_structures import AtomicStructures
 
 T = TypeVar('T', bound='NormalModes')
 
@@ -416,8 +413,8 @@ class NormalModes(pickleIO):
         structure.set_positions(structure.get_positions()+displ.get_positions())
         return structure
 
-    @improvable
-    def project(self:T,trajectory:List[Atoms],warning="**Warning**")->Dict[str,PhysicalTensor]:       
+    # @improvable
+    def project(self:T,trajectory:List[Atoms])->Dict[str,PhysicalTensor]:    
 
         #-------------------#
         # reference position
@@ -478,12 +475,12 @@ class NormalModes(pickleIO):
         # if not np.allclose(mode.data.magnitude,self.mode.data):
         #     raise ValueError("conflict between 'eigvec' and 'mode'")
         
-        #-------------------#
-        # proj should be real
-        if np.any(proj.imag != 0.0):
-            warn("'proj' matrix should be real --> discarding its imaginary part.")
-        # Maybe this should remain complex for Gamma modes
-        proj = proj.real
+        # #-------------------#
+        # # proj should be real
+        # if np.any(proj.imag != 0.0):
+        #     warn("'proj' matrix should be real --> discarding its imaginary part.")
+        # # Maybe this should remain complex for Gamma modes
+        # proj = proj.real
 
 
         # #-------------------#
@@ -568,8 +565,10 @@ class NormalModes(pickleIO):
         else:
             # rectagular matrix
             _A = rbc(mode,mode,"dof") # mode.T @ mode
-            assert np.allclose(np.diag(_A),1), "The matrix should contain normalized vectors."
-            assert np.allclose(_A.data,_A.data.T), "The matrix should be symmetric."
+            _Atmp:np.ndarray = remove_unit(_A)[0].data
+            assert np.allclose(np.diag(_Atmp),1), "The matrix should contain normalized vectors."
+            assert np.allclose(_Atmp,_Atmp.T), "The matrix should be symmetric."
+            del _Atmp
             _b = dot(mode,q,"dof") # rbc(mode,q,"dof")
             displacements = np.linalg.solve(_A.data,_b.data)
 
@@ -583,26 +582,27 @@ class NormalModes(pickleIO):
             raise ValueError("'equipartition' has the wrong unit")
         
         #-------------------#
-        # occupations (in units of hbar)
-        occupation = energy / np.sqrt(w2)
-        occupation /= atomic_unit["action"]
-        if not check_dim(occupation,'[]'):
-            raise ValueError("'occupation' has the wrong unit")
-        
-        #-------------------#
-        w = np.sqrt(w2)
+        w = w2_to_w(w2)
         if not check_dim(w,"1/[time]"):
             raise ValueError("'w' has the wrong unit")
         
         #-------------------#
-        # phases (angles variables of the harmonic oscillators, i.e. the vib. modes)
-        phases = np.arctan2(-vn, w*qn)
-        if not check_dim(phases,"[]"):
-            raise ValueError("'phases' has the wrong unit")
+        # occupations (in units of hbar)
+        occupation = energy / w
+        occupation /= atomic_unit["action"]
+        if not check_dim(occupation,'[]'):
+            raise ValueError("'occupation' has the wrong unit")
+        
+        # #-------------------#
+        # # phases (angles variables of the harmonic oscillators, i.e. the vib. modes)
+        # phases = np.arctan2(-vn, w*qn)
+        # if not check_dim(phases,"[]"):
+        #     raise ValueError("'phases' has the wrong unit")
 
         #-------------------#
         # output
         out = {
+            "total-energy"  : energy.sum(axis=0),
             "energy"        : energy,
             "kinetic"       : K,
             "potential"     : U,
