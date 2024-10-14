@@ -3,7 +3,7 @@ from ase.io import write
 import numpy as np
 import json
 from ase import Atoms
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, warning, float_format
 from eslib.physics import bec_from_oxidation_number
 

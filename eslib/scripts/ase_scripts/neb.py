@@ -3,7 +3,7 @@ from eslib.formatting import esfmt
 from eslib.input import str2bool
 from ase import Atoms
 import json
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.show import show_dict
 from ase.calculators.socketio import SocketIOCalculator
 from ase.optimize import BFGS

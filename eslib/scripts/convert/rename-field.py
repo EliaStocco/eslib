@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from ase.io import write
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, error
 
 #---------------------------------------#

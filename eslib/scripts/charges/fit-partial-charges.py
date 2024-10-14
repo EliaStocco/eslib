@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 from eslib.classes.models.dipole import DipolePartialCharges
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.metrics import metrics
 from scipy.optimize import minimize

@@ -2,7 +2,7 @@
 from ase.io import write
 import numpy as np
 from ase import Atoms
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.tools import convert
 

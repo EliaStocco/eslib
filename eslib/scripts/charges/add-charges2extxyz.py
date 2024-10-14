@@ -2,7 +2,7 @@
 import json
 import numpy as np
 from eslib.classes.models.dipole import DipolePartialCharges
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, warning
 from eslib.show import show_dict
 from eslib.tools import is_integer

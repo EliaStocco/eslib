@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import json
 import numpy as np
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.classes.bec import bec
 

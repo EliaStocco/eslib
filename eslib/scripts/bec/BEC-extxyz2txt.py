@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from ase.io import write
 from ase import Atoms
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, warning, dec_format
 from eslib.tools import convert
 from eslib.input import str2bool

@@ -14,7 +14,7 @@ from ase.io.netcdftrajectory import read_netcdftrajectory, write_netcdftrajector
 from eslib.classes.file_formats.hdf5 import write_hdf5, read_hdf5
 from eslib.classes.file_formats.netcdf import write_netcdf, read_netcdf
 from eslib.classes.file_formats.pdb import read_pdb
-# from classes.trajectory import AtomicStructures
+# from eslib.classes.trajectory import AtomicStructures
 from eslib.classes.io import pickleIO
 from eslib.tools import convert
 from eslib.functions import extract_number_from_filename
@@ -152,7 +152,7 @@ def file_pattern(method: M) -> M:
                 # Initialize a list to hold results from each file
                 structures = [None] * len(matched_files)
 
-                from classes.atomic_structures import AtomicStructures            
+                from eslib.classes.atomic_structures import AtomicStructures            
                 # Process each matched file
                 N = len(matched_files)
                 print()

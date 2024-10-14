@@ -4,7 +4,7 @@ import pickle
 import xarray as xr
 from eslib.output import output_folder
 from eslib.classes.normal_modes import NormalModes
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.units import remove_unit
 from eslib.formatting import esfmt, warning
 

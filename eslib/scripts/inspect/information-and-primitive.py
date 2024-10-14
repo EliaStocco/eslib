@@ -4,7 +4,7 @@
 # from ase.io import read
 import numpy as np
 from eslib.show import matrix2str
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.input import str2bool
 from eslib.tools import convert, find_transformation
 from ase.cell import Cell

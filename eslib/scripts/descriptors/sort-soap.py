@@ -5,7 +5,7 @@ from eslib.input import str2bool
 from eslib.formatting import esfmt
 from python_tsp import exact
 from python_tsp import heuristics
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.functions import suppress_output
  
 # git@github.com:fillipe-gsm/python-tsp.git

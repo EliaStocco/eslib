@@ -2,7 +2,7 @@
 import numpy as np
 import os
 from ase.build import make_supercell
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from phonopy.structure.cells import get_supercell
 from eslib.tools import ase2phonopy, phonopy2ase

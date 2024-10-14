@@ -2,8 +2,8 @@
 from ase.io import read
 import numpy as np
 from eslib.classes.models.dipole.baseclass import DipoleModel
-from classes.atomic_structures import AtomicStructures
-from classes.atomic_structures import info
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import info
 from eslib.formatting import esfmt, float_format, warning
 from eslib.physics import oxidation_number
 from eslib.physics import bec_from_oxidation_number

@@ -4,7 +4,7 @@ from eslib.show import matrix2str
 from eslib.tools import convert
 
 from eslib.formatting import esfmt
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 
 #---------------------------------------#
 THRESHOLD = 1e-4

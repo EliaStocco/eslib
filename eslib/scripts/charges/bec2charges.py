@@ -2,7 +2,7 @@
 import numpy as np
 import json
 from ase import Atoms
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.show import show_dict
 

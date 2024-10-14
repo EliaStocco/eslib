@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, float_format
 from eslib.input import slist
 from statsmodels.tsa.stattools import adfuller, kpss

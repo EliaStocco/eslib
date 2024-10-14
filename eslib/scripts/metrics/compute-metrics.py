@@ -4,7 +4,7 @@ import numpy as np
 from eslib.input import size_type, str2bool
 from eslib.metrics import metrics
 from eslib.formatting import esfmt, warning
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 
 #---------------------------------------#
 # Description of the script's purpose

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from ase import Atoms
 from numpy import require
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.input import str2bool
 import seekpath

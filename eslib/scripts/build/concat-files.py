@@ -2,7 +2,7 @@
 import glob
 from eslib.input import slist
 from eslib.formatting import esfmt, error
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from ase import Atoms
 from typing import List
 

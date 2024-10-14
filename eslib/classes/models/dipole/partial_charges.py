@@ -1,6 +1,6 @@
 from ase.calculators.calculator import Calculator
 from ase.calculators.calculator import all_changes
-from classes.models.dipole.baseclass import DipoleModel
+from eslib.classes.models.dipole.baseclass import DipoleModel
 from eslib.tools import add_info_array
 from dataclasses import dataclass, field
 from ase import Atoms

@@ -6,7 +6,7 @@ from ase.io import write, read
 from eslib.classes.properties import Properties
 from eslib.functions import suppress_output, get_one_file_in_folder
 from eslib.input import size_type, str2bool
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, error, warning
 
 #---------------------------------------#

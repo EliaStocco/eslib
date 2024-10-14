@@ -3,7 +3,7 @@ import numpy as np
 from typing import Union, List
 from eslib.input import union_type
 from eslib.formatting import esfmt
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.input import str2bool
 
 # Description of the script's purpose

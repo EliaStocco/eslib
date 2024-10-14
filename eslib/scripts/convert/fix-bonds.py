@@ -4,7 +4,7 @@ import numpy as np
 from eslib.tools import cart2frac, frac2cart
 from eslib.input import slist
 from typing import List
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.input import str2bool
 
 #---------------------------------------#

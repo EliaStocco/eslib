@@ -3,7 +3,7 @@ from ase.io import read
 from scipy.spatial.distance import pdist, squareform
 import numpy as np
 import argparse
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from tqdm import tqdm
 
 #---------------------------------------#

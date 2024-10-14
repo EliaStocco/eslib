@@ -4,7 +4,7 @@ import numpy as np
 from skmatter.feature_selection import FPS
 from eslib.input import str2bool
 from eslib.formatting import esfmt
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 
 #---------------------------------------#
 # Description of the script's purpose

@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.pyplot as plt
 import numpy as np
-from classes.atomic_structures import AtomicStructures
-from classes.atomic_structures import info, array
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import info, array
 from eslib.functions import plot_bisector
 from eslib.tools import convert
 

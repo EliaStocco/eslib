@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.tools import convert
-from classes.atomic_structures import info, array
+from eslib.classes.atomic_structures import info, array
 
 trajectory = AtomicStructures.from_file("trajectory.extxyz")
 time = info(trajectory,"time") * convert(1,"time","atomic_unit","femtosecond")

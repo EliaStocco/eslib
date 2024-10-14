@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 from ase.io import write
-from classes.atomic_structures import AtomicStructures# , info, array
+from eslib.classes.atomic_structures import AtomicStructures# , info, array
 from eslib.formatting import esfmt
 from eslib.physics import compute_dipole_quanta
 import matplotlib.pyplot as plt

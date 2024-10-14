@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.classes.models.dipole.baseclass import DipoleModel
 from eslib.formatting import esfmt
 import numpy as np

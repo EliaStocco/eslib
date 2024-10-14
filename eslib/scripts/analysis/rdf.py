@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 from ase.geometry.rdf import get_rdf
-from classes.atomic_structures import AtomicStructures
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.input import itype, nslist
 import matplotlib.pyplot as plt
