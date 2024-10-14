@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from eslib.functions import Dict2Obj, args_to_dict
 from eslib.functions import add_default
 from datetime import datetime
+from argparse import ArgumentParser
 import inspect
 import json
 import psutil
@@ -66,6 +67,8 @@ def get_path(main):
     return local_path, global_path
 
 #---------------------------------------#
+_description = None
+_documentation = None
 def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=None):
     """Decorator for the 'main' function of many scripts."""
 
@@ -75,6 +78,11 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
     if documentation is not None:
         documentation = documentation.replace("\n","\n\t")
         documentation = Fore.GREEN  + "\n\tDocumentation:\n\t" + Style.RESET_ALL + documentation
+    
+    global _documentation
+    global _description
+    _documentation = documentation
+    _description = description
 
     try: description = Fore.GREEN  + Style.BRIGHT + description + Style.RESET_ALL
     except: pass
@@ -84,69 +92,63 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
     start_date = start.date().strftime("%Y-%m-%d")
     start_time = start.time().strftime("%H:%M:%S")
 
-    @contextmanager
-    def print_header(args:dict,main:callable):
+    # @contextmanager
+    def print_header(args:dict,main:callable,help=False):
         
         line(start="###")
         try: 
             local_path, global_path = get_path(main)
             print("{:20s}: {:s}".format("script file",local_path))
             print("{:20s}: {:s}".format("script global path",global_path))
-            print("{:20s}: {:s}".format("working directory",os.getcwd()))
-            vscode_args = json.dumps(sys.argv[1:])
-            print("{:20}: \"args\" : {:s} ".format("VScode debugging",vscode_args))
-            tmp = [f'"{a}"' if '*' in a else a for a in sys.argv[1:]]
-            command_line = ' '.join(tmp)   
-            local_path, global_path = get_path(main)
-            print("{:20}: {:s} ".format("running script as",local_path),command_line)
+            if not help:
+                print("{:20s}: {:s}".format("working directory",os.getcwd()))
+                vscode_args = json.dumps(sys.argv[1:])
+                print("{:20}: \"args\" : {:s} ".format("VScode debugging",vscode_args))
+                tmp = [f'"{a}"' if '*' in a else a for a in sys.argv[1:]]
+                command_line = ' '.join(tmp)   
+                local_path, global_path = get_path(main)
+                print("{:20}: {:s} ".format("running script as",local_path),command_line)
         except: 
             pass    
-        print("{:20s}:".format("python --version"), sys.version.replace("\n"," "))
-        print("{:20s}:".format("which python"), sys.executable.replace("\n"," "))
-        conda_env = os.environ.get('CONDA_DEFAULT_ENV')
-        if conda_env:
-            print("{:20s}:".format("conda env"), conda_env)
-            index_bin = sys.executable.find('/bin')
-            _conda_env = sys.executable[:index_bin].split('/')[-1]
-            if _conda_env != conda_env:
-                print("{:s}: possible discrepancy between conda environment and python executable.".format(warning))
-        else:
-            print("not using conda env")
-        print("{:20s}: {:s}".format("start date",start_date))
-        print("{:20s}: {:s}".format("start time",start_time))
+        if not help:
+            print("{:20s}:".format("python --version"), sys.version.replace("\n"," "))
+            print("{:20s}:".format("which python"), sys.executable.replace("\n"," "))
+            conda_env = os.environ.get('CONDA_DEFAULT_ENV')
+            if conda_env:
+                print("{:20s}:".format("conda env"), conda_env)
+                index_bin = sys.executable.find('/bin')
+                _conda_env = sys.executable[:index_bin].split('/')[-1]
+                if _conda_env != conda_env:
+                    print("{:s}: possible discrepancy between conda environment and python executable.".format(warning))
+            else:
+                print("not using conda env")
+            print("{:20s}: {:s}".format("start date",start_date))
+            print("{:20s}: {:s}".format("start time",start_time))
         line(start="###")
         
-        # try:
-        #     print("{:20s}".format("SLURM information"))
-        #     print("{:20s}: {:s}".format("Job ID",os.environ['SLURM_JOB_ID']))
-        #     print("{:20s}: {:s}".format("Job name",os.environ['SLURM_JOB_NAME']))
-        #     print("{:20s}: {:s}".format("Node name",os.environ['SLURM_NODE']))
-        #     print("{:20s}: {:s}".format("Number of nodes",os.environ['SLURM_NNODES']))
-        #     print("{:20s}: {:s}".format("Number of tasks",os.environ['SLURM_NPROCS']))
-        #     print("{:20s}: {:s}".format("Node list",os.environ['SLURM_NODELIST']))
-        #     print("{:20s}: {:s}".format("Partition",os.environ['SLURM_PARTITION']))
-        #     line(start="###")
-        # except: 
-        #     pass 
+        global _documentation
+        global _description
+        # global description
+    
+        if help:
+            print("\n{:s}".format(description.replace("\n\t","\n").replace("\t\t","\t")))
+        else:
+            print("\n\t{:s}".format(description))
+        # if  help :
+        #     description = None
+        if _documentation is not None: 
+            if help:
+                _documentation = str(_documentation).replace("\n\t","\n").replace("\t\t","\t")
+            print(_documentation)
         
-        # try:
-        #     print("{:20s}".format("Cores information"))
-        #     print("{:20s}: {:d}".format("Number of cores", os.cpu_count()))
-        #     print("{:20s}: {:d}".format("Number of CPU threads", psutil.cpu_count(logical=False)))
-        #     print("{:20s}: {:d}".format("Number of GPUs", len(os.environ.get('CUDA_VISIBLE_DEVICES', '').split(','))))
-        #     print("{:20s}: {:d}".format("Number of GPU devices", len(os.environ.get('CUDA_VISIBLE_DEVICES', '').split(','))))
-        #     print("{:20s}: {:d}".format("Number of CPU cores per socket", psutil.cpu_count(logical=False)))
-        #     print("{:20s}: {:d}".format("Number of CPU threads per core", psutil.cpu_count(logical=True) // psutil.cpu_count(logical=False)))
-        #     line(start="###")
-        # except: 
-        #     pass 
-
-        print("\n\t{:s}".format(description))
-        if documentation is not None: print(documentation)
-        print("\n\t{:s}".format(input_arguments))
-        for k in args.__dict__.keys():
-            print("\t{:>20s}:".format(k), getattr(args, k))
-        print()
+        if args is not None:
+            print("\n\t{:s}".format(input_arguments))
+            for k in args.__dict__.keys():
+                print("\t{:>20s}:".format(k), getattr(args, k))
+            print()
+            
+        # if help:
+        #     description = None
     
     def print_end(ok:bool):
         if ok:
@@ -175,10 +177,10 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
         line(end="###")
         print("end date: {:s}".format(end_date))
         print("end time: {:s}s ".format(end_time))
-        print("elapsed time: {:s}".format(format_seconds_to_hhmmss(elapsed_seconds)))
         print("elapsed seconds: {:d}s".format(elapsed_seconds))
+        print("elapsed time: {:s}".format(format_seconds_to_hhmmss(elapsed_seconds)))
         line(end="###\n")
-
+        
     def wrapper(main: callable):
         def wrapped_main(args=dict()):
             # Call the specified prepare_parser function
@@ -186,9 +188,14 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
             # if len(sys.argv) == 1:
             #     argv1 = dict_to_list(args)
             #     sys.argv.extend(argv1)
-            
+            parser = None
+            if len(sys.argv) > 1 and sys.argv[1] in ["-h","--help"]:
+                print_header(None,main,help=True)
+                parser:ArgumentParser = prepare_parser(None)
+
             if prepare_parser is not None:
-                parser = prepare_parser(description)
+                if parser is None:
+                    parser:ArgumentParser = prepare_parser(description)
                 args_script = parser.parse_args(args=dict_to_list(args))
             if type(args) == dict:
                 args = add_default(args,args_to_dict(args_script))
