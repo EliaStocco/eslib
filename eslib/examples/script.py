@@ -15,7 +15,7 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"         , **argv, required=True , type=str, help="file with an atomic structure")
     parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-o" , "--output"        , **argv, required=False, type=str, help="output file with the oxidation numbers (default: %(default)s)", default="oxidation-numbers.extxyz")
+    parser.add_argument("-o" , "--output"        , **argv, required=True , type=str, help="output file")
     parser.add_argument("-of" , "--output_format", **argv, required=False, type=str, help="output file format (default: %(default)s)", default=None)
     return parser# .parse_args()
 
