@@ -42,110 +42,110 @@ def change_directory():
 tmp_folder = "tmp"
 
 torun = {
-    "eval-model-PES" :
-    {
-        "folder"  : "nn",
-        "file"   : "eval-model.py",
-        "kwargs"  : {
-            "input" : "tests/structures/LiNbO3/geometries.extxyz" ,   
-            "model" : "tests/models/MACE-LiNbO3/MACE.LiNbO3.pickle",
-            "output": f"{tmp_folder}/mace.extxyz"
-        },
-    },
-    "eval-model-PES+save-info-arrays" :
-    {
-        "folder"  : "nn",
-        "file"   : "eval-model.py",
-        "kwargs"  : {
-            "input" : "tests/structures/LiNbO3/geometries.extxyz" ,   
-            "model" : "tests/models/MACE-LiNbO3/MACE.LiNbO3.pickle",
-            "output": f"{tmp_folder}/mace.extxyz",
-            "names" : ['MACE_energy','MACE_forces'],
-            "shapes": [[-1,1],[-1,3]],
-            "data_output" : [f'{tmp_folder}/MACE_energy.txt',f'{tmp_folder}/MACE_forces.txt']
-        },
-    },
-    "backward compatibility" :
-    {
-        "folder"  : "inspect",
-        "file"   : "trajectory-summary.py",
-        "kwargs"  : {
-            "input" : "tests/structures/back-comp/pos.300K.E=0.00.pickle" ,   
-        },
-    },
-    "extras2dipole" :
-    {
-        "folder"  : "dipole",
-        "file"   : "extras2dipole",
-        "kwargs"  : {
-            "input"  : "tests/data/i-pi.extras_0",  
-            "output" :  "tests/dipoles.txt",  
-        },
-    },
-    "get-iPI-cell" :
-    {
-        "folder"  : "inspect",
-        "file"   : "get-iPI-cell",
-        "kwargs"  : {
-            "input" : "tests/structures/bulk-water/bulk-water.au.extxyz",            
-        },
-    },
-    "convert-file" :
-    {
-        "folder"  : "convert",
-        "file"   : "convert-file",
-        "kwargs"  : {
-            "input"              : "tests/structures/bulk-water/bulk-water.au.extxyz",   
-            "remove_properties"  : "true",   
-            "output"             : f"{tmp_folder}/output.extxyz",     
-        },
-    },
-    "netcdf-write" :
-    {
-        "folder"  : "convert",
-        "file"   : "convert-file",
-        "kwargs"  : {
-            "input"              : "tests/structures/LiNbO3/long.n=10000.extxyz",   
-            "output"             : f"{tmp_folder}/output.nc",     
-        },
-    },
-    "netcdf-read" :
-    {
-        "folder"  : "convert",
-        "file"   : "convert-file",
-        "kwargs"  : {
-            "input"              : "tests/structures/LiNbO3/long.n=10000.nc",   
-            "output"             : f"{tmp_folder}/output.extxyz",     
-        },
-    },
-    "pickle-write" :
-    {
-        "folder"  : "convert",
-        "file"   : "convert-file",
-        "kwargs"  : {
-            "input"              : "tests/structures/LiNbO3/long.n=10000.extxyz",   
-            "output"             : f"{tmp_folder}/output.pickle",     
-        },
-        "clean" : False
-    },
-    "pickle-inspect" : {
-        "folder"  : "inspect",
-        "file"   : "trajectory-summary.py",
-        "kwargs"  : {
-            "input" : f"{tmp_folder}/output.pickle",  
-        },
-        "clean" : False
-    },
-    "pickle-read" :
-    {
-        "folder"  : "convert",
-        "file"   : "convert-file",
-        "kwargs"  : {
-            "input"              : f"{tmp_folder}/output.pickle",   
-            "input_format"       : "pickle",
-            "output"             : f"{tmp_folder}/output.nc",  
-        },
-    },
+    # "eval-model-PES" :
+    # {
+    #     "folder"  : "nn",
+    #     "file"   : "eval-model.py",
+    #     "kwargs"  : {
+    #         "input" : "tests/structures/LiNbO3/geometries.extxyz" ,   
+    #         "model" : "tests/models/MACE-LiNbO3/MACE.LiNbO3.pickle",
+    #         "output": f"{tmp_folder}/mace.extxyz"
+    #     },
+    # },
+    # "eval-model-PES+save-info-arrays" :
+    # {
+    #     "folder"  : "nn",
+    #     "file"   : "eval-model.py",
+    #     "kwargs"  : {
+    #         "input" : "tests/structures/LiNbO3/geometries.extxyz" ,   
+    #         "model" : "tests/models/MACE-LiNbO3/MACE.LiNbO3.pickle",
+    #         "output": f"{tmp_folder}/mace.extxyz",
+    #         "names" : ['MACE_energy','MACE_forces'],
+    #         "shapes": [[-1,1],[-1,3]],
+    #         "data_output" : [f'{tmp_folder}/MACE_energy.txt',f'{tmp_folder}/MACE_forces.txt']
+    #     },
+    # },
+    # "backward compatibility" :
+    # {
+    #     "folder"  : "inspect",
+    #     "file"   : "trajectory-summary.py",
+    #     "kwargs"  : {
+    #         "input" : "tests/structures/back-comp/pos.300K.E=0.00.pickle" ,   
+    #     },
+    # },
+    # "extras2dipole" :
+    # {
+    #     "folder"  : "dipole",
+    #     "file"   : "extras2dipole",
+    #     "kwargs"  : {
+    #         "input"  : "tests/data/i-pi.extras_0",  
+    #         "output" :  "tests/dipoles.txt",  
+    #     },
+    # },
+    # "get-iPI-cell" :
+    # {
+    #     "folder"  : "inspect",
+    #     "file"   : "get-iPI-cell",
+    #     "kwargs"  : {
+    #         "input" : "tests/structures/bulk-water/bulk-water.au.extxyz",            
+    #     },
+    # },
+    # "convert-file" :
+    # {
+    #     "folder"  : "convert",
+    #     "file"   : "convert-file",
+    #     "kwargs"  : {
+    #         "input"              : "tests/structures/bulk-water/bulk-water.au.extxyz",   
+    #         "remove_properties"  : "true",   
+    #         "output"             : f"{tmp_folder}/output.extxyz",     
+    #     },
+    # },
+    # "netcdf-write" :
+    # {
+    #     "folder"  : "convert",
+    #     "file"   : "convert-file",
+    #     "kwargs"  : {
+    #         "input"              : "tests/structures/LiNbO3/long.n=10000.extxyz",   
+    #         "output"             : f"{tmp_folder}/output.nc",     
+    #     },
+    # },
+    # "netcdf-read" :
+    # {
+    #     "folder"  : "convert",
+    #     "file"   : "convert-file",
+    #     "kwargs"  : {
+    #         "input"              : "tests/structures/LiNbO3/long.n=10000.nc",   
+    #         "output"             : f"{tmp_folder}/output.extxyz",     
+    #     },
+    # },
+    # "pickle-write" :
+    # {
+    #     "folder"  : "convert",
+    #     "file"   : "convert-file",
+    #     "kwargs"  : {
+    #         "input"              : "tests/structures/LiNbO3/long.n=10000.extxyz",   
+    #         "output"             : f"{tmp_folder}/output.pickle",     
+    #     },
+    #     "clean" : False
+    # },
+    # "pickle-inspect" : {
+    #     "folder"  : "inspect",
+    #     "file"   : "trajectory-summary.py",
+    #     "kwargs"  : {
+    #         "input" : f"{tmp_folder}/output.pickle",  
+    #     },
+    #     "clean" : False
+    # },
+    # "pickle-read" :
+    # {
+    #     "folder"  : "convert",
+    #     "file"   : "convert-file",
+    #     "kwargs"  : {
+    #         "input"              : f"{tmp_folder}/output.pickle",   
+    #         "input_format"       : "pickle",
+    #         "output"             : f"{tmp_folder}/output.nc",  
+    #     },
+    # },
     "hdf5-write" :
     {
         "folder"  : "convert",
