@@ -4,26 +4,42 @@
 # from ase.io import read
 import numpy as np
 from eslib.show import matrix2str
-from eslib.tools import find_transformation
 from classes.atomic_structures import AtomicStructures
 from eslib.input import str2bool
-from eslib.tools import convert
+from eslib.tools import convert, find_transformation
 from ase.cell import Cell
 from ase import Atoms
 from ase.io import write
-from eslib.classes.structure import Structure, read
+from eslib.classes.structure import Structure, rotate2LT
 from eslib.formatting import esfmt, warning
 
 #---------------------------------------#
-description     = "Show general information of a given atomic structure and find its primitive cell structure using GIMS."
+description     = "Show general information of a given atomic structure and find its primitive cell structure."
 divisor         = "-"*100
+
+choices = ['niggli','minkowski','conventional','primitive','phonopy-primitive']
     
+#---------------------------------------#
+def prepare_parser(description):
+    import argparse
+    parser = argparse.ArgumentParser(description=description)
+    argv = {"metavar":"\b"}
+    parser.add_argument("-i" , "--input"         , type=str     , **argv, help="atomic structure input file")
+    parser.add_argument("-if", "--input_format"  , type=str     , **argv, help="input file format (default: %(default)s)" , default=None)
+    parser.add_argument("-t" , "--threshold"     , type=float   , **argv, help="symmetry threshold (default: %(default)s)", default=1e-3)
+    parser.add_argument("-r" , "--rotate"        , type=str2bool, **argv, help="whether to rotate the cell to the upper triangular (default: %(default)s)", default=True)
+    parser.add_argument("-s" , "--shift"         , type=str2bool, **argv, help="shift the first atom to the origing (default: %(default)s)", default=False)
+    parser.add_argument("-sp", "--show_positions", type=str2bool, **argv, help="show positions (default: %(default)s)", default=True)
+    parser.add_argument("-c" , "--conversion"    , type=str     , **argv, help=f"structure conversion form {choices}"+" (default: %(default)s)", default=None, choices=choices)
+    parser.add_argument("-o" , "--output"        , type=str     , **argv, help="output file of the converted structure (default: %(default)s)", default=None)
+    parser.add_argument("-of", "--output_format" , type=str     , **argv, help="output file format (default: %(default)s)", default=None)
+    return parser
+
 #---------------------------------------#
 def print_info(structure:Atoms,threshold:float,title:str,show_pos:bool):
     from eslib.classes.structure import StructureInfo
     strinfo = StructureInfo(structure,threshold)
     info = str(strinfo)
-    # print("done")    
 
     print("\t{:s}:\n\tthe positions are assumed to be stored in angstrom in the input file".format(warning))
     info = info.replace("System Info","\n{:s}".format(title))
@@ -44,16 +60,7 @@ def print_info(structure:Atoms,threshold:float,title:str,show_pos:bool):
     density = tot_mass/V
     density = convert(density,"density","atomic_unit","g/cm3")
     print("\t{:<30}:".format("density [g/cm^3]"),density)
-    # except:
-    #     pass
     print("\t{:<30}:".format("chemical symbols"),structure.get_chemical_symbols())
-
-    # from icecream import ic
-    # # ic(structure.get_cell().cellpar)
-    # try:
-    #     ic(strinfo.equivalent_atoms)
-    # except:
-    #     pass
 
     if np.all(structure.get_pbc()):
         print("\n\tCell:")
@@ -73,21 +80,6 @@ def print_info(structure:Atoms,threshold:float,title:str,show_pos:bool):
             line = matrix2str(structure.get_positions(),digits=3,col_names=["Rx","Ry","Rz"],cols_align="^",width=8,row_names=structure.get_chemical_symbols())
             print(line)
     return
-#---------------------------------------#
-def prepare_parser(description):
-    import argparse
-    parser = argparse.ArgumentParser(description=description)
-    argv = {"metavar":"\b"}
-    parser.add_argument("-i" , "--input"        , type=str     , **argv, help="atomic structure input file")
-    parser.add_argument("-if" , "--input_format"     , **argv,required=False, type=str     , help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-t" , "--threshold"    , type=float   , **argv, help="threshold for GIMS (default: %(default)s)", default=1e-3)
-    parser.add_argument("-r" , "--rotate"       , type=str2bool, **argv, help="whether to rotate the cell to the upper triangular form compatible with i-PI (default: %(default)s)", default=True)
-    parser.add_argument("-s" , "--shift"        , type=str2bool, **argv, help="shift the first atom to the origing (default: %(default)s)", default=False)
-    parser.add_argument("-sp" , "--show_positions"        , type=str2bool, **argv, help="show positions (default: %(default)s)", default=True)
-    parser.add_argument("-c" , "--conversion"   , type=str     , **argv, help="structure conversion form (default: %(default)s)", default=None, choices=['niggli','minkowski','conventional','primitive'])
-    parser.add_argument("-o" , "--output"       , type=str     , **argv, help="output file of the converted structure (default: %(default)s)", default=None)
-    parser.add_argument("-of", "--output_format", type=str     , **argv, help="output file format (default: %(default)s)", default=None)
-    return parser
 
 #---------------------------------------#
 @esfmt(prepare_parser,description)
@@ -103,15 +95,8 @@ def main(args):
 
     if args.rotate:
         print("\tRotating the lattice vectors of the atomic structure such that they will be in upper triangular form ... ",end="")
-        # frac = atom.get_scaled_positions()
-        cellpar = atoms.cell.cellpar()
-        cell = Cell.fromcellpar(cellpar).array
-        if np.allclose(cell,atoms.cell):
-            print("done")
-            print("\tThe lattice vectors are already in upper triangular form.")
-        else:
-            atoms.set_cell(cell,scale_atoms=True)
-            print("done")
+        atoms = rotate2LT(atoms)
+        print("done")
     
     if args.shift:
         print("\tShifting the first atom to the origin ... ",end="")
@@ -122,9 +107,11 @@ def main(args):
         print("done")
 
 
-    print("\n\tComputing general information of the atomic structure using GIMS ... ",end="")
+    print("\n\tComputing general information of the atomic structure ... ",end="")
     structure = Structure(atoms)
     print("done") 
+    
+    
     print_info(structure,args.threshold,"Original structure information:",args.show_positions)
 
     if args.conversion is not None:
@@ -144,33 +131,29 @@ def main(args):
             converted_structure = converted_structure.get_primitive_cell(args.threshold)
         elif args.conversion == "conventional":
             converted_structure.get_conventional_cell(args.threshold)
+        elif args.conversion == "phonopy-primitive":
+            from phonopy.structure.cells import get_supercell, get_primitive
+            from eslib.tools import ase2phonopy, phonopy2ase
+            tmp = converted_structure.get_primitive_cell(args.threshold)
+            tmp = tmp.rotate2LT()
+            _ , M  = find_transformation(tmp,converted_structure)
+            M = np.round(M,0).astype(int)
+            converted_structure = ase2phonopy(converted_structure)
+            primitive_matrix = np.linalg.inv(M)
+            converted_structure = get_primitive(converted_structure,primitive_matrix=primitive_matrix,symprec=args.threshold)
+            converted_structure = phonopy2ase(converted_structure)
         else:
             raise ValueError("coding error")
         print("done")
-
-        # if args.rotate:
-        #     print("\tRotating the lattice vectors of the primitive structure such that they will be in upper triangular form ... ",end="")
-        #     # frac = atom.get_scaled_positions()
-        #     cellpar = primive_structure.cell.cellpar()
-        #     cell = Cell.fromcellpar(cellpar).array
-        #     if np.allclose(cell,primive_structure.cell):
-        #         print("done")
-        #         print("\tThe lattice vectors are already in upper triangular form.")
-        #     else:
-        #         primive_structure.set_cell(cell,scale_atoms=True)
-        #         print("done")    
-
-        print("\n\tComputing general information of the primitive structure using GIMS ... ",end="")
-        print("done") 
-        print_info(converted_structure,args.threshold,"Primitive cell structure information:",args.show_positions)
         
-        # #---------------------------------------#
-        # # trasformation
-        # print("\n\t{:s}".format(divisor))
-        # size, M = find_transformation(primive_structure,structure)
-        # print("\tTrasformation matrix from primitive to original cell:")
-        # line = matrix2str(M.round(2),col_names=["1","2","3"],cols_align="^",width=6)
-        # print(line)
+        if args.rotate:
+            print("\n\tRotating the lattice vectors of the converted structure such that they will be in upper triangular form ... ",end="")
+            atoms = rotate2LT(atoms)
+            print("done")
+
+        print("\n\tComputing general information of the converted structure ... ",end="")
+        print("done") 
+        print_info(converted_structure,args.threshold,"Converted cell structure information:",args.show_positions)
 
     #---------------------------------------#
     # Write the data to the specified output file with the specified format

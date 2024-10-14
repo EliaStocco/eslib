@@ -8,6 +8,8 @@ from typing import Union, Dict, List
 from eslib.ipi_units import unit_to_internal, unit_to_user, UnitMap
 from copy import copy
 import pandas as pd
+from ase import Atoms
+from phonopy.structure.atoms import PhonopyAtoms
 
 #---------------------------------------#
 def find_transformation(A: Atoms, B: Atoms):
@@ -512,3 +514,56 @@ def w2_to_w(w2: np.ndarray) -> np.ndarray:
         np.ndarray: Corresponding frequencies.
     """
     return np.sqrt(np.absolute(w2)) * np.sign(w2)
+
+
+
+
+def ase2phonopy(atoms_ase: Atoms) -> PhonopyAtoms:
+    """
+    Convert ASE Atoms to PhonopyAtoms.
+
+    Args:
+        atoms_ase (Atoms): An ASE Atoms object containing the structure data.
+
+    Returns:
+        PhonopyAtoms: A PhonopyAtoms object representing the same atomic structure.
+
+    Raises:
+        ImportError: If the Phonopy module is not found.
+    """
+    # Extract the relevant data from ASE Atoms
+    cell = atoms_ase.cell  # The cell dimensions of the atomic structure
+    positions = atoms_ase.get_positions()  # The positions of atoms in fractional coordinates
+    symbols = atoms_ase.get_chemical_symbols()  # The atomic numbers of the atoms
+    
+    # Create and return PhonopyAtoms
+    phonopy_atoms = PhonopyAtoms(
+        symbols=symbols,  # Atomic symbols
+        positions=positions,  # Atomic positions
+        cell=cell,  # The cell dimensions
+        pbc=atoms_ase.pbc,  # Periodic boundary conditions
+    )
+    return phonopy_atoms
+
+
+def phonopy2ase(atoms_phonopy: PhonopyAtoms) -> Atoms:
+    """
+    Convert PhonopyAtoms to ASE Atoms.
+
+    Args:
+        atoms_phonopy (PhonopyAtoms): A PhonopyAtoms object containing the structure data.
+
+    Returns:
+        Atoms: An ASE Atoms object representing the same atomic structure.
+
+    Raises:
+        ImportError: If the ASE module is not found.
+    """
+    # Create ASE Atoms object from PhonopyAtoms data
+    ase_atoms = Atoms(
+        cell=atoms_phonopy.cell,  # The cell dimensions of the atomic structure
+        scaled_positions=atoms_phonopy.scaled_positions,  # The positions of atoms in fractional coordinates
+        numbers=atoms_phonopy.numbers,  # The atomic numbers of the atoms
+        pbc=True,  # Set periodic boundary conditions to True
+    )
+    return ase_atoms
