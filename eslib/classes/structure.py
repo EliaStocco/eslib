@@ -5,6 +5,7 @@ import os
 import numpy as np
 from ase import Atoms
 from ase.io import read as ase_read
+from ase.cell import Cell
 import spglib as spg
 
 class StructureInfo:
@@ -255,8 +256,21 @@ class Structure(Atoms):
                 pass
             json_s["atoms"].append([list(pos), species, "", init_moment, constraint, charge])
         return json.dumps(json_s)
+    
+    def rotate2LT(self):
+        """Rotate the lattice vector to be in lower triangular form."""
+        return rotate2LT(self)
 
 
 def read(file_name, *args, **kwargs):
     """A revamped implementation of ase.io.read that returns gims.Structure"""
     return Structure.from_atoms(ase_read(file_name, *args, **kwargs))
+
+def rotate2LT(self:Atoms)->Atoms:
+    """Rotate the lattice vector to be in lower triangular form."""
+    tmp = self.copy()
+    cellpar = tmp.cell.cellpar()
+    cell = Cell.fromcellpar(cellpar).array
+    if not np.allclose(cell,tmp.cell):
+        tmp.set_cell(cell,scale_atoms=True)
+    return tmp
