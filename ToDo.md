@@ -28,3 +28,6 @@
 # Improvements:
 - find a way to "standardize" `DipoleModel`, `MACEModel` and `Calculator`: I need to build a class on top of `ase.calculator`
 - implement a class to deal with `i-PI` properties
+
+# Bugs
+- the dynamical matrix eigenvetors are not correctly normalized when computed from `phonopy`
