@@ -4,6 +4,7 @@
 - improve code quality with type hinting
 - provide a clean way to install this repository
 - add automatic tests with `pytest`
+- use `logging` instead of `print` to better indentation and profiling/timing
 
 # General Ideas
 - create "backup file" for `soap.py`
