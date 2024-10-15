@@ -600,9 +600,15 @@ class NormalModes(pickleIO):
         #     raise ValueError("'phases' has the wrong unit")
 
         #-------------------#
+        energy_summary = [None]*3
+        energy_summary[0] = K.sum(axis=0)
+        energy_summary[1] = U.sum(axis=0)
+        energy_summary[2] = energy.sum(axis=0)
+        energy_summary = np.asarray(energy_summary)
+        
         # output
         out = {
-            "total-energy"  : energy.sum(axis=0),
+            "total-energy"  : energy_summary,
             "energy"        : energy,
             "kinetic"       : K,
             "potential"     : U,
