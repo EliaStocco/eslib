@@ -42,21 +42,6 @@ everythingok    = Fore.BLUE    + Style.BRIGHT + everythingok            + Style.
 
 
 #---------------------------------------#
-# def print_python_info():
-#     # Print Python version
-#     print("Python Version:", sys.version)
-
-#     # Print Python executable path
-#     print("Python Executable Path:", sys.executable)
-
-#     # Print Conda environment
-#     conda_env = os.environ.get('CONDA_DEFAULT_ENV')
-#     if conda_env:
-#         print("Conda Environment:", conda_env)
-#     else:
-#         print("Not using Conda environment.")
-
-#---------------------------------------#
 def line(start="",end="",N=30,mult=1):
     print(start+"-"*mult*N+end)
 
@@ -65,6 +50,28 @@ def get_path(main):
     global_path = inspect.getfile(main)
     local_path = os.path.basename(global_path)
     return local_path, global_path
+
+#---------------------------------------#
+# def format_seconds_to_hhmmss(seconds:int)->str:
+#     hours = seconds // (60*60)
+#     seconds %= (60*60)
+#     minutes = seconds // 60
+#     seconds %= 60
+#     return "%02i:%02i:%02i" % (hours, minutes, seconds)
+
+def format_seconds_to_hhmmss(seconds: float) -> str:
+    """
+    Utility function to format seconds into HH:MM:SS format.
+
+    Args:
+        seconds (float): Time duration in seconds.
+
+    Returns:
+        str: Time formatted as a string in HH:MM:SS format.
+    """
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}"
 
 #---------------------------------------#
 _description = None
@@ -163,12 +170,6 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
 
         elapsed_seconds = int((end - start).total_seconds())
 
-        def format_seconds_to_hhmmss(seconds):
-            hours = seconds // (60*60)
-            seconds %= (60*60)
-            minutes = seconds // 60
-            seconds %= 60
-            return "%02i:%02i:%02i" % (hours, minutes, seconds)
 
         # # Convert elapsed time into hours, minutes, and seconds
         # hours   = int(elapsed_seconds // 3600)
@@ -221,3 +222,126 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
         return wrapped_main
 
     return wrapper
+
+#---------------------------------------#
+from typing import TypeVar, Callable
+from eslib.classes.timing import timing as Timing
+from colorama import Fore, Style
+
+T = TypeVar('T', bound='eslog')
+
+class eslog(Timing):
+    """
+    A logging class that inherits from the `Timing` class and provides logging functionality 
+    with a timed context manager for logging messages. The class prints a message when 
+    entering and leaving a context, showing the elapsed time upon exit.
+
+    Attributes:
+        message (str): The message to be displayed during logging.
+    """
+    
+    message: str
+    newline: bool
+
+    def __init__(self: T, message: str = "", timing: bool = True) -> None:
+        """
+        Initialize the eslog class.
+
+        Args:
+            message (str): The message to log (default is an empty string).
+            timing (bool): Flag to enable or disable timing (default is True).
+        """
+        # Pass the closure function to the parent class (Timing) which gets called at the end of the context.
+        super().__init__(enabled=timing, func=self.closure_message)
+        if message.startswith("\n"):
+            self.message = message[1:]
+            self.newline = True
+        else:
+            self.message = message
+            self.newline = False
+        
+
+    def __enter__(self: T) -> T:
+        """
+        Enter the runtime context related to this object and print the initial message.
+
+        Returns:
+            T: The instance of the `eslog` class.
+        """
+        # Call the parent context manager's __enter__ method.
+        super().__enter__()
+        # Print the message when the context is entered.
+        prefix = datetime.now().time().strftime("%H:%M:%S")
+        prefix = Fore.YELLOW + prefix + Style.RESET_ALL
+        if self.newline:
+            print()
+        print_message(message=self.message, prefix=prefix,end="\r", flush=True)
+        return self
+
+    def closure_message(self, elapsed_seconds: float) -> None:
+        """
+        Closure function to format and print the message when the context is exited,
+        including the elapsed time.
+
+        Args:
+            elapsed_seconds (float): The elapsed time in seconds.
+        """
+        # Format the elapsed time to HH:MM:SS format and color it.
+        elapsed_time_str = format_seconds_to_hhmmss(elapsed_seconds)
+        elapsed_time_str = Fore.YELLOW + elapsed_time_str + Style.RESET_ALL
+        # Print the message with the elapsed time and suffix indicating completion.
+        print_message(message=self.message,
+                      prefix=elapsed_time_str,
+                      suffix=" ... done",
+                      end="\n",
+                      flush=True)
+
+
+import string
+from colorama import Fore, Style
+
+def get_not_printable_length(text: str) -> int:
+    """
+    Calculate the length of printable characters in the text, ignoring ANSI color codes.
+    
+    Args:
+        text (str): The string to measure, which may contain ANSI escape sequences.
+        
+    Returns:
+        int: The length of the string considering only printable characters.
+    """
+    # Extracting printable characters only
+    return len([char for char in text if char not in string.printable])
+
+
+def print_message(message: str, prefix: str = "", suffix: str = " ... ", end: str = "\n", flush: bool = False) -> None:
+    """
+    Utility function to print a formatted message with optional prefix, suffix, and padding 
+    to ensure the total output respects a given width, ignoring ANSI color sequences.
+
+    Args:
+        message (str): The main message to display.
+        prefix (str): Optional prefix to display before the message (default is an empty string).
+        suffix (str): Optional suffix to display after the message (default is " ... ").
+        end (str): The end character to print (default is newline "\n").
+        flush (bool): Whether to forcefully flush the output buffer (default is False).
+        width (int): Total width of the output to ensure proper alignment (default is 120).
+    """
+    # TOT = 5 
+    # N = get_not_printable_length(prefix)
+    # if N > 0 :
+    #     N = 8 # somehow it works
+    # prefix = f"{prefix:<s} "
+    full_message = f"{prefix:<s} {message}{suffix}"+" "*100
+    # Print the padded message
+    print(full_message, end=end, flush=flush)
+
+
+
+# Example Usage
+if __name__ == "__main__":
+    # Simulate a task with timing and message logging
+    with eslog(message="Processing task"):
+        # Some dummy task simulation (sleep for 2 seconds)
+        import time
+        time.sleep(10)
