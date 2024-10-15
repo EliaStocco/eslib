@@ -24,5 +24,6 @@ done
 find "${ESLIB}/cluster/" -name "*.py" -type f -exec chmod +x {} \;
 export PATH="${PATH}:${ESLIB}/cluster/"
 export PYTHONPATH="${PYTHONPATH}:${ESLIB}/cluster/"
+export PYTHONPATH="${PYTHONPATH}:${ESLIB}/eslib/eslib/fortran"
 
 echo "Done. All the scripts should be available in the PATH."
