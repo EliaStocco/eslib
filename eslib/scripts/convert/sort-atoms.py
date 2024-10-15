@@ -41,10 +41,12 @@ def main(args):
     print("\n\tSorting the following arrays: ", structures.get_keys("arrays"))
     print("\tSorting: ")
     N = len(structures)
-    for n,atoms in enumerate(structures):
+    for n in range(len(structures)):
         print("\t{:d}/{:d}".format(n+1,N), end="\r")
-        for k in atoms.arrays.keys():
-            atoms.arrays[k] = atoms.arrays[k][indices]
+        structures[n] = structures[n][indices]
+        # pass
+        # for k in atoms.arrays.keys():
+        #     atoms.arrays[k] = atoms.arrays[k][indices]
     print("\n\tdone")
     
     #------------------#

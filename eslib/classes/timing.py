@@ -2,6 +2,9 @@ from contextlib import ContextDecorator
 import time
 from typing import Any, Optional, Tuple
 
+def func_default(elapsed_time: float) -> None:
+    print(f"Elapsed time: {elapsed_time:.6f} seconds")
+
 class timing(ContextDecorator):
     """
     A class to measure the execution time of code blocks and functions.
@@ -23,8 +26,12 @@ class timing(ContextDecorator):
         Stops the timer and prints the elapsed time if timing is enabled.
 
     """
+    
+    enabled    : bool
+    func       : callable
+    start_time : float
 
-    def __init__(self, enabled: bool = True) -> None:
+    def __init__(self, enabled: bool = True,func:callable=func_default) -> None:
         """
         Initializes the timing class with the given enabled flag.
 
@@ -34,6 +41,7 @@ class timing(ContextDecorator):
             Flag to enable or disable timing. Default is True.
         """
         self.enabled = enabled
+        self.func    = func
 
     def __enter__(self) -> 'timing':
         """
@@ -62,7 +70,8 @@ class timing(ContextDecorator):
         if self.enabled:
             end_time = time.perf_counter()
             elapsed_time = end_time - self.start_time
-            print(f"Elapsed time: {elapsed_time:.6f} seconds")
+            self.func(elapsed_time)
+            # print(f"Elapsed time: {elapsed_time:.6f} seconds")
 
 class MyClass:
     @timing(enabled=False)  # Disable timing for this method
@@ -84,6 +93,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-if __name__ == "__main__":
-    main()

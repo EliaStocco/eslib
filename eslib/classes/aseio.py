@@ -155,9 +155,9 @@ def file_pattern(method: M) -> M:
                 from eslib.classes.atomic_structures import AtomicStructures            
                 # Process each matched file
                 N = len(matched_files)
-                print()
+                # print()
                 for n, file in enumerate(matched_files):
-                    print(f"\t{n+1}/{N} : {file}                        ", end="\r",flush=True)
+                    # print(f"\t{n+1}/{N} : {file}                        ", end="\r",flush=True)
                     kwargs['file'] = file  # Update 'file' in kwargs
                     atoms:AtomicStructures = method(cls,*args, **kwargs)  # Call the method with updated 'file'
                     if ADD_FILE:

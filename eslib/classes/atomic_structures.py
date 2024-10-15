@@ -2,6 +2,7 @@ from copy import deepcopy
 from typing import List, Union, TypeVar
 import numpy as np
 import pandas as pd
+from warnings import warn
 from eslib.classes import Trajectory
 from eslib.tools import convert
 from eslib.functional import deprecated
@@ -387,6 +388,41 @@ class AtomicStructures(Trajectory,aseio):
         assert all( [ not (a is b) for a,b in zip(self,out) ])
         assert all( [ a == b for a,b in zip(self,out) ])
         return out
+    
+    def info2pandas(self:T,discard=[],include=None)->pd.DataFrame:
+        """
+        Convert the info attributes of the AtomicStructures object to a pandas DataFrame.
+
+        Parameters:
+        - discard (list): List of keys to discard from the DataFrame. Defaults to an empty list.
+        - include (list): List of keys to include in the DataFrame. Defaults to None, which means all keys are included.
+
+        Returns:
+        - pd.DataFrame: A pandas DataFrame containing the info attributes of the AtomicStructures object.
+        """
+        df = self.summary()
+        df = df[df["i/a"]=="info"]
+        df.set_index("key",inplace=True)
+        if include is not None:
+            df = df[df.index.isin(include)]        
+        N = len(self)
+        output = pd.DataFrame(index=np.arange(N))
+        
+        for key,row in df.iterrows():
+            if key in discard:
+                continue
+            data = self.get(key)
+            if data.ndim == 1:
+                output[key] = data
+            elif data.ndim == 2:
+                for n in range(data.shape[1]):
+                    output[f"{key}_{n}"] = data[:,n]
+            else:
+                warn (f"Skipping {key} with shape {row['shape']}")
+        return output
+        
+        
+        
 
 def random_water_structure(num_molecules=1):
     from ase import Atoms

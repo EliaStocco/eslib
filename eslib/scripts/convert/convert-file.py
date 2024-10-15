@@ -4,7 +4,7 @@ from ase.cell import Cell
 from eslib.classes.atomic_structures import AtomicStructures
 import numpy as np
 import os
-from eslib.formatting import esfmt, warning, error
+from eslib.formatting import esfmt, warning, error, eslog
 from eslib.input import str2bool, itype
 from eslib.functions import suppress_output
 from eslib.tools import convert
@@ -57,19 +57,19 @@ def main(args):
             raise ValueError("'i-PI' format support only 'None' as -iuc/--input_unit_cell since the units are automatically read and converted into angstrom.")
 
     if args.input_format is not None and args.input_format == "xyz":
-        print("\n\t{:s}: 'xyz' format is not optimized in ASE. extxyz' would be preferable.".format(warning))
+        print("\n\t {:s}: 'xyz' format is not optimized in ASE. extxyz' would be preferable.".format(warning))
 
     #------------------#
     if args.input_format is None:
         try:
-            print("\tDeducing input file format: ", end="")
+            print("\t Deducing input file format: ", end="")
             from ase.io.formats import filetype
             args.input_format = filetype(args.input, read=True)
             print(args.input_format)
         except:
             print("failed")
     if args.output_format is None:
-        print("\tDeducing output file format: ", end="")
+        print("\t Deducing output file format: ", end="")
         from ase.io.formats import filetype
         args.output_format = filetype(args.output, read=False)
         print(args.output_format)
@@ -81,42 +81,42 @@ def main(args):
         raise ValueError("coding error: 'args.output_format' is None.")
         
     #------------------#
-    print("\tReading data from input file '{:s}' ... ".format(args.input), end="")
-    with suppress_output(not DEBUG):
-        # Try to determine the format by checking each supported format
+    with eslog(f"Reading data from input file '{args.input}'"):
+        # with suppress_output(not DEBUG):
+            # Try to determine the format by checking each supported format
         atoms = AtomicStructures.from_file(file=args.input,
-                           format=args.input_format,
-                           index=args.index,
-                           pbc=args.pbc,
-                           same_cell=args.same_cell,
-                           remove_replicas=args.remove_replicas)
+                        format=args.input_format,
+                        index=args.index,
+                        pbc=args.pbc,
+                        same_cell=args.same_cell,
+                        remove_replicas=args.remove_replicas)
         if args.input_format == "pickle":
             index = integer_to_slice_string(args.index)
             atoms = AtomicStructures(atoms[index])
-        # atoms:List[Atoms] = list(atoms)
-    print("done")
+            # atoms:List[Atoms] = list(atoms)
+    # print("done")
     print("\tn. of atomic structures: {:d}".format(len(atoms)))
 
     #------------------#
     if args.input_format in ["espresso-in","espresso-out"] and args.output_format in ["espresso-in","espresso-out"] :
         if args.input_unit is not None and args.input_unit != "angstrom":
-            print("\t{:s}: if 'input_format' == 'espresso-io/out' only 'input_unit' == 'angstrom' (or None) is allowed. ".format(error))
+            print("\t {:s}: if 'input_format' == 'espresso-io/out' only 'input_unit' == 'angstrom' (or None) is allowed. ".format(error))
             return 
         if args.input_unit_cell is not None and args.input_unit_cell != "angstrom":
-            print("\t{:s}: if 'input_format' == 'espresso-io/out' only 'input_unit_cell' == 'angstrom' (or None) is allowed. ".format(error))
+            print("\t {:s}: if 'input_format' == 'espresso-io/out' only 'input_unit_cell' == 'angstrom' (or None) is allowed. ".format(error))
             return 
         
         args.input_unit = "angstrom"
         args.input_unit_cell = "angstrom"
 
         if args.output_unit is None:
-            print("\n\t{:s}: the input file format is '{:s}', then the position ".format(warning,args.input_format)+\
-                "and cell are automatically convert to 'angstrom' by ASE.\n\t"+\
+            print("\n\t {:s}: the input file format is '{:s}', then the position ".format(warning,args.input_format)+\
+                "and cell are automatically convert to 'angstrom' by ASE.\n\t "+\
                     "Specify the output units (-ou,--output_unit) if you do not want the output to be in 'angstrom'.")
         if args.output_format is None or args.output_format == "espresso-in":
-            print("\n\t{:s}: the output file format is 'espresso-in'.\n\tThen, even though the positions have been converted to another unit, ".format(warning) + \
+            print("\n\t {:s}: the output file format is 'espresso-in'.\n\tThen, even though the positions have been converted to another unit, ".format(warning) + \
                     "you will find the keyword 'angstrom' in the output file."+\
-                    "\n\t{:s}\n".format(keywords))
+                    "\n\t {:s}\n".format(keywords))
 
     #------------------#
     pbc = np.any( [ np.all(atoms[n].get_pbc()) for n in range(len(atoms)) ] )
@@ -143,8 +143,8 @@ def main(args):
         factor_pos = convert(what=1,family="length",_to=args.output_unit,_from=args.input_unit)
         if pbc : 
             if args.input_unit_cell is None :
-                print("\t{:s} The unit of the lattice parameters is not specified ('input_unit_cell'):".format(warning)+\
-                      "\n\t\tit will be assumed to be equal to the positions unit")
+                print("\t {:s} The unit of the lattice parameters is not specified ('input_unit_cell'):".format(warning)+\
+                      "\n\t \tit will be assumed to be equal to the positions unit")
                 args.input_unit_cell = args.input_unit
             # print("\tConverting lattice parameters from '{:s}' to '{:s}'".format(args.input_unit_cell,args.output_unit))
             factor_cell = convert(what=1,family="length",_to=args.output_unit,_from=args.input_unit_cell)
@@ -177,8 +177,8 @@ def main(args):
         for n in range(len(atoms)):
             atoms[n].set_positions(atoms[n].get_scaled_positions())
         print("done")
-        print("\n\t{:s}: in the output file the positions will be indicated as 'cartesian'.".format(warning) + \
-              "\n\t{:s}".format(keywords))
+        print("\n\t {:s}: in the output file the positions will be indicated as 'cartesian'.".format(warning) + \
+              "\n\t {:s}".format(keywords))
         
     #------------------#
     # remove properties
@@ -193,38 +193,39 @@ def main(args):
                 
     #------------------#
     # summary
-    print("\n\tSummary of the properties: ")
+    print("\n\t  Summary of the properties: ")
     df = atoms.summary()
     tmp = "\n"+df.to_string(index=False)
-    print(tmp.replace("\n", "\n\t"))
+    print(tmp.replace("\n", "\n\t "))
 
 
     #------------------#
     # Write the data to the specified output file with the specified format
     if args.folder is None:
-        print("\n\tWriting data to file '{:s}' ... ".format(args.output), end="")
-        atoms.to_file(file=args.output,format=args.output_format)
-        print("done")
+        with eslog(f"\nWriting data to file '{args.output}'"):
+            atoms.to_file(file=args.output,format=args.output_format)
+        # print("done")
         # try:
         #     write(images=atoms,filename=args.output, format=args.output_format) # fmt)
         #     print("done")
         # except Exception as e:
         #     print("\n\tError: {:s}".format(e))
     else:
-        print("\n\tWriting each atomic structure to a different file in folder '{:s}' ... ".format(args.folder), end="")
-        if not os.path.exists(args.folder):
-            os.mkdir(args.folder)
-        for n,structure in enumerate(atoms):
-            file_name, file_extension  = os.path.splitext(args.output)
-            file = f"{args.folder}/{file_name}.n={n}{file_extension}"
-            file = os.path.normpath(file)
-            structure = AtomicStructures([structure])
-            structure.to_file(file=file,format=args.output_format)
-            # try:
-            #     write(images=structure,filename=file, format=args.output_format) # fmt)
-            # except Exception as e:
-            #     print("\n\tError: {:s}".format(e))
-        print("done")
+        with eslog(f"\nWriting each atomic structure to a different file in folder '{args.folder}'"):
+            # print("\n\tWriting each atomic structure to a different file in folder '{:s}' ... ".format(args.folder), end="")
+            if not os.path.exists(args.folder):
+                os.mkdir(args.folder)
+            for n,structure in enumerate(atoms):
+                file_name, file_extension  = os.path.splitext(args.output)
+                file = f"{args.folder}/{file_name}.n={n}{file_extension}"
+                file = os.path.normpath(file)
+                structure = AtomicStructures([structure])
+                structure.to_file(file=file,format=args.output_format)
+                # try:
+                #     write(images=structure,filename=file, format=args.output_format) # fmt)
+                # except Exception as e:
+                #     print("\n\tError: {:s}".format(e))
+        # print("done")
 
 if __name__ == "__main__":
     main()
