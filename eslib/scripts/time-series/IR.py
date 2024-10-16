@@ -104,7 +104,7 @@ def main(args):
 
     print("\n\tSaving the spectrum and the frequecies to file '{:s}' ... ".format(args.output), end="")
     tmp =  np.vstack((freq,spectrum,std,err)).T
-    assert tmp.ndim == 2, "thsi array should have 2 dimensions"
+    assert tmp.ndim == 2, "this array should have 2 dimensions"
     assert tmp.shape[1] == 4, "this array should have 4 columns"
     tmp = PhysicalTensor(tmp)
     if str(args.output).endswith("txt"):
