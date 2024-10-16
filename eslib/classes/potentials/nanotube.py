@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from ase.io import write
 
 DTYPE = torch.float64
+TEST = False
 
 def distance_from_line(point: torch.Tensor, direction: torch.Tensor, pos: torch.Tensor, is_normalized: bool = False) -> torch.Tensor:
     """
@@ -93,6 +94,15 @@ class NanoTube:
         potential = self.potential(pos)
         grad_outputs = torch.ones_like(potential)
         forces = -torch.autograd.grad(potential, [pos], grad_outputs=grad_outputs)[0]
+        # analytical_forces = np.zeros_like(forces)
+        if TEST:
+            distance = distance_from_line(self.point, self.direction, pos, is_normalized=True)
+            direction = pos/distance[:,np.newaxis]
+            direction[:,0] = 0 
+            value = - torch.sum(self.coefficients * self.degrees * torch.pow(distance[:, np.newaxis], self.degrees-1),dim=1)
+            analytical_forces:torch.Tensor  = value[:,np.newaxis]*direction
+            assert np.allclose(analytical_forces.detach().cpu().numpy(), forces.detach().cpu().numpy()),"Analytical and numerical forces do not match"
+        # analytical_forces = -(2*a2*r+4*a4*(r**3)+6*a6*(r**5)+8*a8*(r**7))*coords(i_dim, i_atom)/r
         return potential.detach().cpu().numpy(), forces.detach().cpu().numpy()
 
     def __call__(self, atoms: Atoms):
@@ -181,8 +191,8 @@ class NanoTubeCalculator(Calculator):
         e, f = self.engine(atoms)
 
         # Populate results
-        self.results["energy"]      = e
-        self.results["free_energy"] = e
+        self.results["energy"]      = float(e)
+        self.results["free_energy"] = float(e)
         self.results["forces"]      = f
         self.results["stress"]      = np.zeros((3, 3))
 
@@ -233,15 +243,14 @@ def main():
     # Generate a random structure with 10 water molecules
     bulk_water = random_water_structure(10)
 
-    # Instructions for Lennard-Jones potential calculation
     instructions = {
-        "point": [0,0,0],
-        "direction": [1,0,0],
-        "degrees": [2,4,6,8],
-        "coefficients": [0.2281,1.09,0.2341, 0.3254],
-        "coefficients_unit": "kilocal/mol",
-        "symbols": ['O'],
-        "device" : "cpu"
+        "point": [0,0,0],                               # center of the nanotube (only the y and z coordinates matter)
+        "direction": [1,0,0],                           # nanotube along the x-axis
+        "degrees": [2,4,6,8],                           # exponents of the polynomial
+        "coefficients": [0.2281,1.09,0.2341, 0.3254],   # coefficients of the polynomial
+        "coefficients_unit": "kilocal/mol",             # units of the coefficients without the \AA^degree
+        "symbols": ['O'],                               # symbols of the atoms feeling the potential
+        "device" : "cpu"                                # device to perform the calculation on (the scripts uses pytorch)                             
     }
 
     # Initialize LennardJonesWall calculator
