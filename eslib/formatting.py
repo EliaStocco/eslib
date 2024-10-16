@@ -83,8 +83,8 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
     # Description of the script's purpose
     description = description if description is not None else "Script without description."
     if documentation is not None:
-        documentation = documentation.replace("\n","\n\t")
-        documentation = Fore.GREEN  + "\n\tDocumentation:\n\t" + Style.RESET_ALL + documentation
+        documentation = documentation.replace("\n","\n\t ")
+        documentation = Fore.GREEN  + "\n\t Documentation:\n\t " + Style.RESET_ALL + documentation
     
     global _documentation
     global _description
@@ -138,20 +138,20 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
         # global description
     
         if help:
-            print("\n{:s}".format(description.replace("\n\t","\n").replace("\t\t","\t")))
+            print("\n{:s}".format(description.replace("\n\t ","\n").replace("\t \t ","\t ")))
         else:
-            print("\n\t{:s}".format(description))
+            print("\n\t {:s}".format(description))
         # if  help :
         #     description = None
         if _documentation is not None: 
             if help:
-                _documentation = str(_documentation).replace("\n\t","\n").replace("\t\t","\t")
+                _documentation = str(_documentation).replace("\n\t ","\n").replace("\t \t ","\t ")
             print(_documentation)
         
         if args is not None:
-            print("\n\t{:s}".format(input_arguments))
+            print("\n\t {:s}".format(input_arguments))
             for k in args.__dict__.keys():
-                print("\t{:>20s}:".format(k), getattr(args, k))
+                print("\t {:>20s}:".format(k), getattr(args, k))
             print()
             
         # if help:
@@ -159,9 +159,9 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
     
     def print_end(ok:bool):
         if ok:
-            print("\n\t{:s}\n".format(closure))
+            print("\n\t {:s}\n".format(closure))
         else:
-            print("\n\t{:s}\n".format(closure_error))
+            print("\n\t {:s}\n".format(closure_error))
 
         end      = datetime.now()  
         end_date = end.date().strftime("%Y-%m-%d")
