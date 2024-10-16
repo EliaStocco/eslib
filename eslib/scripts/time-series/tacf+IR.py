@@ -16,7 +16,7 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i"  , "--input"          , **argv, required=True , type=str  , help="txt/npy input file")
-    parser.add_argument("-o"  , "--output"         , **argv, required=False, type=str  , help="txt/npy output file (default: %(default)s)", default='dielectric.txt')
+    parser.add_argument("-o"  , "--output"         , **argv, required=False, type=str  , help="txt/npy output file (default: %(default)s)", default='IR.txt')
     parser.add_argument("-dt" , "--time_step"      , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
     parser.add_argument("-pad", "--padding"        , **argv, required=False, type=int  , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
     parser.add_argument("-as" , "--axis_samples"   , **argv, required=False, type=int  , help="axis corresponding to independent trajectories/samples (default: %(default)s)", default=0)
@@ -45,6 +45,11 @@ def main(args):
     data = np.gradient(data,axis=args.axis_time)/args.time_step
     print("done")
     print("\tdata shape: ",data.shape)    
+    
+    #------------------#
+    print("\n\tRemoving the mean ... ",end="")
+    data -= np.mean(data, axis=args.axis_time,keepdims=True)
+    print("done")
 
     #------------------#
     print("\n\tComputing the autocorrelation function ... ", end="")
@@ -125,6 +130,7 @@ def main(args):
     freq = get_freq(dt=args.time_step, N=len(spectrum),output_units="THz")
     freq = convert(freq,'frequency','thz',args.freq_unit)
     print("done")
+    print("\tmax freq: ",freq[-1],f" {args.freq_unit}")
 
     #------------------#
     print("\n\tSaving the spectrum and the frequecies to file '{:s}' ... ".format(args.output), end="")
