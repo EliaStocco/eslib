@@ -10,6 +10,39 @@ from copy import copy
 import pandas as pd
 from ase import Atoms
 from phonopy.structure.atoms import PhonopyAtoms
+from glob import glob
+import re
+import glob
+
+
+def take(arr, axis, indices,keepdims=False):
+    # Take the values along the specified axis
+    result = np.take(arr, indices=indices, axis=axis)
+    
+    # If indices is a scalar, add back the singleton dimension along the axis
+    if np.isscalar(indices) and keepdims:
+        result = np.expand_dims(result, axis=axis)
+    
+    return result
+
+def get_files(pattern: str):
+    # Get the list of files using glob
+    files = glob.glob(pattern)
+
+    # Function to extract the first number from the filename
+    def extract_number(filename):
+        # This regex will extract the first sequence of digits found in the filename
+        match = re.search(r'(\d+)', filename)
+        if match:
+            return int(match.group(1))  # Return the number as an integer
+        return float('inf')  # If no number is found, return a large number
+
+    # Sort the files based on the extracted number
+    try:
+        return sorted(files, key=extract_number)
+    except:
+        return files
+
 
 #---------------------------------------#
 def find_transformation(A: Atoms, B: Atoms):
