@@ -18,13 +18,14 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i" , "--input" , **argv,type=str, help="input file [extxyz]")
-    parser.add_argument("-if", "--input_format", **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-n" , "--name"  , **argv,type=str, help="name for the new info/array")
-    parser.add_argument("-s" , "--shape"  , **argv,type=ilist, help="reshape the data (default: %(default)s", default=None)  
-    parser.add_argument("-o" , "--output", **argv,type=str, help="output file (default: %(default)s)", default=None)
-    parser.add_argument("-of", "--output_format", **argv,type=str, help="output format for np.savetxt (default: %(default)s)", default=float_format)
-    return parser# .parse_args()
+    parser.add_argument("-i" , "--input"        , **argv, required=True , type=str  , help="input file [extxyz]")
+    parser.add_argument("-if", "--input_format" , **argv, required=False, type=str  , help="input file format (default: %(default)s)" , default=None)
+    parser.add_argument("-n" , "--name"         , **argv, required=True , type=str  , help="name for the new info/array")
+    parser.add_argument("-s" , "--shape"        , **argv, required=False, type=ilist, help="reshape the data (default: %(default)s", default=None)  
+    parser.add_argument("-a" , "--append"       , **argv, required=False, type=str  , help="append the trajectories (default: %(default)s)", default=True)
+    parser.add_argument("-o" , "--output"       , **argv, required=False, type=str  , help="output file (default: %(default)s)", default=None)
+    parser.add_argument("-of", "--output_format", **argv, required=False, type=str  , help="output format for np.savetxt (default: %(default)s)", default=float_format)
+    return parser
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
@@ -33,13 +34,13 @@ def main(args):
     #---------------------------------------#
     # atomic structures
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    file = str(args.input)
-    if file.endswith("pickle"):
-        atoms = Trajectory.from_file(file=file,format=args.input_format)
-    elif file.endswith("txt") or file.endswith("out"):
-        atoms = Properties.from_file(file=file)
-    else:
-        atoms = AtomicStructures.from_file(file=file,format=args.input_format)
+    # file = str(args.input)
+    # if file.endswith("pickle"):
+    #     atoms = Trajectory.from_file(file=file,format=args.input_format)
+    # elif file.endswith("txt") or file.endswith("out"):
+    #     atoms = Properties.from_file(file=file)
+    # else:
+    atoms = AtomicStructures.from_file(file=file,format=args.input_format)
     print("done")
 
     #---------------------------------------#
