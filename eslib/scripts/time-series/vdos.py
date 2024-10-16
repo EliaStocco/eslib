@@ -2,42 +2,46 @@
 import numpy as np
 from typing import List
 import matplotlib.pyplot as plt
+from classes.aseio import PARALLEL
 from eslib.classes.physical_tensor import PhysicalTensor
 from eslib.classes.trajectory import AtomicStructures
 from eslib.classes.tcf import TimeAutoCorrelation, compute_spectrum, get_freq
 from eslib.formatting import esfmt, eslog
-from eslib.tools import convert
-from eslib.tools import get_files, take
+from eslib.tools import convert, get_files, take
+from eslib.input import str2bool
+import concurrent.futures
 
 #---------------------------------------#
 # Description of the script's purpose
 description = "Compute the Vibrational Density Of States (VDOS) from a Molecular Dynamics trajectory."
 documentation = \
-"The script takes the positions as input and computes the velocities usng `np.gradient`.\n\
-Be sure that the trajectory has not been folded in the primitive unit cell.\n\
-If that is the case, you can use `unfold.py`."
+"The script takes the positions as input and computes the velocities using `np.gradient`.\n\
+Be sure that the trajectories have not been folded in the primitive unit cell.\n\
+The positions must be continous over time.\
+If it is not the case, you can use `unfold.py`."
 
 AXIS_SAMPLES = 0
 AXIS_TIME = 1
 AXIS_DOFS = 2
+# PARALLEL = True
 
 #---------------------------------------#
 def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i"   , "--input"       , **argv, required=True , type=str  , help="file with the atomic structure")
-    parser.add_argument("-if"  , "--input_format", **argv, required=False, type=str  , help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-u"   , "--unit"        , **argv, required=False, type=str  , help="unit of the atomic structure (default: %(default)s)" , default="angstrom")
-    parser.add_argument("-dt"  , "--time_step"   , **argv, required=True , type=float, help="time step [fs]")
-    parser.add_argument("-pad" , "--padding"     , **argv, required=False, type=int  , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
-    parser.add_argument("-w"   , "--window"      , **argv, required=False, type=str  , help="window type (default: %(default)s)", default='hanning', choices=['none','barlett','blackman','hamming','hanning','kaiser'])
-    parser.add_argument("-wt"  , "--window_t"    , **argv, required=False, type=int  , help="time span of the window [fs] (default: %(default)s)", default=1000)
-    parser.add_argument("-o"   , "--output"      , **argv, required=False, type=str  , help="txt/npy output file (default: %(default)s)", default='vdos.txt')
-    parser.add_argument("-p"   , "--plot"        , **argv, required=False, type=str  , help="plot file (default: %(default)s)", default=None)
-    parser.add_argument("-fu"  , "--freq_unit"   , **argv, required=False, type=str  , help="unit of the frequencies (default: %(default)s)", default="inversecm")
-    parser.add_argument("-fmax", "--freq_max"    , **argv, required=False, type=float, help="maximum frequency (default: %(default)s)", default=None)
-    
+    parser.add_argument("-i"   , "--input"       , **argv, required=True , type=str     , help="file with the atomic structure")
+    parser.add_argument("-if"  , "--input_format", **argv, required=False, type=str     , help="input file format (default: %(default)s)" , default=None)
+    parser.add_argument("-u"   , "--unit"        , **argv, required=False, type=str     , help="unit of the atomic structure (default: %(default)s)" , default="angstrom")
+    parser.add_argument("-dt"  , "--time_step"   , **argv, required=True , type=float   , help="time step [fs]")
+    parser.add_argument("-pad" , "--padding"     , **argv, required=False, type=int     , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
+    parser.add_argument("-w"   , "--window"      , **argv, required=False, type=str     , help="window type (default: %(default)s)", default='hanning', choices=['none','barlett','blackman','hamming','hanning','kaiser'])
+    parser.add_argument("-wt"  , "--window_t"    , **argv, required=False, type=int     , help="time span of the window [fs] (default: %(default)s)", default=1000)
+    parser.add_argument("-o"   , "--output"      , **argv, required=False, type=str     , help="txt/npy output file (default: %(default)s)", default='vdos.txt')
+    parser.add_argument("-p"   , "--plot"        , **argv, required=False, type=str     , help="plot file (default: %(default)s)", default=None)
+    parser.add_argument("-fu"  , "--freq_unit"   , **argv, required=False, type=str     , help="unit of the frequencies (default: %(default)s)", default="inversecm")
+    parser.add_argument("-fmax", "--freq_max"    , **argv, required=False, type=float   , help="maximum frequency (default: %(default)s)", default=None)
+    parser.add_argument("-par"   , "--parallel"  , **argv, required=False, type=str2bool, help="use parallel algorithm to read files (default: %(default)s)", default=False)
     return parser
     
 #---------------------------------------#
@@ -47,17 +51,34 @@ def main(args):
     #------------------#
     files = get_files(args.input)
     n_files = len(files)
-    print("\t Find {:d} files using '{:s}'".format(n_files,args.input))
+    print("\t Found {:d} files using '{:s}'".format(n_files,args.input))
     for n,file in enumerate(files):
         print("\t\t {:<3d}/{:>3d}: {:s}".format(n,n_files,file))
+    print()
     
     #------------------#
     trajectories:List[AtomicStructures] = [None]*n_files
-    # with eslog(f"\nReading atomic structures from file '{args.input}'"):
-    print()
-    for n,file in enumerate(files):
-        with eslog(f"Reading atomic structures from file '{file}'"):
-            trajectories[n] = AtomicStructures.from_file(file=file)#.get("positions")
+
+    if args.parallel:
+        with eslog(f"Reading atomic structures from '{args.input}' (parallel)"):
+            def read_atomic_structure(file: str) -> AtomicStructures:
+                # with eslog(f"Reading atomic structures from file '{file}'"):
+                return AtomicStructures.from_file(file=file)
+            # Using ThreadPoolExecutor for I/O-bound tasks
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                # Submit tasks to the executor
+                futures = {executor.submit(read_atomic_structure, file): n for n, file in enumerate(files)}
+
+                for future in concurrent.futures.as_completed(futures):
+                    n = futures[future]  # Get the original index
+                    try:
+                        trajectories[n] = future.result()  # Retrieve the result
+                    except Exception as e:
+                        print(f"Error reading file {files[n]}: {e}")
+    else:
+        for n,file in enumerate(files):
+            with eslog(f"Reading atomic structures from file '{file}'"):
+                trajectories[n] = AtomicStructures.from_file(file=file)
             
     #------------------#
     positions = [None]*n_files
@@ -119,7 +140,7 @@ def main(args):
         raw_autocorr = np.copy(autocorr)  
         with eslog(f"\nApplying the '{args.window}' window"):
             func = getattr(np, args.window)
-            window = np.zeros(raw_autocorr.shape[args.axis_time])
+            window = np.zeros(raw_autocorr.shape[AXIS_TIME])
             M = int(args.window_t / args.time_step)
             window[:M] = func(2*M)[M:]
             window /= window[0] # small correction so that the first value is 1
