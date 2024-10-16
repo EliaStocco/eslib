@@ -352,12 +352,19 @@ def compute_spectrum(
         np.ndarray: The spectrum.
     """
     # Add padding to the autocorrelation function
-    N = autocorr.shape[axis]*pad
-    padding = np.zeros(N)
+    
     if axis == 1:
+        N = autocorr.shape[axis]*pad
+        padding = np.zeros(N)
         autocorr = np.asarray([ np.append(a,padding) for a in autocorr ])
     else:
-        raise ValueError("not implemented yet") 
+        shape = list(autocorr.shape)
+        shape[axis] = shape[axis]*pad 
+        padding = np.zeros(tuple(shape))
+        ndim = autocorr.ndim
+        autocorr = np.append(autocorr,padding,axis=axis)
+        assert ndim == autocorr.ndim, "shape mismatch"
+        # raise ValueError("not implemented yet") 
 
     # Compute the discrete cosine transform of the autocorrelation function
     # along the specified axis
