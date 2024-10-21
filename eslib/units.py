@@ -1,6 +1,6 @@
 import pint
 import xarray as xr
-from typing import Union
+from typing import Union, Tuple
 import numpy as np
 
 __all__ = ["atomic_unit","ureg","remove_unit","set_unit","get_unit","check_dim"]
@@ -29,7 +29,7 @@ families = {    "energy"          : ["conserved","kinetic_md","potential"],
                 "electric-field"  : ["Efield","Eenvelope"]
 }
 
-def remove_unit(array:dtype)->dtype:
+def remove_unit(array:dtype)->Tuple[dtype,utype]:
     """Returns a tuple with the input array without the ```pint``` unit, and the removed ```pint``` unit."""
     out = array.copy()
     unit = get_unit(out)
