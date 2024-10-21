@@ -7,16 +7,29 @@ def show_dict(obj:dict,string:str="",width=30):
         print(fmt.format(string,k),obj[k])
 
 #---------------------------------------#
-def print_df(df:pd.DataFrame)->str:
+import pandas as pd
+
+import pandas as pd
+
+def print_df(df: pd.DataFrame, format_str: str = '{:>12.4f}') -> str:
+    # Create a formatted string for the column names
     column_names = ''.join(['{:>12}'.format(col) for col in df.columns])
-    print('\n\t' + "-"*len(column_names))
+    
+    # Print the headers and the separator line
+    print('\n\t' + "-" * len(column_names))
     print('\t' + column_names)
-    print('\t' + "-"*len(column_names))
+    print('\t' + "-" * len(column_names))
+    
     # Iterate over rows and print with the specified format
     for index, row in df.iterrows():
-        formatted_row = ''.join(['{:>12.4e}'.format(value) for value in row])
+        formatted_row = '{:>12d}'.format(int(row[0]))  # First column as integer
+        formatted_row += ''.join([format_str.format(value) for value in row[1:]])  # Remaining columns using user-provided format
         print('\t' + formatted_row)
-    print('\t' + "-"*len(column_names))
+    
+    # Print the closing separator line
+    print('\t' + "-" * len(column_names))
+
+
 
 #---------------------------------------#
 def print_cell(cell, tab="\t\t"):

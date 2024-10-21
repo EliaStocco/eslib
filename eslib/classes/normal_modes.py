@@ -24,6 +24,23 @@ class NormalModes(pickleIO):
 
     # To DO :
     # - replace ref with as ase.Atoms and then initialize masses with that
+    
+    # parameters
+    Ndof     :int
+    Nmodes   :int
+    Natoms   :int
+    size     :List[int]
+    
+    # matrices (atomic units)
+    dynmat   :PhysicalTensor
+    eigvec   :PhysicalTensor
+    mode     :PhysicalTensor
+    eigval   :PhysicalTensor
+    masses   :PhysicalTensor
+    
+    # reference structure (bohr)
+    reference:Atoms
+    
 
     def to_pickle(self:T, file)->None:
         pint.get_application_registry()
@@ -43,6 +60,8 @@ class NormalModes(pickleIO):
         if Ndof is None:
             Ndof = Nmodes
         self.Ndof = int(Ndof)
+        
+        self.size = [1,1,1]
 
         # Natoms
         self.Natoms = int(self.Ndof / 3)
@@ -65,6 +84,16 @@ class NormalModes(pickleIO):
         pass
 
     def set_reference(self:T,ref:Atoms):
+        """
+        Sets the reference structure for the NormalModes object.
+        Attention: the reference structure should be in atomic units (bohr).
+
+        Parameters:
+            ref (Atoms): The reference structure. If None, an empty Atoms object is used.
+
+        Returns:
+            None
+        """
         if ref is None:
             self.reference = Atoms()
             # self.masses = PhysicalTensor(np.full(self.Ndof,np.nan), dims=('dof'))
@@ -80,12 +109,18 @@ class NormalModes(pickleIO):
             self.masses = PhysicalTensor(masses, dims=('dof'))
             
         
-    # def __repr__(self) -> str:
-    #     line = "" 
-    #     line += "{:<10s}: {:<10d}\n".format("# modes",self.Nmodes)  
-    #     line += "{:<10s}: {:<10d}\n".format("# dof",self.Ndof)  
-    #     line += "{:<10s}: {:<10d}\n".format("# atoms",self.Natoms)  
-    #     return line
+    def __repr__(self) -> str:
+        line = "Parameters:\n" 
+        line += "  {:<10s}: {:<10d}\n".format("atoms",self.Natoms)  
+        line += "  {:<10s}: {:<10d} (atoms x 3)\n".format("dof",self.Ndof)  
+        line += "  {:<10s}: {:<10d}\n".format("modes",self.Nmodes)   
+        line += "  {:<10s}: {}\n".format("size",self.size)                  
+        line += "Matrices:"
+        for mat in ["dynmat","eigvec","mode","eigval","masses"]:
+            line += "\n  {:<10s}: {}".format(mat,vars(self)[mat].shape)
+        line += "\nReference structure (bohr/a.u.):"
+        line += "\n  {:<10s}: {}".format("reference", self.reference)  
+        return line
     
     # def to_dict(self)->dict:
     #     return nparray2list_in_dict(vars(self))
@@ -300,7 +335,7 @@ class NormalModes(pickleIO):
         values = [None]*len(size)
         for n,a in enumerate(size):
             values[n] = np.arange(a)
-        r_point = list(product(*values))
+        # r_point = list(product(*values))
         
         size = np.asarray(size)
         # N = size.prod()
@@ -335,6 +370,7 @@ class NormalModes(pickleIO):
         ref_au.positions *= convert(1,"length","angstrom","atomic_unit")
         ref_au.cell *= convert(1,"length","angstrom","atomic_unit")
         supercell = NormalModes(self.Nmodes,self.Ndof*size.prod(),ref=ref_au)
+        supercell.size = size.tolist()
         
         for i,r in enumerate(displ):
             kr = np.asarray(r) / size @ q
@@ -358,7 +394,7 @@ class NormalModes(pickleIO):
         # if np.isnan(supercell.eigvec).sum() != 0:
         #     raise ValueError("error")
         
-        supercell.eigvec /= np.linalg.norm(supercell.eigvec,axis=0)
+        supercell.eigvec /= np.linalg.norm(supercell.eigvec,axis=0)# *size.prod())
         supercell.eigval = self.eigval.copy()
         
         # raise ValueError("Elia Stocco, this is a message for yourself of the past. Check again this script, please!")

@@ -53,16 +53,17 @@ def main(args):
     print("\tReading phonon modes from file '{:s}' ... ".format(args.input), end="")
     nm = NormalModes.from_pickle(args.input)
     print("done")
-    print("\tn. of modes:",nm.Nmodes)  
-    print("\tn. of dof  :",nm.Ndof)  
-    
+    string = repr(nm)
+    string = string.replace("\n","\n\t")
+    print("\t"+string)
+        
     structure = nm.reference
     Natoms = structure.get_global_number_of_atoms()
-    print("\tn. of atoms:",Natoms)    
+    # print("\tn. of atoms:",Natoms)    
     if Natoms*3 == nm.Nmodes:
-        print("\tsupercell  : false --> these are vibrational modes")        
+        print("\n\tsupercell  : false --> these are vibrational modes")        
     else:
-        print("\tsupercell  : true --> these are phonon modes")    
+        print("\n\tsupercell  : true --> these are phonon modes")    
     print("\tunit cell [au] :")    
     line = matrix2str(structure.cell.array.T,col_names=["1","2","3"],cols_align="^",width=10,digits=4)
     print(line)
@@ -79,8 +80,10 @@ def main(args):
     df["w [THz]"]   = convert(df["w [a.u.]"],"frequency",_from="atomic_unit",_to="thz")
     df["w [cm^-1]"] = convert(df["w [a.u.]"],"frequency",_from="atomic_unit",_to="inversecm")
     df["T [a.u.]"]  = 2*np.pi / df["w [a.u.]"]
-    df["T [ps]"]    = convert(df["T [a.u.]"],"time",_from="atomic_unit",_to="picosecond")
+    # df["T [ps]"]    = convert(df["T [a.u.]"],"time",_from="atomic_unit",_to="picosecond")
     df["T [fs]"]    = convert(df["T [a.u.]"],"time",_from="atomic_unit",_to="femtosecond")
+    del df["w [a.u.]"]
+    del df["w^2 [a.u.]"]
     print("done")
 
     #---------------------------------------#
