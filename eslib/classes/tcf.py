@@ -272,7 +272,7 @@ def serial_fft(A: np.ndarray, axis:int=-1, len_fft:Optional[int]=None,enable:boo
     return result
 
 # @profile_function(output_file='autocorrelate.profile.txt')
-def autocorrelate(A: np.ndarray, axis: Optional[int] = 0,loop:Optional[bool]=True) -> np.ndarray:
+def autocorrelate(A: np.ndarray, axis: Optional[int] = 0,loop:Optional[bool]=False) -> np.ndarray:
     """
     Computes the auto-correlation of an array along the specified axis
     when A == B.

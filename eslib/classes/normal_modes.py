@@ -7,6 +7,7 @@ from warnings import warn
 import pandas as pd
 from ase import Atoms
 from typing import List, Dict, TypeVar
+from icecream import ic
 
 from eslib.classes.io import pickleIO
 from eslib.functional import unsafe, improvable
@@ -488,6 +489,8 @@ class NormalModes(pickleIO):
         eigvec = self.eigvec.copy() * atomic_unit["dimensionless"]
         A = self.eigvec.rename({'mode': 'mode-a', 'dof': 'dof'})
         B = self.eigvec.rename({'mode': 'mode-b', 'dof': 'dof'})
+        ic(type(self.eigvec))
+        ic(type(A))
         test = A.dot(B,dim="dof")
         if test.shape != (self.Nmodes,self.Nmodes):
             raise ValueError("wrong shape")

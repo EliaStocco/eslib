@@ -121,14 +121,17 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
             print("{:20s}:".format("python --version"), sys.version.replace("\n"," "))
             print("{:20s}:".format("which python"), sys.executable.replace("\n"," "))
             conda_env = os.environ.get('CONDA_DEFAULT_ENV')
-            if conda_env:
-                print("{:20s}:".format("conda env"), conda_env)
-                index_bin = sys.executable.find('/bin')
-                _conda_env = sys.executable[:index_bin].split('/')[-1]
-                if _conda_env != conda_env:
-                    print("{:s}: possible discrepancy between conda environment and python executable.".format(warning))
-            else:
-                print("not using conda env")
+            print("{:20s}:".format("conda env"), conda_env if conda_env is not None else "none")
+            # if conda_env:
+            #     print("{:20s}:".format("conda env"), conda_env)
+            #     # index_bin = sys.executable.find('/bin')
+            #     # _conda_env = sys.executable[:index_bin].split('/')[-1]
+            #     # if _conda_env != conda_env:
+            #     #     print("{:s}: possible discrepancy between conda environment and python executable.".format(warning))
+            #     # else:
+            #     #     print()
+            # else:
+            #     print("no conda env")
             print("{:20s}: {:s}".format("start date",start_date))
             print("{:20s}: {:s}".format("start time",start_time))
         line(start="###")

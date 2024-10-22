@@ -3,7 +3,7 @@ from ase.io import write
 import numpy as np
 from ase import Atoms
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import esfmt
+from eslib.formatting import esfmt, eslog
 from eslib.tools import convert
 
 #---------------------------------------#
@@ -16,10 +16,10 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"           , **argv, required=True , type=str, help="file with an atomic structure")
     parser.add_argument("-if", "--input_format"    , **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-up" , "--unit_positions"  , **argv, required=False, type=str, help="positions unit (default: %(default)s)", default="angstrom")
+    parser.add_argument("-up" , "--unit_positions" , **argv, required=False, type=str, help="positions unit (default: %(default)s)", default="angstrom")
     parser.add_argument("-dt" , "--time_step"      , **argv, required=True , type=float, help="time step")
     parser.add_argument("-udt" , "--unit_time_step", **argv, required=False, type=str  , help="time step unit (default: %(default)s)", default="femtosecond")
-    parser.add_argument("-o"  , "--output"          , **argv, required=True , type=str, help="output file with the velocities")
+    parser.add_argument("-o"  , "--output"         , **argv, required=True , type=str, help="output file with the velocities")
     parser.add_argument("-of" , "--output_format"  , **argv, required=False, type=str, help="output file format (default: %(default)s)", default="xyz")
     parser.add_argument("-uv" , "--unit_velocity"  , **argv, required=False, type=str, help="velocity unit (default: %(default)s)", default="atomic_unit")
     return parser
@@ -41,10 +41,7 @@ def main(args):
         factor_pos = convert(what=1,family="length",_from=args.unit_positions,_to="atomic_unit")
         print(f"\tConverting positions from '{args.unit_positions}' to 'atomic_unit' using factor {factor_pos} ... ",end="")
         for n,atoms in enumerate(structures):
-            # print("\t{:d}/{:d} ... ".format(n+1,N), end="\r")
             atoms.positions *= factor_pos
-            # if np.all(atoms.get_pbc()):
-            #     atoms.cell *= factor_pos
         print("done")
         
     #------------------#
@@ -54,32 +51,34 @@ def main(args):
         args.time_step *= factor_time
         print("done")
         
-    #------------------#
-    factor_vel = 1
-    if args.unit_velocity != "atomic_unit":
-        factor_vel = convert(what=1,family="velocity",_from="atomic_unit",_to=args.unit_velocity)
-        print(f"\tConverting time velocities from 'atomic_unit' to '{args.unit_velocity}' using factor {factor_vel} ... ",end="")
-        print("done")
-        
     print("\tComputing velocities ... ", end="")
     pos = structures.get_array("positions")
-    vel = np.gradient(pos,axis=0)/args.time_step*factor_vel
+    vel = np.gradient(pos,axis=0)/args.time_step
     velocities = [None]*N
     for n,atoms in enumerate(structures):
         velocities[n] = Atoms(symbols=atoms.get_chemical_symbols(),positions=vel[n],cell=None,pbc=False)
     velocities = AtomicStructures(velocities)
     print("done")
     
+    print("\tComputing temperature ... ", end="")
     masses = structures[0].get_masses()
     masses = convert(masses,family="mass",_from="dalton",_to="atomic_unit")
-    kinetic = np.zeros(len(structures))
-    for t in range(len(structures)):
-        kinetic[t] = 0
-        for n,atoms in enumerate(structures[t]):
-            kinetic[t] += 0.5*(masses[n]*(vel[t,n]**2).sum())
-    # kinetic = 0.5*(masses*(vel**2).sum(axis=-1)).sum(axis=-1).flatten()
+    v2 = np.square(vel)
+    kinetic = 0.5*(masses[np.newaxis,:,np.newaxis] * v2).sum(axis=(1,2))
     temperature = 2.*kinetic/(3.*structures[0].get_global_number_of_atoms())
     temperature = convert(temperature,"temperature",_from="atomic_unit",_to="kelvin")
+    print("done")
+    
+    print("\n\tTemperature = ",temperature.mean(),"K")
+    
+    #------------------#
+    factor_vel = 1
+    if args.unit_velocity != "atomic_unit":
+        factor_vel = convert(what=1,family="velocity",_from="atomic_unit",_to=args.unit_velocity)
+        print(f"\tConverting time velocities from 'atomic_unit' to '{args.unit_velocity}' using factor {factor_vel} ... ",end="")
+        for n,atoms in enumerate(velocities):
+            atoms.positions *= factor_vel
+        print("done")
     
     print("\n\tSaving velocities to file '{:s}' ... ".format(args.output), end="")
     velocities.to_file(file=args.output,format=args.output_format)

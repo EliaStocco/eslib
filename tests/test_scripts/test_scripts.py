@@ -42,6 +42,26 @@ def change_directory():
 tmp_folder = "tmp"
 
 torun = {
+    "rdf" :
+    {
+        "folder"  : "analysis",
+        "file"   : "rdf.py",
+        "kwargs"  : {
+            "input"              : "tests/structures/LiNbO3/LiNbO3.au.extxyz",
+            "elements"           : ["Li","Nb"],
+            "rmax"               : 4
+        },
+    },
+    "gtrdf" :
+    {
+        "folder"  : "analysis",
+        "file"   : "gtrdf.py",
+        "kwargs"  : {
+            "input"              : "tests/structures/LiNbO3/LiNbO3.au.extxyz",
+            "elements"           : ["Li","Nb"],
+            "rmax"               : 4
+        },
+    },
     "extxyz2array" : # info to txt
     {
         "folder"  : "build",
@@ -351,7 +371,7 @@ def test_scripts(name, test):
 if __name__ == "__main__":
     for name, test in torun.items():
         test_scripts(name, test)
-    
+      
 # { 
 #     "version": "0.2.0",
 #     "configurations": [
@@ -359,8 +379,8 @@ if __name__ == "__main__":
 #             "name": "Python: Current File",
 #             "type": "debugpy",
 #             "request": "launch",
-#             "program": "/home/stoccoel/google-personal/codes/eslib/tests/test_scripts/test_scritps.py",
-#             "cwd" : "/home/stoccoel/google-personal/codes/eslib/tests/test_scripts/",
+#             "program": "/home/stoccoel/google-personal/codes/eslib/tests/test_scripts/test_scripts.py",
+#             "cwd" : "/home/stoccoel/google-personal/codes/eslib/",
 #             "console": "integratedTerminal",
 #             "justMyCode": true,
 #         }

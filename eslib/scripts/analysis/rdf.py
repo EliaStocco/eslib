@@ -22,7 +22,7 @@ def prepare_args(description):
     parser.add_argument("-if", "--input_format", **argv, type=str  , help="input file format (default: %(default)s)", default=None)
     parser.add_argument("-in", "--index"       , **argv,required=False, type=itype   , help="index to be read from input file (default: %(default)s)", default=':')
     parser.add_argument("-n" , "--nbins"       , **argv, type=int  , help="Number of bins to divide RDF (default: %(default)s)", default=100)
-    parser.add_argument("-m" , "--min"         , **argv, type=float, help="minimu distance in the plot (default: %(default)s)", default=2)
+    parser.add_argument("-m" , "--min"         , **argv, type=float, help="minimum distance in the plot (default: %(default)s)", default=2)
     parser.add_argument("-r" , "--rmax"        , **argv, type=float, help="Maximum distance of RDF (default: %(default)s)", default=5.)
     parser.add_argument("-e" , "--elements"    , **argv, type=nslist, help="elements (default: %(default)s)", default=None)
     parser.add_argument("-o" , "--output"      , **argv, type=str  , help="output file (default: %(default)s)", default="rdf.csv")
@@ -32,6 +32,8 @@ def prepare_args(description):
 #---------------------------------------#
 @esfmt(prepare_args, description)
 def main(args):
+    
+    args.rmax = float(args.rmax)
 
     #---------------------------------------#
     # atomic structures

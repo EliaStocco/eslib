@@ -5,6 +5,50 @@ from ase import Atoms
 from eslib.classes.bec import bec as BEC
 from copy import copy, deepcopy
 from eslib.tools import cart2frac
+from ase.data import atomic_masses, atomic_numbers
+
+from typing import Union, List
+from ase.data import atomic_masses, atomic_numbers
+
+def get_element_mass(symbols: Union[str, List[str]]) -> Union[float, List[float]]:
+    """
+    Get the atomic mass of a chemical element or a list of elements by their symbol(s).
+    
+    Parameters:
+    symbols (Union[str, List[str]]): A chemical symbol (e.g., 'O') or a list of chemical symbols (e.g., ['O', 'H', 'C']).
+    
+    Returns:
+    Union[float, List[float]]: The atomic mass of the element if a single symbol is provided, 
+                               or a list of atomic masses if a list of symbols is provided.
+
+    Raises:
+    TypeError: If the input is not a string or a list/tuple of strings.
+    ValueError: If an invalid chemical symbol is provided.
+    
+    Example:
+    >>> get_element_mass('O')
+    15.999
+    >>> get_element_mass(['O', 'H', 'C'])
+    [15.999, 1.008, 12.011]
+    """
+    if isinstance(symbols, str):  # If input is a single string
+        if symbols not in atomic_numbers:
+            raise ValueError(f"Invalid chemical symbol: {symbols}")
+        atomic_number = atomic_numbers[symbols]
+        return atomic_masses[atomic_number]
+    
+    elif isinstance(symbols, (list, tuple,np.ndarray)):  # If input is a list or tuple
+        masses = []
+        for symbol in symbols:
+            if symbol not in atomic_numbers:
+                raise ValueError(f"Invalid chemical symbol: {symbol}")
+            atomic_number = atomic_numbers[symbol]
+            masses.append(atomic_masses[atomic_number])
+        return masses
+    
+    else:
+        raise TypeError("Input must be a string or a list/tuple of strings.")
+
 
 def FWHM2sigma(FWHM: float) -> float:
     """
