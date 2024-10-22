@@ -42,64 +42,104 @@ def change_directory():
 tmp_folder = "tmp"
 
 torun = {
-    # "eval-model-PES" :
-    # {
-    #     "folder"  : "nn",
-    #     "file"   : "eval-model.py",
-    #     "kwargs"  : {
-    #         "input" : "tests/structures/LiNbO3/geometries.extxyz" ,   
-    #         "model" : "tests/models/MACE-LiNbO3/MACE.LiNbO3.pickle",
-    #         "output": f"{tmp_folder}/mace.extxyz"
-    #     },
-    # },
-    # "eval-model-PES+save-info-arrays" :
-    # {
-    #     "folder"  : "nn",
-    #     "file"   : "eval-model.py",
-    #     "kwargs"  : {
-    #         "input" : "tests/structures/LiNbO3/geometries.extxyz" ,   
-    #         "model" : "tests/models/MACE-LiNbO3/MACE.LiNbO3.pickle",
-    #         "output": f"{tmp_folder}/mace.extxyz",
-    #         "names" : ['MACE_energy','MACE_forces'],
-    #         "shapes": [[-1,1],[-1,3]],
-    #         "data_output" : [f'{tmp_folder}/MACE_energy.txt',f'{tmp_folder}/MACE_forces.txt']
-    #     },
-    # },
-    # "backward compatibility" :
-    # {
-    #     "folder"  : "inspect",
-    #     "file"   : "trajectory-summary.py",
-    #     "kwargs"  : {
-    #         "input" : "tests/structures/back-comp/pos.300K.E=0.00.pickle" ,   
-    #     },
-    # },
-    # "extras2dipole" :
-    # {
-    #     "folder"  : "dipole",
-    #     "file"   : "extras2dipole",
-    #     "kwargs"  : {
-    #         "input"  : "tests/data/i-pi.extras_0",  
-    #         "output" :  "tests/dipoles.txt",  
-    #     },
-    # },
-    # "get-iPI-cell" :
-    # {
-    #     "folder"  : "inspect",
-    #     "file"   : "get-iPI-cell",
-    #     "kwargs"  : {
-    #         "input" : "tests/structures/bulk-water/bulk-water.au.extxyz",            
-    #     },
-    # },
-    # "convert-file" :
-    # {
-    #     "folder"  : "convert",
-    #     "file"   : "convert-file",
-    #     "kwargs"  : {
-    #         "input"              : "tests/structures/bulk-water/bulk-water.au.extxyz",   
-    #         "remove_properties"  : "true",   
-    #         "output"             : f"{tmp_folder}/output.extxyz",     
-    #     },
-    # },
+    "extxyz2array" : # info to txt
+    {
+        "folder"  : "build",
+        "file"   : "extxyz2array.py",
+        "kwargs"  : {
+            "input"              : "tests/structures/water-wire/water-wire.extxyz",   
+            "keyword"            : "MACE_dipole",   
+            "output"             : f"{tmp_folder}/MACE_dipole.txt", 
+        },
+    },
+    "extxyz2array" : # info to npy
+    {
+        "folder"  : "build",
+        "file"   : "extxyz2array.py",
+        "kwargs"  : {
+            "input"              : "tests/structures/water-wire/water-wire.extxyz",   
+            "keyword"            : "MACE_dipole",   
+            "output"             : f"{tmp_folder}/MACE_dipole.npy", 
+        },
+    },
+    "extxyz2array" : # array to txt
+    {
+        "folder"  : "build",
+        "file"   : "extxyz2array.py",
+        "kwargs"  : {
+            "input"              : "tests/structures/water-wire/water-wire.extxyz",   
+            "keyword"            : "MACE_atomic_dipoles",   
+            "output"             : f"{tmp_folder}/MACE_atomic_dipoles.txt", 
+        },
+    },
+    "extxyz2array" : # array to txt
+    {
+        "folder"  : "build",
+        "file"   : "extxyz2array.py",
+        "kwargs"  : {
+            "input"              : "tests/structures/water-wire/water-wire.extxyz",   
+            "keyword"            : "MACE_atomic_dipoles",   
+            "output"             : f"{tmp_folder}/MACE_atomic_dipoles.npy", 
+        },
+    },
+    "eval-model-PES" :
+    {
+        "folder"  : "nn",
+        "file"   : "eval-model.py",
+        "kwargs"  : {
+            "input" : "tests/structures/LiNbO3/geometries.extxyz" ,   
+            "model" : "tests/models/MACE-LiNbO3/MACE.LiNbO3.pickle",
+            "output": f"{tmp_folder}/mace.extxyz"
+        },
+    },
+    "eval-model-PES+save-info-arrays" :
+    {
+        "folder"  : "nn",
+        "file"   : "eval-model.py",
+        "kwargs"  : {
+            "input" : "tests/structures/LiNbO3/geometries.extxyz" ,   
+            "model" : "tests/models/MACE-LiNbO3/MACE.LiNbO3.pickle",
+            "output": f"{tmp_folder}/mace.extxyz",
+            "names" : ['MACE_energy','MACE_forces'],
+            "shapes": [[-1,1],[-1,3]],
+            "data_output" : [f'{tmp_folder}/MACE_energy.txt',f'{tmp_folder}/MACE_forces.txt']
+        },
+    },
+    "backward compatibility" :
+    {
+        "folder"  : "inspect",
+        "file"   : "trajectory-summary.py",
+        "kwargs"  : {
+            "input" : "tests/structures/back-comp/pos.300K.E=0.00.pickle" ,   
+        },
+    },
+    "extras2dipole" :
+    {
+        "folder"  : "dipole",
+        "file"   : "extras2dipole",
+        "kwargs"  : {
+            "input"  : "tests/data/i-pi.extras_0",  
+            "output" :  "tests/dipoles.txt",  
+        },
+    },
+    "get-iPI-cell" :
+    {
+        "folder"  : "inspect",
+        "file"   : "get-iPI-cell",
+        "kwargs"  : {
+            "input" : "tests/structures/bulk-water/bulk-water.au.extxyz",            
+        },
+    },
+    "convert-file" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : "tests/structures/bulk-water/bulk-water.au.extxyz",   
+            "remove_properties"  : "true",   
+            "output"             : f"{tmp_folder}/output.extxyz",     
+        },
+    },
     # "netcdf-write" :
     # {
     #     "folder"  : "convert",
@@ -109,43 +149,43 @@ torun = {
     #         "output"             : f"{tmp_folder}/output.nc",     
     #     },
     # },
-    # "netcdf-read" :
-    # {
-    #     "folder"  : "convert",
-    #     "file"   : "convert-file",
-    #     "kwargs"  : {
-    #         "input"              : "tests/structures/LiNbO3/long.n=10000.nc",   
-    #         "output"             : f"{tmp_folder}/output.extxyz",     
-    #     },
-    # },
-    # "pickle-write" :
-    # {
-    #     "folder"  : "convert",
-    #     "file"   : "convert-file",
-    #     "kwargs"  : {
-    #         "input"              : "tests/structures/LiNbO3/long.n=10000.extxyz",   
-    #         "output"             : f"{tmp_folder}/output.pickle",     
-    #     },
-    #     "clean" : False
-    # },
-    # "pickle-inspect" : {
-    #     "folder"  : "inspect",
-    #     "file"   : "trajectory-summary.py",
-    #     "kwargs"  : {
-    #         "input" : f"{tmp_folder}/output.pickle",  
-    #     },
-    #     "clean" : False
-    # },
-    # "pickle-read" :
-    # {
-    #     "folder"  : "convert",
-    #     "file"   : "convert-file",
-    #     "kwargs"  : {
-    #         "input"              : f"{tmp_folder}/output.pickle",   
-    #         "input_format"       : "pickle",
-    #         "output"             : f"{tmp_folder}/output.nc",  
-    #     },
-    # },
+    "netcdf-read" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : "tests/structures/LiNbO3/long.n=10000.nc",   
+            "output"             : f"{tmp_folder}/output.extxyz",     
+        },
+    },
+    "pickle-write" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : "tests/structures/LiNbO3/long.n=10000.extxyz",   
+            "output"             : f"{tmp_folder}/output.pickle",     
+        },
+        "clean" : False
+    },
+    "pickle-inspect" : {
+        "folder"  : "inspect",
+        "file"   : "trajectory-summary.py",
+        "kwargs"  : {
+            "input" : f"{tmp_folder}/output.pickle",  
+        },
+        "clean" : False
+    },
+    "pickle-read" :
+    {
+        "folder"  : "convert",
+        "file"   : "convert-file",
+        "kwargs"  : {
+            "input"              : f"{tmp_folder}/output.pickle",   
+            "input_format"       : "pickle",
+            "output"             : f"{tmp_folder}/output.nc",  
+        },
+    },
     "hdf5-write" :
     {
         "folder"  : "convert",
@@ -313,9 +353,6 @@ if __name__ == "__main__":
         test_scripts(name, test)
     
 # { 
-#     // Use IntelliSense to learn about possible attributes.
-#     // Hover to view descriptions of existing attributes.
-#     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 #     "version": "0.2.0",
 #     "configurations": [
 #         {
