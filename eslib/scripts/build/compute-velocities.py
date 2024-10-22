@@ -43,8 +43,8 @@ def main(args):
         for n,atoms in enumerate(structures):
             # print("\t{:d}/{:d} ... ".format(n+1,N), end="\r")
             atoms.positions *= factor_pos
-            if np.all(atoms.get_pbc()):
-                atoms.cell *= factor_pos
+            # if np.all(atoms.get_pbc()):
+            #     atoms.cell *= factor_pos
         print("done")
         
     #------------------#
@@ -69,6 +69,17 @@ def main(args):
         velocities[n] = Atoms(symbols=atoms.get_chemical_symbols(),positions=vel[n],cell=None,pbc=False)
     velocities = AtomicStructures(velocities)
     print("done")
+    
+    masses = structures[0].get_masses()
+    masses = convert(masses,family="mass",_from="dalton",_to="atomic_unit")
+    kinetic = np.zeros(len(structures))
+    for t in range(len(structures)):
+        kinetic[t] = 0
+        for n,atoms in enumerate(structures[t]):
+            kinetic[t] += 0.5*(masses[n]*(vel[t,n]**2).sum())
+    # kinetic = 0.5*(masses*(vel**2).sum(axis=-1)).sum(axis=-1).flatten()
+    temperature = 2.*kinetic/(3.*structures[0].get_global_number_of_atoms())
+    temperature = convert(temperature,"temperature",_from="atomic_unit",_to="kelvin")
     
     print("\n\tSaving velocities to file '{:s}' ... ".format(args.output), end="")
     velocities.to_file(file=args.output,format=args.output_format)

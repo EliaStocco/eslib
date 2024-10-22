@@ -1,20 +1,12 @@
 from dataclasses import dataclass, field
+from gc import enable
 import numpy as np
 from scipy.fftpack import dct
 from eslib.tools import convert
 from scipy.optimize import curve_fit
-from typing import Optional, TypeVar, Tuple# , Callable, Any
-# from scipy.signal import correlate as scipy_correlate
-# import functools
-
-# Try to import the timing function from the eslib.classes.timing module
-try:
-    from eslib.classes.timing import timing
-# If ImportError occurs (module not found), define a dummy timing function
-except ImportError:
-    def timing(func):
-        return func  # Dummy timing function that returns the input function unchanged
-
+from typing import Optional, TypeVar, Tuple
+from tqdm import tqdm
+from eslib.classes.timing import timing
 
 T = TypeVar('T', bound='TimeCorrelation')
 
@@ -50,9 +42,9 @@ class TimeCorrelation:
 
     A: np.ndarray
     B: np.ndarray
-    _ready: bool = field(default=False, init=False)
-    _tcf: np.ndarray = field(default=None, init=False)
-    _norm: np.ndarray = field(default=None, init=False)
+    # _ready: bool = field(default=False, init=False)
+    # _tcf: np.ndarray = field(default=None, init=False)
+    # _norm: np.ndarray = field(default=None, init=False)
 
     def __post_init__(self: T):
         """
@@ -84,21 +76,16 @@ class TimeCorrelation:
         np.ndarray
             Computed time correlation function.
         """
-        if self._ready:
-            return self._tcf
-        else:
-            # if axis != 0:
-            #     self.A = np.moveaxis(self.A, axis, 0)
-            #     self.B = np.moveaxis(self.B, axis, 0)
-            self._tcf = correlate(self.A, self.B, axis=axis)
-            # if axis != 0:
-            #     self.A    = np.moveaxis(self.A, 0, axis)
-            #     self.B    = np.moveaxis(self.B, 0, axis)
-            #     self._tcf = np.moveaxis(self._tcf, 0, axis)
-            self._ready = True
-            return self._tcf.copy()
+        # if self._ready:
+        #     return self._tcf
+        # else:
+        #     self._tcf = correlate(self.A, self.B, axis=axis)
+        #     self._ready = True
+        #     return self._tcf.copy()
+        return correlate(self.A, self.B, axis=axis)
 
-class TimeAutoCorrelation(TimeCorrelation):
+@dataclass
+class TimeAutoCorrelation:
     """
     Class to compute auto-correlation functions for a single array.
 
@@ -123,9 +110,11 @@ class TimeAutoCorrelation(TimeCorrelation):
     >>> tac = TimeAutoCorrelation(A=A)
     >>> tcf_result = tac.tcf(axis=0)
     """
+    
+    A: np.ndarray
 
-    def __init__(self: T, A: np.ndarray):
-        super().__init__(A=A, B=A.copy())
+    # def __init__(self: T, A: np.ndarray):
+    #     super().__init__(A=A, B=A.copy())
 
     def tcf(self: T, axis: Optional[int] = 0, mode: str = "half",normalize:str="none",axis_sum:Optional[int]=-1) -> np.ndarray:
         """
@@ -145,20 +134,22 @@ class TimeAutoCorrelation(TimeCorrelation):
         """
         if mode not in ["half","full"]:
             raise ValueError("`mode` can be only `half` or `full`")
-        arr:np.ndarray = super().tcf(axis)
+        
+        arr = autocorrelate(self.A, axis=axis) 
+    
         if normalize == "component":
             norm = np.mean(self.A ** 2, axis=axis,keepdims=True) # normalized to 1 each component
             arr /= norm 
             test = np.take(arr,0,axis)
             assert np.allclose(test,1), "The auto-correlation function is not normalized to 1"
-            self._norm = norm
+            # self._norm = norm
         elif normalize == "all":
             norm = np.sum(np.mean(self.A ** 2, axis=axis),axis=axis_sum) # normalized to 1 the sum fo all the components
             norm = np.expand_dims(norm, axis=(axis,axis_sum))
             arr /= norm
             test = np.sum(np.take(arr,0,axis),axis=axis_sum-1 if axis_sum>axis else axis_sum)
             assert np.allclose(test,1), "The auto-correlation function is not normalized to 1"
-            self._norm = norm
+            # self._norm = norm
         else:
             pass
         if mode == "half":
@@ -167,6 +158,32 @@ class TimeAutoCorrelation(TimeCorrelation):
             arr = np.take(arr, np.arange(N), axis=axis)      
         return arr
 
+# import cProfile
+# import functools
+# import numpy as np
+# from typing import Optional
+
+# # Decorator to profile a function and save the output to a file
+# def profile_function(output_file: str):
+#     def decorator(func):
+#         @functools.wraps(func)
+#         def wrapper(*args, **kwargs):
+#             profiler = cProfile.Profile()
+#             profiler.enable()  # Start profiling
+
+#             result = func(*args, **kwargs)  # Execute the original function
+
+#             profiler.disable()  # Stop profiling
+#             profiler.dump_stats(output_file)  # Save the profiling data
+#             print(f"Profile saved to {output_file}")
+            
+#             return result
+
+#         return wrapper
+#     return decorator
+
+# Use the decorator to profile the correlate function
+# @profile_function(output_file='correlate.profile.txt')
 def correlate(
     A: np.ndarray, 
     B: np.ndarray, 
@@ -220,11 +237,122 @@ def correlate(
     ftB = np.fft.rfft(B, axis=axis, n=len_fft)         # (121,1) for Example (1), (171,1) for Example (2)
     np.conj(ftA, out=ftA)
     ftB *= ftA
-    tmp = np.fft.irfft(ftB, axis=axis, n=len_fft) # (240,1) for Example (1), (340,1) for Example (2)
+    del ftA # no longer needed
+    ftB = np.fft.irfft(ftB, axis=axis, n=len_fft) # (240,1) for Example (1), (340,1) for Example (2)
     indices = np.arange(len_tcf)
-    tmp = np.take(tmp, indices, axis=axis)
-    out = tmp / norm_tcf # (120,1) for Example (1), (240,1) for Example (2)
-    return out
+    ftB = np.take(ftB, indices, axis=axis) # overwrite ftB
+    return ftB / norm_tcf # (120,1) for Example (1), (240,1) for Example (2)
+
+def serial_fft(A: np.ndarray, axis:int=-1, len_fft:Optional[int]=None,enable:bool=False):
+    
+    # Determine the shape of A
+    shape = A.shape
+    
+    # Create an empty array to store the results
+    # Adjust the shape for the rfft result along the FFT axis
+    result_shape = list(shape)
+    if len_fft is None:
+        len_fft = shape[axis]
+    result_shape[axis] = len_fft // 2 + 1  # rfft output size for real input
+    
+    result = np.empty(result_shape, dtype=np.complex128)
+    
+    # Calculate the total number of iterations
+    total_slices = np.prod(shape[:axis]) * np.prod(shape[axis+1:])
+    
+    # Iterate over all indices except the one along the FFT axis
+    for idx in tqdm(np.ndindex(*shape[:axis], *shape[axis+1:]), total=total_slices, desc="Computing FFT",enable=enable):
+        # Build a slice object to extract a sub-array along the FFT axis
+        slc = list(idx[:axis]) + [slice(None)] + list(idx[axis:])
+        slc = tuple(slc)
+        
+        # Perform FFT on the sliced array
+        result[slc] = np.fft.rfft(A[slc], n=len_fft)
+    
+    return result
+
+# @profile_function(output_file='autocorrelate.profile.txt')
+def autocorrelate(A: np.ndarray, axis: Optional[int] = 0,loop:Optional[bool]=True) -> np.ndarray:
+    """
+    Computes the auto-correlation of an array along the specified axis
+    when A == B.
+
+    Parameters
+    ----------
+    A : np.ndarray
+        Input array (since A == B, only one array is needed).
+    axis : int, optional
+        Axis along which to compute the correlation. Default is 0.
+
+    Returns
+    -------
+    np.ndarray
+        Auto-correlation of the input array.
+    """
+
+    shape_a = A.shape
+    len_a = shape_a[axis]
+    
+    # Use the entire array A for FFT since A == B
+    len_fft = 2 * len_a
+    len_tcf = len_a
+    norm_tcf = np.arange(len_a, 0, -1, dtype=int)
+    
+    dims_to_append = np.arange(A.ndim - 1, -1, -1, dtype=int)[axis]
+    norm_tcf = append_dims(norm_tcf, dims_to_append)
+    
+    if loop:
+        ftA = serial_fft(A, axis=axis, len_fft=len_fft,enable=True)
+    else:
+        ftA = np.fft.rfft(A, axis=axis, n=len_fft)
+        
+
+    # # Compute the FFT of A
+    # if A.nbytes > 1e8 or loop:
+    #     # Create an output array to accumulate the results
+    #     ftA = np.zeros_like(A, shape=(len_tcf,) + A.shape[1:])
+    #     # Iterate over all slices except along the axis we are performing the FFT
+    #     it = np.nditer(np.zeros(A.shape[:axis] + A.shape[axis+1:]), flags=['multi_index'])
+    #     while not it.finished:
+    #         idx = list(it.multi_index)
+    #         idx.insert(axis, slice(None))
+
+    #         # Compute the FFT for the slice along the axis of interest
+    #         ftA[tuple(idx)] = np.fft.rfft(A[tuple(idx)], axis=axis, n=len_fft)
+            
+    #         # Multiply by its conjugate (auto-correlation in Fourier space)
+    #         ftA[tuple(idx)] *= np.conj(ftA[tuple(idx)])
+            
+    #         # Inverse FFT to get the correlation
+    #         ftA[tuple(idx)] = np.fft.irfft(ftA[tuple(idx)], axis=axis, n=len_fft)
+            
+    #         # Slice the result to the length of the original signal and normalize
+    #         ftA[tuple(idx)] = np.take(ftA[tuple(idx)], np.arange(len_tcf), axis=axis) / norm_tcf
+            
+    #         it.iternext()
+    #     # ftA = result.copy()
+    #     # del result
+    # else:
+    #     
+    
+    # ftA = np.fft.rfft(A, axis=axis, n=len_fft)
+
+    # Multiply the FFT with its conjugate to get the power spectrum
+    ftA *= np.conj(ftA)
+    
+    # Compute the inverse FFT to get the auto-correlation
+    ftA = np.fft.irfft(ftA, axis=axis, n=len_fft)
+    
+    # Slice the result to get the correct length of the auto-correlation
+    ftA = np.take(ftA, np.arange(len_tcf), axis=axis)
+    
+    return ftA / norm_tcf  # Normalize by the decreasing window size
+
+def append_dims(arr, dims_to_append):
+    for dim in dims_to_append:
+        arr = np.expand_dims(arr, axis=dim)
+    return arr
+
 
 def append_dims(arr, ndims=1):
     """Return a view of the input array with `ndims` axes of
@@ -438,6 +566,14 @@ def main():
         If the results obtained from both methods are not approximately equal.
     """
     dim = 1
+    
+    #########################
+    # using FFT trick
+    with timing():
+        A = np.random.random((100,dim))
+        corr = TimeCorrelation(A=A,B=A).tcf()
+        autocorr = TimeAutoCorrelation(A=A).tcf()
+    assert np.allclose(corr,autocorr), "Ostregeta, son' mica uguali qui!"
 
     #########################
     # using FFT trick
