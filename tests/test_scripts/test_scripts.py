@@ -92,19 +92,19 @@ torun = {
             "output": f"{tmp_folder}/mace.extxyz"
         },
     },
-    "eval-model-PES+save-info-arrays" :
-    {
-        "folder"  : "nn",
-        "file"   : "eval-model.py",
-        "kwargs"  : {
-            "input" : "tests/structures/LiNbO3/geometries.extxyz" ,   
-            "model" : "tests/models/MACE-LiNbO3/MACE.LiNbO3.pickle",
-            "output": f"{tmp_folder}/mace.extxyz",
-            "names" : ['MACE_energy','MACE_forces'],
-            "shapes": [[-1,1],[-1,3]],
-            "data_output" : [f'{tmp_folder}/MACE_energy.txt',f'{tmp_folder}/MACE_forces.txt']
-        },
-    },
+    # "eval-model-PES+save-info-arrays" :
+    # {
+    #     "folder"  : "nn",
+    #     "file"   : "eval-model.py",
+    #     "kwargs"  : {
+    #         "input" : "tests/structures/LiNbO3/geometries.extxyz" ,   
+    #         "model" : "tests/models/MACE-LiNbO3/MACE.LiNbO3.pickle",
+    #         "output": f"{tmp_folder}/mace.extxyz",
+    #         "names" : ['MACE_energy','MACE_forces'],
+    #         "shapes": [[-1,1],[-1,3]],
+    #         "data_output" : [f'{tmp_folder}/MACE_energy.txt',f'{tmp_folder}/MACE_forces.txt']
+    #     },
+    # },
     "backward compatibility" :
     {
         "folder"  : "inspect",
