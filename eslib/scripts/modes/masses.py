@@ -1,9 +1,10 @@
 #!/usr/bin/env python
+import numpy as np
 from ase import Atoms
+from ipi.utils.units import Elements
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, float_format
-import numpy as np
-from ipi.utils.units import Elements
 from eslib.tools import convert
 
 #---------------------------------------#

@@ -1,14 +1,15 @@
 #!/usr/bin/env python
-import numpy as np
-from ase.io import write
-from eslib.classes.atomic_structures import AtomicStructures# , info, array
-from eslib.formatting import esfmt
-from eslib.physics import compute_dipole_quanta
 import matplotlib.pyplot as plt
-from eslib.tools import frac2cart, cart2frac
+import numpy as np
+import pandas as pd
+from ase.io import write
+
+from eslib.classes.atomic_structures import AtomicStructures  # , info, array
+from eslib.formatting import esfmt
 from eslib.geometry import modular_norm
 from eslib.input import str2bool
-import pandas as pd
+from eslib.physics import compute_dipole_quanta
+from eslib.tools import cart2frac, frac2cart
 
 #---------------------------------------#
 # Description of the script's purpose

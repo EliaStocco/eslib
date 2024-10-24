@@ -1,19 +1,20 @@
 #!/usr/bin/env python
-import numpy as np
-import matplotlib.pyplot as plt
-from eslib.plot import plot_bisector
-from eslib.classes.models.dipole.baseclass import DipoleModel, DipoleLinearModel
-from eslib.classes.models.dipole import DipolePartialCharges
-from eslib.classes.atomic_structures import info
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.tools import cart2lattice, cart2frac, frac2cart
-from eslib.output import output_folder
-from ase.io import write
-from eslib.formatting import esfmt, everythingok, warning, error
 import json
-from eslib.show import show_dict
-from eslib.tools import is_integer
+
+import matplotlib.pyplot as plt
+import numpy as np
+from ase.io import write
+
+from eslib.classes.atomic_structures import AtomicStructures, info
+from eslib.classes.models.dipole import DipolePartialCharges
+from eslib.classes.models.dipole.baseclass import (DipoleLinearModel,
+                                                   DipoleModel)
+from eslib.formatting import error, esfmt, everythingok, warning
 from eslib.geometry import fold
+from eslib.output import output_folder
+from eslib.plot import plot_bisector
+from eslib.show import show_dict
+from eslib.tools import cart2frac, cart2lattice, frac2cart, is_integer
 
 #---------------------------------------#
 # Description of the script's purpose

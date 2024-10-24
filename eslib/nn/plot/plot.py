@@ -2,6 +2,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 def plot_learning_curves(arrays,file,title=None,opts=None):
 
     cols = ["train","val","train-2","std","ratio","ratio-2"]

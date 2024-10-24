@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import numpy as np
 from ase.io import read
-from eslib.tools import cart2frac
-from eslib.input import flist
+
 from eslib.formatting import esfmt
+from eslib.input import flist
+from eslib.tools import cart2frac
 
 #---------------------------------------#
 description = "Convert the shift-vector (dipole) from cartesian to fractional coordinates (quanta)."

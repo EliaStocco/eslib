@@ -1,15 +1,16 @@
 #!/usr/bin/env python
-from eslib.classes.normal_modes import NormalModes
-from eslib.formatting import esfmt, warning
-from eslib.classes.physical_tensor import PhysicalTensor, corrected_sqrt
-from eslib.output import output_folder
-import numpy as np
-import seaborn as sns
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
-from eslib.plot import square_plot, plot_bisector, hzero
+import numpy as np
+import seaborn as sns
 from icecream import ic
+from matplotlib.colors import LinearSegmentedColormap
+
+from eslib.classes.normal_modes import NormalModes
+from eslib.classes.physical_tensor import PhysicalTensor, corrected_sqrt
+from eslib.formatting import esfmt, warning
+from eslib.output import output_folder
+from eslib.plot import hzero, plot_bisector, square_plot
 from eslib.tools import convert
 
 # Set the backend to QtAgg

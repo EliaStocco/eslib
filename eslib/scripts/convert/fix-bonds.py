@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-from eslib.formatting import esfmt, warning
-import numpy as np
-from eslib.tools import cart2frac, frac2cart
-from eslib.input import slist
 from typing import List
+
+import numpy as np
+
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.input import str2bool
+from eslib.formatting import esfmt, warning
+from eslib.input import slist, str2bool
+from eslib.tools import cart2frac, frac2cart
 
 #---------------------------------------#
 # Description of the script's purpose

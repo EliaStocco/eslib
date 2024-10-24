@@ -1,7 +1,8 @@
+from typing import Tuple, Union
+
+import numpy as np
 import pint
 import xarray as xr
-from typing import Union, Tuple
-import numpy as np
 
 __all__ = ["atomic_unit","ureg","remove_unit","set_unit","get_unit","check_dim"]
 

@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # author: Elia Stocco
 # email : elia.stocco@mpsd.mpg.de
+import argparse
+
+import numpy as np
+from ase.io import read
+
+from eslib.formatting import esfmt
 from eslib.show import matrix2str
 from eslib.tools import find_transformation
-from ase.io import read
-import argparse
-import numpy as np
-from eslib.formatting import esfmt
 
 #---------------------------------------#
 description     = "Compute the trasformation matrix M(A->B) between the lattice vector of the atomic configurations A and B."

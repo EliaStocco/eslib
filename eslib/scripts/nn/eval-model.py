@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 import json
+
 import numpy as np
+import pandas as pd
 import torch
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.classes.models import eslibModel
-from eslib.formatting import esfmt, float_format, warning
-from eslib.input import slist, nilist, literal
 from eslib.classes.physical_tensor import PhysicalTensor
-import pandas as pd
+from eslib.formatting import esfmt, float_format, warning
+from eslib.input import literal, nilist, slist
 from eslib.show import show_dict
 from eslib.tools import is_integer
 
@@ -78,7 +80,7 @@ def main(args):
     if args.charges_file is not None:
         
         from eslib.classes.models.dipole import DipolePartialCharges
-        
+
         #------------------#
         # charges
         print("\tReading the charges from file '{:s}' ... ".format(args.charges_file), end="")

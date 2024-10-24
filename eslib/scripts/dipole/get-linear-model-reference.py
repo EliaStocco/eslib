@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from ase.io import write
+
 from eslib.classes.models.dipole.baseclass import DipoleModel
 from eslib.formatting import esfmt
 

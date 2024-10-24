@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 import argparse
-from matplotlib import markers
+import os
+import xml.etree.ElementTree as xmlet
+
 import matplotlib.pyplot as plt
 import numpy as np
-import xml.etree.ElementTree as xmlet
-import os
-#import ast 
-from eslib.tools import convert
+from matplotlib import markers
+
+from eslib.classes.efield import ElectricField
 from eslib.formatting import esfmt
 from eslib.show import show_dict
-from eslib.classes.efield import ElectricField
+#import ast 
+from eslib.tools import convert
 
 description = "Plot the electric field E(t) into a pdf file."
 

@@ -1,5 +1,6 @@
+from typing import Callable, Optional, Tuple, Union
+
 import numpy as np
-from typing import Union, Tuple, Optional, Callable
 
 # Documentations;
 # - https://stats.stackexchange.com/questions/413209/is-there-something-like-a-root-mean-square-relative-error-rmsre-or-what-is-t

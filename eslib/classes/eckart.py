@@ -11,8 +11,8 @@ DOI: 10.1063/1.1929739
 DOI: 10.1063/1.4870936
 """
 
-from __future__ import print_function
-from __future__ import division
+from __future__ import division, print_function
+
 import numpy as np
 
 

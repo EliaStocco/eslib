@@ -1,18 +1,19 @@
+import glob
+import re
+from copy import copy
+from glob import glob
+from typing import Dict, List, Union
+
 import numpy as np
+import pandas as pd
 from ase import Atoms
 from ase.cell import Cell
 from ase.geometry import distance
-from scipy.spatial.distance import cdist
-from scipy.optimize import linear_sum_assignment
-from typing import Union, Dict, List
-from eslib.ipi_units import unit_to_internal, unit_to_user, UnitMap
-from copy import copy
-import pandas as pd
-from ase import Atoms
 from phonopy.structure.atoms import PhonopyAtoms
-from glob import glob
-import re
-import glob
+from scipy.optimize import linear_sum_assignment
+from scipy.spatial.distance import cdist
+
+from eslib.ipi_units import UnitMap, unit_to_internal, unit_to_user
 
 
 def take(arr, axis, indices,keepdims=False):
@@ -167,6 +168,7 @@ def return_transformed_components(func):
 def lattice2cart(cell:Union[np.ndarray,Cell],v:np.ndarray=None)->np.ndarray:
     """ Lattice to Cartesian coordinates rotation matrix."""
     from copy import copy
+
     # normalize the lattice parameters
     length = np.linalg.norm(cell,axis=0)
     matrix = copy(cell)
@@ -294,6 +296,7 @@ def relative_vectors(structure:Atoms,_all=False):
 def string2function(input_string:str)->callable:
     """Converts a Python code string into a callable function."""
     import ast
+
     # Parse the input string as Python code
     parsed_code = ast.parse(input_string, mode='eval')
     # Create a function from the parsed code

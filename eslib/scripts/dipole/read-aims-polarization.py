@@ -1,16 +1,17 @@
 #!/usr/bin/env python
-import re
-import numpy as np
 import glob
-import pandas as pd
-from eslib.tools import convert
-from eslib.formatting import esfmt, float_format, warning
+import re
 from typing import Tuple
+
+import numpy as np
+import pandas as pd
 from ase.io import read
-from eslib.functions import check_pattern_in_file
+
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.functions import extract_number_from_filename
+from eslib.formatting import esfmt, float_format, warning
+from eslib.functions import check_pattern_in_file, extract_number_from_filename
 from eslib.regex import extract_float
+from eslib.tools import convert
 
 #---------------------------------------#
 # Description of the script's purpose

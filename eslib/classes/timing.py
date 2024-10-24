@@ -1,6 +1,7 @@
-from contextlib import ContextDecorator
 import time
+from contextlib import ContextDecorator
 from typing import Any, Optional, Tuple
+
 
 def func_default(elapsed_time: float) -> None:
     print(f"Elapsed time: {elapsed_time:.6f} seconds")

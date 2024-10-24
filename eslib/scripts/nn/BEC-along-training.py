@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 import argparse
-
 # import json5 as json
 import json
 import os
-import torch
-import pandas as pd
-import numpy as np
-from ase.io import read
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import torch
+from ase.io import read
+
 from eslib.nn.user import get_model
 
 # from chart_studio.plotly import plotly as py

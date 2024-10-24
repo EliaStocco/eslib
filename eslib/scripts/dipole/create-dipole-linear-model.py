@@ -1,12 +1,13 @@
 #!/usr/bin/env python
-from ase.io import read
 import numpy as np
 from ase import Atoms
-from eslib.classes.models.dipole import DipoleLinearModel
+from ase.io import read
+
 from eslib.classes.atomic_structures import AtomicStructures
+from eslib.classes.models.dipole import DipoleLinearModel
+from eslib.formatting import error, esfmt, warning
 from eslib.input import flist
-from eslib.tools import lattice2cart, frac2cart
-from eslib.formatting import esfmt, warning, error
+from eslib.tools import frac2cart, lattice2cart
 
 #---------------------------------------#
 # Description of the script's purpose

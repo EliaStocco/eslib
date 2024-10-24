@@ -1,12 +1,13 @@
 #!/usr/bin/env python
-from eslib.show import matrix2str
 import numpy as np
-from eslib.formatting import esfmt
-from eslib.classes.atomic_structures import AtomicStructures
-from ase import Atoms
-from eslib.input import ilist
-from eslib.geometry import modular_norm
 import yaml
+from ase import Atoms
+
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.formatting import esfmt
+from eslib.geometry import modular_norm
+from eslib.input import ilist
+from eslib.show import matrix2str
 
 PHONOPY_FILE = "phonopy.yaml"
     

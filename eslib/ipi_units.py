@@ -9,6 +9,7 @@ to/from atomic units.
 
 import re
 
+
 class Constants(object):
     """Class whose members are fundamental constants.
 

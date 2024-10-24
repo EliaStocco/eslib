@@ -21,11 +21,13 @@ Examples:
 5
 """
 
+from concurrent.futures import ThreadPoolExecutor
+from typing import List
+
 import h5py
 import numpy as np
 from ase import Atoms
-from typing import List
-from concurrent.futures import ThreadPoolExecutor
+
 
 def read_atoms_from_group(atom_group) -> Atoms:
     """ Helper function to read a single Atoms object from a group """

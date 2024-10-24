@@ -1,19 +1,23 @@
 #!/usr/bin/env python
 import time
+
 start_time = time.time()
-import numpy as np
-import random
 import json
+import random
 from copy import copy
+
+import numpy as np
 import torch
+
 default_dtype = torch.float64
 torch.set_default_dtype(default_dtype)
-from eslib.nn.training import hyper_train_at_fixed_model
+from warnings import warn
+
+from eslib.formatting import esfmt
 # from elia.nn.network import aile3nn
 from eslib.functions import add_default, str2bool
+from eslib.nn.training import hyper_train_at_fixed_model
 from eslib.nn.user import get_class
-from eslib.formatting import esfmt
-from warnings import warn
 
 #---------------------------------------#
 # Documentation

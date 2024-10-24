@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 

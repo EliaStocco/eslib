@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import argparse
 import pickle
+
 import numpy as np
+
 from eslib.formatting import esfmt
 
 #---------------------------------------#

@@ -1,6 +1,6 @@
 import numpy as np
-from ase.io import read
 from ase import Atoms
+from ase.io import read
 from icecream import ic
 
 atoms:Atoms = read("test.extxyz",index=0)

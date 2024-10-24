@@ -1,9 +1,9 @@
 # Created by Alan M Lewis. A script to create IR spectra from a dipole time-series 
 
+import matplotlib.pyplot as plt
 import numpy as np
-from scipy.fft import rfft, rfftfreq,irfft
+from scipy.fft import irfft, rfft, rfftfreq
 from scipy.signal.windows import kaiser
-import matplotlib.pyplot as plt 
 
 # Number of MD trajectories to be averaged over
 n_runs = 5

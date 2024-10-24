@@ -1,13 +1,15 @@
-from dataclasses import dataclass, field
-from ase import Atoms
-from typing import List, Dict, Any
-import numpy as np
-from eslib.tools import convert
-from eslib.physics import compute_dipole_quanta
 from copy import copy
+from dataclasses import dataclass, field
+from typing import Any, Dict, List
+
+import numpy as np
+from ase import Atoms
 from ase.calculators.calculator import all_changes
-from eslib.tools import cart2frac
+
 from eslib.classes.models.dipole.baseclass import DipoleModel
+from eslib.physics import compute_dipole_quanta
+from eslib.tools import cart2frac, convert
+
 
 @dataclass
 class DipoleLinearModel(DipoleModel):
@@ -103,8 +105,9 @@ class DipoleLinearModel(DipoleModel):
             raise ValueError(f"Invalid value for 'frame'. Expected 'global' or 'eckart', got {frame}")
             
     def eckart(self,positions:np.ndarray,inplace=False):
-        from eslib.classes.eckart import EckartFrame
         from scipy.spatial.transform import Rotation
+
+        from eslib.classes.eckart import EckartFrame
         m = np.asarray(self.ref.get_masses()) * convert(1,"mass","dalton","atomic_unit")
         eck = EckartFrame(m)
         x    = positions.reshape((-1,self.Natoms,3))

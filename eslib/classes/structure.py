@@ -2,11 +2,13 @@
 """A Structure class based on ase.Atoms"""
 import json
 import os
+
 import numpy as np
-from ase import Atoms
-from ase.io import read as ase_read
-from ase.cell import Cell
 import spglib as spg
+from ase import Atoms
+from ase.cell import Cell
+from ase.io import read as ase_read
+
 
 class StructureInfo:
     """Wrapper to get supportive information about the structure"""

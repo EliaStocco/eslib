@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
+
 from eslib.classes.properties import Properties
 from eslib.formatting import esfmt
 

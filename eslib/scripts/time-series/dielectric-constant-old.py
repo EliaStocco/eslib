@@ -1,15 +1,19 @@
 #!/usr/bin/env python
 from enum import auto
+
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import curve_fit
-import matplotlib.pyplot as plt
+
+from eslib.classes.physical_tensor import PhysicalTensor
+from eslib.classes.tcf import (TimeAutoCorrelation, compute_cyclic_derivative,
+                               compute_spectrum)
+from eslib.formatting import esfmt
+from eslib.input import flist, str2bool
 from eslib.mathematics import tacf
 from eslib.plot import hzero
-from eslib.classes.physical_tensor import PhysicalTensor
-from eslib.input import str2bool, flist
-from eslib.formatting import esfmt
-from eslib.classes.tcf import TimeAutoCorrelation, compute_spectrum, compute_cyclic_derivative
 from eslib.tools import convert
+
 # from eslib.classes.spectrum import Spectrum
 
 #---------------------------------------#

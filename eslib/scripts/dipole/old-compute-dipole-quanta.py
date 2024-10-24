@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 import argparse
+
 import numpy as np
-from eslib.tools import cart2frac
 from ase.io import read
+
 from eslib.formatting import esfmt
 from eslib.physics import compute_dipole_quanta
+from eslib.tools import cart2frac
 
 #---------------------------------------#
 # Description of the script's purpose

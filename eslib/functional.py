@@ -1,6 +1,7 @@
 import functools
 import warnings
-from typing import Callable, Any
+from typing import Any, Callable
+
 
 def deprecated(reason: str = "", name: str = "deprecated", warning:Warning=DeprecationWarning) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """

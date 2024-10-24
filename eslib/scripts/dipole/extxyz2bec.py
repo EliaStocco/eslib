@@ -1,7 +1,6 @@
 #!/usr/bin/env python
+from eslib.classes.atomic_structures import AtomicStructures, array
 from eslib.classes.bec import bec as BEC
-from eslib.classes.atomic_structures import array
-from eslib.classes.atomic_structures import AtomicStructures 
 
 #---------------------------------------#
 # Description of the script's purpose

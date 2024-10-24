@@ -1,8 +1,9 @@
 
 #!/usr/bin/env python
-import os
-import fnmatch
 import argparse
+import fnmatch
+import os
+
 
 def find_files(folder, pattern, file_extension):
     matches = []

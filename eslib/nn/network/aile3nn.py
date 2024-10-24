@@ -1,12 +1,15 @@
+from typing import Dict, TypeVar, Union
+
+import numpy as np
 import torch
-from eslib.nn.network.iPIinterface import iPIinterface
-from eslib.nn.network.SimpleNetwork import SimpleNetwork
+from scipy.stats import pearsonr
+from torch.nn import MSELoss
 # from .Methods4Training import EDFMethods4Training
 from torch_geometric.data import Data
-from torch.nn import MSELoss
-from scipy.stats import pearsonr
-import numpy as np
-from typing import TypeVar, Union, Dict
+
+from eslib.nn.network.iPIinterface import iPIinterface
+from eslib.nn.network.SimpleNetwork import SimpleNetwork
+
 T = TypeVar('T', bound='aile3nn')
 # See https://mypy.readthedocs.io/en/latest/generics.html#generic-methods-and-generic-self for the use
 # of `T` to annotate `self`. Many methods of `Module` return `self` and we want those return values to be

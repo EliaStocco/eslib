@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # from mace.calculators import MACECalculator
 import torch
+from ase.calculators.socketio import SocketClient
 from ase.io import read
-from mace.calculators import MACEliaCalculator, MACECalculator
+from mace.calculators import MACECalculator, MACEliaCalculator
+
+from eslib.drivers.socketextras import SocketClientExtras
 from eslib.formatting import esfmt
 from eslib.functions import suppress_output
-from eslib.input import str2bool, slist
-from eslib.drivers.socketextras import SocketClientExtras
-from ase.calculators.socketio import SocketClient
+from eslib.input import slist, str2bool
 
 #---------------------------------------#
 # Description of the script's purpose

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import esfmt, error
+from eslib.formatting import error, esfmt
 from eslib.input import slist
 
 #---------------------------------------#

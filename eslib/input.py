@@ -1,7 +1,9 @@
-import numpy as np
 import argparse
-import re
 import ast
+import re
+
+import numpy as np
+
 
 #---------------------------------------#
 def itype(x:str):

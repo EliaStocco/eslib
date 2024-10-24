@@ -1,7 +1,9 @@
-import pytest
 import os
 import shutil
 from contextlib import contextmanager
+
+import pytest
+
 # # Try to import the timing function from the eslib.classes.timing module
 # try:
 #     from eslib.classes.timing import timing
@@ -49,7 +51,8 @@ torun = {
         "kwargs"  : {
             "input"              : "tests/structures/LiNbO3/LiNbO3.au.extxyz",
             "elements"           : ["Li","Nb"],
-            "rmax"               : 4
+            "rmax"               : 4,
+            "output"             : f"{tmp_folder}/rdf.csv", 
         },
     },
     "gtrdf" :
@@ -59,7 +62,8 @@ torun = {
         "kwargs"  : {
             "input"              : "tests/structures/LiNbO3/LiNbO3.au.extxyz",
             "elements"           : ["Li","Nb"],
-            "rmax"               : 4
+            "rmax"               : 4,
+            "output"             : f"{tmp_folder}/rdf.csv", 
         },
     },
     "extxyz2array" : # info to txt

@@ -1,8 +1,10 @@
 # This is a new class to unifiy Properties and AtomicStructures
 import abc
+from typing import TypeVar
+
 import numpy as np
 import pandas as pd
-from typing import TypeVar
+
 from eslib.classes.io import pickleIO
 
 # TypeVar for the Trajectory class

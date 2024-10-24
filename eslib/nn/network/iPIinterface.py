@@ -1,14 +1,16 @@
-import torch
+from abc import ABC, abstractmethod, abstractproperty
+from typing import Tuple, TypeVar
+
 import numpy as np
-from ase.io import read
-from ase.cell import Cell
+import torch
 from ase import Atoms
-from eslib.nn.dataset import make_datapoint
-from eslib.nn.dataset import enforce_dependency
-from eslib.tools import check_cell_format
+from ase.cell import Cell
+from ase.io import read
 from torch_geometric.data import Data
-from abc import ABC, abstractproperty, abstractmethod
-from typing import TypeVar, Tuple
+
+from eslib.nn.dataset import enforce_dependency, make_datapoint
+from eslib.tools import check_cell_format
+
 T = TypeVar('T', bound='iPIinterface')
 
 class iPIinterface(ABC):

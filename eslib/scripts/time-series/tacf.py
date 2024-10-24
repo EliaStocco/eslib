@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 from random import choice
+
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import curve_fit
-import matplotlib.pyplot as plt
+
+from eslib.classes.physical_tensor import PhysicalTensor
+from eslib.classes.tcf import TimeAutoCorrelation
+from eslib.formatting import esfmt, float_format, warning
+from eslib.input import str2bool
 from eslib.mathematics import tacf
 from eslib.plot import hzero
-from eslib.classes.physical_tensor import PhysicalTensor
-from eslib.input import str2bool
-from eslib.formatting import esfmt, warning, float_format
-from eslib.classes.tcf import TimeAutoCorrelation
 
 #---------------------------------------#
 # Description of the script's purpose

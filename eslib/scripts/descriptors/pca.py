@@ -1,11 +1,13 @@
 #!/usr/bin/env python
-from ase.io import read
+import json
+
 import chemiscope
 import numpy as np
-import json
-from skmatter.preprocessing import StandardFlexibleScaler
+from ase.io import read
 from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE, MDS
+from sklearn.manifold import MDS, TSNE
+from skmatter.preprocessing import StandardFlexibleScaler
+
 from eslib.formatting import esfmt
 from eslib.functions import add_default
 from eslib.show import show_dict

@@ -21,16 +21,12 @@ Examples:
 5
 """
 
-import h5py
-import numpy as np
-from ase import Atoms
-from typing import List
 from concurrent.futures import ThreadPoolExecutor
+from typing import List
 
 import h5py
 import numpy as np
 from ase import Atoms
-from typing import List
 
 
 def read_hdf5(filename: str, index: slice = None) -> List[Atoms]:

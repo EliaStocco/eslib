@@ -1,12 +1,13 @@
-import os
-import itertools
-import numpy as np
-import os
-from copy import copy
 import contextlib
-import sys
+import itertools
+import os
 # from scipy.ndimage import gaussian_filter1d, generic_filter
 import re
+import sys
+from copy import copy
+
+import numpy as np
+
 
 #---------------------------------------#
 def phonopy2atoms(data):

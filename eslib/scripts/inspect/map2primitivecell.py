@@ -1,8 +1,8 @@
+import numpy as np
 from ase.build import bulk
 from ase.calculators.emt import EMT
 from phonopy import Phonopy
 from phonopy.structure.atoms import Atoms as PhonopyAtoms
-import numpy as np
 
 # Create a primitive cell
 primitive_atoms = bulk("Si", cubic=True)

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import numpy as np
+
 from eslib.classes.physical_tensor import PhysicalTensor
+from eslib.classes.tcf import TimeAutoCorrelation, compute_spectrum, get_freq
 from eslib.formatting import esfmt
-from eslib.classes.tcf import TimeAutoCorrelation
-from eslib.classes.tcf import  compute_spectrum, get_freq
-from eslib.tools import convert
 from eslib.input import str2bool
+from eslib.tools import convert
 
 #---------------------------------------#
 # Description of the script's purpose

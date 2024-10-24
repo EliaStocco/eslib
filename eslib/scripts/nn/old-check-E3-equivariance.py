@@ -1,11 +1,13 @@
 #!/usr/bin/env python
-import numpy as np
 import os
-from eslib.nn.user import get_model
-from eslib.functions import suppress_output
+
+import numpy as np
 from ase.io import read
 from e3nn.o3 import rand_matrix
+
 from eslib.formatting import esfmt
+from eslib.functions import suppress_output
+from eslib.nn.user import get_model
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -109,6 +111,8 @@ if __name__ == "__main__":
 
 #---------------------------------------#
 import pytest
+
+
 @pytest.mark.parametrize("input_value, expected_output", [
     # Test case 1
     (1, 2),  # Input value is 1, expected output is 2

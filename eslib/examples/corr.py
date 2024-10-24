@@ -1,7 +1,8 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from eslib.functions import plot_bisector, square_plot
+import numpy as np
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+from eslib.functions import plot_bisector, square_plot
 
 # Load data
 A = np.loadtxt("../dipole.test-dft.txt")

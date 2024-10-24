@@ -1,7 +1,8 @@
+from typing import List
+
 import netCDF4 as nc
 import numpy as np
 from ase import Atoms
-from typing import List
 
 
 def read_netcdf(filename: str) -> List[Atoms]:

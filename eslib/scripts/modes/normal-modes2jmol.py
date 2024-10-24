@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-from eslib.formatting import esfmt, warning
-from eslib.classes.normal_modes import NormalModes
 import numpy as np
+
+from eslib.classes.normal_modes import NormalModes
+from eslib.formatting import esfmt, warning
 from eslib.tools import convert
 
 #---------------------------------------#

@@ -1,8 +1,10 @@
 # from elia.classes import MicroState
 import os
 import warnings
+
 import matplotlib.pyplot as plt
 import numpy as np
+
 
 def visualize_datasets(datasets:dict,variable:str,folder:str="images"):
 

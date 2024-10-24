@@ -1,14 +1,16 @@
 #!/usr/bin/env python
+import os
+
+import numpy as np
+import pandas as pd
+import yaml
+from ase import Atoms
+from phonopy.units import VaspToTHz
+
 from eslib.classes.normal_modes import NormalModes
+from eslib.formatting import esfmt, warning
 from eslib.show import matrix2str
 from eslib.tools import convert
-import numpy as np
-import yaml
-import pandas as pd
-import os
-from eslib.formatting import esfmt, warning
-from phonopy.units import VaspToTHz
-from ase import Atoms
 
 #---------------------------------------#
 THRESHOLD = 1e-4

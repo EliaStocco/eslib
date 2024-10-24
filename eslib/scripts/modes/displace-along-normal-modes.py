@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 import argparse
 import pickle
-from eslib.classes.normal_modes import NormalModes
-from ase.io import read, write
-from eslib.tools import convert
-from eslib.input import flist
-import pandas as pd
-import numpy as np
-import xarray as xr
-from eslib.formatting import esfmt, error
-from eslib.input import str2bool
 from itertools import product
+
+import numpy as np
+import pandas as pd
+import xarray as xr
+from ase.io import read, write
+
 from eslib.classes.atomic_structures import AtomicStructures
+from eslib.classes.normal_modes import NormalModes
+from eslib.formatting import error, esfmt
+from eslib.input import flist, str2bool
+from eslib.tools import convert
 
 #---------------------------------------#
 # example of file for --displacements

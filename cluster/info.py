@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-import subprocess
-import re
 import os
+import re
+import subprocess
+
 import pandas as pd
 
 # Replace 'your_username' with your actual SLURM username

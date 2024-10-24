@@ -1,13 +1,15 @@
 #!/usr/bin/env python
-import numpy as np
 import matplotlib.pyplot as plt
-from eslib.plot import plot_bisector
-from eslib.classes.models.dipole.baseclass import DipoleModel, DipoleLinearModel
+import numpy as np
+
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.tools import frac2cart
+from eslib.classes.models.dipole.baseclass import (DipoleLinearModel,
+                                                   DipoleModel)
+from eslib.formatting import esfmt, everythingok, float_format, warning
 from eslib.output import output_folder
-from eslib.formatting import esfmt, everythingok, warning, float_format
 from eslib.physics import compute_dipole_quanta
+from eslib.plot import plot_bisector
+from eslib.tools import frac2cart
 
 #---------------------------------------#
 # Description of the script's purpose

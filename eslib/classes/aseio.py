@@ -1,26 +1,29 @@
-from ase import Atoms
-from ase.cell import Cell
-from io import TextIOWrapper
-import re
-import os
-import math
-import numpy as np
-from concurrent.futures import ProcessPoolExecutor
-from typing import List, Union, TypeVar, Match, Callable, Any, Dict, cast
 import functools
 import glob
-from ase.io import read, write, string2index
-from ase.io.netcdftrajectory import read_netcdftrajectory, write_netcdftrajectory
-from eslib.classes.file_formats.hdf5 import write_hdf5, read_hdf5
-from eslib.classes.file_formats.netcdf import write_netcdf, read_netcdf
+import math
+import os
+import re
+from concurrent.futures import ProcessPoolExecutor
+from io import TextIOWrapper
+from typing import Any, Callable, Dict, List, Match, TypeVar, Union, cast
+# from eslib.formatting import float_format
+from warnings import warn
+
+import numpy as np
+from ase import Atoms
+from ase.cell import Cell
+from ase.io import read, string2index, write
+from ase.io.formats import filetype
+from ase.io.netcdftrajectory import (read_netcdftrajectory,
+                                     write_netcdftrajectory)
+
+from eslib.classes.file_formats.hdf5 import read_hdf5, write_hdf5
+from eslib.classes.file_formats.netcdf import read_netcdf, write_netcdf
 from eslib.classes.file_formats.pdb import read_pdb
 # from eslib.classes.trajectory import AtomicStructures
 from eslib.classes.io import pickleIO
-from eslib.tools import convert
 from eslib.functions import extract_number_from_filename
-from ase.io.formats import filetype
-# from eslib.formatting import float_format
-from warnings import warn
+from eslib.tools import convert
 
 T = TypeVar('T', bound='aseio')
 M = TypeVar('M', bound=Callable[..., Any])
@@ -152,7 +155,8 @@ def file_pattern(method: M) -> M:
                 # Initialize a list to hold results from each file
                 structures = [None] * len(matched_files)
 
-                from eslib.classes.atomic_structures import AtomicStructures            
+                from eslib.classes.atomic_structures import AtomicStructures
+
                 # Process each matched file
                 N = len(matched_files)
                 # print()

@@ -1,15 +1,16 @@
 #!/usr/bin/env python
-from ase.io import read
 import glob
-import matplotlib.pyplot as plt
-from eslib.input import slist
-from eslib.formatting import esfmt
-from eslib.classes.models.dipole.baseclass import DipoleModel
-from eslib.plot import plot_bisector
-from eslib.physics import compute_dipole_quanta
 from copy import copy
-from eslib.plot import generate_colors
+
+import matplotlib.pyplot as plt
+from ase.io import read
+
 from eslib.classes.atomic_structures import AtomicStructures
+from eslib.classes.models.dipole.baseclass import DipoleModel
+from eslib.formatting import esfmt
+from eslib.input import slist
+from eslib.physics import compute_dipole_quanta
+from eslib.plot import generate_colors, plot_bisector
 
 #---------------------------------------#
 # To Do:

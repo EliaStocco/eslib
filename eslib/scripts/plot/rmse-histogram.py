@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import numpy as np
-from eslib.formatting import esfmt
+
 from eslib.classes import Trajectory
+from eslib.formatting import esfmt
 from eslib.plot import histogram
 
 metrics = {

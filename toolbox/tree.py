@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
-import os
-import numpy as np
 import argparse
+import os
+
+import numpy as np
 from colorama import Fore, Style
+
 
 def colorize(item, directory):
     if os.path.isdir(os.path.join(directory, item)):

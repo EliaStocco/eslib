@@ -1,6 +1,8 @@
 from cProfile import label
-import numpy as np
 from typing import TypeVar, Union
+
+import numpy as np
+
 T = TypeVar('T',bound="ElectricField")
 
 TimeType = Union[float, np.ndarray]
@@ -76,6 +78,7 @@ if __name__ == "__main__":
     dEdt_exact = efield.derivative(time)[:,0]
 
     import matplotlib.pyplot as plt
+
     # plt.plot(time, E,label="E")
     plt.plot(time, dEdt,label="dE/dt (num)")
     plt.plot(time, dEdt_exact,label="dE/dt (exact)")

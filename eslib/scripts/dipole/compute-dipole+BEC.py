@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 import argparse
-import numpy as np
 import os
 import sys
+
+import numpy as np
 from ase.io import read
+
+from eslib.formatting import esfmt
 # from elia.classes import MicroState
 from eslib.nn.user import get_model
-from eslib.formatting import esfmt
 
 #####################
 

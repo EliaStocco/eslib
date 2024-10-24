@@ -1,14 +1,16 @@
 #!/usr/bin/env python
-from ase.io import read
-import random
 import os
-import torch
-import numpy as np
+import random
 from copy import copy
-from eslib.functions import str2bool
-from eslib.nn.dataset import make_dataset
-from eslib.input import size_type
+
+import numpy as np
+import torch
+from ase.io import read
+
 from eslib.formatting import esfmt
+from eslib.functions import str2bool
+from eslib.input import size_type
+from eslib.nn.dataset import make_dataset
 
 #---------------------------------------#
 description = "Build a dataset from an 'extxyz' file, readable by 'train-e3nn-model.py'."

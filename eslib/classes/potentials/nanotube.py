@@ -1,12 +1,14 @@
-from typing import Dict, List, Union
-import numpy as np
-from ase.calculators.calculator import Calculator, all_changes
-from ase import Atoms
 import json
-import torch
-from eslib.tools import convert
 from dataclasses import dataclass
+from typing import Dict, List, Union
+
+import numpy as np
+import torch
+from ase import Atoms
+from ase.calculators.calculator import Calculator, all_changes
 from ase.io import write
+
+from eslib.tools import convert
 
 DTYPE = torch.float64
 TEST = False

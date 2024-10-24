@@ -9,20 +9,22 @@
 '''
 
 
-from __future__ import print_function, division, absolute_import
-from ase.geometry.analysis import Analysis
-from ase import io
+from __future__ import absolute_import, division, print_function
+
 import argparse
 import re
 import sys
-import numpy as np
-from ipi.utils.io import read_file
-from ipi.utils.units import unit_to_internal, unit_to_user, Constants, Elements
-from ase.data import atomic_masses
 
-from eslib.fortran import fortran_rdfs
+import numpy as np
+from ase import io
+from ase.data import atomic_masses
+from ase.geometry.analysis import Analysis
+from ipi.utils.io import read_file
+from ipi.utils.units import Constants, Elements, unit_to_internal, unit_to_user
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, float_format
+from eslib.fortran import fortran_rdfs
 from eslib.input import itype, size_type
 from eslib.physics import get_element_mass
 

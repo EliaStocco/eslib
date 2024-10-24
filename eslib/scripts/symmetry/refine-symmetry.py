@@ -3,13 +3,14 @@
 # email : elia.stocco@mpsd.mpg.de
 # from ase.io import read
 import numpy as np
+from ase import Atoms
+from ase.cell import Cell
+from ase.spacegroup import Spacegroup, get_spacegroup
+from spglib import standardize_cell
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.input import str2bool
-from ase.spacegroup import get_spacegroup, Spacegroup
-from spglib import standardize_cell
-from ase import Atoms
-from ase.cell import Cell
 
 # Documentation:
 # - https://github.com/ajjackson/ase-tutorial-symmetry/blob/master/ase-symmetry.md

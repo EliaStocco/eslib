@@ -1,13 +1,15 @@
 from copy import deepcopy
-from typing import List, Union, TypeVar
+from typing import List, TypeVar, Union
+from warnings import warn
+
 import numpy as np
 import pandas as pd
-from warnings import warn
+
 from eslib.classes import Trajectory
-from eslib.tools import convert
+from eslib.classes.aseio import aseio, integer_to_slice_string
 from eslib.functional import deprecated
-from eslib.classes.aseio import aseio
-from eslib.classes.aseio import integer_to_slice_string
+from eslib.tools import convert
+
 T = TypeVar('T', bound='AtomicStructures')
 
 #---------------------------------------#

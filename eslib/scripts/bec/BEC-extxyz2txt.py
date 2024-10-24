@@ -1,12 +1,14 @@
 #!/usr/bin/env python
-from ase.io import write
-from ase import Atoms
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import esfmt, warning, dec_format
-from eslib.tools import convert
-from eslib.input import str2bool
-import numpy as np
 from typing import List
+
+import numpy as np
+from ase import Atoms
+from ase.io import write
+
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.formatting import dec_format, esfmt, warning
+from eslib.input import str2bool
+from eslib.tools import convert
 
 #---------------------------------------#
 # Description of the script's purpose

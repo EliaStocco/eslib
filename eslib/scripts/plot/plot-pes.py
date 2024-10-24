@@ -1,11 +1,13 @@
 #!/usr/bin/env python
-import numpy as np
-import matplotlib.pyplot as plt
-from eslib.formatting import esfmt
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.input import ilist
-import pandas as pd
 from itertools import product
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.formatting import esfmt
+from eslib.input import ilist
 
 #---------------------------------------#
 # Description of the script's purpose

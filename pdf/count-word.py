@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import re
+import sys
 import time
+
 import PyPDF2
+
 
 def getPageCount(pdf_file):
 

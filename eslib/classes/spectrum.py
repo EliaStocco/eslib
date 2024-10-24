@@ -1,10 +1,11 @@
+from dataclasses import dataclass, field
+from typing import Optional, TypeVar
+
 import numpy as np
 import pandas as pd
-from typing import Optional, TypeVar
-from dataclasses import dataclass, field
+
 from eslib.classes.tcf import TimeAutoCorrelation
-from eslib.tools import convert
-from eslib.tools import element_wise_multiplication
+from eslib.tools import convert, element_wise_multiplication
 
 T = TypeVar('T', bound='Spectrum')
 

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 from ase.io import write
+
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import esfmt, error
+from eslib.formatting import error, esfmt
 
 #---------------------------------------#
 # Description of the script's purpose

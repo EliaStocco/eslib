@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import numpy as np
-from eslib.tools import convert
+
 from eslib.formatting import esfmt
 from eslib.input import str2bool
 from eslib.physics import FWHM2sigma, sigma2FWHM
+from eslib.tools import convert
 
 #---------------------------------------#
 description = "Full Width at Half Maximum (FWHM) to sigma."

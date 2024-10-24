@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 import os
 import sys
-import numpy as np
+from ast import literal_eval
+
 import matplotlib.pyplot as plt
+import numpy as np
+
 from eslib.formatting import esfmt
 from eslib.input import slist
 from eslib.plot import vzero
-from ast import literal_eval
 
 #---------------------------------------#
 description="Create a band plot as in phonopy"

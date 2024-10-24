@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 import os
-import numpy as np
-import pandas as pd
+import warnings
+
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from statsmodels.tsa.stattools import adfuller, kpss
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, float_format
 from eslib.input import slist
-from statsmodels.tsa.stattools import adfuller, kpss
 from eslib.plot import hzero
-import warnings
 
 matplotlib.use('QtAgg')
 # Disable all warnings

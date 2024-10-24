@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # author: Elia Stocco
 # email : elia.stocco@mpsd.mpg.de
-from ase.io import read
 import numpy as np
-from eslib.show import matrix2str
+from ase.io import read
+
 from eslib.formatting import esfmt
+from eslib.show import matrix2str
 
 #---------------------------------------#
 description = "Save to file and/or print to screen the cell an atomic configuration in a i-PI compatible format."

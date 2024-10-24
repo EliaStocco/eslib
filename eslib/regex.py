@@ -1,5 +1,7 @@
 import re
+
 import numpy as np
+
 
 def extract_float(string:str)->np.ndarray:
     """

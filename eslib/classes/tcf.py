@@ -1,12 +1,14 @@
 from dataclasses import dataclass, field
 from gc import enable
+from typing import Optional, Tuple, TypeVar
+
 import numpy as np
 from scipy.fftpack import dct
-from eslib.tools import convert
 from scipy.optimize import curve_fit
-from typing import Optional, TypeVar, Tuple
 from tqdm import tqdm
+
 from eslib.classes.timing import timing
+from eslib.tools import convert
 
 T = TypeVar('T', bound='TimeCorrelation')
 

@@ -1,15 +1,15 @@
 #!/usr/bin/env python
-from ase.io import read
-from eslib.formatting import esfmt, warning
-from ase import Atoms
-import numpy as np
-from ase.io import read, write
-from eslib.tools import cart2frac, frac2cart
-from eslib.input import slist
 from typing import List
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.input import str2bool
+
+import numpy as np
+from ase import Atoms
+from ase.io import read, write
+
 from eslib.classes.append import AppendableArray
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.formatting import esfmt, warning
+from eslib.input import slist, str2bool
+from eslib.tools import cart2frac, frac2cart
 
 #---------------------------------------#
 # Description of the script's purpose

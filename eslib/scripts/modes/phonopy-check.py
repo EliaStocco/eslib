@@ -1,13 +1,16 @@
 #!/usr/bin/env python
-from eslib.classes.normal_modes import NormalModes
-from eslib.show import matrix2str
-from eslib.tools import convert
-from eslib.output import output_folder
-from eslib.input import size_type
-from eslib.functions import phonopy2atoms
 import argparse
+
 import numpy as np
 import yaml
+
+from eslib.classes.normal_modes import NormalModes
+from eslib.functions import phonopy2atoms
+from eslib.input import size_type
+from eslib.output import output_folder
+from eslib.show import matrix2str
+from eslib.tools import convert
+
 # import pandas as pd
 # from icecream import ic
 # import os

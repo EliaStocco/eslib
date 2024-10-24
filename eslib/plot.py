@@ -1,8 +1,11 @@
-from eslib.functions import add_default
-import numpy as np
-import matplotlib.pyplot as plt
 from itertools import product
-from matplotlib.colors import Normalize, LinearSegmentedColormap
+
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.colors import LinearSegmentedColormap, Normalize
+
+from eslib.functions import add_default
+
 
 def draw_sphere(ax, center, radius, color='blue',**kwargs):
     """
@@ -114,8 +117,7 @@ def get_continous_colors_map(vmin:float,vmax:float,map:str)->callable:
     Returns:
     callable: A function that takes a value and returns a color.
     """
-    from matplotlib.colors import Normalize
-    from matplotlib.colors import Colormap
+    from matplotlib.colors import Colormap, Normalize
     norm = Normalize(vmin=vmin, vmax=vmax)
     colormap:Colormap = plt.get_cmap(map)
     def return_color(x:float)->tuple:
@@ -276,7 +278,8 @@ def histogram(data: np.ndarray, file: str=None):
 
 #---------------------------------------#
 def plot_matrix(M,Natoms=None,file=None):
-    import matplotlib.pyplot as plt  
+    import matplotlib.pyplot as plt
+
     # from matplotlib.colors import ListedColormap
     # Create a figure and axis
     fig, ax = plt.subplots()  

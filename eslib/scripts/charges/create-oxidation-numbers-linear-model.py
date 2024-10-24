@@ -1,14 +1,13 @@
 #!/usr/bin/env python
-from ase.io import read
 import numpy as np
-from eslib.classes.models.dipole.baseclass import DipoleModel
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.classes.atomic_structures import info
-from eslib.formatting import esfmt, float_format, warning
-from eslib.physics import oxidation_number
-from eslib.physics import bec_from_oxidation_number
-from eslib.metrics import metrics
+from ase.io import read
 from scipy.optimize import minimize
+
+from eslib.classes.atomic_structures import AtomicStructures, info
+from eslib.classes.models.dipole.baseclass import DipoleModel
+from eslib.formatting import esfmt, float_format, warning
+from eslib.metrics import metrics
+from eslib.physics import bec_from_oxidation_number, oxidation_number
 
 #---------------------------------------#
 # Description of the script's purpose

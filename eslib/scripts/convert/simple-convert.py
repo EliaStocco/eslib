@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-from ase.io import read, write
-from ase import Atoms
 from typing import List
+
+from ase import Atoms
+from ase.io import read, write
+
 from eslib.formatting import esfmt
 
 #---------------------------------------#

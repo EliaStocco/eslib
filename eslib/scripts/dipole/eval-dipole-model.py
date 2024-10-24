@@ -1,8 +1,9 @@
 #!/usr/bin/env python
+import numpy as np
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.classes.models.dipole.baseclass import DipoleModel
 from eslib.formatting import esfmt
-import numpy as np
 
 #---------------------------------------#
 # Description of the script's purpose

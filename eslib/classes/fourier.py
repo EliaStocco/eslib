@@ -1,7 +1,7 @@
-import numpy as np
-from numpy.fft import fft, rfft
-from numpy.fft import fftfreq, rfftfreq
 import matplotlib.pyplot as plt
+import numpy as np
+from numpy.fft import fft, fftfreq, rfft, rfftfreq
+
 
 class FourierAnalyzer:
     def __init__(self, time, signal, real=None):

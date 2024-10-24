@@ -1,15 +1,17 @@
 #!/usr/bin/env python
+import os
+from typing import List
+
+import numpy as np
 from ase.cell import Cell
+
+from eslib.classes.aseio import integer_to_slice_string
 # from elia.functions import str2bool, suppress_output, convert
 from eslib.classes.atomic_structures import AtomicStructures
-import numpy as np
-import os
-from eslib.formatting import esfmt, warning, error, eslog
-from eslib.input import str2bool, itype
+from eslib.formatting import error, esfmt, eslog, warning
 from eslib.functions import suppress_output
+from eslib.input import itype, str2bool
 from eslib.tools import convert
-from eslib.classes.aseio import integer_to_slice_string
-from typing import List
 
 DEBUG = True
 #---------------------------------------#

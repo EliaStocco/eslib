@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import numpy as np
-from eslib.formatting import esfmt
+
 from eslib.classes.properties import Properties
+from eslib.formatting import esfmt
 from eslib.functions import suppress_output
 from eslib.tools import convert
 

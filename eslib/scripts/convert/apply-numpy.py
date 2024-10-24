@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import numpy as np
-from eslib.tools import string2function
-from eslib.formatting import esfmt
+
 from eslib.classes.physical_tensor import PhysicalTensor
+from eslib.formatting import esfmt
+from eslib.tools import string2function
 
 #---------------------------------------#
 # Description of the script's purpose

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-from ase.io import write
-from ase import Atoms
-from torch_geometric.data import Data
 import torch
+from ase import Atoms
+from ase.io import write
+from torch_geometric.data import Data
+
 from eslib.formatting import esfmt, warning
 from eslib.show import show_dict
 

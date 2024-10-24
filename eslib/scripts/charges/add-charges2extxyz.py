@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 import json
+from typing import List
+
 import numpy as np
-from eslib.classes.models.dipole import DipolePartialCharges
+from ase import Atoms
+
 from eslib.classes.atomic_structures import AtomicStructures
+from eslib.classes.models.dipole import DipolePartialCharges
 from eslib.formatting import esfmt, warning
 from eslib.show import show_dict
 from eslib.tools import is_integer
-from typing import List
-from ase import Atoms
 
 #---------------------------------------#
 # Description of the script's purpose

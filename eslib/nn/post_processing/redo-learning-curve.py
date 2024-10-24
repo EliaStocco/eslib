@@ -2,21 +2,22 @@
 import argparse
 # import json5 as json
 import json
-# import os
-# import torch
-import pandas as pd
-import numpy as np
+
 # from scipy.stats import pearsonr
 # from copy import deepcopy
 # import time
 import matplotlib.pyplot as plt
+import numpy as np
+# import os
+# import torch
+import pandas as pd
 # from elia.nn.functions.functions import get_model
 # from elia.functions import plot_bisector
 # from elia.nn.dataset import make_dataloader
 # from elia.nn.plot.plot import plot_learning_curves
 # from matplotlib.ticker import MaxNLocator
 # import mpld3
-from mpld3 import plugins #, utils
+from mpld3 import plugins  # , utils
 
 # from chart_studio.plotly import plotly as py
 # import chart_studio.tools as tls

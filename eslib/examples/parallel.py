@@ -1,8 +1,10 @@
 import os
-import numpy as np
-from eslib.classes.trajectory import AtomicStructures
 from concurrent.futures import ProcessPoolExecutor
+
+import numpy as np
 from icecream import ic
+
+from eslib.classes.trajectory import AtomicStructures
 
 # Create output directories if they don't exist
 os.makedirs("data", exist_ok=True)

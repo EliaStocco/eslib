@@ -2,22 +2,21 @@
 # author: Elia Stocco
 # email : elia.stocco@mpsd.mpg.de
 # from ase.io import read
-from joblib import PrintTime
 import numpy as np
+import spglib
+from ase import Atoms
+from ase.spacegroup import get_spacegroup
 from ase.spacegroup.spacegroup import Spacegroup
+from joblib import PrintTime
+from phonopy.cui.show_symmetry import _get_symmetry_yaml
+from phonopy.structure.atoms import PhonopyAtoms
+from phonopy.structure.cells import (Primitive, get_primitive,
+                                     guess_primitive_matrix)
+from phonopy.structure.symmetry import Symmetry
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.input import flist
-import spglib
-from ase.spacegroup import get_spacegroup
-from ase import Atoms
-
-from phonopy.structure.atoms import PhonopyAtoms
-from phonopy.structure.cells import get_primitive, guess_primitive_matrix, Primitive
-from phonopy.structure.symmetry import Symmetry
-from phonopy.cui.show_symmetry import _get_symmetry_yaml
-
-
 
 #---------------------------------------#
 description = "Find the symmetry of an atomic structure."

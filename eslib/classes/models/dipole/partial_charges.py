@@ -1,11 +1,13 @@
-from ase.calculators.calculator import Calculator
-from ase.calculators.calculator import all_changes
+from dataclasses import dataclass, field
+from typing import Any, Dict, List
+
+import numpy as np
+from ase import Atoms
+from ase.calculators.calculator import Calculator, all_changes
+
 from eslib.classes.models.dipole.baseclass import DipoleModel
 from eslib.tools import add_info_array
-from dataclasses import dataclass, field
-from ase import Atoms
-from typing import List, Dict, Any
-import numpy as np
+
 
 @dataclass
 class DipolePartialCharges(DipoleModel):

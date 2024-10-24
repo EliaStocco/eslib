@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 import argparse
-from ase.io import read
+
 import numpy as np
-from eslib.input import str2bool
-from eslib.input import size_type
-from eslib.show import matrix2str
+from ase.io import read
+
 from eslib.formatting import esfmt
+from eslib.input import size_type, str2bool
+from eslib.show import matrix2str
 
 #---------------------------------------#
 description="Return a vector in cartesian coordinates depending on its lattice vector coordinates."

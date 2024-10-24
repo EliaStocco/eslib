@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-from ase.io import write
+import numpy as np
 from ase import Atoms
+from ase.io import write
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.tools import convert
-import numpy as np
 
 #---------------------------------------#
 # Description of the script's purpose

@@ -1,19 +1,19 @@
 # from copy import copy
-import torch
-import numpy as np
-from tqdm import tqdm
-import pandas as pd
-import warnings
 import os
 import time
+import warnings
 from copy import copy
-from eslib.functions import add_default
-from eslib.functions import remove_empty_folder
-from eslib.functions import remove_files_in_folder
-from eslib.nn.plot   import plot_learning_curves
-from eslib.nn.training.functions import save_checkpoint
-from eslib.nn.training.functions import get_all_dataloader
-from eslib.nn.training.functions import get_all
+
+import numpy as np
+import pandas as pd
+import torch
+from tqdm import tqdm
+
+from eslib.functions import (add_default, remove_empty_folder,
+                             remove_files_in_folder)
+from eslib.nn.plot import plot_learning_curves
+from eslib.nn.training.functions import (get_all, get_all_dataloader,
+                                         save_checkpoint)
 
 __all__ = ["train"]
 

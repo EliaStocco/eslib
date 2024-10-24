@@ -1,8 +1,11 @@
-import torch
-import numpy as np
 import subprocess
-from eslib.functions import add_default
 from typing import Tuple
+
+import numpy as np
+import torch
+
+from eslib.functions import add_default
+
 
 def vectorize(A:callable,min_shape=1,init=torch.zeros):
     def B(x):

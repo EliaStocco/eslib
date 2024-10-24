@@ -1,5 +1,7 @@
 import os
+
 import numpy as np
+
 
 def output_folder(folder,show=True):
     if folder in ["", ".", "./"]:

@@ -1,10 +1,12 @@
 #!/usr/bin/env python
+import re
+
+import numpy as np
+
+from eslib.classes.append import AppendableArray
+from eslib.classes.physical_tensor import PhysicalTensor
 from eslib.formatting import esfmt, float_format, warning
 from eslib.input import str2bool
-import numpy as np
-import re
-from eslib.classes.physical_tensor import PhysicalTensor
-from eslib.classes.append import AppendableArray
 
 # ---------------------------------------#
 # Description of the script's purpose

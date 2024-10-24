@@ -2,23 +2,27 @@
 # author: Elia Stocco
 # email : elia.stocco@mpsd.mpg.de
 # from ase.io import read
-from joblib import PrintTime
 import numpy as np
+import spglib
+from ase import Atoms
+from ase.spacegroup import get_spacegroup
 from ase.spacegroup.spacegroup import Spacegroup
+from joblib import PrintTime
+from phonopy import Phonopy
+from phonopy.cui.show_symmetry import _get_symmetry_yaml
+from phonopy.file_IO import parse_BORN, parse_FORCE_SETS
+from phonopy.harmonic.force_constants import (
+    _get_force_constants_disps, distribute_force_constants,
+    distribute_force_constants_by_translations)
+from phonopy.structure.atoms import PhonopyAtoms
+from phonopy.structure.cells import (Primitive, get_primitive,
+                                     guess_primitive_matrix)
+from phonopy.structure.symmetry import Symmetry
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.input import flist
-import spglib
-from ase.spacegroup import get_spacegroup
-from ase import Atoms
 
-from phonopy.structure.atoms import PhonopyAtoms
-from phonopy.structure.cells import get_primitive, guess_primitive_matrix, Primitive
-from phonopy.structure.symmetry import Symmetry
-from phonopy.cui.show_symmetry import _get_symmetry_yaml
-from phonopy.harmonic.force_constants import _get_force_constants_disps, distribute_force_constants, distribute_force_constants_by_translations
-from phonopy import Phonopy
-from phonopy.file_IO import parse_BORN, parse_FORCE_SETS
 
 def get_bec(
     supercell: PhonopyAtoms,

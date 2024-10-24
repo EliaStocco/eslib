@@ -1,12 +1,14 @@
 #!/usr/bin/env python
-import numpy as np
-import xml.etree.ElementTree as ET
 import ast
-from typing import Tuple, List
+import xml.etree.ElementTree as ET
+from typing import List, Tuple
+
+import numpy as np
 from ase import Atoms
 from ase.io import write
-from eslib.tools import convert
+
 from eslib.formatting import esfmt
+from eslib.tools import convert
 
 #---------------------------------------#
 # Description of the script's purpose

@@ -1,17 +1,17 @@
-from ase import Atoms
-from ase.calculators.calculator import Calculator
-from ase.calculators.calculator import all_changes
-from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, TypeVar
+from warnings import warn
+
 import numpy as np
 import torch
-from warnings import warn
-from mace.tools import torch_geometric, torch_tools
+from ase import Atoms
+from ase.calculators.calculator import Calculator, all_changes
 from mace.cli.elia_configs import make_dataloader
 from mace.modules.models.general import MACEBaseModel
-from eslib.tools import add_info_array, reshape_info_array
+from mace.tools import torch_geometric, torch_tools
+
 from eslib.classes.models import eslibModel
-from typing import TypeVar
+from eslib.tools import add_info_array, reshape_info_array
 
 T = TypeVar('T', bound='MACEModel')
 

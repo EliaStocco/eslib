@@ -1,7 +1,6 @@
-from typing import Union
-import numpy as np
-from typing import TypeVar
+from typing import TypeVar, Union
 
+import numpy as np
 
 T = TypeVar('T',bound="AppendableArray")
 

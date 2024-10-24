@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import numpy as np
-from eslib.tools import convert
+
 from eslib.formatting import esfmt
+from eslib.tools import convert
 
 #---------------------------------------#
 description = "Compute the period given its angular frequency."

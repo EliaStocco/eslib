@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 import re
+
 import numpy as np
-from eslib.tools import convert
-from eslib.input import str2bool
+
 from eslib.formatting import esfmt, warning
+from eslib.input import str2bool
+from eslib.tools import convert
 
 #---------------------------------------#
 # Description of the script's purpose

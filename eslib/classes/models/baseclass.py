@@ -1,10 +1,12 @@
 
+import pickle
+from typing import Any, List, Type, TypeVar
+from warnings import warn
+
 from ase import Atoms
 from ase.calculators.calculator import Calculator
+
 from eslib.classes.io import pickleIO
-from warnings import warn
-import pickle
-from typing import List, TypeVar, Any, Type
 
 T = TypeVar('T', bound='eslibModel')
 

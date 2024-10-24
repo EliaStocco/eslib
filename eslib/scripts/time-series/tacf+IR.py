@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import numpy as np
+
 from eslib.classes.physical_tensor import PhysicalTensor
-from eslib.formatting import esfmt
 from eslib.classes.tcf import TimeAutoCorrelation, compute_spectrum, get_freq
+from eslib.formatting import esfmt
 from eslib.tools import convert
 
 #---------------------------------------#

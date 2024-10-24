@@ -1,16 +1,17 @@
 #!/usr/bin/env python
-from eslib.formatting import esfmt
-from eslib.input import str2bool
-from ase import Atoms
 import json
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.show import show_dict
+
+from ase import Atoms
 from ase.calculators.socketio import SocketIOCalculator
-from ase.optimize import BFGS
 from ase.constraints import FixSymmetry
 from ase.filters import FrechetCellFilter as RelaxCell
 from ase.io import write
-    
+from ase.optimize import BFGS
+
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.formatting import esfmt
+from eslib.input import str2bool
+from eslib.show import show_dict
 
 #---------------------------------------#
 description = "Run an ASE optimizer with constrained symmetries."

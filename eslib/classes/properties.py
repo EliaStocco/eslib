@@ -1,11 +1,14 @@
-import pandas as pd
-import numpy as np
 import re
 from copy import copy
+from typing import TypeVar, Union
+
+import numpy as np
+import pandas as pd
+
 from eslib.classes import Trajectory
 from eslib.classes.io import pickleIO
 from eslib.tools import convert
-from typing import Union, TypeVar
+
 T = TypeVar('T', bound='Properties')
 
 def find_key_by_value(family_map, value):

@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
 from eslib.classes.physical_tensor import PhysicalTensor
-from eslib.input import str2bool, flist
+from eslib.classes.tcf import compute_spectrum, get_freq
 from eslib.formatting import esfmt
-from eslib.classes.tcf import  compute_spectrum, get_freq
+from eslib.input import flist, str2bool
 from eslib.tools import convert
 
 #---------------------------------------#

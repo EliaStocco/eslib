@@ -1,14 +1,16 @@
 #!/usr/bin/env python
-import numpy as np
 import os
-from eslib.nn.user import get_model
-from eslib.functions import suppress_output
-from eslib.input import str2bool
+
+import numpy as np
+import torch
+from tqdm import tqdm
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, warning
-import torch 
-from tqdm import tqdm
+from eslib.functions import suppress_output
+from eslib.input import str2bool
 from eslib.nn.dataset import make_dataloader
+from eslib.nn.user import get_model
 from eslib.scripts.nn.dataset2extxyz import Data2Atoms
 
 #---------------------------------------#

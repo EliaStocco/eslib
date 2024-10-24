@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-from eslib.formatting import esfmt
-from eslib.classes.atomic_structures import AtomicStructures
-from ase import Atoms
-from eslib.input import flist
 import numpy as np
+from ase import Atoms
+
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.formatting import esfmt
+from eslib.input import flist
 
 #---------------------------------------#
 # Description of the script's purpose

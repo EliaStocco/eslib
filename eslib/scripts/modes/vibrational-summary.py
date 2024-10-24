@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-import numpy as np
-import xarray as xr
-import pandas as pd
 import matplotlib.pyplot as plt
-from eslib.formatting import esfmt
+import numpy as np
+import pandas as pd
+import xarray as xr
+
 from eslib.classes.normal_modes import NormalModes
+from eslib.formatting import esfmt
+from eslib.show import matrix2str, print_df
 from eslib.tools import convert
-from eslib.show import print_df
-from eslib.show import matrix2str
 
 #---------------------------------------#
 # Description of the script's purpose

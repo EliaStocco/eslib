@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-import numpy as np
 import matplotlib.pyplot as plt
-from eslib.formatting import esfmt
+import numpy as np
+
 from eslib.classes.trajectory import AtomicStructures
-from eslib.plot import generate_colors
+from eslib.formatting import esfmt
 from eslib.input import flist
+from eslib.plot import generate_colors
 
 #---------------------------------------#
 # Description of the script's purpose

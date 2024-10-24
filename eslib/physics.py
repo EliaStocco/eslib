@@ -1,14 +1,14 @@
-from typing import List, Tuple, Union, Any
 import re
+from copy import copy, deepcopy
+from typing import Any, List, Tuple, Union
+
 import numpy as np
 from ase import Atoms
-from eslib.classes.bec import bec as BEC
-from copy import copy, deepcopy
-from eslib.tools import cart2frac
 from ase.data import atomic_masses, atomic_numbers
 
-from typing import Union, List
-from ase.data import atomic_masses, atomic_numbers
+from eslib.classes.bec import bec as BEC
+from eslib.tools import cart2frac
+
 
 def get_element_mass(symbols: Union[str, List[str]]) -> Union[float, List[float]]:
     """

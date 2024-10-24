@@ -1,20 +1,21 @@
 #!/usr/bin/env python
-from eslib.classes.normal_modes import NormalModes
-from eslib.show import matrix2str
-from eslib.tools import convert
-from eslib.output import output_folder
-from eslib.input import size_type
-from eslib.functions import phonopy2atoms
-import numpy as np
-import yaml
-import pandas as pd
 import os
-from eslib.formatting import esfmt, warning
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.tools import is_sorted_ascending, w2_to_w
-from phonopy.units import VaspToTHz
+
+import numpy as np
+import pandas as pd
+import yaml
 from ase import Atoms
+from phonopy.units import VaspToTHz
+
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.classes.normal_modes import NormalModes
+from eslib.formatting import esfmt, warning
+from eslib.functions import phonopy2atoms
 from eslib.geometry import modular_norm
+from eslib.input import size_type
+from eslib.output import output_folder
+from eslib.show import matrix2str
+from eslib.tools import convert, is_sorted_ascending, w2_to_w
 
 #---------------------------------------#
 # Description of the script's purpose

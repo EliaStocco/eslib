@@ -1,6 +1,9 @@
 import re
+
 import numpy as np
+
 from eslib.classes.aseio import integer_to_slice_string
+
 
 class AtomSelector:
     def __init__(self):

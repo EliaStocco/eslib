@@ -1,11 +1,13 @@
+import importlib
+import json
 import warnings
 # from typing import TYPE_CHECKING
 # if TYPE_CHECKING:
 # from eslib.nn.network import iPIinterface
 from typing import Union
-import importlib
-import json
+
 import torch
+
 
 def get_class(module_name, class_name):
     try:

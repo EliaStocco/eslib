@@ -1,10 +1,12 @@
+import json
+import time
+
+import ase.units as units
 import numpy as np
 from ase import Atoms
 from ase.calculators.calculator import Calculator
-import json
-import time
-import ase.units as units
 from ase.calculators.socketio import SocketClient, SocketClosed
+
 from eslib.tools import convert
 
 PRINT_MSG = False

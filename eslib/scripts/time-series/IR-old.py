@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 from enum import auto
-import numpy as np
+
 import matplotlib
-import matplotlib.pyplot as plt 
-from eslib.formatting import esfmt, message
+import matplotlib.pyplot as plt
+import numpy as np
+
 from eslib.classes.physical_tensor import PhysicalTensor
 from eslib.classes.spectrum import Spectrum
+from eslib.formatting import esfmt, message
 
 matplotlib.use('QtAgg')
 plt.ion()

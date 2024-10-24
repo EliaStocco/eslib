@@ -1,12 +1,16 @@
+import os
+from copy import copy
+from itertools import product
+from typing import Union
+
 import numpy as np
 import pandas as pd
-from copy import copy
 import torch
-import os
-from typing import Union
-from .train import train
+
 from eslib.functions import add_default
-from itertools import product
+
+from .train import train
+
 
 def hyper_train_at_fixed_model( net:torch.nn.Module,\
                                 all_bs:list,\

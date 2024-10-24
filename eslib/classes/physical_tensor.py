@@ -1,10 +1,13 @@
-import xarray as xr
-import numpy as np
 import glob
-from eslib.formatting import float_format, complex_format
+from typing import Any, Callable, Type, TypeVar, Union
+
+import numpy as np
+import xarray as xr
+
 from eslib.classes.io import pickleIO
+from eslib.formatting import complex_format, float_format
 from eslib.units import *
-from typing import TypeVar, Union, Any, Callable, Type
+
 T = TypeVar('T', bound='PhysicalTensor')
 # Suppress warnings in this specific file
 import warnings

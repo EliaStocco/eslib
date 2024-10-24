@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-from ase.io import read
-from eslib.formatting import esfmt
-from eslib.input import str2bool
 from ase.calculators.socketio import SocketClient
+from ase.io import read
+
 from eslib.classes.potentials.LJwall_calculator import LennardJonesWall
 from eslib.classes.potentials.nanotube import NanoTubeCalculator
+from eslib.formatting import esfmt
+from eslib.input import str2bool
 
 #---------------------------------------#
 # Description of the script's purpose

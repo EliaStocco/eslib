@@ -1,9 +1,10 @@
 #!/usr/bin/env python
+from ase.calculators.socketio import SocketClient
 from ase.io import read
+
+from eslib.classes.potentials.LJwall_calculator import LennardJonesWall
 from eslib.formatting import esfmt
 from eslib.input import str2bool
-from ase.calculators.socketio import SocketClient
-from eslib.classes.potentials.LJwall_calculator import LennardJonesWall
 
 #---------------------------------------#
 # Description of the script's purpose

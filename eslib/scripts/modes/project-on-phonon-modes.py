@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 import argparse
+
+import pandas as pd
+from ase import Atoms
 # import numpy as np
 from ase.io import read
-from ase import Atoms
-import pandas as pd
+
+from eslib.classes.normal_modes import NormalModes
 # from icecream import ic
 from eslib.classes.vectorize import easyvectorize
-from eslib.classes.normal_modes import NormalModes
+
 # import warnings
 # warnings.filterwarnings("error")
 #---------------------------------------#

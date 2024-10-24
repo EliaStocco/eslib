@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-from eslib.tools import convert
-from eslib.formatting import esfmt, error
-from eslib.ipi_units import UnitMap
 import json
+
+from eslib.formatting import error, esfmt
+from eslib.ipi_units import UnitMap
 from eslib.show import show_dict
+from eslib.tools import convert
 
 #---------------------------------------#
 # Description of the script's purpose

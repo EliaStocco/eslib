@@ -1,11 +1,13 @@
 #!/usr/bin/env python
-import numpy as np
 import xml.etree.ElementTree as xmlet
+
+import numpy as np
+
+from eslib.classes.efield import ElectricField
 from eslib.classes.properties import Properties
 from eslib.formatting import esfmt
 from eslib.input import flist
 from eslib.tools import convert
-from eslib.classes.efield import ElectricField
 
 #---------------------------------------#
 description = "Compute the actual conserved quantity of the system when an electric field is applied."

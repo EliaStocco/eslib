@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-from subprocess import run
 import os
+from subprocess import run
+
 from eslib.formatting import esfmt
 from eslib.input import ilist
 

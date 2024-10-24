@@ -1,6 +1,9 @@
+from typing import TypeVar
+
 import numpy as np
-from typing import  TypeVar
+
 from eslib.classes.physical_tensor import PhysicalTensor
+
 T = TypeVar('T', bound='Signal')
 class Signal(PhysicalTensor):
     """Class to handle signals."""

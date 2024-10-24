@@ -1,8 +1,10 @@
-import numpy as np
+from __future__ import absolute_import, division, print_function
+
+import sys
 from typing import Optional
 
-from __future__ import absolute_import, division, print_function
-import sys
+import numpy as np
+
 
 def slice_along_axis(arr, axis, start=None, end=None, step=1):
     """Return arr[..., slc, ...], where the slice is applied to 

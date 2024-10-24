@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import numpy as np
-from eslib.formatting import esfmt
+
 from eslib.classes.atomic_structures import AtomicStructures
+from eslib.formatting import esfmt
 
 #---------------------------------------#
 # Description of the script's purpose

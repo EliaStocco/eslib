@@ -1,9 +1,13 @@
-import xarray as xr
-import numpy as np
-from .io import pickleIO
-from typing import Union, List, Dict, Tuple, TypeVar, Type
-from eslib.formatting import float_format
 import warnings
+from typing import Dict, List, Tuple, Type, TypeVar, Union
+
+import numpy as np
+import xarray as xr
+
+from eslib.formatting import float_format
+
+from .io import pickleIO
+
 # Filter out the warning by category and message
 warnings.filterwarnings("ignore", category=FutureWarning, message="xarray subclass bec should explicitly define __slots__")
 

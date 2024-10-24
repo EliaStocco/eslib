@@ -1,5 +1,6 @@
 from ase import Atoms
 
+
 def read_pdb(file_path):
     positions = []
     symbols = []

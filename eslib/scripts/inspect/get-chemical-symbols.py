@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # author: Elia Stocco
 # email : elia.stocco@mpsd.mpg.de
-from ase.io import read
 import argparse
 import json
+
+from ase.io import read
 
 #---------------------------------------#
 description     = "Save to file and/or print to screen the chemical symbols of an atomic configuration."

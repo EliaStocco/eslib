@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import numpy as np
-from eslib.formatting import esfmt, warning, everythingok
+
 from eslib.classes.properties import Properties
+from eslib.formatting import esfmt, everythingok, warning
 from eslib.functions import suppress_output
 from eslib.input import str2bool
 

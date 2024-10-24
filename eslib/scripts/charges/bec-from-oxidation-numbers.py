@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-from ase.io import write
-import numpy as np
 import json
+
+import numpy as np
 from ase import Atoms
+from ase.io import write
+
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import esfmt, warning, float_format
+from eslib.formatting import esfmt, float_format, warning
 from eslib.physics import bec_from_oxidation_number
 
 #---------------------------------------#

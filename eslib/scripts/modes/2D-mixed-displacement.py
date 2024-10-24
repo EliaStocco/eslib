@@ -1,14 +1,16 @@
 #!/usr/bin/env python
-from eslib.classes.normal_modes import NormalModes
-from ase.io import read
-import pandas as pd
-import numpy as np
-import xarray as xr
-from eslib.formatting import esfmt
-from eslib.classes.atomic_structures import AtomicStructures
-from itertools import product
 import json
+from itertools import product
+
+import numpy as np
+import pandas as pd
+import xarray as xr
+from ase.io import read
 from icecream import ic
+
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.classes.normal_modes import NormalModes
+from eslib.formatting import esfmt
 
 #---------------------------------------#
 # example of file for --displacements

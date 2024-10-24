@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-from eslib.classes.normal_modes import NormalModes
 from ase.io import read
+
+from eslib.classes.normal_modes import NormalModes
 from eslib.formatting import esfmt
 
 #---------------------------------------#

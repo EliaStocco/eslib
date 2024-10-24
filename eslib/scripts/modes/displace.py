@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 import argparse
 import pickle
-from eslib.classes.normal_modes import NormalModes
-from ase.io import read, write
-from eslib.tools import convert
-from eslib.input import flist
+
 import numpy as np
 import xarray as xr
+from ase.io import read, write
 
+from eslib.classes.normal_modes import NormalModes
+from eslib.input import flist
+from eslib.tools import convert
 
 #---------------------------------------#
 # Description of the script's purpose

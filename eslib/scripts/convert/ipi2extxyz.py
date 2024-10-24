@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 import os
-import numpy as np
 from copy import copy
-from ase.io import write, read
-from eslib.classes.properties import Properties
-from eslib.functions import suppress_output, get_one_file_in_folder
-from eslib.input import size_type, str2bool
+
+import numpy as np
+from ase.io import read, write
+
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import esfmt, error, warning
+from eslib.classes.properties import Properties
+from eslib.formatting import error, esfmt, warning
+from eslib.functions import get_one_file_in_folder, suppress_output
+from eslib.input import size_type, str2bool
 
 #---------------------------------------#
 # example:

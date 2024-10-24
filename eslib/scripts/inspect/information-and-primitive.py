@@ -3,15 +3,16 @@
 # email : elia.stocco@mpsd.mpg.de
 # from ase.io import read
 import numpy as np
-from eslib.show import matrix2str
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.input import str2bool
-from eslib.tools import convert, find_transformation
-from ase.cell import Cell
 from ase import Atoms
+from ase.cell import Cell
 from ase.io import write
+
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.classes.structure import Structure, rotate2LT
 from eslib.formatting import esfmt, warning
+from eslib.input import str2bool
+from eslib.show import matrix2str
+from eslib.tools import convert, find_transformation
 
 #---------------------------------------#
 description     = "Show general information of a given atomic structure and find its primitive cell structure."
@@ -132,7 +133,8 @@ def main(args):
         elif args.conversion == "conventional":
             converted_structure.get_conventional_cell(args.threshold)
         elif args.conversion == "phonopy-primitive":
-            from phonopy.structure.cells import get_supercell, get_primitive
+            from phonopy.structure.cells import get_primitive, get_supercell
+
             from eslib.tools import ase2phonopy, phonopy2ase
             tmp = converted_structure.get_primitive_cell(args.threshold)
             tmp = tmp.rotate2LT()

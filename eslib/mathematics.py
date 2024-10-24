@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def reshape_into_blocks(data: np.ndarray, N: int) -> np.ndarray:
     """
     Reshape a numpy array into N blocks along the first axis, discarding any excess elements.

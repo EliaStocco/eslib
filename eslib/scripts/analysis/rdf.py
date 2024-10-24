@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 import os
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from ase.data import atomic_numbers
 from ase.geometry.rdf import get_rdf
+from matscipy.neighbours import neighbour_list
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.input import itype, nslist
-import matplotlib.pyplot as plt
-from ase.data import atomic_numbers
-from matscipy.neighbours import neighbour_list
 
 #---------------------------------------#
 description = "Compute and plot the Radial Distribution Function (RDF)."

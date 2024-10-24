@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 import numpy as np
+from python_tsp import exact, heuristics
 from skmatter.feature_selection import FPS
-from eslib.input import str2bool
-from eslib.formatting import esfmt
-from python_tsp import exact
-from python_tsp import heuristics
+
 from eslib.classes.atomic_structures import AtomicStructures
+from eslib.formatting import esfmt
 from eslib.functions import suppress_output
- 
+from eslib.input import str2bool
+
 # git@github.com:fillipe-gsm/python-tsp.git
 methods = {
     "branch" : exact.solve_tsp_branch_and_bound,

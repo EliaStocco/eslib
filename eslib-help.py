@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-import os
-import fnmatch
-import ast
 import argparse
-from eslib.input import str2bool, slist
+import ast
+import fnmatch
+import os
+
 from eslib.formatting import esfmt
+from eslib.input import slist, str2bool
 
 description = "Search for scripts and their description in 'eslib'."
 

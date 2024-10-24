@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 import json
+
 import numpy as np
-from eslib.classes.models.dipole import DipolePartialCharges
+
 from eslib.classes.atomic_structures import AtomicStructures
+from eslib.classes.models.dipole import DipolePartialCharges
 from eslib.formatting import esfmt, warning
 from eslib.show import show_dict
 from eslib.tools import is_integer

@@ -1,10 +1,9 @@
 #!/usr/bin/env python
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.classes.normal_modes import NormalModes
+from eslib.formatting import esfmt
 from eslib.show import matrix2str
 from eslib.tools import convert
-
-from eslib.formatting import esfmt
-from eslib.classes.atomic_structures import AtomicStructures
 
 #---------------------------------------#
 THRESHOLD = 1e-4

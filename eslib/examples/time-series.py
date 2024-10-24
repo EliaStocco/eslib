@@ -1,15 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.classes.atomic_structures import info, array
-from eslib.classes.bec import bec as BEC
-from eslib.tools import convert
-from eslib.plot import plot_bisector, square_plot, align_yaxis, remove_empty_space, hzero
-import xarray as xr
 import pandas as pd
+import xarray as xr
+from matplotlib.lines import Line2D
 from matplotlib.ticker import AutoMinorLocator, FixedLocator
 from sklearn.metrics import mean_squared_error, r2_score
-from matplotlib.lines import Line2D
+
+from eslib.classes.atomic_structures import AtomicStructures, array, info
+from eslib.classes.bec import bec as BEC
+from eslib.plot import (align_yaxis, hzero, plot_bisector, remove_empty_space,
+                        square_plot)
+from eslib.tools import convert
 
 fontsize = 16
 Emodes = pd.read_csv("nm/energy.csv",header=None)

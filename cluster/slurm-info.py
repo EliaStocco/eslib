@@ -11,6 +11,7 @@ Usage:
 import os
 from datetime import datetime
 
+
 def print_slurm_info():
     """
     Prints SLURM environment variables.

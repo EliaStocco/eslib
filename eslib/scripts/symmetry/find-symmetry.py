@@ -3,11 +3,12 @@
 # email : elia.stocco@mpsd.mpg.de
 # from ase.io import read
 import numpy as np
+from ase.spacegroup import get_spacegroup
 from ase.spacegroup.spacegroup import Spacegroup
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.input import flist
-from ase.spacegroup import get_spacegroup
 
 #---------------------------------------#
 description = "Find the symmetry of an atomic structure."

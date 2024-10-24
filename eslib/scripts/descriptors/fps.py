@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-from ase.io import read, write
 import numpy as np
+from ase.io import read, write
 from skmatter.feature_selection import FPS
-from eslib.input import str2bool
-from eslib.formatting import esfmt
+
 from eslib.classes.atomic_structures import AtomicStructures
+from eslib.formatting import esfmt
+from eslib.input import str2bool
 
 #---------------------------------------#
 # Description of the script's purpose

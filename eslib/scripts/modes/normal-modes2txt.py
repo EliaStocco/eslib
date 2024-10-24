@@ -1,12 +1,14 @@
 #!/usr/bin/env python
-from ase.io import write
-from ase import Atoms
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import esfmt, warning, float_format, error
-from eslib.classes.normal_modes import NormalModes
-import numpy as np
-from typing import List, Tuple
 import os
+from typing import List, Tuple
+
+import numpy as np
+from ase import Atoms
+from ase.io import write
+
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.classes.normal_modes import NormalModes
+from eslib.formatting import error, esfmt, float_format, warning
 from eslib.output import output_folder
 
 #---------------------------------------#

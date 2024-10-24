@@ -1,14 +1,15 @@
-from e3nn.math import soft_one_hot_linspace
-from torch_scatter import scatter
-from e3nn import o3
-import torch
-from torch_geometric.nn import radius_graph
-from torch_geometric.data import Data
-from eslib.nn.network.MessagePassing import MessagePassing
-from eslib.nn.dataset import compute_edge_vec
 import warnings
-from typing import Dict, Union
-from typing import TypeVar
+from typing import Dict, TypeVar, Union
+
+import torch
+from e3nn import o3
+from e3nn.math import soft_one_hot_linspace
+from torch_geometric.data import Data
+from torch_geometric.nn import radius_graph
+from torch_scatter import scatter
+
+from eslib.nn.dataset import compute_edge_vec
+from eslib.nn.network.MessagePassing import MessagePassing
 
 T = TypeVar("T", bound="SimpleNetwork")
 # See https://mypy.readthedocs.io/en/latest/generics.html#generic-methods-and-generic-self for the use

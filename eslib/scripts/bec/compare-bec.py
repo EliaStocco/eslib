@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-import numpy as np
-from eslib.formatting import esfmt
 import matplotlib.pyplot as plt
-from eslib.input import str2bool, ilist
+import numpy as np
+
 from eslib.classes.bec import bec
+from eslib.formatting import esfmt
+from eslib.input import ilist, str2bool
 
 #---------------------------------------#
 # Description of the script's purpose

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import matplotlib.pyplot as plt
-from eslib.plot import plot_bisector
-from eslib.formatting import esfmt
+
 from eslib.classes.trajectory import AtomicStructures
+from eslib.formatting import esfmt
+from eslib.plot import plot_bisector
 
 #---------------------------------------#
 # Description of the script's purpose

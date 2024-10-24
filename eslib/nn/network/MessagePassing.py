@@ -1,8 +1,11 @@
-from e3nn.nn import Gate, Dropout, BatchNorm
+from typing import TypeVar
+
 import torch
 from e3nn import o3
+from e3nn.nn import BatchNorm, Dropout, Gate
+
 from eslib.nn.network.Convolution import Convolution
-from typing import TypeVar
+
 C = TypeVar('C', bound='Compose')
 T = TypeVar('T', bound='MessagePassing')
 # See https://mypy.readthedocs.io/en/latest/generics.html#generic-methods-and-generic-self for the use

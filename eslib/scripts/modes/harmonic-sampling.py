@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 import argparse
-from eslib.input import str2bool
-from eslib.classes.normal_modes import NormalModes
-from ase.io import read, write
-from eslib.tools import convert
+
 import numpy as np
 import xarray as xr
+from ase.io import read, write
 
+from eslib.classes.normal_modes import NormalModes
+from eslib.input import str2bool
+from eslib.tools import convert
 
 #---------------------------------------#
 # Documentation:

@@ -1,8 +1,9 @@
 #Subtract avg values s.t. correlation function will go to zero.
 from re import A
+
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.fftpack import dct
-import matplotlib.pyplot as plt 
 
 from eslib.classes.atomic_structures import AtomicStructures
 

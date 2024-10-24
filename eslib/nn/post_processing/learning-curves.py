@@ -3,16 +3,18 @@ import argparse
 # import json5 as json
 import json
 import os
-import torch
-import pandas as pd
-import numpy as np
 # from scipy.stats import pearsonr
 # from copy import deepcopy
 import time
+
 import matplotlib.pyplot as plt
-from eslib.nn.user import get_model
+import numpy as np
+import pandas as pd
+import torch
+
 # from elia.functions import plot_bisector
 from eslib.nn.dataset import make_dataloader
+from eslib.nn.user import get_model
 
 #####################
 

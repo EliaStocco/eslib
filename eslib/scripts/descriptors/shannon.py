@@ -1,12 +1,13 @@
 #!/usr/bin/env python
-import numpy as np
-from scipy.stats import entropy
-import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import xarray as xr
+from scipy.stats import entropy
+
 from eslib.formatting import esfmt
-from eslib.mathematics import reshape_into_blocks, histogram_along_axis
 from eslib.input import ilist
+from eslib.mathematics import histogram_along_axis, reshape_into_blocks
 
 #---------------------------------------#
 # Description of the script's purpose

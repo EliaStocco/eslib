@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-import sys
 import random
+import sys
 
 doc_string = """\
 Usage:

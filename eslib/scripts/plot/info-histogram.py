@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-import numpy as np
 import matplotlib.pyplot as plt
-from eslib.formatting import esfmt
+import numpy as np
+
 from eslib.classes import Trajectory
-from eslib.plot import generate_colors
-from eslib.plot import histogram
+from eslib.formatting import esfmt
+from eslib.plot import generate_colors, histogram
 
 #---------------------------------------#
 # Description of the script's purpose

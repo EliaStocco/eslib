@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-import numpy as np
 import matplotlib.pyplot as plt
-from eslib.formatting import esfmt
+import numpy as np
+
 from eslib.classes.physical_tensor import PhysicalTensor
+from eslib.formatting import esfmt
 
 #---------------------------------------#
 # Description of the script's purpose

@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 import numpy as np
-from ase.io import write
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import warning, error, esfmt
-from eslib.input import flist
-from eslib.classes.atoms_selector import AtomSelector
 from ase import Atoms
+from ase.io import write
+
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.classes.atoms_selector import AtomSelector
+from eslib.formatting import error, esfmt, warning
+from eslib.input import flist
 from eslib.tools import cart2frac, frac2cart
 
 #---------------------------------------#

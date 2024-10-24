@@ -1,10 +1,12 @@
 #!/usr/bin/env python
+import argparse
+
+import numpy as np
 from ase.io import read
 from scipy.spatial.distance import pdist, squareform
-import numpy as np
-import argparse
-from eslib.classes.atomic_structures import AtomicStructures
 from tqdm import tqdm
+
+from eslib.classes.atomic_structures import AtomicStructures
 
 #---------------------------------------#
 

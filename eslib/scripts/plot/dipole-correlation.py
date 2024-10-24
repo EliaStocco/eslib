@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-import numpy as np
 import matplotlib.pyplot as plt
-from eslib.plot import plot_bisector
+import numpy as np
+
 from eslib.formatting import esfmt
+from eslib.plot import plot_bisector
 
 #---------------------------------------#
 # Description of the script's purpose

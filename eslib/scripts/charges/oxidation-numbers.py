@@ -1,12 +1,14 @@
 #!/usr/bin/env python
-from ase.io import write
-import numpy as np
 import json
+
+import numpy as np
 from ase import Atoms
+from ase.io import write
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, warning
-from eslib.show import matrix2str
 from eslib.physics import oxidation_number
+from eslib.show import matrix2str
 
 #---------------------------------------#
 # Description of the script's purpose

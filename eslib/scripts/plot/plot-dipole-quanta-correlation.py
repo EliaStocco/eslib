@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import matplotlib.pyplot as plt
-from eslib.plot import plot_bisector
-from eslib.formatting import esfmt
+
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.physics import compute_dipole_quanta
-from eslib.plot import square_plot
+from eslib.formatting import esfmt
 from eslib.input import str2bool
+from eslib.physics import compute_dipole_quanta
+from eslib.plot import plot_bisector, square_plot
 
 #---------------------------------------#
 # Description of the script's purpose

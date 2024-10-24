@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 import json
+
+import torch
+
 from eslib.formatting import esfmt
-from eslib.show import show_dict
 # from eslib.classes.dipole import DipoleMACECalculator
 from eslib.functions import args_to_dict
-import torch
+from eslib.show import show_dict
 
 #---------------------------------------#
 description = "Modify a MACE checkpoint."

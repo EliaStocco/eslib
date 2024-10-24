@@ -1,12 +1,14 @@
 #!/usr/bin/env python
+import json
+
 import numpy as np
-from eslib.classes.models.dipole import DipolePartialCharges
+from scipy.optimize import minimize
+
 from eslib.classes.atomic_structures import AtomicStructures
+from eslib.classes.models.dipole import DipolePartialCharges
 from eslib.formatting import esfmt
 from eslib.metrics import metrics
-from scipy.optimize import minimize
 from eslib.show import show_dict
-import json
 
 #---------------------------------------#
 # Description of the script's purpose

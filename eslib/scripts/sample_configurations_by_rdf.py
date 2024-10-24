@@ -1,20 +1,19 @@
 #!/usr/bin/env python
 
-from __future__ import print_function, division
+from __future__ import division, print_function
 
 import argparse
-import numpy as np
-from scipy.special import kl_div
-from scipy.stats import entropy, energy_distance, wasserstein_distance
-from scipy.spatial.distance import jensenshannon
-from ase.io import read, write
-from asap3.analysis.rdf import RadialDistributionFunction
-from sklearn.metrics import pairwise_distances
-from sklearn.metrics import pairwise, log_loss
-from itertools import combinations
 # from numba import jit
 import random
+from itertools import combinations
 
+import numpy as np
+from asap3.analysis.rdf import RadialDistributionFunction
+from ase.io import read, write
+from scipy.spatial.distance import jensenshannon
+from scipy.special import kl_div
+from scipy.stats import energy_distance, entropy, wasserstein_distance
+from sklearn.metrics import log_loss, pairwise, pairwise_distances
 
 
 def read_arguments():

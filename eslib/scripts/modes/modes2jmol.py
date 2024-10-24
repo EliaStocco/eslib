@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-from eslib.tools import convert
 import argparse
-from ase.io import read
+
 import numpy as np
+from ase.io import read
+
 from eslib.formatting import esfmt
+from eslib.tools import convert
 
 #---------------------------------------#
 """ 

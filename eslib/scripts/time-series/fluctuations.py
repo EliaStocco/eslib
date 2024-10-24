@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-import numpy as np
 import matplotlib.pyplot as plt
-from eslib.tools import convert
-from eslib.formatting import esfmt
+import numpy as np
+
 from eslib.classes.signal import Signal
+from eslib.formatting import esfmt
+from eslib.tools import convert
 
 #---------------------------------------#
 # Description of the script's purpose

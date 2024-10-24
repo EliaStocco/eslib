@@ -1,7 +1,8 @@
-import os
-import pytest
-import subprocess
 import ast
+import os
+import subprocess
+
+import pytest
 
 folders = ["."]
 exclude = ["./eslib/functional.py", "./eslib/old/classes.py", "./eslib/tests"]

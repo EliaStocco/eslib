@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-from ase import Atoms
-from numpy import require
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import esfmt
-from eslib.input import str2bool
 import seekpath
 from ase import Atoms
+from numpy import require
+
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.formatting import esfmt
 from eslib.functions import suppress_output
+from eslib.input import str2bool
 
 # # import matplotlib.pyplot as plt
 # import warnings

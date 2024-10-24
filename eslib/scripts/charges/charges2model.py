@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import json
-from eslib.formatting import esfmt
-from eslib.show import show_dict
-from eslib.input import str2bool
+
 from eslib.classes.models.dipole import DipolePartialCharges
+from eslib.formatting import esfmt
+from eslib.input import str2bool
+from eslib.show import show_dict
 
 #---------------------------------------#
 description = "Create a dipole model from partial charges."

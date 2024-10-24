@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 import numpy as np
+
 # from copy import copy
 # from eslib.tools import cart2lattice, lattice2cart
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.tools import frac2cart, cart2frac
-from eslib.input import flist, str2bool
 from eslib.formatting import esfmt, warning
+from eslib.input import flist, str2bool
+from eslib.tools import cart2frac, frac2cart
 
 #---------------------------------------#
 description = "Fix the dipole jumps and shift the values of some multitples of the dipole quantum."

@@ -1,12 +1,14 @@
-from torch_geometric.loader import DataLoader
+import numpy as np
 import torch
-from torch_geometric.data import Data
-from tqdm import tqdm
+from ase import Atoms
 from ase.neighborlist import neighbor_list
+from torch_geometric.data import Data
+from torch_geometric.loader import DataLoader
+from tqdm import tqdm
+
 from eslib.functions import add_default
 from eslib.nn.functions import symbols2x
-from ase import Atoms
-import numpy as np
+
 
 #----------------------------------------------------------------#
 def compute_edge_vec(pos,lattice,edge_src,edge_dst,edge_shift,pbc):

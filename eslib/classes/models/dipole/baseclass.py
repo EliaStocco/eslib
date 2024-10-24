@@ -1,7 +1,10 @@
+from typing import List
+
 import numpy as np
 from ase import Atoms
-from typing import List
+
 from eslib.classes.models import eslibModel
+
 
 class DipoleModel(eslibModel):
     """A class to handle models predicting dipoles."""

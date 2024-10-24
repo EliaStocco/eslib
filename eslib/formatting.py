@@ -1,15 +1,18 @@
-import os, sys
-from contextlib import contextmanager
-from eslib.functions import Dict2Obj, args_to_dict
-from eslib.functions import add_default
-from datetime import datetime
-from argparse import ArgumentParser
 import inspect
 import json
-import psutil
-from eslib.show import dict_to_list
+import os
+import sys
+from argparse import ArgumentParser
+from contextlib import contextmanager
+from datetime import datetime
+
 import colorama
+import psutil
 from colorama import Fore, Style
+
+from eslib.functions import Dict2Obj, add_default, args_to_dict
+from eslib.show import dict_to_list
+
 # from icecream import ic
 colorama.init(autoreset=True)
 
@@ -227,9 +230,11 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
     return wrapper
 
 #---------------------------------------#
-from typing import TypeVar, Callable
-from eslib.classes.timing import timing as Timing
+from typing import Callable, TypeVar
+
 from colorama import Fore, Style
+
+from eslib.classes.timing import timing as Timing
 
 T = TypeVar('T', bound='eslog')
 
@@ -301,7 +306,9 @@ class eslog(Timing):
 
 
 import string
+
 from colorama import Fore, Style
+
 
 def get_not_printable_length(text: str) -> int:
     """

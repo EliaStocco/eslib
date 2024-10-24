@@ -1,10 +1,11 @@
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.tools import cart2frac, frac2cart
-import numpy as np
 from copy import copy
-from eslib.tools import is_integer
-from typing import Tuple
-from typing import List
+from typing import List, Tuple
+
+import numpy as np
+
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.tools import cart2frac, frac2cart, is_integer
+
 
 def modular_norm(numbers: np.ndarray, modulus: float = 1, threshold: float = 0.01) -> np.ndarray:
     """

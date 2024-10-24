@@ -1,8 +1,11 @@
-from ase import Atoms
-from typing import List
 from dataclasses import dataclass
+from typing import List
+
+from ase import Atoms
+
 from eslib.classes.models.dipole.baseclass import DipoleModel
 from eslib.classes.models.mace_model import MACEModel
+
 
 @dataclass
 class DipoleMACECalculator(DipoleModel,MACEModel):
