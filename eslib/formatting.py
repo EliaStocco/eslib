@@ -7,7 +7,6 @@ from contextlib import contextmanager
 from datetime import datetime
 
 import colorama
-import psutil
 from colorama import Fore, Style
 
 from eslib.functions import Dict2Obj, add_default, args_to_dict
