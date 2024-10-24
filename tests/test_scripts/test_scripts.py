@@ -4,14 +4,6 @@ from contextlib import contextmanager
 
 import pytest
 
-# # Try to import the timing function from the eslib.classes.timing module
-# try:
-#     from eslib.classes.timing import timing
-# # If ImportError occurs (module not found), define a dummy timing function
-# except ImportError:
-#     def timing(func):
-#         return func  # Dummy timing function that returns the input function unchanged
-
 def import_from(module, name):
     module = __import__(module, fromlist=[name])
     return getattr(module, name)
@@ -64,6 +56,26 @@ torun = {
             "elements"           : ["Li","Nb"],
             "rmax"               : 4,
             "output"             : f"{tmp_folder}/rdf.csv", 
+        },
+    },
+    "check-prop" : # info to txt
+    {
+        "folder"  : "properties",
+        "file"   : "check-properties.py",
+        "kwargs"  : {
+            "input"              : "tests/structures/333-water/i-pi.properties.out",   
+            "output"             : f"{tmp_folder}/prop.pickle", 
+        },
+        "clean" : False
+    },
+    "prop2array" : # info to txt
+    {
+        "folder"  : "properties",
+        "file"   : "prop2array.py",
+        "kwargs"  : {
+            "input"              : f"{tmp_folder}/prop.pickle", 
+            "keyword"            : "dipole",   
+            "output"             : f"{tmp_folder}/dipole.txt", 
         },
     },
     "extxyz2array" : # info to txt
