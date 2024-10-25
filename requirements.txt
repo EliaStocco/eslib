@@ -3,6 +3,7 @@ black
 chemiscope
 colorama
 e3nn
+extxyz
 icecream
 importlib-metadata
 matplotlib

@@ -4,7 +4,65 @@
 !
 !**********************************************************!
 
-subroutine UpdateQRDF(gOOr, atxyz1, atxyz2, r_min, r_max, cell, invCell, mass1, mass2, nat1, nat2, nbins)
+subroutine UpdateQRDFFixedCell(gOOr, atxyz1, atxyz2, r_min, r_max, cell, invCell, mass1, mass2, nsnapshots, nat1, nat2, nbins)
+  !
+  IMPLICIT NONE
+  !
+  ! Input
+  !
+  INTEGER, INTENT(in) :: nsnapshots, nat1, nat2, nbins
+  REAL(8), INTENT(in) :: mass1, mass2
+  REAL(8), INTENT(in) :: r_min, r_max
+  REAL(8), INTENT(in) :: atxyz1(nsnapshots,3*nat1), atxyz2(nsnapshots,3*nat2), cell(3,3), invCell(3,3)
+  !
+  ! Output
+  !
+  REAL(8), INTENT(inout) :: gOOr(nbins,2)
+  !f2py intent(hide) :: nat1
+  !f2py intent(hide) :: nat2
+  !f2py intent(hide) :: nbins
+  ! Local variables
+  !
+  INTEGER :: ia, ib, ig, n
+  REAL(8) :: deltar, dAB, vdAB(3), norm
+  REAL(8), PARAMETER :: tol = 0.00001
+  !
+  ! Histogram step initialization
+  !
+  deltar = gOOr(2,1) - gOOr(1,1)
+  !
+  ! Start computing g(r) from MD configurations
+  !
+  ! Normalization constant
+  !
+  IF (mass1.EQ.mass2) THEN
+    norm = 1.0/(nat1*(nat2-1))
+  ELSE
+    norm = 1.0/(nat1*nat2)
+  END IF
+  !
+  ! Populate histogram bins for gOO(r)...
+  !
+  DO n=1,nsnapshots! Loop over snapshots
+    DO ia=1,nat1
+      DO ib=1,nat2
+        ! Compute the distance of the closest image of atom B to atom A using minimum image convention...
+        CALL CalcMinDist(cell, invCell, &
+          atxyz1(n,3*ia-2), atxyz1(n,3*ia-1), atxyz1(n,3*ia), &
+          atxyz2(n,3*ib-2), atxyz2(n,3*ib-1), atxyz2(n,3*ib), &
+          dAB, vdAB)
+        ! Screen distances that are outside desired range
+        IF (dAB.LT.r_max.AND.dAB.GT.r_min) THEN
+          ig=INT((dAB-r_min)/deltar)+1  !bin/histogram position
+          gOOr(ig,2)=gOOr(ig,2)+1*norm
+        END IF
+      END DO !ib 
+    END DO !ia 
+  END DO !n
+  !
+END SUBROUTINE UpdateQRDFFixedCell
+
+subroutine UpdateQRDFVariableCell(gOOr, atxyz1, atxyz2, r_min, r_max, cell, invCell, mass1, mass2, nat1, nat2, nbins)
     !
     IMPLICIT NONE
     !
@@ -58,9 +116,9 @@ subroutine UpdateQRDF(gOOr, atxyz1, atxyz2, r_min, r_max, cell, invCell, mass1, 
       END DO !ib 
     END DO !ia 
     !
-END SUBROUTINE UpdateQRDF
+END SUBROUTINE UpdateQRDFVariableCell
 
-subroutine UpdateQRDFBead(gOOr, atxyz1, atxyz2, r_min, r_max, cell, invCell, mass1, mass2, nbeads, nat1, nat2, nbins)
+subroutine UpdateQRDFBeadVariableCell(gOOr, atxyz1, atxyz2, r_min, r_max, cell, invCell, mass1, mass2, nbeads, nat1, nat2, nbins)
   !
   IMPLICIT NONE
   !
@@ -117,7 +175,7 @@ subroutine UpdateQRDFBead(gOOr, atxyz1, atxyz2, r_min, r_max, cell, invCell, mas
     END DO !ia 
   END DO !ih 
   !
-END SUBROUTINE UpdateQRDFBead
+END SUBROUTINE UpdateQRDFBeadVariableCell
     
 SUBROUTINE CalcMinDist(cell,invCell,xA,yA,zA,xB,yB,zB,dAB,rAB)
     !

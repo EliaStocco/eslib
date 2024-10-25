@@ -12,7 +12,9 @@ from warnings import warn
 import numpy as np
 from ase import Atoms
 from ase.cell import Cell
-from ase.io import read, string2index, write
+from extxyz import read, write
+from ase import io
+from ase.io import string2index
 from ase.io.formats import filetype
 from ase.io.netcdftrajectory import (read_netcdftrajectory,
                                      write_netcdftrajectory)
@@ -310,7 +312,14 @@ def read_trajectory(file:str,
     f = "extxyz" if format in ["i-pi","ipi"] else format
     remove_replicas = False if format not in ["i-pi","ipi"] else remove_replicas
 
-    atoms = read(file,index=index,format=f)
+    if f in [None,"xyz","extxyz"]:
+        # `extxyz.read`` from https://github.com/libAtoms/extxyz
+        # this function should be faster than `ASE.io.read``
+        atoms = read(file,index=index)
+    else:
+        # ASE.io.read
+        atoms = io.read(file,index=index,format=f)
+        
     index = integer_to_slice_string(index)
 
     units = {
