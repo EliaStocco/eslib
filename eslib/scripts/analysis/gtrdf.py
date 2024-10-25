@@ -11,16 +11,9 @@
 
 from __future__ import absolute_import, division, print_function
 
-import argparse
-import re
 import sys
 
 import numpy as np
-from ase import io
-from ase.data import atomic_masses
-from ase.geometry.analysis import Analysis
-from ipi.utils.io import read_file
-from ipi.utils.units import Constants, Elements, unit_to_internal, unit_to_user
 
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, float_format
@@ -153,82 +146,7 @@ def main(args):
     print("done")
     
     return 0 
-    
-    
 
-    # Convert string representation to slice object
-    # slc = string_to_slice(args.index)
-    # nbeads = len(args.traj)
-    # pos_files = [open(fn, "r") for fn in args.traj]
-    massA = Elements.mass(args.a1)
-    massB = Elements.mass(args.a2)
-    # r_min = unit_to_internal("length", "angstrom", args.rmin)  # Minimal distance for RDF
-    # r_max = unit_to_internal("length", "angstrom", args.rmax)  # Maximal distance for RDF
-    
-
-    ifr = 0
-    isample = 0
-    natoms = None
-    while True:
-        if ifr % args.stride == 0:
-            print("\rProcessing frame {:d}".format(ifr), end=" ")
-            sys.stdout.flush()
-        try:
-            for i in range(nbeads):
-                ret = read_file("xyz", pos_files[i], dimension="length")
-                if not natoms:
-                    mass, natoms = ret["atoms"].m, ret["atoms"].natoms
-                    pos = np.zeros((nbeads, 3 * natoms), order="F")
-                cell = ret["cell"].h
-                inverseCell = ret["cell"].get_ih()
-                cellVolume = ret["cell"].get_volume()
-                pos[i, :] = ret["atoms"].q
-        except EOFError:  # finished reading files
-            break
-
-        if index_in_slice(slc, ifr):
-            # select the target atoms:
-            species_A = [
-                    3 * i + j
-                    for i in np.where(mass == massA)[0]
-                    for j in range(3)
-                ]
-            species_B = [
-                    3 * i + j
-                    for i in np.where(mass == massB)[0]
-                    for j in range(3)
-                ]
-            natomsA = len(species_A)
-            natomsB = len(species_B)    
-            posA = np.zeros((nbeads, natomsA), order="F")
-            posB = np.zeros((nbeads, natomsB), order="F")
-            for bead in range(nbeads):
-                posA[bead, :] = pos[bead, species_A]
-                posB[bead, :] = pos[bead, species_B]
-            fortran_rdfs(
-                rdf,
-                posA,
-                posB,
-                args.r_min,
-                args.r_max,
-                cell,
-                inverseCell,
-                massA,
-                massB)
-            isample += 1
-        ifr += 1
-        if isample > 0 and ifr % args.stride == 0:
-            # Normalization
-            _rdf = np.copy(rdf)
-            _rdf[:,1] /= isample * nbeads
-            # Creating RDF from N(r)
-            _rdf[:, 1] *= cellVolume/shellVolumes
-            for bin in range(args.nbins):
-                _rdf[bin, 0] = unit_to_user("length", "angstrom", _rdf[bin, 0])
-            np.savetxt(args.output, _rdf)
-    print()
-
-    return 0
 
 if __name__ == "__main__":
     main()
