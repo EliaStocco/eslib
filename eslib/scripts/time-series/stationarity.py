@@ -13,7 +13,7 @@ from eslib.formatting import esfmt, float_format
 from eslib.input import slist
 from eslib.plot import hzero
 
-matplotlib.use('QtAgg')
+matplotlib.use('Agg')
 # Disable all warnings
 warnings.filterwarnings('ignore')
 #---------------------------------------#

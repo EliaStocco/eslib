@@ -14,7 +14,7 @@ from eslib.plot import hzero, plot_bisector, square_plot
 from eslib.tools import convert
 
 # Set the backend to QtAgg
-matplotlib.use('QtAgg')
+matplotlib.use('Agg')
 
 # Enable interactive mode
 plt.ion()

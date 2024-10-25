@@ -9,7 +9,7 @@ from eslib.classes.physical_tensor import PhysicalTensor
 from eslib.classes.spectrum import Spectrum
 from eslib.formatting import esfmt, message
 
-matplotlib.use('QtAgg')
+matplotlib.use('Agg')
 plt.ion()
 
 #---------------------------------------#

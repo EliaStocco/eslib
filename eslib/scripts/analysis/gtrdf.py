@@ -12,7 +12,7 @@ from __future__ import absolute_import, division, print_function
 
 import matplotlib
 import matplotlib.pyplot as plt
-matplotlib.use('QtAgg')
+matplotlib.use('Agg')
 import numpy as np
 
 from eslib.classes.atomic_structures import AtomicStructures
