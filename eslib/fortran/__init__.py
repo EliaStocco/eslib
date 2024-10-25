@@ -16,5 +16,8 @@ def fortran_rdfs(rdf,posA,posB,rmin,rmax,cell,invcell,massA,massB)->None:
         massA (float): The mass of atom A.
         massB (float): The mass of atom B.
     """
-    import eslib.fortran._rdfs_fort as RDF  # type: ignore
+    try:
+        import eslib.fortran._rdfs_fort as RDF  # type: ignore
+    except:
+        import eslib.fortran.rdf._rdfs_fort as RDF  # type: ignore
     RDF.updateqrdf(rdf,posA,posB,rmin,rmax,cell,invcell,massA,massB)
