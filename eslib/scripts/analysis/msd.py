@@ -80,7 +80,7 @@ def main(args):
     with eslog(f"\nComputing the diffusion coefficient"):
         D = MSD[ MSD["time"] >= np.asarray(MSD["time"])[-1] - args.time_span ]
         D = unp.uarray(D["MSD/time"], D["MSD/time-err"])
-        D = np.mean(D)
+        D = np.nanmean(D)
     print(f"\t {warning}: there could be a missing factor 6 in the diffusion coefficient!")
     print("\t D = {:.6f} +/- {:.6f} [angstrom^2 / n. of atoms / picosecond]".format(unp.nominal_values(D),unp.std_devs(D)))        
     
