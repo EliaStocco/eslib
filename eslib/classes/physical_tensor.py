@@ -8,7 +8,7 @@ from eslib.classes.io import pickleIO
 from eslib.formatting import complex_format, float_format
 from eslib.units import *
 
-T = TypeVar('T', bound='PhysicalTensor')
+T = TypeVar('T', bound='TensorData')
 # Suppress warnings in this specific file
 import warnings
 
@@ -136,7 +136,7 @@ def read_from_pattern(func: Callable) -> Callable:
             return func(cls, **argv)
     return wrapper
 
-class PhysicalTensor(pickleIO,xr.DataArray):
+class TensorData(pickleIO,xr.DataArray):
     # __slots__ = ()
     # data:np.ndarray
 
@@ -189,3 +189,7 @@ class PhysicalTensor(pickleIO,xr.DataArray):
             np.save(file,data)
         else:
             raise ValueError("Only `txt`, `pickle`, and `npy` extensions are supported.")
+        
+        
+class PhysicalTensor(TensorData,xr.DataArray):
+    pass

@@ -8,6 +8,7 @@ from datetime import datetime
 
 import colorama
 from colorama import Fore, Style
+from git import Optional
 
 from eslib.functions import Dict2Obj, add_default, args_to_dict
 from eslib.show import dict_to_list
@@ -42,10 +43,43 @@ warning         = Fore.MAGENTA + Style.BRIGHT + warning.replace("*","") + Style.
 message         = Fore.MAGENTA + Style.BRIGHT + message.replace("*","") + Style.RESET_ALL
 everythingok    = Fore.BLUE    + Style.BRIGHT + everythingok            + Style.RESET_ALL
 
+#---------------------------------------#
+
+import logging
+
+# Configure logging
+import logging
+from typing import Optional
+
+def handle_errors(enable: bool = True, file: Optional[str] = "error.log"):
+    """
+    Decorator to handle errors in the decorated function.
+
+    Parameters:
+    - enable: If True, catch exceptions and log them. If False, let exceptions propagate.
+    - file: The filename for the error log.
+    """
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            if enable:
+                # Set up logging configuration inside the wrapper
+                logging.basicConfig(filename=file, level=logging.ERROR)
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    logging.error(f"An unhandled exception occurred in {func.__name__}: {e}", exc_info=True)
+                    print(f"An error occurred in {func.__name__}. Please check {file} for more details.")
+            else:
+                # If error handling is disabled, just call the function
+                return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 #---------------------------------------#
 def line(start="",end="",N=30,mult=1):
-    print(start+"-"*mult*N+end)
+    to_print = start+"-"*mult*N+end
+    to_print = Fore.MAGENTA + to_print + Style.RESET_ALL
+    print(to_print)
 
 #---------------------------------------#
 def get_path(main):
@@ -78,7 +112,7 @@ def format_seconds_to_hhmmss(seconds: float) -> str:
 #---------------------------------------#
 _description = None
 _documentation = None
-def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=None):
+def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=None, logerr:Optional[str] = None):
     """Decorator for the 'main' function of many scripts."""
 
     #---------------------------------------#
@@ -104,7 +138,7 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
     # @contextmanager
     def print_header(args:dict,main:callable,help=False):
         
-        line(start="###")
+        line(start="@")
         try: 
             local_path, global_path = get_path(main)
             print("{:20s}: {:s}".format("script file",local_path))
@@ -136,7 +170,7 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
             #     print("no conda env")
             print("{:20s}: {:s}".format("start date",start_date))
             print("{:20s}: {:s}".format("start time",start_time))
-        line(start="###")
+        line(start="@")
         
         global _documentation
         global _description
@@ -180,14 +214,15 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
         # hours   = int(elapsed_seconds // 3600)
         # minutes = int(elapsed_seconds % 3600 // 60)
         # seconds = int(elapsed_seconds % 60)
-        line(end="###")
+        line(end="@")
         print("end date: {:s}".format(end_date))
         print("end time: {:s}s ".format(end_time))
         print("elapsed seconds: {:d}s".format(elapsed_seconds))
         print("elapsed time: {:s}".format(format_seconds_to_hhmmss(elapsed_seconds)))
-        line(end="###\n")
+        line(end="@\n")
         
     def wrapper(main: callable):
+        # Conditionally wrap the main function with handle_errors
         def wrapped_main(args=dict()):
             # Call the specified prepare_parser function
             args_script = dict()
@@ -214,7 +249,20 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
             print_header(args,main)
 
             # run the script
-            out = main(args)
+            out = None
+            if logerr is not None:
+                logging.basicConfig(filename=logerr, level=logging.ERROR)
+                try:
+                    out = main(args)
+                except Exception as e:
+                    logging.error(f"An unhandled exception occurred in {main.__name__}: {e}", exc_info=True)
+                    print(f"An error occurred in {main.__name__}. Please check {logerr} for more details.")
+                finally:
+                    # Check if the log file exists and is empty, then delete it
+                    if os.path.exists(logerr) and os.path.getsize(logerr) == 0:
+                        os.remove(logerr)  # Delete the empty log file
+            else:
+                out = main(args)
 
             if out is None or out == 0 :
                 # print completion message

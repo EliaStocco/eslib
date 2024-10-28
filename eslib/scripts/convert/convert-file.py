@@ -97,7 +97,7 @@ def main(args):
             atoms = AtomicStructures(atoms[index])
             # atoms:List[Atoms] = list(atoms)
     # print("done")
-    print("\tn. of atomic structures: {:d}".format(len(atoms)))
+    print("\t n. of atomic structures: {:d}".format(len(atoms)))
 
     #------------------#
     if args.input_format in ["espresso-in","espresso-out"] and args.output_format in ["espresso-in","espresso-out"] :
@@ -122,14 +122,14 @@ def main(args):
 
     #------------------#
     pbc = np.any( [ np.all(atoms[n].get_pbc()) for n in range(len(atoms)) ] )
-    print("\tThe atomic structure is {:s}periodic.".format("" if pbc else "not "))
+    print("\t The atomic structure is {:s}periodic.".format("" if pbc else "not "))
 
     if args.pbc is not None:
         if args.pbc and not pbc:
             raise ValueError("You required the structures to be periodic, but they are not.")
         elif not args.pbc and pbc:
-            print("\tYou required to remove periodic boundary conditions.")
-            print("\tRemoving cells from all the structures ... ",end="")
+            print("\t You required to remove periodic boundary conditions.")
+            print("\t Removing cells from all the structures ... ",end="")
             for n in range(len(atoms)):
                 atoms[n].set_cell(None)
                 atoms[n].set_pbc(False)
@@ -162,7 +162,7 @@ def main(args):
     #------------------#
     # atoms[0].positions - (atoms[0].cell.array @ atoms[0].get_scaled_positions().T ).T 
     if args.rotate:
-        print("\tRotating the lattice vectors such that they will be in upper triangular form ... ",end="")
+        print("\t Rotating the lattice vectors such that they will be in upper triangular form ... ",end="")
         for n in range(len(atoms)):
             atom = atoms[n]
             # frac = atom.get_scaled_positions()
@@ -175,7 +175,7 @@ def main(args):
     #------------------#
     # scale
     if args.scaled:
-        print("\tReplacing the cartesian positions with the fractional/scaled positions: ... ",end="")        
+        print("\t Replacing the cartesian positions with the fractional/scaled positions: ... ",end="")        
         for n in range(len(atoms)):
             atoms[n].set_positions(atoms[n].get_scaled_positions())
         print("done")
@@ -186,8 +186,8 @@ def main(args):
     # remove properties
     if args.remove_properties:
         properties = []
-        print("\tRemoving the following info: ",properties)  
-        print("\tRemoving the following arrays: ",['initial_magnoms'])
+        print("\t Removing the following info: ",properties)  
+        print("\t Removing the following arrays: ",['initial_magnoms'])
         for n in range(len(atoms)):
             atoms[n].info = {}
             if 'initial_magmoms' in atoms[n].arrays:

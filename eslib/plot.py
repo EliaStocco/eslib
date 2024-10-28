@@ -1,9 +1,10 @@
-from itertools import product
-
-import matplotlib.pyplot as plt
 import numpy as np
+from itertools import product
+import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, Normalize
-
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+from typing import Any
 from eslib.functions import add_default
 
 
@@ -72,6 +73,33 @@ legend_options = {
     "framealpha":1,
     "edgecolor":"black"
 }
+
+def add_common_legend(fig: Figure, ax: Axes, ax2: Axes, **argv: Any) -> None:
+    """
+    Adds a common legend to a figure with two y-axes.
+
+    Parameters:
+    - fig: The Figure object.
+    - ax: The main Axes object.
+    - ax2: The secondary (twin) Axes object.
+    - loc: Optional; The location of the legend (default is 'upper right').
+    - bbox_to_anchor: Optional; Anchor point for the legend box (default is (1, 1)).
+    - **argv: Additional legend parameters to override defaults.
+    """
+    # Gather legend handles and labels from both axes
+    handles, labels = ax.get_legend_handles_labels()
+    handles2, labels2 = ax2.get_legend_handles_labels()
+
+    # Combine the handles and labels
+    common_handles = handles + handles2
+    common_labels = labels + labels2
+
+    # Merge default options with user-provided options
+    options = add_default(argv, legend_options)
+    
+    # Add the common legend to the figure
+    ax.legend(common_handles, common_labels, **options)
+
 
 def generate_continuous_color_map(vmin: float, vmax: float, color1: str = 'red', color2: str = 'blue') -> callable:
     """

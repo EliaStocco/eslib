@@ -12,7 +12,6 @@ from warnings import warn
 import numpy as np
 from ase import Atoms
 from ase.cell import Cell
-from extxyz import read
 from ase import io
 from ase.io import string2index, write
 from ase.io.formats import filetype
@@ -316,6 +315,7 @@ def read_trajectory(file:str,
         # `extxyz.read`` from https://github.com/libAtoms/extxyz
         # this function should be faster than `ASE.io.read``
         try:
+            from extxyz import read
             atoms = read(file,index=index)
             if len(atoms) == 0 :
                 raise ValueError("some error occurred")
