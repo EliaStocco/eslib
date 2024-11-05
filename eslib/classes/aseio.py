@@ -311,7 +311,7 @@ def read_trajectory(file:str,
     f = "extxyz" if format in ["i-pi","ipi"] else format
     remove_replicas = False if format not in ["i-pi","ipi"] else remove_replicas
 
-    if f in [None,"xyz","extxyz"]:
+    if format in [None,"xyz","extxyz"]:
         # `extxyz.read`` from https://github.com/libAtoms/extxyz
         # this function should be faster than `ASE.io.read``
         try:

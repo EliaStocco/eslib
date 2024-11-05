@@ -1,6 +1,6 @@
 import re
 from copy import copy, deepcopy
-from typing import Any, List, Tuple, Union
+from typing import Any, List, Tuple, Union, Optional
 
 import numpy as np
 from ase import Atoms
@@ -8,7 +8,29 @@ from ase.data import atomic_masses, atomic_numbers
 
 from eslib.classes.bec import bec as BEC
 from eslib.tools import cart2frac
+from eslib.tools import convert
 
+def kin2temp(kin: float,Natoms:int,kin_unit:Optional[str]="atomic_unit",temp_unit:Optional[str]="atomic_unit") -> float:
+    """
+    Convert kinetic energy to temperature.
+    
+    Parameters:
+    kin (float): Kinetic energy
+    Natoms (int): Number of atoms
+    kin_unit (str): Unit of the kinetic energy
+    temp_unit (str): Unit of the temperature to be converted to
+    
+    Returns:
+    float: Temperature in the specified unit
+    
+    Notes:
+    The conversion is done using the formula T = 2K / (3N) where K is the kinetic energy and N is the number of atoms.
+    The conversion is internally performed in atomic units where the Boltzmann constant is 1.
+    """
+    kin = convert(kin,"energy",kin_unit,"atomic_unit")
+    temp = 2*kin / (3*Natoms) 
+    temp = convert(temp,"temperature","atomic_unit",temp_unit)
+    return temp
 
 def get_element_mass(symbols: Union[str, List[str]]) -> Union[float, List[float]]:
     """

@@ -88,7 +88,7 @@ def main(args):
     #---------------------------------------#
     print()
     if args.same_cell:
-        print("\t {:s}: the adopted algorithm will assumed that all snapshots have the same cell".format(warning))
+        print("\t {:s}: the adopted algorithm will assume that all snapshots have the same cell".format(warning))
         with eslog("Calculating RDF"):
             posA = np.zeros((N,natomsA), order="F")
             posB = np.zeros((N,natomsB), order="F")
@@ -99,7 +99,7 @@ def main(args):
             inverseCell = np.linalg.inv(cell)  
             fortran_rdfs_fixed_cell(rdf, posA, posB, args.rmin, args.rmax, cell, inverseCell, massA, massB)
     else:
-        print("\t {:s}: the adopted algorithm will assumed that all snapshots could have different cells".format(warning))
+        print("\t {:s}: the adopted algorithm will assume that all snapshots could have different cells".format(warning))
         posA = np.zeros(natomsA, order="F")
         posB = np.zeros(natomsB, order="F")
         with eslog("Calculating RDF"):

@@ -3,6 +3,7 @@ import ast
 import re
 
 import numpy as np
+from typing import Union
 
 
 #---------------------------------------#
@@ -32,8 +33,9 @@ def size_type(s:str,dtype=int,N=None):
 flist = lambda s:size_type(s,float) # float list
 ilist = lambda s:size_type(s,int)   # integer list
 slist = lambda s:size_type(s,str)   # string list
+
 #---------------------------------------#
-def str2bool(v):
+def str2bool(v:Union[bool,str]):
     if isinstance(v, bool):
         return v
     if v.lower() in ("yes", "true", "t", "y", "1"):
@@ -42,6 +44,8 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError("Boolean value expected.")
+    
+blist = lambda s: size_type(s, str2bool)
     
     
 #---------------------------------------#
