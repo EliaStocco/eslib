@@ -3,12 +3,10 @@ import json
 import os
 import sys
 from argparse import ArgumentParser
-from contextlib import contextmanager
 from datetime import datetime
 
 import colorama
 from colorama import Fore, Style
-from git import Optional
 
 from eslib.functions import Dict2Obj, add_default, args_to_dict
 from eslib.show import dict_to_list
