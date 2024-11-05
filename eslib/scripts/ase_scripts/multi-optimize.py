@@ -72,7 +72,7 @@ def main(args):
     filter = None
     if args.relax_cell:
         print("\tPreparing filter to relax the cell ... ",end="")
-        filter = RelaxCell(atoms)
+        filter = RelaxCell(atoms,mask=args.cell_mask)
         print("done")
 
     #------------------#
@@ -130,31 +130,3 @@ def main(args):
 #---------------------------------------#
 if __name__ == "__main__":
     main()
-
-
-
-from ase import Atoms
-from ase.constraints import FixAtoms
-from ase.calculators.emt import EMT
-from ase.optimize import BFGS
-from ase.constraints import FrechetCellFilter
-
-# Example atomic structure: initialize an Atoms object
-atoms = Atoms('Cu4', positions=[[0, 0, 0], [1.8, 0, 0], [0, 1.8, 0], [1.8, 1.8, 1.8]],
-              cell=[[3.6, 0, 0], [0, 3.6, 0], [0, 0, 3.6]], pbc=True)
-
-# Set calculator (e.g., EMT for this example)
-atoms.set_calculator(EMT())
-
-# Define mask for relaxing only the x-component of the first lattice vector
-# 3x3 mask where the first row's x-component is True, and all others are False
-mask = [[True, False, False],
-        [False, False, False],
-        [False, False, False]]
-
-# Apply the FrechetCellFilter with the mask
-cell_filter = FrechetCellFilter(atoms, mask=mask)
-
-# Run optimization using BFGS (or another optimizer) on the cell filter
-opt = BFGS(cell_filter)
-opt.run(fmax=0.01)
