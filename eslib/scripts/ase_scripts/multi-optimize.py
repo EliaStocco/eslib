@@ -6,7 +6,6 @@ from ase.constraints import FixSymmetry
 from ase.filters import FrechetCellFilter as RelaxCell
 from ase.io import write
 from ase.optimize import BFGS
-from tomlkit import document
 
 from classes.potentials.multisocket import MultiSocket
 from eslib.classes.atomic_structures import AtomicStructures
