@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-
+import json
 import numpy as np
 import pandas as pd
 import yaml
@@ -9,7 +9,7 @@ from phonopy.units import VaspToTHz
 
 from eslib.classes.normal_modes import NormalModes
 from eslib.formatting import esfmt, warning
-from eslib.show import matrix2str
+from eslib.show import matrix2str, show_dict
 from eslib.tools import convert
 
 #---------------------------------------#
@@ -25,6 +25,7 @@ def prepare_args(description):
     argv = {"metavar":"\b"}
     parser.add_argument("-q" , "--qpoints"         , **argv, required=False, type=str  , help="qpoints file (default: %(default)s)", default="qpoints.yaml")
     parser.add_argument("-i" , "--input"           , **argv, required=False, type=str  , help="general phonopy file (default: %(default)s)", default="phonopy.yaml")
+    parser.add_argument("-n" , "--names"           , **argv, required=False, type=str  , help="JSON file with the names of the phonon modes (default: %(default)s)", default=None)
     parser.add_argument("-f" , "--factor"          , **argv, required=False, type=float, help="conversion factor to THz for the frequencies ω (default: %(default)s)", default=VaspToTHz)
     parser.add_argument("-o" , "--output"          , **argv, required=False, type=str  , help="output prefix file (default: %(default)s)", default="phonons")
     parser.add_argument("-of", "--output_folder"   , **argv, required=False, type=str  , help="output folder (default: %(default)s)", default="phonons")
@@ -32,6 +33,15 @@ def prepare_args(description):
 #---------------------------------------#
 @esfmt(prepare_args,description)
 def main(args):
+    
+    if args.names is not None:
+        print("\n\tReading phonon mode names from file '{:s}' ... ".format(args.names), end="")
+        with open(args.names) as f:
+            names = json.load(f)
+        print("done")
+        show_dict(names,"\t\t",width=25)
+    else:
+        names = None
     
     #---------------------------------------#
     print("\n\tReading data from input file '{:s}' ... ".format(args.input), end="")
@@ -126,14 +136,17 @@ def main(args):
         nm.eigvec2modes()
 
         qstr = np.asarray(q)*size
-        tmp = "{:d}-{:d}-{:d}".format(*[ int(i) for i in qstr])
+        if names is None:
+            tmp = "{:d}-{:d}-{:d}".format(*[ int(i) for i in qstr])
+        else:
+            tmp = names["[{:.3f},{:.3f},{:.3f}]".format(*[ i for i in q])]
         file = os.path.normpath("{:s}/{:s}-unitcell.{:s}.pickle".format(args.output_folder,args.output,tmp))
 
-        print("\t    * saving normal modes (unit cell) for q point {:} to file {:s}".format(q,file))
+        print("\t    * saving normal modes (unit cell) to file {:s}".format(file))
         nm.to_file(file=file)
         
         file = os.path.normpath("{:s}/{:s}-supercell.{:s}.pickle".format(args.output_folder,args.output,tmp))
-        print("\t    * saving normal modes (supercell) for q point {:} to file {:s}".format(q,file))
+        print("\t    * saving normal modes (supercell) to file {:s}".format(file))
         snm = nm.build_supercell_displacement(size=size,q=q,info=info)
         snm.to_file(file=file)
     
