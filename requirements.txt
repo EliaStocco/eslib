@@ -1,5 +1,6 @@
 ase
 black
+bottleneck>=1.3.6 # required by pandas
 chemiscope
 colorama
 e3nn
@@ -10,7 +11,9 @@ matplotlib
 matscipy
 netCDF4
 nbconvert
+numexpr>=2.8.4 # required by pandas
 numpy
+pandas
 pint
 scikit-learn
 scipy
