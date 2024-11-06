@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Installing ESLIB ..."
-
+./check_requirements.sh
 # Determine the directory of the script
 SCRIPT_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 
