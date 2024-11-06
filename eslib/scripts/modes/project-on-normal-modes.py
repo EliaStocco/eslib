@@ -27,6 +27,7 @@ def prepare_args(description):
     # parser.add_argument("-g",  "--ground_state", type=str, **argv, help="ground-state atomic structure [a.u.] (default: %(default)s)", default="start.xyz")
     parser.add_argument("-t" ,  "--trajectory"   , type=str     , **argv, required=True , help="input extxyz file [ang]")
     parser.add_argument("-nm", "--normal_modes"  , type=str     , **argv, required=True , help="normal modes file")
+    parser.add_argument("-n"  , "--indices"      ,   **argv, required=False, type=str, help="*.txt file with the indices")
     parser.add_argument("-r", "--use_reference"  , type=str2bool, **argv, required=False, help="use NormalModes reference structure instead of the first structure of the trajectory' (default: %(default)s)", default=True)
     parser.add_argument("-o" ,  "--output"       , type=str     , **argv, required=False, help="output file  (default: %(default)s)", default=None)
     parser.add_argument("-of",  "--output_folder", type=str     , **argv, required=False, help="output folder for csv files (default: %(default)s)", default="project")
@@ -64,6 +65,20 @@ def main(args):
         atoms.positions *= factor_pos
         if np.all(atoms.get_pbc()):
             atoms.cell *= factor_pos
+            
+    #------------------#
+    if args.indices is not None:
+        print("\tReading indices from file '{:s}' ... ".format(args.indices), end="")
+        indices = np.loadtxt(args.indices,dtype=int).astype(int)
+        print("done")
+        
+        #------------------#
+        print("\n\tSorting the following arrays: ", trajectory.get_keys("arrays"))
+        print("\tSorting ... ",end="")
+        N = len(trajectory)
+        for n in range(len(trajectory)):
+            trajectory[n] = trajectory[n][indices]
+        print("done")
 
     #---------------------------------------#
     # project on phonon modes
