@@ -44,10 +44,12 @@ def main(args):
     elif str(args.soap_descriptors).endswith("txt"):
         X = np.loadtxt(args.soap_descriptors)
     print("done")
-
-    #
+    
+    assert X.shape[0] == len(frames), f"SOAP descriptors have shape {X.shape} while n. of structures is {len(frames)}."
     
     if args.number == -1:
+        args.number = len(frames)
+    if args.number < len(frames):
         args.number = len(frames)
     
     print("\tExtracting structures using the FPS algorithm:")
