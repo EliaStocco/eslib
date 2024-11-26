@@ -1,0 +1,33 @@
+name: my_project
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - phonopy
+  - ase
+  - black
+  - bottleneck>=1.3.6
+  - chemiscope
+  - colorama
+  - e3nn
+  - extxyz
+  - icecream
+  - importlib-metadata
+  - matplotlib
+  - matscipy
+  - netCDF4
+  - nbconvert
+  - numexpr>=2.8.4
+  - numpy
+  - pandas
+  - pint
+  - scikit-learn
+  - scipy
+  - seekpath
+  - sphinx
+  - spglib
+  - tqdm
+  - torch-geometric
+  - xarray
+  - pytest
+  - uncertainties
