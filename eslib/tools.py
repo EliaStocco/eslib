@@ -9,7 +9,10 @@ import pandas as pd
 from ase import Atoms
 from ase.cell import Cell
 from ase.geometry import distance
-from phonopy.structure.atoms import PhonopyAtoms
+try:
+    from phonopy.structure.atoms import PhonopyAtoms
+except:
+    pass
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cdist
 
@@ -573,7 +576,7 @@ def w2_to_w(w2: np.ndarray) -> np.ndarray:
 
 
 
-def ase2phonopy(atoms_ase: Atoms) -> PhonopyAtoms:
+def ase2phonopy(atoms_ase: Atoms) -> "PhonopyAtoms":
     """
     Convert ASE Atoms to PhonopyAtoms.
 
@@ -586,6 +589,7 @@ def ase2phonopy(atoms_ase: Atoms) -> PhonopyAtoms:
     Raises:
         ImportError: If the Phonopy module is not found.
     """
+    from phonopy.structure.atoms import PhonopyAtoms
     # Extract the relevant data from ASE Atoms
     cell = atoms_ase.cell  # The cell dimensions of the atomic structure
     positions = atoms_ase.get_positions()  # The positions of atoms in fractional coordinates
@@ -601,7 +605,7 @@ def ase2phonopy(atoms_ase: Atoms) -> PhonopyAtoms:
     return phonopy_atoms
 
 
-def phonopy2ase(atoms_phonopy: PhonopyAtoms) -> Atoms:
+def phonopy2ase(atoms_phonopy: "PhonopyAtoms") -> Atoms:
     """
     Convert PhonopyAtoms to ASE Atoms.
 
