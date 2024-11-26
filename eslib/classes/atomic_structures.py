@@ -7,7 +7,7 @@ import pandas as pd
 
 from eslib.classes import Trajectory
 from eslib.classes.aseio import aseio, integer_to_slice_string
-from eslib.functional import deprecated
+from eslib.functional import custom_deprecated
 from eslib.tools import convert
 
 T = TypeVar('T', bound='AtomicStructures')
@@ -235,7 +235,7 @@ class AtomicStructures(Trajectory,aseio):
 
         return df
 
-    @deprecated(reason="Use `set` instead")
+    @custom_deprecated(reason="Use `set` instead")
     def set_info(self:T,name:str,data:np.ndarray)->None:
         """
         Set information attribute values for all structures (deprecated).
@@ -248,7 +248,7 @@ class AtomicStructures(Trajectory,aseio):
         for n,atoms in enumerate(self):
             atoms.info[name] = data[n]
 
-    @deprecated(reason="Use `set` instead")
+    @custom_deprecated(reason="Use `set` instead")
     def set_array(self:T,name:str,data:np.ndarray)->None:
         """
         Set array attribute values for all structures (deprecated).
