@@ -6,7 +6,7 @@ echo "Installing ESLIB ..."
 SCRIPT_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 
 # Set ESLIB to the script directory
-ESLIB="$SCRIPT_DIR"
+export ESLIB="$SCRIPT_DIR"
 # source ${ESLIB}/check_requirements.sh $@
 export PATH="$PATH:${ESLIB}/eslib"
 export PYTHONPATH="$PYTHONPATH:${ESLIB}/eslib"
