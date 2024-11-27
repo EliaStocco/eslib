@@ -23,7 +23,8 @@ def prepare_args(description):
     parser.add_argument("-in", "--index"       , **argv, required=False, type=itype, help="index to be read from input file (default: %(default)s)", default=':')
     parser.add_argument("-dt", "--time_step"   , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
     parser.add_argument("-e" , "--element"     , **argv, required=True , type=str  , help="element")
-    parser.add_argument("-T ", "--time_span"   , **argv, required=False, type=float, help="time span to evaluate the diffusion coefficient [ps] (default: %(default)s)", default=20)
+    parser.add_argument("-I ", "--initial"     , **argv, required=False, type=float, help="initial time span to discard [ps] (default: %(default)s)", default=0)
+    parser.add_argument("-T ", "--time_span"   , **argv, required=False, type=float, help="final time span to evaluate the diffusion coefficient [ps] (default: %(default)s)", default=20)
     parser.add_argument("-o" , "--output"      , **argv, type=str  , help="output file (default: %(default)s)", default="msd.csv")
     parser.add_argument("-p" , "--plot"        , **argv, type=str  , help="plot (default: %(default)s)", default=None)
     return parser 
@@ -53,6 +54,12 @@ def main(args):
     #------------------#
     args.time_step /= 1000 # fs to ps
     
+    if args.initial > 0:
+        print(f"\t Discarding initial {args.initial}ps")
+        positions = positions[ np.arange(N)*args.time_step > args.initial ] 
+        N = positions.shape[0]
+        print(f"\t positions.shape: {positions.shape}")
+    
     #------------------#
     # Mean Squared Displacement (MSD)
     with eslog(f"Computing the Mean Squared Displacement (MSD)"):
@@ -80,9 +87,11 @@ def main(args):
     with eslog(f"\nComputing the diffusion coefficient"):
         D = MSD[ MSD["time"] >= np.asarray(MSD["time"])[-1] - args.time_span ]
         D = unp.uarray(D["MSD/time"], D["MSD/time-err"])
+        minT, maxT = min(D["time"]), max(D["time"])
         D = np.nanmean(D)
     print(f"\t {warning}: there could be a missing factor 6 in the diffusion coefficient!")
-    print("\t D = {:.6f} +/- {:.6f} [angstrom^2 / n. of atoms / picosecond]".format(unp.nominal_values(D),unp.std_devs(D)))        
+    print("\t D = {:.6f} +/- {:.6f} [angstrom^2 / n. of atoms / picosecond]".format(unp.nominal_values(D),unp.std_devs(D)))   
+    print(f"\t D has been computed for the time span [{minT},{maxT}]ps")    
     
     with open(args.output, "w") as f:
         f.write("# Diffusion coefficient D (computed using the last {:.1f} ps):\n".format(args.time_span))
@@ -130,6 +139,7 @@ def main(args):
             
             ax2.plot(MSD["time"],MSD["MSD/time"],color="green",label=r"MSD/t")
             ax2.fill_between(MSD["time"],MSD["MSD/time"]-MSD["MSD/time-err"],MSD["MSD/time"]+MSD["MSD/time-err"],alpha=0.5,color="green",lw=0)
+            ax2.hlines(D,minT,maxT,alpha=1,color="red",linestyle="solid",label="D")
             ax2.set_ylabel(r"$\partial$MSD/$\partial$t [ $\AA^2$ / n. atoms / ps ]")
             ax2.set_ylim(0,None)
             
