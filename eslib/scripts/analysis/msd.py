@@ -56,7 +56,7 @@ def main(args):
     
     if args.initial > 0:
         print(f"\t Discarding initial {args.initial}ps")
-        positions = positions[ np.arange(N)*args.time_step > args.initial ] 
+        positions = positions[ np.arange(N)*args.time_step >= args.initial ] 
         N = positions.shape[0]
         print(f"\t positions.shape: {positions.shape}")
     
@@ -86,8 +86,8 @@ def main(args):
     # Diffusion coefficient
     with eslog(f"\nComputing the diffusion coefficient"):
         D = MSD[ MSD["time"] >= np.asarray(MSD["time"])[-1] - args.time_span ]
-        D = unp.uarray(D["MSD/time"], D["MSD/time-err"])
         minT, maxT = min(D["time"]), max(D["time"])
+        D = unp.uarray(D["MSD/time"], D["MSD/time-err"])
         D = np.nanmean(D)
     print(f"\t {warning}: there could be a missing factor 6 in the diffusion coefficient!")
     print("\t D = {:.6f} +/- {:.6f} [angstrom^2 / n. of atoms / picosecond]".format(unp.nominal_values(D),unp.std_devs(D)))   
