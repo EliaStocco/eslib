@@ -23,7 +23,7 @@ def prepare_args(description):
     parser.add_argument("-in", "--index"       , **argv, required=False, type=itype, help="index to be read from input file (default: %(default)s)", default=':')
     parser.add_argument("-dt", "--time_step"   , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
     parser.add_argument("-e" , "--element"     , **argv, required=True , type=str  , help="element")
-    parser.add_argument("-I ", "--initial"     , **argv, required=False, type=float, help="initial time span to discard [ps] (default: %(default)s)", default=0)
+    # parser.add_argument("-I ", "--initial"     , **argv, required=False, type=float, help="initial time span to discard [ps] (default: %(default)s)", default=0)
     parser.add_argument("-T ", "--time_span"   , **argv, required=False, type=float, help="final time span to evaluate the diffusion coefficient [ps] (default: %(default)s)", default=20)
     parser.add_argument("-o" , "--output"      , **argv, type=str  , help="output file (default: %(default)s)", default="msd.csv")
     parser.add_argument("-p" , "--plot"        , **argv, type=str  , help="plot (default: %(default)s)", default=None)
@@ -32,12 +32,16 @@ def prepare_args(description):
 #---------------------------------------#
 @esfmt(prepare_args, description, documentation)
 def main(args):
+    
+    #------------------#
+    args.time_step /= 1000 # fs to ps
 
     #------------------#
     with eslog(f"Reading atomic structures from file '{args.input}'"):
         trajectory = AtomicStructures.from_file(file=args.input, format=args.input_format,index=args.index)
     N = len(trajectory)
-    print("\t n. of atomic structures: {:d}".format(N))
+    print(f"\t n. of atomic structures: {N}")
+    print(f"\t simulation time: {N*args.time_step}ps")
     
     #------------------#
     positions = trajectory.get("positions")
@@ -50,15 +54,6 @@ def main(args):
     with eslog(f"\nExtracting positions of '{args.element}' atoms"):
         positions = positions[:,indices,:]
     print(f"\t positions.shape: {positions.shape}") # time, atoms, xyz
-    
-    #------------------#
-    args.time_step /= 1000 # fs to ps
-    
-    if args.initial > 0:
-        print(f"\t Discarding initial {args.initial}ps")
-        positions = positions[ np.arange(N)*args.time_step >= args.initial ] 
-        N = positions.shape[0]
-        print(f"\t positions.shape: {positions.shape}")
     
     #------------------#
     # Mean Squared Displacement (MSD)
@@ -130,7 +125,7 @@ def main(args):
             ax.set_ylabel(r"MSD [ $\AA^2$ / n. atoms ]")
             ax.set_ylim(0,None)
             
-            ax.set_xlabel("time $[ps]$")
+            ax.set_xlabel("time [ps]")
             ax.set_xlim(min(MSD["time"]),max(MSD["time"]))
             
             ax2 = ax.twinx()
@@ -139,7 +134,8 @@ def main(args):
             
             ax2.plot(MSD["time"],MSD["MSD/time"],color="green",label=r"MSD/t")
             ax2.fill_between(MSD["time"],MSD["MSD/time"]-MSD["MSD/time-err"],MSD["MSD/time"]+MSD["MSD/time-err"],alpha=0.5,color="green",lw=0)
-            ax2.hlines(D,minT,maxT,alpha=1,color="red",linestyle="solid",label="D")
+            ax2.hlines(unp.nominal_values(D),minT,maxT,alpha=1,color="red",linestyle="solid",label="D")
+            ax2.fill_between(np.linspace(minT,maxT,100),unp.nominal_values(D)-unp.std_devs(D),unp.nominal_values(D)+unp.std_devs(D),alpha=0.5,color="red")
             ax2.set_ylabel(r"$\partial$MSD/$\partial$t [ $\AA^2$ / n. atoms / ps ]")
             ax2.set_ylim(0,None)
             
