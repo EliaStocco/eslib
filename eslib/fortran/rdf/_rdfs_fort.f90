@@ -4,6 +4,105 @@
 !
 !**********************************************************!
 
+SUBROUTINE InteratomicDistances(positions, cell, invCell, nsnapshots, natoms, distances)
+  IMPLICIT NONE
+
+  ! Input
+  INTEGER, INTENT(in) :: nsnapshots, natoms
+  REAL(8), INTENT(in) :: positions(nsnapshots, 3*natoms), cell(3,3), invCell(3,3)
+
+  ! Output
+  REAL(8), INTENT(out) :: distances(nsnapshots*natoms, nsnapshots*natoms)
+
+  ! Local variables
+  INTEGER :: n, m, i, j
+  REAL(8) :: dAB, vdAB(3)
+
+  ! Initialize distances array
+  distances(:,:) = 0.0
+
+  ! Loop over snapshots and atoms
+  DO n = 1, nsnapshots
+    DO i = 1, natoms
+      DO m = n, nsnapshots
+        DO j = 1, natoms
+          CALL CalcMinDist(cell, invCell, &
+                           positions(n, 3*i-2), positions(n, 3*i-1), positions(n, 3*i), &
+                           positions(m, 3*j-2), positions(m, 3*j-1), positions(m, 3*j), &
+                           dAB, vdAB)
+          distances((n-1)*natoms+i, (m-1)*natoms+j) = dAB
+          distances((m-1)*natoms+j, (n-1)*natoms+i) = dAB
+        END DO
+      END DO
+    END DO
+  END DO
+
+END SUBROUTINE InteratomicDistances
+
+subroutine InterMolecularRDF(gOOr, atxyz1, atxyz2, r_min, r_max, &
+    cell, invCell, partition1, partition2, mass1, mass2, &
+    nsnapshots, nat1, nat2, nbins)
+  !
+  IMPLICIT NONE
+  !
+  ! Input
+  !
+  INTEGER, INTENT(in) :: nsnapshots, nat1, nat2, nbins
+  REAL(8), INTENT(in) :: mass1, mass2
+  REAL(8), INTENT(in) :: r_min, r_max
+  REAL(8), INTENT(in) :: atxyz1(nsnapshots,nat1,3), atxyz2(nsnapshots,nat2,3), cell(3,3), invCell(3,3)
+  INTEGER, INTENT(in) :: partition1(nsnapshots,nat1), partition2(nsnapshots,nat2)
+  !
+  ! Output
+  !
+  REAL(8), INTENT(inout) :: gOOr(nbins,2)
+  !
+  ! Local variables
+  !
+  INTEGER :: ia, ib, ig, n
+  REAL(8) :: deltar, dAB, vdAB(3), norm
+  REAL(8), PARAMETER :: tol = 0.00001
+  !
+  ! Histogram step initialization
+  !
+  deltar = gOOr(2,1) - gOOr(1,1)
+  !
+  ! Start computing g(r) from MD configurations
+  !
+  ! Normalization constant
+  !
+  IF (mass1.EQ.mass2) THEN
+    norm = 1.0/(nat1*(nat2-1))
+  ELSE
+    norm = 1.0/(nat1*nat2)
+  END IF
+  !
+  ! Populate histogram bins for gOO(r)...
+  !
+  DO n=1,nsnapshots! Loop over snapshots
+    DO ia=1,nat1
+      DO ib=1,nat2
+        !
+        IF (partition1(n,ia) .EQ. partition2(n,ib)) THEN ! same molecule: skip
+          CONTINUE
+        END IF
+        !
+        ! Compute the distance of the closest image of atom B to atom A using minimum image convention...
+        CALL CalcMinDist(cell, invCell, &
+          atxyz1(n,ia,1), atxyz1(n,ia,2), atxyz1(n,ia,3), &
+          atxyz2(n,ib,1), atxyz2(n,ib,2), atxyz2(n,ib,3), &
+          dAB, vdAB)
+        ! Screen distances that are outside desired range
+        IF (dAB.LT.r_max.AND.dAB.GT.r_min) THEN
+          ig=INT((dAB-r_min)/deltar)+1  !bin/histogram position
+          gOOr(ig,2)=gOOr(ig,2)+1*norm
+        END IF
+      END DO !ib 
+    END DO !ia 
+  END DO !n
+  !
+END SUBROUTINE InterMolecularRDF
+
 subroutine UpdateQRDFFixedCell(gOOr, atxyz1, atxyz2, r_min, r_max, cell, invCell, mass1, mass2, nsnapshots, nat1, nat2, nbins)
   !
   IMPLICIT NONE
@@ -139,7 +238,7 @@ subroutine UpdateQRDFBeadVariableCell(gOOr, atxyz1, atxyz2, r_min, r_max, cell, 
   ! Local variables
   !
   INTEGER :: ia, ib, ig, ih
-  REAL(8) :: deltar, dAB, vdAB(3), temp, norm
+  REAL(8) :: deltar, dAB, vdAB(3), norm
   REAL(8), PARAMETER :: tol = 0.00001
   !
   ! Histogram step initialization
