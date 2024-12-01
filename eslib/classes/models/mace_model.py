@@ -210,6 +210,10 @@ class MACEModel(eslibModel):
         # Set default dtype
         self._set_defaults()
         self.network = self.network.to(self.current_device)
+        
+        actual_device = next(self.network.parameters()).device
+        if torch.cuda.is_available() and actual_device:
+            warn(f"CUDA is available but torch is gonna run on {actual_device}.")
 
         # Create data loader
         data_loader: torch_geometric.dataloader.DataLoader = make_dataloader(
