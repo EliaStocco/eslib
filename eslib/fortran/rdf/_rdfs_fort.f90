@@ -83,19 +83,19 @@ subroutine InterMolecularRDF(gOOr, atxyz1, atxyz2, r_min, r_max, &
     DO ia=1,nat1
       DO ib=1,nat2
         !
-        IF (partition1(n,ia) .EQ. partition2(n,ib)) THEN ! same molecule: skip
-          CONTINUE
-        END IF
-        !
-        ! Compute the distance of the closest image of atom B to atom A using minimum image convention...
-        CALL CalcMinDist(cell, invCell, &
-          atxyz1(n,ia,1), atxyz1(n,ia,2), atxyz1(n,ia,3), &
-          atxyz2(n,ib,1), atxyz2(n,ib,2), atxyz2(n,ib,3), &
-          dAB, vdAB)
-        ! Screen distances that are outside desired range
-        IF (dAB.LT.r_max.AND.dAB.GT.r_min) THEN
-          ig=INT((dAB-r_min)/deltar)+1  !bin/histogram position
-          gOOr(ig,2)=gOOr(ig,2)+1*norm
+        IF (partition1(n,ia) .NE. partition2(n,ib)) THEN ! different molecule: compute
+          !
+          ! Compute the distance of the closest image of atom B to atom A using minimum image convention...
+          CALL CalcMinDist(cell, invCell, &
+            atxyz1(n,ia,1), atxyz1(n,ia,2), atxyz1(n,ia,3), &
+            atxyz2(n,ib,1), atxyz2(n,ib,2), atxyz2(n,ib,3), &
+            dAB, vdAB)
+          ! Screen distances that are outside desired range
+          IF (dAB.LT.r_max.AND.dAB.GT.r_min) THEN
+            ig=INT((dAB-r_min)/deltar)+1  !bin/histogram position
+            gOOr(ig,2)=gOOr(ig,2)+1*norm
+          END IF
+          !
         END IF
       END DO !ib 
     END DO !ia 

@@ -23,6 +23,7 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"       , **argv, required=True , type=str  , help="input file")
     parser.add_argument("-if", "--input_format", **argv, required=False, type=str  , help="input file format (default: %(default)s)", default=None)
     parser.add_argument("-in", "--index"       , **argv, required=False, type=itype, help="index to be read from input file (default: %(default)s)", default=':')
+    parser.add_argument("-e" , "--elements"    , **argv, required=True , type=el   , help="elements list")
     parser.add_argument("-m" , "--molecule"    , **argv, required=False, type=str  , help="molecule name (default: %(default)s)", default="molecule")
     parser.add_argument("-n" , "--nbins"       , **argv, required=False, type=int  , help="number of bins to divide RDF (default: %(default)s)", default=100)
     parser.add_argument("-r1", "--rmin"        , **argv, required=False, type=float, help="minimum distance of RDF (default: %(default)s)", default=1.)
@@ -58,16 +59,14 @@ def main(args):
     
     # mass = trajectory[0].get_masses()
     
-    ELEMENTS = ["O","H"]
+    massA, massB = get_element_mass(args.elements)
     
-    massA, massB = get_element_mass(ELEMENTS)
-    
-    species_A = [i for i in np.where(symbols == ELEMENTS[0])[0]]
-    species_B = [i for i in np.where(symbols == ELEMENTS[1])[0]]
+    species_A = [i for i in np.where(symbols == args.elements[0])[0]]
+    species_B = [i for i in np.where(symbols == args.elements[1])[0]]
     natomsA = len(species_A)
     natomsB = len(species_B)
-    print("\t n. of {:s} atoms: {:d}".format(ELEMENTS[0], natomsA))
-    print("\t n. of {:s} atoms: {:d}".format(ELEMENTS[1], natomsB))
+    print("\t n. of {:s} atoms: {:d}".format(args.elements[0], natomsA))
+    print("\t n. of {:s} atoms: {:d}".format(args.elements[1], natomsB))
     
     #---------------------------------------#
     print()
@@ -77,9 +76,9 @@ def main(args):
             posA = np.zeros((N,natomsA,3), order="F")
             posB = np.zeros((N,natomsB,3), order="F")
             pos = trajectory.get("positions")# .reshape((N,3*Natoms))
-            partition = trajectory.get(args.molecule)
-            partitionA = np.zeros((N,natomsA), order="F")
-            partitionB = np.zeros((N,natomsB), order="F")
+            partition = trajectory.get(args.molecule).astype(int)
+            partitionA = np.zeros((N,natomsA), order="F",dtype=int)
+            partitionB = np.zeros((N,natomsB), order="F",dtype=int)
             partitionA[:,:] = partition[:,species_A]
             partitionB[:,:] = partition[:,species_B]
             posA[:,:,:] = pos[:,species_A,:]#.reshape((N,natomsA))
