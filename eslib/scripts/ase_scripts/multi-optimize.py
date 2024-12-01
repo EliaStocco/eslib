@@ -7,7 +7,7 @@ from ase.filters import FrechetCellFilter as RelaxCell
 from ase.io import write
 from ase.optimize import BFGS
 
-from classes.potentials.multisocket import MultiSocket
+from eslib.classes.potentials.multisocket import MultiSocket
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.input import str2bool, slist, ilist, blist
