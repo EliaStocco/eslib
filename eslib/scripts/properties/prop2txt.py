@@ -5,6 +5,7 @@ from eslib.classes.properties import Properties
 from eslib.formatting import esfmt, everythingok, warning, float_format
 from eslib.functions import suppress_output
 from eslib.input import str2bool
+from eslib.tools import convert
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -16,7 +17,9 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
     parser.add_argument("-i" , "--input"          , type=str     , **argv, required=True , help='txt input file')
-    parser.add_argument("-k" , "--keyword"        , type=str     , **argv, required=True , help='keyworde')
+    parser.add_argument("-k" , "--keyword"        , type=str     , **argv, required=True , help='keyword')
+    parser.add_argument("-f" , "--family"         , type=str     , **argv, required=True , help="family (default: %(default)s)", default=None)
+    parser.add_argument("-u" , "--unit"           , type=str     , **argv, required=True , help="output unit (default: %(default)s)", default=None)
     parser.add_argument("-rr", "--remove_replicas", type=str2bool, **argv, required=False, help='whether to remove replicas (default: false)', default=False)
     parser.add_argument("-o" , "--output"         , type=str     , **argv, required=False, help='output file (default: %(default)s)', default=None)
     return parser# .parse_args()
@@ -67,6 +70,16 @@ def main(args):
     data = allproperties.get(args.keyword)
     print("done")
     print(f"\t{args.keyword}.shape: {data.shape}")
+    
+    print(f"\t{args.keyword} unit: {allproperties.units[args.keyword]}")
+    
+    #------------------#
+    if args.unit is not None:
+        iu = allproperties.units[args.keyword]
+        ou = args.unit
+        print(f"\n\tConverting {args.keyword} from {iu} to {ou} ... ",end="")
+        data = convert(data,args.family,_from=iu,_to=ou)
+        print("done")        
     
     #------------------#
     # write 
