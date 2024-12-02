@@ -1,12 +1,12 @@
 from ase import Atoms
 from eslib.classes.models.mace_model import MACEModel
 from ase.calculators.calculator import Calculator, all_changes
-from multiprocessing import Pool
+import threading  # Replace multiprocess with threading
 from typing import List, TypeVar, Dict, Tuple
 from ase.calculators.socketio import SocketClient
 from dataclasses import dataclass, field
 import numpy as np
-from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor  # ThreadPoolExecutor for better thread management
 
 T = TypeVar('T', bound='SocketsPoolMACE')
 
@@ -26,12 +26,6 @@ class BatchedModel:
         self.single_results = [None]*self.batch_size
         self.list_atoms = [None]*self.batch_size
         
-    # @property
-    # @abstractmethod
-    # def mace_calculator(self)->MACEModel:
-    #     """Abstract attribute that must be implemented in the subclass."""
-    #     pass
-    
     def master(self):
         """Master task running in parallel."""
         self.ready = False
@@ -52,8 +46,6 @@ class BatchedModel:
                 break  
             
             self.ready = True         
-
-            continue
         
         return
             
@@ -65,6 +57,8 @@ class SingleCalculator(Calculator):
     index:int
     
     def calculate(self, atoms:Atoms=None, properties=None, system_changes=all_changes)->None:
+        
+        super().__init__()
         
         self.batched_model.list_atoms[self.index] = atoms
         self.batched_model.have_atoms[self.index] = True
@@ -88,7 +82,6 @@ class SocketsPoolMACE(BatchedModel):
     ports:List[int]
     unixsockets:List[str]
     socket_client:str
-    # use_stress:bool
     log:str
     mace_calculator:MACEModel
     
@@ -96,10 +89,7 @@ class SocketsPoolMACE(BatchedModel):
     calculators:List[SingleCalculator] = field(init=False)
     
     def __post_init__(self):
-        # assert len(self.address) == len(self.unixsockets), "ports and unixsockets must have the same length"
         self.batch_size = len(self.unixsockets)
-        
-        # self.mace_model = self.atoms.calc
         
         self.drivers = [None]*self.batch_size
         self.calculators = [None]*self.batch_size
@@ -111,38 +101,38 @@ class SocketsPoolMACE(BatchedModel):
                 self.drivers[n] = SocketClient(port=port,unixsocket=unixsocket,log=None)
 
             self.calculators[n] = SingleCalculator(self,n)
-        # self.mace_calculator = WrapMACEModel(self.mace_calculator,N)
+            self.calculators[n].implemented_properties = self.mace_calculator.implemented_properties
         
         super().__post_init__()
             
-
-    def _run_single(self, args: Tuple[Atoms, SocketClient, Calculator, bool]):
-        """Helper function for multiprocessing."""
-        atoms, driver, calc, use_stress = args
+    @staticmethod
+    def _run_single(task: Tuple[Atoms, SocketClient, Calculator, bool]):
+        """Helper function for threading."""
+        atoms, driver, calc, use_stress = task
         atoms.calc = calc
         driver.run(atoms, use_stress=use_stress)
-        self.exit = True
 
-    def run(self, atoms: Atoms, use_stress:bool=False):
+    @staticmethod
+    def _run_master_task(instance: "SocketsPoolMACE"):
+        """Run the master task."""
+        instance.master()
+
+    def run(self, atoms: Atoms, use_stress: bool = False):
         """Run all drivers in parallel on the given atoms."""
         N = len(self.drivers)
         if N != len(self.calculators):
             raise ValueError("Number of drivers must match the number of calculators.")
 
-        # Prepare arguments for multiprocessing
+        # Prepare arguments for threading
         tasks = [(atoms.copy(), self.drivers[n], self.calculators[n], use_stress) for n in range(N)]
 
-        # Add master task as the last task in the pool
-        all_tasks = [("master",)] + tasks
-
-        def _run_task(task):
-            if task[0] == "master":
-                self.master()
-            else:
-                self._run_single(task)
-
-        # Use multiprocessing pool
-        with Pool(processes=N + 1) as pool:  # Add one for the master
-            pool.map(_run_task, all_tasks)
-        
-        
+        # Use ThreadPoolExecutor for threading
+        with ThreadPoolExecutor(max_workers=N + 1) as executor:  # Add one for the master task
+            
+            # Submit all individual tasks to the executor
+            futures = [executor.submit(self._run_single, task) for task in tasks]
+            master = executor.submit(self._run_master_task, self)  # Submit the master task to the executor
+            futures.append(master)
+            # Wait for all futures to finish
+            for future in futures:
+                future.result()  # This will block until all tasks are complete
