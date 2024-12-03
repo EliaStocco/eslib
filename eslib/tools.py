@@ -251,10 +251,39 @@ def project_on_Miller(cell:np.ndarray, Miller:np.ndarray,array:np.ndarray)->np.n
     Miller= np.asarray(Miller,dtype=float)
     assert Miller.ndim == 1, "Miller must be a 1D array"
     Miller /= np.linalg.norm(Miller)
-    array = cart2lattice(cell,array)
+    Miller = frac2cart(cell,Miller)
+    Miller /= np.linalg.norm(Miller)
     array = np.dot(array,Miller)
     # return frac2cart(cell,array)
     return array
+    
+# #---------------------------------------#
+# def project_on_Miller(cell:np.ndarray, Miller:np.ndarray,array:np.ndarray)->np.ndarray:
+#     """
+#     Projects an array onto a Miller index direction in lattice coordinates.
+
+#     This function takes a crystal cell, a Miller index, and an array, 
+#     converts the array from cartesian to lattice coordinates, and then 
+#     projects this array onto the specified Miller index direction.
+#     The output has to be intended with lenght dimensions, same as the input array.
+
+#     Parameters:
+#     - cell (np.ndarray): The lattice parameters of the crystal cell.
+#     - Miller (np.ndarray): A 1D array representing the Miller index 
+#       direction to project onto. It will be normalized internally.
+#     - array (np.ndarray): The input array in cartesian coordinates.
+
+#     Returns:
+#     - np.ndarray: The array projected onto the Miller index direction 
+#       in lattice coordinates.
+#     """
+#     Miller= np.asarray(Miller,dtype=float)
+#     assert Miller.ndim == 1, "Miller must be a 1D array"
+#     Miller /= np.linalg.norm(Miller)
+#     array = cart2lattice(cell,array)
+#     array = np.dot(array,Miller)
+#     # return frac2cart(cell,array)
+#     return array
 
 def relative_vectors(structure:Atoms,_all=False):
     columns = ["i","j","Si","Sj", # indices and symbols
