@@ -1,5 +1,35 @@
 import numpy as np
 
+from typing import Tuple
+
+def std_err(array: np.ndarray, axis: int) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Compute the standard deviation and standard error along a specified axis.
+
+    Parameters:
+    array : np.ndarray
+        Input data array.
+    axis : int
+        Axis along which computations are performed.
+
+    Returns:
+    Tuple[np.ndarray, np.ndarray]
+        Standard deviation and standard error along the specified axis.
+
+    Notes:
+    - Requires at least two elements along the axis to compute the error.
+    """
+    # Compute standard deviation along the specified axis
+    std = np.std(array, axis=axis, ddof=0)
+
+    # Compute standard error of the mean along the specified axis
+    n = array.shape[axis]
+    if n <= 1:
+        raise ValueError("Standard error requires at least two elements along the axis.")
+    err = std / np.sqrt(n - 1)
+
+    return std, err
+
 
 def reshape_into_blocks(data: np.ndarray, N: int) -> np.ndarray:
     """

@@ -1,9 +1,15 @@
 # pylint: disable=import-error
 #import _rdfs_fort as fortran_rdfs # type: ignore
 from ase import Atoms
-from ase.cell import Cell
 import numpy as np
 
+def shift_msd(delta_squared:np.ndarray,positions:np.ndarray,msg:bool=False):
+    try:
+        import eslib.fortran._msd_fort as MSD  # type: ignore
+    except:
+        import eslib.fortran.msd._msd_fort as MSD  # type: ignore
+    MSD.shifted_msd(positions,delta_squared,msg)
+    
 def fortran_intermolecular_rdfs_fixed_cell(rdf,posA,posB,rmin,rmax,cell,invcell,partitionA,partitionB,massA,massB)->None:                
     try:
         import eslib.fortran._rdfs_fort as RDF  # type: ignore
