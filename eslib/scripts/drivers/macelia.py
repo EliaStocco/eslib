@@ -90,13 +90,13 @@ def main(args):
         print("\tLoading eslib MACE model from file '{:s}' ... ".format(args.model), end="")
         calculator = MACEModel.from_pickle(args.model)
         try:
-            calculator.to(device=args.device)
-        except:
-            warn(f"Failed moving calculator to {args.device}.")
-        try:
-            calculator.to(dtype=args.dtype)
-        except:
-            warn(f"Failed moving calculator to {args.dtype}.")
+            calculator.to(device=args.device,dtype=args.dtype)
+        except Exception as e:
+            warn(f"Failed moving calculator to {args.device} or/and {args.dtype}.\n{e}")
+        # try:
+        #     calculator.to(dtype=args.dtype)
+        # except Exception as e:
+        #     warn(f"Failed moving calculator to {args.dtype}\n{e}")
         
     elif args.model_type == "MACE":
         print("\tLoading a MACECalculator based on the model that you provided ... ", end="")
