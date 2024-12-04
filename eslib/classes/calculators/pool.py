@@ -6,7 +6,8 @@ from typing import List, TypeVar, Dict, Tuple
 from ase.calculators.socketio import SocketClient
 from dataclasses import dataclass, field
 import numpy as np
-from concurrent.futures import ThreadPoolExecutor  # ThreadPoolExecutor for better thread management
+from copy import deepcopy
+from concurrent.futures import ThreadPoolExecutor, wait, as_completed
 
 T = TypeVar('T', bound='SocketsPoolMACE')
 
@@ -38,9 +39,12 @@ class BatchedModel:
             if self.exit:
                 break
             
-            results = self.mace_calculator.compute(self.list_atoms)
-            
-            # Do things
+            results:Dict[str,np.ndarray] = self.mace_calculator.compute(self.list_atoms,raw=True)
+            for n,_ in enumerate(self.single_results):
+                self.single_results[n] = {}
+                for key in results.keys():
+                    value:np.ndarray = np.take(results[key],axis=0,indices=n)
+                    self.single_results[n][key] = value if value.size > 1 else float(value)
             
             if self.exit:
                 break  
@@ -56,6 +60,9 @@ class SingleCalculator(Calculator):
     batched_model:BatchedModel
     index:int
     
+    def __post_init__(self):
+        super().__init__()
+    
     def calculate(self, atoms:Atoms=None, properties=None, system_changes=all_changes)->None:
         
         super().__init__()
@@ -64,6 +71,7 @@ class SingleCalculator(Calculator):
         self.batched_model.have_atoms[self.index] = True
         
         while not self.batched_model.ready:
+            self.results = None
             continue
         
         if self.batched_model.single_results is None \
@@ -71,9 +79,9 @@ class SingleCalculator(Calculator):
                 or len(self.batched_model.single_results[self.index].keys()) == 0 :
                     raise ValueError("no results found")
         
-        self.results = self.batched_model.single_results[self.index]
+        self.results = deepcopy(self.batched_model.single_results[self.index])
         self.batched_model.have_atoms[self.index] = False
-        self.batched_model.ready[self.index] = False
+        # self.batched_model.ready = False
         
     
 @dataclass
@@ -117,22 +125,78 @@ class SocketsPoolMACE(BatchedModel):
         """Run the master task."""
         instance.master()
 
+    # def run(self, atoms: Atoms, use_stress: bool = False):
+    #     """Run all drivers in parallel on the given atoms."""
+    #     N = len(self.drivers)
+    #     if N != len(self.calculators):
+    #         raise ValueError("Number of drivers must match the number of calculators.")
+
+    #     # Prepare arguments for threading
+    #     tasks = [(atoms.copy(), self.drivers[n], self.calculators[n], use_stress) for n in range(N)]
+
+    #     # Use ThreadPoolExecutor for threading
+    #     with ThreadPoolExecutor(max_workers=N + 1) as executor:  # Add one for the master task
+            
+    #         # Submit all individual tasks to the executor
+    #         futures = [executor.submit(self._run_single, task) for task in tasks]
+    #         # master = executor.submit(self._run_master_task, self)  # Submit the master task to the executor
+    #         # futures.append(master)
+    #         # Wait for all futures to finish
+    #         for future in futures:
+    #             future.result()  # This will block until all tasks are complete
+    
+    
+
+    # def run(self, atoms: Atoms, use_stress: bool = False):
+    #     """Run all drivers in parallel on the given atoms using threading."""
+        
+    #     N = len(self.drivers)
+    #     if N != len(self.calculators):
+    #         raise ValueError("Number of drivers must match the number of calculators.")
+
+    #     # Prepare tasks
+    #     tasks = [(atoms.copy(), self.drivers[n], self.calculators[n], use_stress) for n in range(N)]
+
+    #     # Create a thread for the master task to run in parallel
+    #     master_thread = threading.Thread(target=self.master)
+    #     master_thread.start()  # Start the master thread
+        
+    #     # Create and start threads for each task
+    #     threads:List[threading.Thread] = []
+    #     for task in tasks:
+    #         thread = threading.Thread(target=self._run_single, args=(task,))
+    #         thread.daemon = False
+    #         threads.append(thread)
+    #         thread.start()  # Start the thread
+        
+    #     # Wait for all threads (tasks) to finish
+    #     for thread in threads:
+    #         thread.join()  # Block until the thread finishes
+
+    #     # Wait for the master thread to finish
+    #     master_thread.join()  # Block until the master thread finishes
+    
     def run(self, atoms: Atoms, use_stress: bool = False):
-        """Run all drivers in parallel on the given atoms."""
+        """Run all drivers in parallel on the given atoms using ThreadPoolExecutor."""
+        
         N = len(self.drivers)
         if N != len(self.calculators):
             raise ValueError("Number of drivers must match the number of calculators.")
 
-        # Prepare arguments for threading
+        # Prepare tasks
         tasks = [(atoms.copy(), self.drivers[n], self.calculators[n], use_stress) for n in range(N)]
-
-        # Use ThreadPoolExecutor for threading
+        
+        # Create a thread pool executor
         with ThreadPoolExecutor(max_workers=N + 1) as executor:  # Add one for the master task
+            # Submit the master task
+            master_future = executor.submit(self.master)
             
-            # Submit all individual tasks to the executor
-            futures = [executor.submit(self._run_single, task) for task in tasks]
-            master = executor.submit(self._run_master_task, self)  # Submit the master task to the executor
-            futures.append(master)
-            # Wait for all futures to finish
-            for future in futures:
-                future.result()  # This will block until all tasks are complete
+            # Submit the tasks for each driver
+            task_futures = [executor.submit(self._run_single, task) for task in tasks]
+            
+            # Wait for all tasks to complete
+            for future in as_completed(task_futures + [master_future]):
+                try:
+                    future.result()  # This will raise any exceptions if they occurred
+                except Exception as e:
+                    print(f"Error in thread execution: {e}")
