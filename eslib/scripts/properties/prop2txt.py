@@ -18,9 +18,10 @@ def prepare_args(description):
     argv = {"metavar":"\b"}
     parser.add_argument("-i" , "--input"          , type=str     , **argv, required=True , help='txt input file')
     parser.add_argument("-k" , "--keyword"        , type=str     , **argv, required=True , help='keyword')
-    parser.add_argument("-f" , "--family"         , type=str     , **argv, required=True , help="family (default: %(default)s)", default=None)
-    parser.add_argument("-u" , "--unit"           , type=str     , **argv, required=True , help="output unit (default: %(default)s)", default=None)
-    parser.add_argument("-rr", "--remove_replicas", type=str2bool, **argv, required=False, help='whether to remove replicas (default: false)', default=False)
+    parser.add_argument("-f" , "--family"         , type=str     , **argv, required=False, help="family (default: %(default)s)", default=None)
+    parser.add_argument("-u" , "--unit"           , type=str     , **argv, required=False, help="output unit (default: %(default)s)", default=None)
+    parser.add_argument("-rr", "--remove_replicas", type=str2bool, **argv, required=False, help='whether to remove replicas (default: %(default)s)', default=False)
+    parser.add_argument("-d" , "--delimiter"      , type=str     , **argv, required=False, help='delimiter (default: false)', default=' ')
     parser.add_argument("-o" , "--output"         , type=str     , **argv, required=False, help='output file (default: %(default)s)', default=None)
     return parser# .parse_args()
 
@@ -87,7 +88,7 @@ def main(args):
     if str(args.output).endswith("npy"):
         np.save(args.output,data)
     else:
-        np.savetxt(args.output,data,fmt=float_format)
+        np.savetxt(args.output,data,fmt=float_format,delimiter=args.delimiter)
     print("done")
     
 
