@@ -99,16 +99,16 @@ class SocketClientExtras(SocketClient):
         forces = np.zeros_like(atoms.positions)
         virial = np.zeros((3, 3))
 
-        # try:
-        energy = atoms.get_potential_energy()
-        forces = atoms.get_forces()
-        if use_stress:
-            stress = atoms.get_stress(voigt=False)
-            virial = -atoms.get_volume() * stress
-        else:
-            virial = np.zeros((3, 3))
-        # except:
-        #     pass        
+        try:
+            energy = atoms.get_potential_energy()
+            forces = atoms.get_forces()
+            if use_stress:
+                stress = atoms.get_stress(voigt=False)
+                virial = -atoms.get_volume() * stress
+            else:
+                virial = np.zeros((3, 3))
+        except:
+            pass        
 
         extras = {}
         calc:Calculator = atoms.calc
