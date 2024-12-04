@@ -9,6 +9,7 @@ from eslib.drivers.socketextras import SocketClientExtras
 from eslib.formatting import esfmt
 from eslib.functions import suppress_output
 from eslib.input import slist, str2bool
+from warnings import warn
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -46,6 +47,9 @@ def main(args):
     
     #------------------#
     print("\tCuda available: ",torch.cuda.is_available())
+    if torch.cuda.is_available() and args.device != "cuda":
+        warn(f"CUDA is available but you specified {args.device}. Let's move to CUDA.")
+        args.device = "cuda"        
 
     #------------------#
     print("\tReading the first atomic structure from file '{:s}' ... ".format(args.structure), end="")
@@ -88,11 +92,11 @@ def main(args):
         try:
             calculator.to(device=args.device)
         except:
-            pass
+            warn(f"Failed moving calculator to {args.device}.")
         try:
             calculator.to(dtype=args.dtype)
         except:
-            pass
+            warn(f"Failed moving calculator to {args.dtype}.")
         
     elif args.model_type == "MACE":
         print("\tLoading a MACECalculator based on the model that you provided ... ", end="")

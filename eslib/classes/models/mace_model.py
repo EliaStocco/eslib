@@ -52,7 +52,6 @@ class MACEModel(eslibModel):
     # Attributes initialized in `__post_init__`
     implemented_properties: Dict[str, Any] = field(init=False)  #  a dictionary that maps property names to their corresponding functions in the MACE model.
     network: torch.nn.Module = field(init=False)                # `MACE model.
-    current_device:torch.device = field(init=False)             # `torch` device currently used for computation (e.g., 'cpu', 'cuda').
 
     #------------------------------------#
     # Methods for `dataclass` initialization
@@ -106,20 +105,20 @@ class MACEModel(eslibModel):
         """Set default values for the model."""
         torch_tools.set_default_dtype(self.default_dtype)
         # self.device = torch_tools.init_device(self.device)
-        if self.device == "cuda" and torch.cuda.is_available():
-            self.current_device = torch_tools.init_device(self.device)
+        if torch.cuda.is_available():
+            self.device = torch_tools.init_device("cuda")
         else:
-            self.current_device = torch_tools.init_device("cpu")
+            self.device = torch_tools.init_device("cpu")
         return
 
     #------------------#
     def _load_model(self:T) -> None:
         """Load the torch.nn.Module from file."""
         try:
-            self.network: MACEBaseModel = torch.load(f=self.model_path, map_location=self.current_device)
+            self.network: MACEBaseModel = torch.load(f=self.model_path, map_location=self.device)
         except Exception as e:
             raise ValueError(f"Could not load model from {self.model_path}.") from e
-        self.network = self.network.to(self.current_device)  # Ensure model is on the specified device
+        self.network.to(self.device)  # Ensure model is on the specified device
         for param in self.network.parameters():
             param.requires_grad = False
         return
@@ -209,11 +208,15 @@ class MACEModel(eslibModel):
 
         # Set default dtype
         self._set_defaults()
-        self.network = self.network.to(self.current_device)
+        self.network.to(self.device)
         
-        actual_device = next(self.network.parameters()).device
-        if torch.cuda.is_available() and actual_device:
-            warn(f"CUDA is available but torch is gonna run on {actual_device}.")
+        # actual_device = next(self.network.parameters()).device
+        if torch.cuda.is_available():
+            warn(f"CUDA is available but `self.device` is {self.device}. Let's move to CUDA.")
+            self.network.to("cuda")
+            if next(self.network.parameters()).device != "cuda":
+                warn(f"Something weird is going on.")
+            # self.network = self.network.to("cuda")
 
         # Create data loader
         data_loader: torch_geometric.dataloader.DataLoader = make_dataloader(
@@ -281,7 +284,6 @@ class MACEModel(eslibModel):
         args = {
             "path": self.model_path,
             "device": self.device,
-            "current-device": self.current_device,
             "batch size": self.batch_size,
             "charges key": self.charges_key,
             "dtype": self.default_dtype,
