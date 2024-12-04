@@ -232,7 +232,7 @@ class MACEModel(eslibModel):
 
         # Iterate over batches
         for batch in data_loader:
-            batch: torch_geometric.batch.Batch = batch.to(self.current_device)
+            batch: torch_geometric.batch.Batch = batch.to(self.device)
             data: Dict[str, torch.Tensor] = batch.to_dict()
 
             # Compute properties for the current batch
