@@ -196,7 +196,7 @@ class SocketsPoolMACE(BatchedModel):
             
             # Wait for all tasks to complete
             for future in as_completed(task_futures + [master_future]):
-                try:
-                    future.result()  # This will raise any exceptions if they occurred
-                except Exception as e:
-                    print(f"Error in thread execution: {e}")
+                # try:
+                future.result()  # This will raise any exceptions if they occurred
+                # except Exception as e:
+                #     print(f"Error in thread execution: {e}")
