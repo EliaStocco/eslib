@@ -25,7 +25,6 @@ def prepare_args(description):
     parser.add_argument("-in", "--index"       , **argv, required=False, type=itype, help="index to be read from input file (default: %(default)s)", default=':')
     parser.add_argument("-dt", "--time_step"   , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
     parser.add_argument("-e" , "--element"     , **argv, required=True , type=str  , help="element")
-    parser.add_argument("-T ", "--time_span"   , **argv, required=False, type=float, help="final time span to evaluate the diffusion coefficient [ps] (default: %(default)s)", default=20)
     parser.add_argument("-o" , "--output"      , **argv, type=str  , help="output file (default: %(default)s)", default="msd.csv")
     parser.add_argument("-p" , "--plot"        , **argv, type=str  , help="plot (default: %(default)s)", default=None)
     return parser 
@@ -105,15 +104,9 @@ def main(args):
 
     #------------------#
     # Diffusion coefficient
-    with eslog(f"\nComputing the diffusion coefficient"):
-        D = MSD[ MSD["time"] >= np.asarray(MSD["time"])[-1] - args.time_span ]
-        minT, maxT = min(D["time"]), max(D["time"])
-        D = unp.uarray(D["MSD/time"], D["MSD/time-err"])
-        D = np.nanmean(D)
-        
-    D = ufloat(MSD["MSD/time"].iloc[-1],MSD["MSD/time-err"].iloc[-1])/6.
+    with eslog(f"\nComputing the diffusion coefficient"):        
+        D = ufloat(MSD["MSD/time"].iloc[-1],MSD["MSD/time-err"].iloc[-1])/6.
     
-    # print(f"\t {warning}: there could be a missing factor 6 in the diffusion coefficient!")
     print( "\t D = {:.6f} +/- {:.6f} [angstrom^2 / n. of atoms / picosecond]".format(unp.nominal_values(D),unp.std_devs(D)))   
     print(f"\t D has been computed for the last snapshot at {maxT} ps")    
     
