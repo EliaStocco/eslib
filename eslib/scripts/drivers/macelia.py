@@ -47,7 +47,7 @@ def main(args):
     
     #------------------#
     print("\tCuda available: ",torch.cuda.is_available())
-    if torch.cuda.is_available() and args.device != "cuda":
+    if torch.cuda.is_available() and "cuda" not in args.device:
         warn(f"CUDA is available but you specified {args.device}. Let's move to CUDA.")
         args.device = "cuda"        
 

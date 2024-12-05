@@ -211,12 +211,12 @@ class MACEModel(eslibModel):
         self.network.to(self.device)
         
         actual_device = str(next(self.network.parameters()).device).lower()
-        if torch.cuda.is_available() and actual_device != "cuda" :
+        if torch.cuda.is_available() and "cuda" not in actual_device:
             warn(f"CUDA is available but used device is {actual_device} (`self.device` is {self.device}).\n\tLet's move to CUDA.")
             self.device = torch_tools.init_device("cuda")
             self.network.to(self.device)
             actual_device = str(next(self.network.parameters()).device).lower()
-            if actual_device != "cuda":
+            if "cuda" not in actual_device:
                 warn(f"Something weird is going on.\n\tUsed device is {actual_device} and `self.device` is {self.device}.")
             # self.network = self.network.to("cuda")
 
