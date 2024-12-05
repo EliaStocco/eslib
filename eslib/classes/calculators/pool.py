@@ -8,18 +8,25 @@ from dataclasses import dataclass, field
 import numpy as np
 from copy import deepcopy
 from concurrent.futures import ThreadPoolExecutor, wait, as_completed
+import time
+
+# lock = threading.Lock()  # Create a lock
+# condition = threading.Condition()
+
+WAITING_TIME = 0.001
 
 T = TypeVar('T', bound='SocketsPoolMACE')
 
 @dataclass
 class BatchedModel:
     
-    batch_size:int = field(init=False)    
+    batch_size:int #= field(init=False)    
     have_atoms:List[bool] = field(init=False)
     list_atoms:List[Atoms] = field(init=False)
     ready:bool = field(init=False)
     single_results:List[Dict[str,np.ndarray]] = field(init=False)
     exit:bool = field(init=False,default=False)
+    mace_calculator:MACEModel # = field(init=False)
     
     def __post_init__(self):    
         self.have_atoms = [False]*self.batch_size
@@ -30,62 +37,92 @@ class BatchedModel:
     def master(self):
         """Master task running in parallel."""
         self.ready = False
+        print("\tEntering master",flush=True)
         while not self.exit:
             
+            print("\tWaiting for all atoms",flush=True)
             while not all(self.have_atoms) and not self.exit:
+                # with lock:  # Acquire the lock
                 self.ready = False
-                continue
+                # time.sleep(WAITING_TIME)
             
             if self.exit:
                 break
             
+            print("\tCalling network",flush=True)
             results:Dict[str,np.ndarray] = self.mace_calculator.compute(self.list_atoms,raw=True)
+            print("\tDispatching results",flush=True)
+            # with lock:  # Acquire the lock
             for n,_ in enumerate(self.single_results):
                 self.single_results[n] = {}
                 for key in results.keys():
                     value:np.ndarray = np.take(results[key],axis=0,indices=n)
                     self.single_results[n][key] = value if value.size > 1 else float(value)
+                    
+            for n,_ in enumerate(self.have_atoms):
+                self.have_atoms[n] = False
             
             if self.exit:
                 break  
             
-            self.ready = True         
-        
+            # with lock:
+            self.ready = True  
+                       
+        print("\tExiting master",flush=True)
         return
             
 
 @dataclass
 class SingleCalculator(Calculator):
     
-    batched_model:BatchedModel
+    batched_model:List[BatchedModel]
     index:int
+    # manager:List[BatchedModel] = field(init=False)
     
     def __post_init__(self):
         super().__init__()
     
     def calculate(self, atoms:Atoms=None, properties=None, system_changes=all_changes)->None:
+        # print(f"\t\tEntering SingleCalculator.calculate {self.index}",flush=True)
+        super().calculate(atoms, properties, system_changes)
         
-        super().__init__()
+        # with lock:  # Acquire the lock
+        self.batched_model[0].list_atoms[self.index] = atoms
+        # self.batched_model.have_atoms[self.index] = True
         
-        self.batched_model.list_atoms[self.index] = atoms
-        self.batched_model.have_atoms[self.index] = True
-        
-        while not self.batched_model.ready:
+        while not self.batched_model[0].ready:
+            # print(f"\t\tThread {self.index} is alive",flush=True)
+            
+            # with lock:  # Acquire the lock
             self.results = None
-            continue
+            self.batched_model[0].have_atoms[self.index] = True
+            if self.index == 0:
+                pass
+            if self.index == 1:
+                pass # IT ALMOST NEVER ARRIVES HERE
+            if self.index == 2:
+                pass
+            if self.index == 3:
+                pass
+            # time.sleep(WAITING_TIME)  # Sleep for 10 ms to avoid busy waiting
+            # continue
         
-        if self.batched_model.single_results is None \
-            or self.batched_model.single_results[self.index] is None \
-                or len(self.batched_model.single_results[self.index].keys()) == 0 :
+        # with lock:  # Acquire the lock
+        # print(f"\t\tReading results in SingleCalculator.calculate  {self.index}",flush=True)
+        if self.batched_model[0].single_results is None \
+            or self.batched_model[0].single_results[self.index] is None \
+                or len(self.batched_model[0].single_results[self.index].keys()) == 0 :
                     raise ValueError("no results found")
         
-        self.results = deepcopy(self.batched_model.single_results[self.index])
-        self.batched_model.have_atoms[self.index] = False
+        # with lock:  # Acquire the lock
+        self.results = deepcopy(self.batched_model[0].single_results[self.index])
+        self.batched_model[0].have_atoms[self.index] = False
         # self.batched_model.ready = False
+        # print(f"\t\tExiting SingleCalculator.calculate  {self.index}",flush=True)
         
     
 @dataclass
-class SocketsPoolMACE(BatchedModel):
+class SocketsPoolMACE:
     
     ports:List[int]
     unixsockets:List[str]
@@ -93,11 +130,14 @@ class SocketsPoolMACE(BatchedModel):
     log:str
     mace_calculator:MACEModel
     
+    batched_model:BatchedModel = field(init=False)
+    
     drivers:List[SocketClient] = field(init=False)
     calculators:List[SingleCalculator] = field(init=False)
     
     def __post_init__(self):
         self.batch_size = len(self.unixsockets)
+        self.batched_model = BatchedModel(self.batch_size,self.mace_calculator)
         
         self.drivers = [None]*self.batch_size
         self.calculators = [None]*self.batch_size
@@ -108,22 +148,23 @@ class SocketsPoolMACE(BatchedModel):
             else:
                 self.drivers[n] = SocketClient(port=port,unixsocket=unixsocket,log=None)
 
-            self.calculators[n] = SingleCalculator(self,n)
+            self.calculators[n] = SingleCalculator(batched_model=[self.batched_model],index=n)
             self.calculators[n].implemented_properties = self.mace_calculator.implemented_properties
         
-        super().__post_init__()
+        # super().__post_init__()
             
     @staticmethod
-    def _run_single(task: Tuple[Atoms, SocketClient, Calculator, bool]):
+    def _run_single(task: Tuple[Atoms, SocketClient, SingleCalculator, bool]):
         """Helper function for threading."""
         atoms, driver, calc, use_stress = task
+        print(f"\n\tRunning thread {calc.index}",flush=True)
         atoms.calc = calc
         driver.run(atoms, use_stress=use_stress)
 
-    @staticmethod
-    def _run_master_task(instance: "SocketsPoolMACE"):
-        """Run the master task."""
-        instance.master()
+    # @staticmethod
+    # def _run_master_task(instance: "SocketsPoolMACE"):
+    #     """Run the master task."""
+    #     instance.master()
 
     # def run(self, atoms: Atoms, use_stress: bool = False):
     #     """Run all drivers in parallel on the given atoms."""
@@ -147,37 +188,8 @@ class SocketsPoolMACE(BatchedModel):
     
     
 
-    # def run(self, atoms: Atoms, use_stress: bool = False):
-    #     """Run all drivers in parallel on the given atoms using threading."""
-        
-    #     N = len(self.drivers)
-    #     if N != len(self.calculators):
-    #         raise ValueError("Number of drivers must match the number of calculators.")
-
-    #     # Prepare tasks
-    #     tasks = [(atoms.copy(), self.drivers[n], self.calculators[n], use_stress) for n in range(N)]
-
-    #     # Create a thread for the master task to run in parallel
-    #     master_thread = threading.Thread(target=self.master)
-    #     master_thread.start()  # Start the master thread
-        
-    #     # Create and start threads for each task
-    #     threads:List[threading.Thread] = []
-    #     for task in tasks:
-    #         thread = threading.Thread(target=self._run_single, args=(task,))
-    #         thread.daemon = False
-    #         threads.append(thread)
-    #         thread.start()  # Start the thread
-        
-    #     # Wait for all threads (tasks) to finish
-    #     for thread in threads:
-    #         thread.join()  # Block until the thread finishes
-
-    #     # Wait for the master thread to finish
-    #     master_thread.join()  # Block until the master thread finishes
-    
     def run(self, atoms: Atoms, use_stress: bool = False):
-        """Run all drivers in parallel on the given atoms using ThreadPoolExecutor."""
+        """Run all drivers in parallel on the given atoms using threading."""
         
         N = len(self.drivers)
         if N != len(self.calculators):
@@ -185,18 +197,50 @@ class SocketsPoolMACE(BatchedModel):
 
         # Prepare tasks
         tasks = [(atoms.copy(), self.drivers[n], self.calculators[n], use_stress) for n in range(N)]
+
+        # Create a thread for the master task to run in parallel
+        master_thread = threading.Thread(target=self.batched_model.master)
+        master_thread.start()  # Start the master thread
         
-        # Create a thread pool executor
-        with ThreadPoolExecutor(max_workers=N + 1) as executor:  # Add one for the master task
-            # Submit the master task
-            master_future = executor.submit(self.master)
+        # Create and start threads for each task
+        threads:List[threading.Thread] = [master_thread]
+        for task in tasks:
+            thread = threading.Thread(target=self._run_single, args=(task,))
+            # thread.daemon = False
+            threads.append(thread)
+            thread.start()  # Start the thread
+        
+        # Wait for all threads (tasks) to finish
+        for thread in threads:
+            # print(f"\n\tRunning thread {n}",flush=True)
+            thread.join()  # Block until the thread finishes
+
+        # Wait for the master thread to finish
+        # master_thread.join()  # Block until the master thread finishes
+    
+    # def run(self, atoms: Atoms, use_stress: bool = False):
+    #     """Run all drivers in parallel on the given atoms using ThreadPoolExecutor."""
+        
+    #     N = len(self.drivers)
+    #     if N != len(self.calculators):
+    #         raise ValueError("Number of drivers must match the number of calculators.")
+
+    #     # Prepare tasks
+    #     tasks = [(atoms.copy(), self.drivers[n], self.calculators[n], use_stress) for n in range(N)]
+        
+    #     # Create a thread pool executor
+    #     with ThreadPoolExecutor(max_workers=N + 1) as executor:  # Add one for the master task
+    #         # Submit the master task
+    #         master_future = executor.submit(self.master)
             
-            # Submit the tasks for each driver
-            task_futures = [executor.submit(self._run_single, task) for task in tasks]
+    #         # Submit the tasks for each driver
+    #         task_futures = [executor.submit(self._run_single, task) for task in tasks]
             
-            # Wait for all tasks to complete
-            for future in as_completed(task_futures + [master_future]):
-                # try:
-                future.result()  # This will raise any exceptions if they occurred
-                # except Exception as e:
-                #     print(f"Error in thread execution: {e}")
+    #         # Wait for all tasks to complete
+    #         for future in as_completed(task_futures + [master_future]):
+    #             # try:
+    #             future.result()  # This will raise any exceptions if they occurred
+    #             # except Exception as e:
+    #             #     print(f"Error in thread execution: {e}")
+    #     print("\n\tFinished running",flush=True)
+    #     return
