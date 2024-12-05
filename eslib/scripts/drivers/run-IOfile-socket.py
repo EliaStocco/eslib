@@ -21,6 +21,7 @@ def prepare_args(description):
     parser.add_argument("-u" , "--unix"         , **argv, required=False, type=str2bool, help="Use a UNIX domain socket (default: %(default)s)", default=False)
     parser.add_argument("-sc", "--socket_client", **argv, required=False, type=str     , help="socket client (default: %(default)s)", choices=['eslib','ase'], default='ase')
     parser.add_argument("-f" , "--folder"       , **argv, required=True , type=str     , help="folder where the files will be written and read")
+    parser.add_argument("-l" , "--log_file"     , **argv, required=False, type=str     , help="optional path for the log file (default: %(default)s)", default=None)
     return parser
 
 #---------------------------------------#
@@ -29,7 +30,7 @@ def main(args):
     
     #------------------#
     print("\tAllocating the calculator ... ", end="")
-    calculator = FileIOCalculator(args.folder)
+    calculator = FileIOCalculator(folder=args.folder,log_file=args.log_file)
     print("done")
     
     #------------------#
