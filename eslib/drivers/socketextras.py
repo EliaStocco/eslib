@@ -63,7 +63,6 @@ class FormatExtras:
 class ProtocolExtras:
 
     def ipi_sendforce(self, energy, forces, virial,morebytes=np.zeros(1, dtype=np.byte)):
-        print("ipi_sendforce",flush=True)
         assert np.array([energy]).size == 1
         assert forces.shape[1] == 3
         assert virial.shape == (3, 3)
@@ -93,7 +92,6 @@ class SocketClientExtras(SocketClient):
     def calculate(self, atoms:Atoms, use_stress:bool):
         # We should also broadcast the bead index, once we support doing
         # multiple beads.
-        print("SocketClientExtras.calculate",flush=True)
         self.comm.broadcast(atoms.positions, 0)
         self.comm.broadcast(np.ascontiguousarray(atoms.cell), 0)
 
