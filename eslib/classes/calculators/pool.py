@@ -117,10 +117,7 @@ class SingleCalculator(Calculator):
         # with lock:  # Acquire the lock
         self.results = deepcopy(self.batched_model[0].single_results[self.index])
         self.batched_model[0].have_atoms[self.index] = False
-        # self.batched_model.ready = False
-        # print(f"\t\tExiting SingleCalculator.calculate  {self.index}",flush=True)
-        
-    
+
 @dataclass
 class SocketsPoolMACE:
     
@@ -161,32 +158,6 @@ class SocketsPoolMACE:
         atoms.calc = calc
         driver.run(atoms, use_stress=use_stress)
 
-    # @staticmethod
-    # def _run_master_task(instance: "SocketsPoolMACE"):
-    #     """Run the master task."""
-    #     instance.master()
-
-    # def run(self, atoms: Atoms, use_stress: bool = False):
-    #     """Run all drivers in parallel on the given atoms."""
-    #     N = len(self.drivers)
-    #     if N != len(self.calculators):
-    #         raise ValueError("Number of drivers must match the number of calculators.")
-
-    #     # Prepare arguments for threading
-    #     tasks = [(atoms.copy(), self.drivers[n], self.calculators[n], use_stress) for n in range(N)]
-
-    #     # Use ThreadPoolExecutor for threading
-    #     with ThreadPoolExecutor(max_workers=N + 1) as executor:  # Add one for the master task
-            
-    #         # Submit all individual tasks to the executor
-    #         futures = [executor.submit(self._run_single, task) for task in tasks]
-    #         # master = executor.submit(self._run_master_task, self)  # Submit the master task to the executor
-    #         # futures.append(master)
-    #         # Wait for all futures to finish
-    #         for future in futures:
-    #             future.result()  # This will block until all tasks are complete
-    
-    
 
     def run(self, atoms: Atoms, use_stress: bool = False):
         """Run all drivers in parallel on the given atoms using threading."""
@@ -215,32 +186,5 @@ class SocketsPoolMACE:
             # print(f"\n\tRunning thread {n}",flush=True)
             thread.join()  # Block until the thread finishes
 
-        # Wait for the master thread to finish
-        # master_thread.join()  # Block until the master thread finishes
     
-    # def run(self, atoms: Atoms, use_stress: bool = False):
-    #     """Run all drivers in parallel on the given atoms using ThreadPoolExecutor."""
-        
-    #     N = len(self.drivers)
-    #     if N != len(self.calculators):
-    #         raise ValueError("Number of drivers must match the number of calculators.")
-
-    #     # Prepare tasks
-    #     tasks = [(atoms.copy(), self.drivers[n], self.calculators[n], use_stress) for n in range(N)]
-        
-    #     # Create a thread pool executor
-    #     with ThreadPoolExecutor(max_workers=N + 1) as executor:  # Add one for the master task
-    #         # Submit the master task
-    #         master_future = executor.submit(self.master)
-            
-    #         # Submit the tasks for each driver
-    #         task_futures = [executor.submit(self._run_single, task) for task in tasks]
-            
-    #         # Wait for all tasks to complete
-    #         for future in as_completed(task_futures + [master_future]):
-    #             # try:
-    #             future.result()  # This will raise any exceptions if they occurred
-    #             # except Exception as e:
-    #             #     print(f"Error in thread execution: {e}")
-    #     print("\n\tFinished running",flush=True)
-    #     return
+    
