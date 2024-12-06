@@ -1,6 +1,50 @@
 import json
 import numpy as np
 from typing import Any, Union
+import logging
+import os
+
+#---------------------------------------#
+
+def setup_logging(log_file: str = None) -> logging.Logger:
+    """
+    Set up a logger that writes logs to a file and handles exceptions cleanly.
+
+    Args:
+        log_file (str): Path to the log file. If None, logs are not written to a file.
+
+    Returns:
+        logging.Logger: Configured logger object.
+    """
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+
+    if log_file:
+        # File handler to write logs to a file
+        file_handler = logging.FileHandler(log_file, mode='a')
+        file_handler.setLevel(logging.DEBUG)
+        
+        # Formatter with date and time
+        file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(file_formatter)
+
+        # Add handler to the logger
+        logger.addHandler(file_handler)
+
+    # Log the working directory as the first line
+    logger.debug(f"Logger initialized. Working directory: {os.getcwd()}")
+
+    # Log uncaught exceptions
+    def handle_exception(exc_type, exc_value, exc_traceback):
+        if issubclass(exc_type, KeyboardInterrupt):
+            logger.warning("KeyboardInterrupt caught. Exiting.")
+            exit(1)
+        logger.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+
+    import sys
+    sys.excepthook = handle_exception
+
+    return logger
 
 # ---------------------------------------#
 class NumpyEncoder(json.JSONEncoder):
