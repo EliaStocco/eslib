@@ -56,7 +56,7 @@ def main(args):
         #     time_no_batch[n] += time_no_batch[n-1]
         print(f"\t - {n+1}: {time_no_batch[n]}s")
     time_no_batch  = time_no_batch[args.discard:]
-    sizes  = np.arange(start=args.discard+1,stop=args.max_batch+1,step=1)
+    sizes_no_batch  = np.arange(start=args.discard+1,stop=args.max_batch+1,step=1)
     av_time_no_batch = np.mean(time_no_batch)
     print(f"\n\tAverage time per structure without batching: {av_time_no_batch}s")
     print("\n\tDeleting model ... ",end="")
@@ -69,28 +69,40 @@ def main(args):
     print("done")
     
     print("\n\tTesing with batching:")
-    time_batch = np.zeros(args.max_batch)
+    time_batch = np.full(args.max_batch,np.nan)
     for n in range(1,args.max_batch+1):
-        start_time = time.time()
-        model.compute([atoms]*n,raw=True)
-        end_time = time.time()
-        time_batch[n-1] = end_time - start_time
-        # if n > 0 :
-        #     time_no_batch[n] += time_no_batch[n-1]
-        print(f"\t - {n}: {time_batch[n-1]}s")
+        try :
+            start_time = time.time()
+            model.compute([atoms]*n,raw=True)
+            end_time = time.time()
+            time_batch[n-1] = end_time - start_time
+            # if n == 50:
+            #     raise ValueError("testing error")
+            # if n > 0 :
+            #     time_no_batch[n] += time_no_batch[n-1]
+            print(f"\t - {n}: {time_batch[n-1]}s")
+        except:
+            break
     time_batch  = time_batch[args.discard:]
-    sizes  = np.arange(start=args.discard+1,stop=args.max_batch+1,step=1)
+    # tot = (~np.isnan(time_batch)).sum()
+    sizes  = np.arange(1,args.max_batch+1)
+    sizes = sizes[args.discard:]
+    sizes = sizes[~np.isnan(time_batch)]
+    time_batch = time_batch[~np.isnan(time_batch)]
     time_batch /= sizes
     av_time_batch = np.mean(time_batch)
     print(f"\n\tAverage time per structure with batching: {av_time_batch}s")
     
     factor = av_time_no_batch/av_time_batch
-    print(f"\n\n\tBatching method is {factor:.2f} times faster than the serial one.\n")
+    print(f"\n\tBatching method is {factor:.2f} times faster than the serial one.")
+    
+    if sizes[-1] != args.max_batch:
+        print(f"\tYou can compute at most {sizes[-1]} structures at the same time.\n")
     
     #------------------#
     print("\tSaving plot to file '{:s}' ... ".format(args.output), end="")
     fig,ax = plt.subplots(figsize=(4,3))
-    ax.plot(sizes,time_no_batch,color="red",label="serial")
+    ax.plot(sizes_no_batch,time_no_batch,color="red",label="serial")
     ax.plot(sizes,time_batch,color="blue",label="batch")
     ax.legend(**legend_options)
     ax.set_xlabel("size")
