@@ -1,6 +1,7 @@
 import os
 import time
 import numpy as np
+from filelock import FileLock
 from typing import List, Dict
 from ase.io import read
 from eslib.classes.models.mace_model import MACEModel
@@ -60,8 +61,9 @@ class FileIOBatchedMACE:
             # Read atomic structures from input files
             self.logger.debug("Reading and removing input files.")
             for n, ifile in enumerate(ifiles):
-                atoms[n] = read(ifile, format="extxyz", index=0)
-                os.remove(ifile)
+                with FileLock(f"{ifile}.lock"):
+                    atoms[n] = read(ifile, format="extxyz", index=0)
+                    os.remove(ifile)
 
             check_exit(self.logger)
 
@@ -88,5 +90,6 @@ class FileIOBatchedMACE:
             # Save results to output files
             self.logger.info("Writing output files.")
             for ofile, res in zip(ofiles, single_results):
-                save2json(ofile, res)
-                self.logger.debug(f"Saved results to {ofile}.")
+                with FileLock(f"{ofile}.lock"):
+                    save2json(ofile, res)
+                    self.logger.debug(f"Saved results to {ofile}.")

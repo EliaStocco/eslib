@@ -2,18 +2,16 @@ import os
 import time
 import shutil
 import numpy as np
+from filelock import FileLock
 from ase import Atoms
 from ase.io import write
 from ase.calculators.calculator import Calculator, all_changes
-from dataclasses import dataclass, field
-from typing import Dict, Union, Any, List
-from classes.aseio import M
+from typing import Dict, Union, Any
 from eslib.io_tools import read_json
 from .tools import check_exit, Logger
 
 MANDATORY = ["energy","free_energy","forces","stress"]
         
-@dataclass
 class FileIOCalculator(Calculator):
     """
     A custom calculator that handles I/O operations with files and logs the process.
@@ -55,7 +53,8 @@ class FileIOCalculator(Calculator):
             raise ValueError(f"Error: {ifile} should not exist yet.")
 
         # Write atomic structure to input file
-        write(ifile, atoms, format="extxyz")
+        with FileLock(f"{ifile}.lock"):
+            write(ifile, atoms, format="extxyz")
         self.logger.debug(f"Input file written: {ifile}")
 
         # Wait for output file to be created
@@ -81,9 +80,10 @@ class FileIOCalculator(Calculator):
 
         #------------------#
         # Read and validate the JSON output file
-        data: Dict[str, Any] = read_json(ofile)
-        self.logger.debug(f"Output file read: {ofile}")
-        os.remove(ofile)
+        with FileLock(f"{ofile}.lock"):
+            data: Dict[str, Any] = read_json(ofile)
+            self.logger.debug(f"Output file read: {ofile}")
+            os.remove(ofile)
 
         #------------------#
         # Process the results
