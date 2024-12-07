@@ -6,7 +6,7 @@ from eslib.classes.calculators.fileIObatchMACE import FileIOBatchedMACE
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Run a many FileIOBatchedMACE."
+description = "Run FileIOBatchedMACE."
 
 #---------------------------------------#
 def prepare_args(description):

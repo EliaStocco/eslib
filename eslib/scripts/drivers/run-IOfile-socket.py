@@ -7,7 +7,7 @@ from eslib.input import str2bool
 from eslib.classes.calculators.fileIOcalculator import FileIOCalculator
 
 #---------------------------------------#
-description = "Run a FileIOCalculator."
+description = "Run one FileIOCalculator."
 
 #---------------------------------------#
 def prepare_args(description):
