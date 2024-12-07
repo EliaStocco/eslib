@@ -47,6 +47,7 @@ class FileIOCalculator(Calculator):
 
         super().calculate(atoms, properties, system_changes)
 
+        #------------------#
         # Prepare the input file path
         ifile = os.path.join(self.folder, "input.extxyz")
         if os.path.exists(ifile):
@@ -62,6 +63,7 @@ class FileIOCalculator(Calculator):
         timeout_seconds = None  # Timeout after 10 minutes
         start_wait = time.time()
 
+        #------------------#
         self.logger.debug(f"Waiting for output file: {ofile}")
         while not os.path.exists(ofile):
             check_exit(self.logger)
@@ -69,18 +71,21 @@ class FileIOCalculator(Calculator):
                 if time.time() - start_wait > timeout_seconds:
                     self.logger.error(f"Timeout waiting for output file: {ofile}")
                     raise TimeoutError(f"Output file not created within {timeout_seconds} seconds.")
-            time.sleep(1)
+            # time.sleep(0.001)
 
+        #------------------#
         # Validate that the input file no longer exists
         if os.path.exists(ifile):
             self.logger.error(f"Input file still exists: {ifile}")
             raise ValueError(f"Error: {ifile} should not exist anymore.")
 
+        #------------------#
         # Read and validate the JSON output file
         data: Dict[str, Any] = read_json(ofile)
         self.logger.debug(f"Output file read: {ofile}")
         os.remove(ofile)
 
+        #------------------#
         # Process the results
         self.results: Dict[str, Union[float, np.ndarray, str]] = {}
         for key in MANDATORY:
@@ -99,6 +104,7 @@ class FileIOCalculator(Calculator):
                 self.results[key] = data[key]
                 self.logger.debug(f"Processed key {key}")
 
+        #------------------#
         # Validate shapes of forces and stress
         got = self.results["forces"].shape
         exp = atoms.positions.shape
@@ -112,6 +118,7 @@ class FileIOCalculator(Calculator):
             self.logger.error(f"Stress has the wrong shape: got {got} but expected {exp}.")
             raise ValueError(f"Stress has the wrong shape: got {got} but expected {exp}.")
 
+        #------------------#
         # Record end time and log the duration
         end_time = time.time()
         total_time = end_time - start_time

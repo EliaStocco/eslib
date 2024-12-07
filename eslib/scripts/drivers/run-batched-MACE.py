@@ -13,8 +13,9 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-f" , "--folders", **argv, required=True , type=slist, help="list of folders")
-    parser.add_argument("-m" , "--model"  , **argv, required=False, type=str  , help="file with the MACE model (default: %(default)s)", default=None)
+    parser.add_argument("-f" , "--folders" , **argv, required=True , type=slist, help="list of folders")
+    parser.add_argument("-m" , "--model"   , **argv, required=False, type=str  , help="file with the MACE model (default: %(default)s)", default=None)
+    parser.add_argument("-l" , "--log_file", **argv, required=False, type=str  , help="optional path for the log file (default: %(default)s)", default=None)
     return parser
 
 #---------------------------------------#
@@ -26,7 +27,7 @@ def main(args):
     
     #------------------#
     print("\tAllocating the calculator ... ", end="")
-    machine = FileIOBatchedMACE(folders=args.folders,model=args.model)
+    machine = FileIOBatchedMACE(folders=args.folders,model=args.model,log_file=args.log_file)
     print("done")
     
     #------------------#

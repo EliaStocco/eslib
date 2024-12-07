@@ -1,4 +1,5 @@
 import os
+import time
 import numpy as np
 from typing import List, Dict
 from ase.io import read
@@ -7,13 +8,6 @@ from eslib.io_tools import save2json
 from .tools import check_exit, Logger
 
 class FileIOBatchedMACE:
-    """
-    A class to run MACE model predictions in batch, processing multiple folders with input/output files.
-
-    Attributes:
-        folders (List[str]): List of folder paths to process.
-        model (MACEModel): The MACE model object loaded from the specified file.
-    """
 
     def __init__(self, folders: List[str], model: str, log_file: str = None) -> None:
         """
@@ -28,8 +22,6 @@ class FileIOBatchedMACE:
         self.model = MACEModel.from_file(model)
         self.logger = Logger(log_file)
     
-
-
     def run(self) -> None:
         """
         Run the batch processing of input/output files, including checking for files and 
@@ -43,14 +35,17 @@ class FileIOBatchedMACE:
         ifiles = [f"{folder}/input.extxyz" for folder in self.folders]
         ofiles = [f"{folder}/output.json" for folder in self.folders]
 
+        #------------------#
         while True:  # iterations
             check_exit(self.logger)
             
+            #------------------#
             # Reset readiness status
             self.logger.debug("Resetting flags.")
             for n in range(N):
                 ready[n] = False
 
+            #------------------#
             # Wait until all folders are ready
             self.logger.info("Waiting for input files.")
             while not all(ready):
@@ -61,6 +56,7 @@ class FileIOBatchedMACE:
                 check_exit(self.logger)
             self.logger.info("All input files found.")
 
+            #------------------#
             # Read atomic structures from input files
             self.logger.debug("Reading and removing input files.")
             for n, ifile in enumerate(ifiles):
@@ -69,10 +65,18 @@ class FileIOBatchedMACE:
 
             check_exit(self.logger)
 
+            #------------------#
             # Compute results using the MACE model
             self.logger.info("Running MACE model.")
+            
+            start_time = time.time()  # Record the start time of the method
             results: Dict[str, np.ndarray] = self.model.compute(atoms, raw=True)
+            end_time = time.time()
+            total_time = end_time - start_time
+            
+            self.logger.info(f"Total time spent to compute results: {total_time:.2f} seconds.")
 
+            #------------------#
             # Process and save results for each folder
             for n, _ in enumerate(single_results):
                 single_results[n] = {}
@@ -80,6 +84,7 @@ class FileIOBatchedMACE:
                     value: np.ndarray = np.take(results[key], axis=0, indices=n)
                     single_results[n][key] = value if value.size > 1 else float(value)
 
+            #------------------#
             # Save results to output files
             self.logger.info("Writing output files.")
             for ofile, res in zip(ofiles, single_results):
