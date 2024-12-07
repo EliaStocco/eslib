@@ -32,8 +32,6 @@ def main(args):
     #------------------#
     print("\tCuda available: ",torch.cuda.is_available())
     
-    
-    
     #------------------#
     print("\tReading the first atomic structure from file '{:s}' ... ".format(args.input), end="")
     atoms = read(args.input,format=args.input_format,index=0)
