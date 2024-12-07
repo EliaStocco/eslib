@@ -49,6 +49,13 @@ class FileIOBatchedMACE:
             #------------------#
             # Wait until all folders are ready
             self.logger.info("Waiting for input files.")
+            
+            # TODO
+            # Here I should:
+            #  - load the `self.model.batch_size` oldest files
+            #  - call the network for these structures
+            #  - write the output files 
+            #  - start the loop again
             while not all(ready):
                 for n, (folder, ifile) in enumerate(zip(self.folders, ifiles)):
                     if os.path.exists(folder) and os.path.exists(ifile):
