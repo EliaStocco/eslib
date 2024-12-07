@@ -1,19 +1,10 @@
 import os
 import numpy as np
-import logging
 from typing import List, Dict
 from ase.io import read
 from eslib.classes.models.mace_model import MACEModel
 from eslib.io_tools import save2json
-
-def check_exit() -> None:
-    """
-    Check if an 'EXIT' file exists in the current directory. 
-    If it exists, terminate the program.
-    """
-    if os.path.exists("EXIT"):
-        exit(0)
-
+from .tools import check_exit, Logger
 
 class FileIOBatchedMACE:
     """
@@ -35,34 +26,16 @@ class FileIOBatchedMACE:
         """
         self.folders = folders
         self.model = MACEModel.from_file(model)
-        
-        # Set up logging
-        self.logger = self.setup_logging(log_file)
+        self.logger = Logger(log_file)
+    
 
-    def setup_logging(self, log_file: str) -> logging.Logger:
-        """
-        Set up the logger for the class.
-
-        Args:
-            log_file (str): Path to the log file.
-
-        Returns:
-            logging.Logger: Configured logger.
-        """
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.DEBUG)
-        file_handler = logging.FileHandler(log_file, mode='a') if log_file else logging.StreamHandler()
-        file_handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-        return logger
 
     def run(self) -> None:
         """
         Run the batch processing of input/output files, including checking for files and 
         computing results using the MACE model. Writes results to output files.
         """
+        self.logger.info("Starting calculation.")
         N = len(self.folders)
         atoms = [None] * N
         ready = [False] * N
@@ -71,28 +44,33 @@ class FileIOBatchedMACE:
         ofiles = [f"{folder}/output.json" for folder in self.folders]
 
         while True:  # iterations
-            check_exit()
+            check_exit(self.logger)
             
             # Reset readiness status
+            self.logger.debug("Resetting flags.")
             for n in range(N):
                 ready[n] = False
 
             # Wait until all folders are ready
+            self.logger.info("Waiting for input files.")
             while not all(ready):
                 for n, (folder, ifile) in enumerate(zip(self.folders, ifiles)):
                     if os.path.exists(folder) and os.path.exists(ifile):
                         ready[n] = True
-                check_exit()
+                        self.logger.debug(f"Input file {ifile} found.")
+                check_exit(self.logger)
+            self.logger.info("All input files found.")
 
             # Read atomic structures from input files
+            self.logger.debug("Reading and removing input files.")
             for n, ifile in enumerate(ifiles):
                 atoms[n] = read(ifile, format="extxyz", index=0)
                 os.remove(ifile)
 
-            check_exit()
+            check_exit(self.logger)
 
             # Compute results using the MACE model
-            self.logger.info("Running MACE model computation.")
+            self.logger.info("Running MACE model.")
             results: Dict[str, np.ndarray] = self.model.compute(atoms, raw=True)
 
             # Process and save results for each folder
@@ -103,6 +81,7 @@ class FileIOBatchedMACE:
                     single_results[n][key] = value if value.size > 1 else float(value)
 
             # Save results to output files
+            self.logger.info("Writing output files.")
             for ofile, res in zip(ofiles, single_results):
                 save2json(ofile, res)
-                self.logger.info(f"Saved results to {ofile}.")
+                self.logger.debug(f"Saved results to {ofile}.")

@@ -29,30 +29,30 @@ def prepare_args(description):
 def main(args):
     
     #------------------#
-    print("\tAllocating the calculator ... ", end="")
+    print("\tAllocating the calculator ... ", end="",flush=True)
     calculator = FileIOCalculator(folder=args.folder,log_file=args.log_file)
-    print("done")
+    print("done",flush=True)
     
     #------------------#
-    print("\tReading the first atomic structure from file '{:s}' ... ".format(args.input), end="")
+    print("\tReading the first atomic structure from file '{:s}' ... ".format(args.input), end="",flush=True)
     atoms = read(args.input,format=args.input_format,index=0)
     atoms.info = {} # I don't know if I actually need this line
-    print("done")
+    print("done",flush=True)
 
     atoms.calc = calculator
 
     #------------------#
     socket_client = SocketClientExtras if args.socket_client == 'eslib' else SocketClient
-    print("\tPreparing the socket communication ... ", end="")
+    print("\tPreparing the socket communication ... ", end="",flush=True)
     client = socket_client(host=args.address,\
                           port=args.port,\
                           unixsocket=args.address if args.unix else None)
-    print("done")
+    print("done",flush=True)
 
     #------------------#
-    print("\n\tRunning ... ", end="")
+    print("\n\tRunning ... \n",flush=True)
     client.run(atoms,use_stress=False)
-    print("done")
+    print("\n\TDone",flush=True)
 
 #---------------------------------------#
 if __name__ == "__main__":

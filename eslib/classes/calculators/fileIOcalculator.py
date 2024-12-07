@@ -1,51 +1,18 @@
 import os
 import time
 import shutil
-import logging
 import numpy as np
 from ase import Atoms
 from ase.io import write
 from ase.calculators.calculator import Calculator, all_changes
 from dataclasses import dataclass, field
-from typing import Dict, Union, Any
+from typing import Dict, Union, Any, List
+from classes.aseio import M
 from eslib.io_tools import read_json
+from .tools import check_exit, Logger
 
 MANDATORY = ["energy","free_energy","forces","stress"]
-
-
-def check_exit(logger: logging.Logger) -> None:
-    """
-    Checks for the existence of the 'EXIT' file. If found, terminates the program.
-
-    Args:
-        logger (logging.Logger): Logger to record the exit message.
-    """
-    if os.path.exists("EXIT"):
-        logger.info("Exit signal detected. Terminating.")
-        exit(0)
-
-
-def prepare_folder(folder: str) -> None:
-    """
-    Prepares the folder by cleaning its contents or creating it if it doesn't exist.
-
-    Args:
-        folder (str): The path of the folder to prepare.
-        logger (logging.Logger): Logger to record the actions.
-    """
-    if os.path.exists(folder):
-        # Clean the folder by removing all its contents
-        for filename in os.listdir(folder):
-            file_path = os.path.join(folder, filename)
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)  # Remove file or symbolic link
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)  # Remove directory
-    else:
-        # Create the folder if it does not exist
-        os.makedirs(folder)
-
-
+        
 @dataclass
 class FileIOCalculator(Calculator):
     """
@@ -55,46 +22,16 @@ class FileIOCalculator(Calculator):
         folder (str): Path to the folder where calculations are stored.
         log_file (str): Optional path to the log file (defaults to {folder}/log.out).
     """
-    folder: str
-    log_file: str = field(default=None)
-
-    def __post_init__(self) -> None:
+    
+    def __init__(self,folder:str,log_file:str) -> None:
         """
         Initializes the calculator and prepares the folder for calculations.
         """
-        super().__init__()
-        os.makedirs(self.folder, exist_ok=True)
-
-        # Default log file if not provided
-        # if self.log_file is None:
-        #     self.log_file = os.path.join(self.folder, "log.out")
-
-        # Set up logging
-        self.logger = self.setup_logging(self.log_file)
-        self.logger.info("Initializing FileIOCalculator.")
+        Calculator.__init__(self)
+        self.folder = folder  
+        self.logger = Logger(log_file)
         self.implemented_properties = MANDATORY
-
-        # Prepare the folder
-        prepare_folder(self.folder)
-
-    def setup_logging(self, log_file: str) -> logging.Logger:
-        """
-        Set up the logger for the class.
-
-        Args:
-            log_file (str): Path to the log file.
-
-        Returns:
-            logging.Logger: Configured logger.
-        """
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.DEBUG)
-        file_handler = logging.FileHandler(log_file, mode='a') if log_file else logging.StreamHandler()
-        file_handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-        return logger
+        prepare_folder(self.folder)      
 
     def calculate(self, atoms: Atoms = None, properties=None, system_changes=all_changes) -> None:
         """
@@ -106,7 +43,7 @@ class FileIOCalculator(Calculator):
             system_changes: Changes to the system (not used here).
         """
         start_time = time.time()  # Record the start time of the method
-        self.logger.info("Starting calculation.")
+        self.logger.debug("Starting calculation.")
 
         super().calculate(atoms, properties, system_changes)
 
@@ -125,6 +62,7 @@ class FileIOCalculator(Calculator):
         timeout_seconds = None  # Timeout after 10 minutes
         start_wait = time.time()
 
+        self.logger.debug(f"Waiting for output file: {ofile}")
         while not os.path.exists(ofile):
             check_exit(self.logger)
             if timeout_seconds is not None:
@@ -177,6 +115,25 @@ class FileIOCalculator(Calculator):
         # Record end time and log the duration
         end_time = time.time()
         total_time = end_time - start_time
-        self.logger.info(f"Calculation completed successfully.")
+        self.logger.debug(f"Calculation completed successfully.")
         self.logger.info(f"Total time spent in calculate: {total_time:.2f} seconds.")
 
+def prepare_folder(folder: str) -> None:
+    """
+    Prepares the folder by cleaning its contents or creating it if it doesn't exist.
+
+    Args:
+        folder (str): The path of the folder to prepare.
+        logger (logging.Logger): Logger to record the actions.
+    """
+    if os.path.exists(folder):
+        # Clean the folder by removing all its contents
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)  # Remove file or symbolic link
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)  # Remove directory
+    else:
+        # Create the folder if it does not exist
+        os.makedirs(folder)
