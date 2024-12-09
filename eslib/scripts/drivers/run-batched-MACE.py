@@ -31,9 +31,9 @@ def main(args):
     print("done")
     
     #------------------#
-    print("\n\tRunning ... ", end="")
+    print("\n\tRunning ... \n")
     machine.run()
-    print("done")
+    print("\n\tDone")
 
 #---------------------------------------#
 if __name__ == "__main__":
