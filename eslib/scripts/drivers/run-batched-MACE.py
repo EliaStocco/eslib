@@ -3,6 +3,7 @@ import torch
 from eslib.formatting import esfmt
 from eslib.input import slist
 from eslib.classes.calculators.fileIObatchMACE import FileIOBatchedMACE
+from eslib.classes.models.mace_model import MACEModel
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -25,6 +26,15 @@ def main(args):
     #------------------#
     print("\tCuda available: ",torch.cuda.is_available())
     
+    #------------------#
+    print("\tTesting model:")
+    model = MACEModel.from_file(file=args.model)
+    try:
+        model.summary()
+    except:
+        print("\tProblem showing model details ... it will be a surprise :)")
+    del model
+        
     #------------------#
     print("\tAllocating the calculator ... ", end="")
     machine = FileIOBatchedMACE(folders=args.folders,model=args.model,log_file=args.log_file)
