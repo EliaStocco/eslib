@@ -86,12 +86,18 @@ class FileIOCalculator(Calculator):
         for key in MANDATORY:
             if key not in data:
                 self.logger.warning(f"Missing key {key} in output data.")
-                if key == "free_energy":
-                    self.results["free_energy"] = data["energy"]
+                if key == "energy":
+                    data["energy"] = 0.0
+                    self.results["energy"] = 0.0
+                elif key == "forces":
+                    self.results["forces"] = np.zeros(atoms.positions)
+                elif key == "free_energy":
+                    self.results["free_energy"] = data["energy"] if "energy" in data else 0.0
                 elif key == "stress":
                     self.results["stress"] = np.zeros((3, 3))
                 else:
-                    raise KeyError(f"Missing key {key} in data. Found keys: {list(data.keys())}.")
+                    # raise KeyError(f"Missing key {key} in data. Found keys: {list(data.keys())}.")
+                    raise KeyError(f"Coding error for key '{key}'.")
             else:
                 self.results[key] = data[key]
                 self.logger.debug(f"Processed key {key}")
