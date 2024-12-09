@@ -1,5 +1,6 @@
 import os
 import time
+import json
 import shutil
 import numpy as np
 from filelock import FileLock
@@ -11,8 +12,31 @@ from eslib.io_tools import read_json
 from .tools import check_exit, Logger
 
 # Mandatory properties to be returned by the calculator
-MANDATORY = ["energy", "free_energy", "forces", "stress"]
+MANDATORY = {
+        "energy"      : (float, 1),
+        "free_energy" : (float, 1),
+        "forces"      : (float, ("natoms", 3)),
+        "stress"      : (float, (3, 3))
+    }
 
+def get_impl_prop(file:str)->Dict[str,Any]:
+    if file is None:
+        return MANDATORY
+    else:
+        with open(file, 'r') as f:
+            data:Dict[str,Any] = json.load(f)
+        # Convert lists back to tuples
+        impl_prop = {}
+        for k,v in data.items():
+            if not isinstance(v, list):
+                v  = [v]
+            try:
+                v[0] = eval(v[0])
+            except:
+                pass
+            v = tuple(v)
+            impl_prop[k] = v
+        return impl_prop
 
 class FileIOCalculator(Calculator):
     """
@@ -22,8 +46,12 @@ class FileIOCalculator(Calculator):
         folder (str): Directory for input/output files.
         logger (Logger): Logger instance for logging operations.
     """
+    
+    folder:str
+    logger:Logger
+    implemented_properties:Dict[str,Any]
 
-    def __init__(self, folder: str, log_file: str) -> None:
+    def __init__(self, folder: str, log_file: str, impl_prop:str) -> None:
         """
         Initialize the calculator and prepare the folder.
 
@@ -34,8 +62,11 @@ class FileIOCalculator(Calculator):
         super().__init__()
         self.folder = folder
         self.logger = Logger(log_file)
-        self.implemented_properties = MANDATORY
         prepare_folder(self.folder)
+        self.implemented_properties = MANDATORY
+        impl_prop = get_impl_prop(impl_prop)
+        self.implemented_properties.update(impl_prop)
+        
 
     def calculate(self, atoms: Atoms = None, properties=None, system_changes=all_changes) -> None:
         """
@@ -83,7 +114,7 @@ class FileIOCalculator(Calculator):
 
         # Process and validate results
         self.results: Dict[str, Union[float, np.ndarray, str]] = {}
-        for key in MANDATORY:
+        for key in MANDATORY.keys():
             if key not in data:
                 self.logger.warning(f"Missing key {key} in output data.")
                 if key == "energy":

@@ -193,3 +193,48 @@ class TensorData(pickleIO,xr.DataArray):
         
 class PhysicalTensor(TensorData,xr.DataArray):
     pass
+
+
+import glob
+import numpy as np
+from typing import Callable, Any, List, Union
+
+def read_many_files(func: Callable[..., np.ndarray]) -> Callable[..., Union[np.ndarray, List[np.ndarray]]]:
+    def wrapper(otype=np.ndarray,**kwargs: Any) -> Union[np.ndarray, List[np.ndarray]]:
+        file = kwargs.get('file') or kwargs.get('fname')
+        if not file:
+            raise ValueError("File not specified")
+        
+        # Check if the file parameter contains wildcard characters
+        if any(char in file for char in '*?[]'):
+            # Handle multiple files matching the pattern
+            all_files = glob.glob(file)
+            if not all_files:
+                raise FileNotFoundError(f"No files matched the pattern: {file}")
+            
+            try:
+                from eslib.functions import extract_number_from_filename
+                matched_files = [ matched_files[i] for i in np.argsort(np.asarray([ int(extract_number_from_filename(x)) for x in matched_files ])) ]
+            except:
+                pass
+            
+            results = [None]*len(all_files)
+            for n,matched_file in enumerate(all_files):
+                new_kwargs = kwargs.copy()
+                new_kwargs['file'] = matched_file
+                results[n] = func(**new_kwargs)
+            return otype(results)  # Return a list of results for multiple files
+        else:
+            # Single file case
+            return func(**kwargs)
+    return wrapper
+
+# @read_many_files
+def load_data(file: str, **kwargs) -> np.ndarray:
+    if file.endswith(".txt"):
+        data = np.loadtxt(fname=file, **kwargs)
+    elif file.endswith(".npy"):
+        data = np.load(file, **kwargs)
+    else:
+        raise ValueError(f"Unsupported file format: {file}")
+    return data

@@ -30,9 +30,8 @@ class eslibModel(pickleIO,Calculator):
             if not isinstance(obj, cls):
                 warn(f"Invalid pickle file format. Expected type: {cls.__name__}, got {type(obj).__name__}")
             return obj
-        except FileNotFoundError:
-            print(f"Error loading from pickle file: File not found - {file}")
-            return None
+        except FileNotFoundError as e:
+            raise e
         except Exception as e:
             print(f"Error loading from pickle file: {e}")
             return obj

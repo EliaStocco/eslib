@@ -3,7 +3,7 @@ import pandas as pd
 
 #---------------------------------------#
 def show_dict(obj:dict,string:str="",width=30):
-    fmt = "{:<s}{:" + str(width) + "s} : "
+    fmt = "\t{:<s}{:" + str(width) + "s} : "
     for k in obj.keys():
         print(fmt.format(string,k),obj[k])
 

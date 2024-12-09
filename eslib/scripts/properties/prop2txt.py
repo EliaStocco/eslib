@@ -21,7 +21,7 @@ def prepare_args(description):
     parser.add_argument("-f" , "--family"         , type=str     , **argv, required=False, help="family (default: %(default)s)", default=None)
     parser.add_argument("-u" , "--unit"           , type=str     , **argv, required=False, help="output unit (default: %(default)s)", default=None)
     parser.add_argument("-rr", "--remove_replicas", type=str2bool, **argv, required=False, help='whether to remove replicas (default: %(default)s)', default=False)
-    parser.add_argument("-d" , "--delimiter"      , type=str     , **argv, required=False, help='delimiter (default: false)', default=' ')
+    parser.add_argument("-d" , "--delimiter"      , type=str     , **argv, required=False, help='delimiter (default: %(default)s)', default=' ')
     parser.add_argument("-o" , "--output"         , type=str     , **argv, required=False, help='output file (default: %(default)s)', default=None)
     return parser# .parse_args()
 
