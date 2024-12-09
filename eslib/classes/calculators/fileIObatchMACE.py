@@ -86,10 +86,12 @@ class FileIOBatchedMACE:
             # Process and store results per folder
             self.logger.debug("Processing results.")
             for n, _ in enumerate(single_results):
-                single_results[n] = {
-                    key: (value := np.take(results[key], indices=n, axis=0)) if value.size > 1 else float(value)
-                    for key in results.keys()
-                }
+                single_results[n] = {}
+                for key in results.keys():
+                    value = np.take(results[key], indices=n, axis=0)
+                    # If the value array has more than one element, use it as is, else convert it to a float
+                    single_results[n][key] = value if value.size > 1 else float(value)
+
 
             # Write results to output files
             self.logger.info("Writing output files.")
