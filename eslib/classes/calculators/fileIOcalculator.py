@@ -90,7 +90,7 @@ class FileIOCalculator(Calculator):
                     data["energy"] = 0.0
                     self.results["energy"] = 0.0
                 elif key == "forces":
-                    self.results["forces"] = np.zeros(atoms.positions)
+                    self.results["forces"] = np.zeros(atoms.positions.shape)
                 elif key == "free_energy":
                     self.results["free_energy"] = data["energy"] if "energy" in data else 0.0
                 elif key == "stress":
