@@ -82,7 +82,16 @@ def save2json(file: str, data: dict) -> None:
     with open(file, "w") as ff:
         json.dump(data, ff, cls=NumpyEncoder, indent=4)
 
-
+    # for n in range(5):
+    #     try:
+    #         ofile = f"{file}.{n}.json"
+    #         with open(ofile, "w") as ff:
+    #             json_string:str = json.dumps(data, cls=NumpyEncoder, indent=n)
+    #             # json_string = json_string.replace('[\n        ', '[').replace(',\n        ', ', ').replace('\n    ]', ']')
+    #             ff.write(json_string)
+    #     except:
+    #         pass
+        
 # ---------------------------------------#
 def convert_lists_to_arrays(data: Any) -> Any:
     """
