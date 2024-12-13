@@ -81,6 +81,7 @@ UnitMap = {
         "": 1.00,
         "automatic": 1.00,
         "atomic_unit": 1.00,
+        "e/ang2": 1./1.8897261**2,  # electron charge / angstrom^2
     },
     "ms-momentum": {  # TODO fill up units here (mass-scaled momentum)
         "": 1.00,

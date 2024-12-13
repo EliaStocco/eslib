@@ -74,23 +74,23 @@ def main(args):
     print("done")
     print("\tautocorr shape: ",autocorr.shape)
 
-    #------------------#
-    print("\n\tComputing the average value of the time derivative of the dipole squared ... ",end="")
-    # norm_der is the average value of the time derivative of the dipole
-    norm_der = np.mean(data ** 2, axis=args.axis_time,keepdims=True)# *data.shape[args.axis_components]
-    print("done")
-    print("\tnorm shape: ",norm_der.shape)
+    # #------------------#
+    # print("\n\tComputing the average value of the time derivative of the dipole squared ... ",end="")
+    # # norm_der is the average value of the time derivative of the dipole
+    # norm_der = np.mean(data ** 2, axis=args.axis_time,keepdims=True)# *data.shape[args.axis_components]
+    # print("done")
+    # print("\tnorm shape: ",norm_der.shape)
     
-    print("\tNormalizing autocorr ... ",end="")
-    autocorr /= norm_der
-    print("done")
-    print("\tautocorr shape: ",autocorr.shape)
+    # print("\tNormalizing autocorr ... ",end="")
+    # autocorr /= norm_der
+    # print("done")
+    # print("\tautocorr shape: ",autocorr.shape)
     
-    #------------------#
-    print("\tComputing normalizing factor ... ",end="")
-    norm_der = float(np.mean(np.sum(norm_der,axis=args.axis_components)))
-    print("done")
-    print("\tnormalizing factor: ",norm_der)
+    # #------------------#
+    # print("\tComputing normalizing factor ... ",end="")
+    # norm_der = float(np.mean(np.sum(norm_der,axis=args.axis_components)))
+    # print("done")
+    # print("\tnormalizing factor: ",norm_der)
 
     #------------------#
     if args.axis_components is not None:
@@ -150,10 +150,10 @@ def main(args):
     print("done")
     print("\tspectrum shape: :",spectrum.shape)
     
-    #------------------#
-    print("\n\tMultiplying the spectrum by the normalizing factor  ... ", end="")
-    spectrum = spectrum * norm_der
-    print("done")
+    # #------------------#
+    # print("\n\tMultiplying the spectrum by the normalizing factor  ... ", end="")
+    # spectrum = spectrum * norm_der
+    # print("done")
     
     if not args.delta:
         spectrum += 1

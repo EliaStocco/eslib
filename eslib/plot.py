@@ -127,6 +127,20 @@ def generate_continuous_color_map(vmin: float, vmax: float, color1: str = 'red',
     
     return return_color
 
+import matplotlib.colors as mcolors
+
+def interpolate_colors(color1, color2, num_colors):
+    if isinstance(color1, str):
+        color1 = mcolors.to_rgb(color1)
+    if isinstance(color2, str):
+        color2 = mcolors.to_rgb(color2)
+    start_color = np.array(color1)
+    end_color = np.array(color2)
+    palette = [
+        tuple((start_color + (end_color - start_color) * i / (num_colors - 1)))
+        for i in range(num_colors)
+    ]
+    return palette
 
 def generate_colors(N,map='tab10',shift=0):
     cmap = plt.get_cmap(map)  # You can choose other colormaps as well

@@ -10,6 +10,59 @@ from eslib.classes.bec import bec as BEC
 from eslib.tools import cart2frac
 from eslib.tools import convert
 
+
+#---------------------------------------#
+def debye_real(w: np.ndarray, chi0: float, tau: float) -> np.ndarray:
+    """
+    Compute the real part of the Debye function without using complex numbers.
+
+    Parameters:
+        w (np.ndarray): Angular frequency array.
+        chi0 (float): Static susceptibility.
+        tau (float): Relaxation time.
+
+    Returns:
+        np.ndarray: Real part of the Debye function.
+    """
+    denominator = 1 + (w * tau) ** 2
+    return chi0 / denominator
+
+def debye_imag(w: np.ndarray, chi0: float, tau: float) -> np.ndarray:
+    """
+    Compute the imaginary part of the Debye function without using complex numbers.
+
+    Parameters:
+        w (np.ndarray): Angular frequency array.
+        chi0 (float): Static susceptibility.
+        tau (float): Relaxation time.
+
+    Returns:
+        np.ndarray: Imaginary part of the Debye function.
+    """
+    numerator = -chi0 * w * tau
+    denominator = 1 + (w * tau) ** 2
+    return numerator / denominator
+
+def Debye_unc(w:np.ndarray,chi0:float,tau:float):
+    real = debye_real(w,chi0,tau)
+    imag = debye_imag(w,chi0,tau)
+    return np.abs(real),np.abs(imag)
+
+def Debye(w:np.ndarray,chi0:float,tau:float)->np.ndarray:
+    return chi0/(1-1j*w*tau)       
+    
+def Debye_fit(_w,chi0,tau):
+    w = np.zeros_like(_w).reshape((-1,2))
+    w[:,0] = _w[:int(len(_w)/2)]
+    w[:,1] = _w[int(len(_w)/2):]
+    assert np.allclose(w[:,0],w[:,1]), "w[:,0] != w[:,1]"
+    w = w[:,0]
+    res = Debye(w,chi0,tau)
+    out = np.zeros((len(w),2),dtype=float)
+    out[:,0] = np.real(res)
+    out[:,1] = np.imag(res)
+    return out.flatten()
+
 def kin2temp(kin: float,Natoms:int,kin_unit:Optional[str]="atomic_unit",temp_unit:Optional[str]="atomic_unit") -> float:
     """
     Convert kinetic energy to temperature.

@@ -35,7 +35,7 @@ def main(args):
     #------------------#
     print("\n\tReading the input array from file '{:s}' ... ".format(args.input), end="")
     args.input = str(args.input)
-    data:np.ndarray = PhysicalTensor.from_file(file=args.input).to_data()
+    data:np.ndarray = PhysicalTensor.from_file(file=args.input).to_data() # e ang
     print("done")
     if data.ndim == 2:
         data = data[np.newaxis,:,:]
@@ -43,7 +43,7 @@ def main(args):
 
     #------------------#
     print("\n\tComputing the derivative ... ",end="")
-    data = np.gradient(data,axis=args.axis_time)/args.time_step
+    data = np.gradient(data,axis=args.axis_time)/args.time_step # e ang/fs
     print("done")
     print("\tdata shape: ",data.shape)    
     
@@ -55,7 +55,7 @@ def main(args):
     #------------------#
     print("\n\tComputing the autocorrelation function ... ", end="")
     obj = TimeAutoCorrelation(data)
-    autocorr = obj.tcf(axis=args.axis_time)
+    autocorr = obj.tcf(axis=args.axis_time) # e^2 ang^2 / fs^2
     print("done")
     print("\tautocorr shape: ",autocorr.shape)
 
@@ -106,7 +106,7 @@ def main(args):
     #------------------#
     print("\n\tComputing the spectrum ... ", end="")
     axis_fourier = args.axis_time if args.axis_time < args.axis_components else args.axis_time - 1
-    spectrum, freq = compute_spectrum(autocorr,axis=axis_fourier,pad=args.padding,method="rfft",dt=args.time_step)
+    spectrum, freq = compute_spectrum(autocorr,axis=axis_fourier,pad=args.padding,method="rfft",dt=args.time_step) # e^2 ang^2 / fs
     print("done")
     print("\tspectrum shape: :",spectrum.shape)
     

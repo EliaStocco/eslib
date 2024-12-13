@@ -15,6 +15,7 @@ from eslib.io_tools import save2json
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.tools import convert
 from eslib.plot import legend_options
+from eslib.physics import debye_real, Debye_unc, Debye_fit
 
 #---------------------------------------#
 description = "Fit the Debye model for susceptibility."
@@ -83,22 +84,6 @@ def function(omega,time,P,phi):
     return out
 
 #---------------------------------------#
-def Debye(w:np.ndarray,chi0:float,tau:float)->np.ndarray:
-    return chi0/(1-1j*w*tau)
-    
-def Debye_fit(_w,chi0,tau):
-    w = np.zeros_like(_w).reshape((-1,2))
-    w[:,0] = _w[:int(len(_w)/2)]
-    w[:,1] = _w[int(len(_w)/2):]
-    assert np.allclose(w[:,0],w[:,1]), "w[:,0] != w[:,1]"
-    w = w[:,0]
-    res = Debye(w,chi0,tau)
-    out = np.zeros((len(w),2),dtype=float)
-    out[:,0] = np.real(res)
-    out[:,1] = np.imag(res)
-    return out.flatten()
-
-#---------------------------------------#
 @esfmt(prepare_args, description)
 def main(args):
     
@@ -126,7 +111,7 @@ def main(args):
         
         fit[omega] = {}
         
-        funcW = lambda time,ReP,ImP: function(omega,time,ReP,ImP)
+        funcW = lambda time,Amp,phase: function(omega,time,Amp,phase)
         time = np.append(*data[omega]["time"]) # ns
         pol = np.append(*data[omega]["dipole"]).reshape((-1,3))[:,2] # only z-component
         popt, pcov = curve_fit(funcW,time,pol,bounds=((0,0), (+np.inf,2*np.pi)))
@@ -170,7 +155,7 @@ def main(args):
     )
     dipole = convert(dipole,"electric-dipole","eang","atomic_unit")
     volume = convert(volume,"volume","angstrom3","atomic_unit")
-    polarization = dipole/ volume
+    polarization = dipole/volume
     
     phase = unp.uarray(
         nominal_values=np.asarray([ a["popt"][1] for a in fit.values() ]),
@@ -191,8 +176,8 @@ def main(args):
     print("\tVacuum permittivity (E) in Hartree atomic units: ",epsilon_0)
     print("\t4piE: ",4*np.pi*epsilon_0)
 
-    Xreal = polarization*unp.cos(phase)/(Efields*epsilon_0)
-    Ximag = polarization*unp.sin(phase)/(Efields*epsilon_0)
+    Xreal = np.abs(polarization*unp.cos(phase)/(Efields*epsilon_0))
+    Ximag = np.abs(polarization*unp.sin(phase)/(Efields*epsilon_0))
     
     df = pd.DataFrame(columns=["freq [GHz]","Xreal","Ximag","Xreal-err","Ximag-err"])
     args.frequencies = np.asarray(args.frequencies)
@@ -215,6 +200,17 @@ def main(args):
     fit["debye"]["pcov"] = pcov
     fit["debye"]["perr"] = np.sqrt(np.diag(pcov))
     
+    parameters = unp.uarray(
+        nominal_values=np.asarray(fit["debye"]["popt"]),
+        std_devs=np.asarray(fit["debye"]["perr"])
+    )
+    
+    epsilon_r = debye_real(0,parameters[0],parameters[1])
+    fit["epsilon_r"] = {
+        "value" : unp.nominal_values(epsilon_r),
+        "err"   : unp.std_devs(epsilon_r)
+    }
+    
     #------------------#
     print(f"\n\tSaving fit results to file '{args.fit_output}' ... ", end="")
     save2json(args.fit_output,fit)
@@ -228,9 +224,20 @@ def main(args):
         ax.errorbar(args.frequencies,unp.nominal_values(Ximag),yerr=unp.std_devs(Ximag),fmt=".",color="blue",label=r"Im$\chi$ (data)")
         
         omega = np.linspace(0.1,1000,10000)
-        y = Debye(omega,*popt)
-        ax.plot(omega,y.real,color="red",alpha=0.5,label=r"Re$\chi$ (fit)")
-        ax.plot(omega,y.imag,color="blue",alpha=0.5,label=r"Im$\chi$ (fit)")
+        yreal,yimag = Debye_unc(omega,parameters[0],parameters[1])
+        ax.plot(omega,unp.nominal_values(yreal),color="red",alpha=1,linewidth=0.1,label=r"Re$\chi$ (fit)")
+        ax.plot(omega,unp.nominal_values(yimag),color="blue",alpha=1,linewidth=0.1,label=r"Im$\chi$ (fit)")
+        
+        ax.fill_between(omega,
+            unp.nominal_values(yreal)-unp.std_devs(yreal),
+            unp.nominal_values(yreal)+unp.std_devs(yreal),
+            color="red",alpha=0.5,linewidth=0
+        )
+        ax.fill_between(omega,
+            unp.nominal_values(yimag)-unp.std_devs(yimag),
+            unp.nominal_values(yimag)+unp.std_devs(yimag),
+            color="blue",alpha=0.5,linewidth=0
+        )
         
         ax.grid()
         ax.legend(loc="center left",**legend_options)

@@ -104,11 +104,11 @@ class MACEModel(eslibModel):
     def _set_defaults(self:T) -> None:
         """Set default values for the model."""
         torch_tools.set_default_dtype(self.default_dtype)
-        # self.device = torch_tools.init_device(self.device)
-        if torch.cuda.is_available():
-            self.device = torch_tools.init_device("cuda")
-        else:
-            self.device = torch_tools.init_device("cpu")
+        self.device = torch_tools.init_device(self.device)
+        # if torch.cuda.is_available():
+        #     self.device = torch_tools.init_device(self.device)
+        # else:
+        #     self.device = torch_tools.init_device("cpu")
         return
 
     #------------------#
