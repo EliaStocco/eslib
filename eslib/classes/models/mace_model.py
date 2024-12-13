@@ -106,7 +106,7 @@ class MACEModel(eslibModel):
         torch_tools.set_default_dtype(self.default_dtype)
         self.device = torch_tools.init_device(self.device)
         if torch.cuda.is_available():
-            self.device = torch_tools.init_device(self.device)
+            self.device = torch_tools.init_device("cuda")
         else:
             self.device = torch_tools.init_device("cpu")
         return
