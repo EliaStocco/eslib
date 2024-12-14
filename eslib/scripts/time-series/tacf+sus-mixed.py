@@ -2,33 +2,32 @@
 import numpy as np
 from ase.io import read
 from eslib.classes.physical_tensor import PhysicalTensor
-from eslib.classes.tcf import TimeAutoCorrelation, compute_spectrum, get_freq
+from eslib.classes.tcf import TimeCorrelation, compute_spectrum, get_freq
 from eslib.formatting import esfmt
 from eslib.tools import convert
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Compute the Infrared (IR) absorption spectrum from dipole time series in arbitrary units."
-documentation = "This script computes the frequency dependent Beer-Lambert absorption coefficient of IR spectroscopy from the time derivative of dipole."
+description = "Compute the dielectric susceptibility from dipole time series."
 
 #---------------------------------------#
 def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-d"  , "--dipole"         , **argv, required=True , type=str  , help="txt/npy input file")
-    parser.add_argument("-o"  , "--output"         , **argv, required=False, type=str  , help="txt/npy output file (default: %(default)s)", default='IR.txt')
-    parser.add_argument("-dt" , "--time_step"      , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
+    parser.add_argument("-d"  , "--dipole"         , **argv, required=True , type=str     , help="txt/npy input file with the dipoles [eang]")
+    parser.add_argument("-o"  , "--output"         , **argv, required=False, type=str     , help="txt/npy output file (default: %(default)s)", default='sus.txt')
+    parser.add_argument("-dt" , "--time_step"      , **argv, required=False, type=float   , help="time step [fs] (default: %(default)s)", default=1)
     parser.add_argument("-T"  , "--temperature"    , **argv, required=True , type=float   , help="temperature [K]")
     parser.add_argument("-i"  , "--input"          , **argv, required=True , type=str     , help="file with the atomic structure")
     parser.add_argument("-if" , "--input_format"   , **argv, required=False, type=str     , help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-pad", "--padding"        , **argv, required=False, type=int  , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
-    parser.add_argument("-as" , "--axis_samples"   , **argv, required=False, type=int  , help="axis corresponding to independent trajectories/samples (default: %(default)s)", default=0)
-    parser.add_argument("-at" , "--axis_time"      , **argv, required=False, type=int  , help="axis corresponding to time (default: %(default)s)", default=1)
-    parser.add_argument("-ac" , "--axis_components", **argv, required=False, type=int  , help="axis corresponding to dipole components (default: %(default)s)", default=2)
-    parser.add_argument("-fu" , "--freq_unit"      , **argv, required=False, type=str  , help="unit of the frequency in IR plot and output file (default: %(default)s)", default="inversecm")
-    parser.add_argument("-w"  , "--window"         , **argv, required=False, type=str  , help="window type (default: %(default)s)", default='hanning', choices=['none','barlett','blackman','hamming','hanning','kaiser'])
-    parser.add_argument("-wt" , "--window_t"       , **argv, required=False, type=int  , help="time span of the window [fs] (default: %(default)s)", default=5000)
+    parser.add_argument("-pad", "--padding"        , **argv, required=False, type=int     , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
+    parser.add_argument("-as" , "--axis_samples"   , **argv, required=False, type=int     , help="axis corresponding to independent trajectories/samples (default: %(default)s)", default=0)
+    parser.add_argument("-at" , "--axis_time"      , **argv, required=False, type=int     , help="axis corresponding to time (default: %(default)s)", default=1)
+    parser.add_argument("-ac" , "--axis_components", **argv, required=False, type=int     , help="axis corresponding to dipole components (default: %(default)s)", default=2)
+    parser.add_argument("-fu" , "--freq_unit"      , **argv, required=False, type=str     , help="unit of the frequency in IR plot and output file (default: %(default)s)", default="inversecm")
+    parser.add_argument("-w"  , "--window"         , **argv, required=False, type=str     , help="window type (default: %(default)s)", default='hanning', choices=['none','barlett','blackman','hamming','hanning','kaiser'])
+    parser.add_argument("-wt" , "--window_t"       , **argv, required=False, type=int     , help="time span of the window [fs] (default: %(default)s)", default=5000)
     return parser
     
 #---------------------------------------#
@@ -41,47 +40,30 @@ def main(args):
     #------------------#
     print("\n\tReading the input array from file '{:s}' ... ".format(args.dipole), end="")
     args.dipole = str(args.dipole)
-    data:np.ndarray = PhysicalTensor.from_file(file=args.dipole).to_data() # e ang
+    dipole:np.ndarray = PhysicalTensor.from_file(file=args.dipole).to_data() # e ang
     print("done")
-    if data.ndim == 2:
-        data = data[np.newaxis,:,:]
-    print("\tdata shape: ",data.shape)
-    data = convert(data,"electric-dipole","eang","atomic_unit")
-
-    #------------------#
-    print("\n\tComputing the derivative ... ",end="")
-    data = np.gradient(data,axis=args.axis_time)/args.time_step # e ang/fs
-    print("done")
-    print("\tdata shape: ",data.shape)    
+    if dipole.ndim == 2:
+        dipole = dipole[np.newaxis,:,:]
+    print("\tdipole shape: ",dipole.shape)
+    dipole = convert(dipole,"electric-dipole","eang","atomic_unit")
     
     #------------------#
     print("\n\tRemoving the mean ... ",end="")
-    data -= np.mean(data, axis=args.axis_time,keepdims=True)
+    dipole -= np.mean(dipole, axis=args.axis_time,keepdims=True)
     print("done")
+    
+    #------------------#
+    print("\n\tComputing the derivative ... ",end="")
+    time_der = np.gradient(dipole,axis=args.axis_time)/args.time_step # e ang / fs
+    print("done")
+    print("\tdipole derivative shape: ",dipole.shape)    
 
     #------------------#
     print("\n\tComputing the autocorrelation function ... ", end="")
-    obj = TimeAutoCorrelation(data)
-    autocorr = obj.tcf(axis=args.axis_time) # e^2 ang^2 / fs^2
+    obj = TimeCorrelation(dipole,time_der)
+    autocorr = obj.tcf(axis=args.axis_time) # e^2 ang^2 / fs
     print("done")
     print("\tautocorr shape: ",autocorr.shape)
-
-    #------------------#
-    print("\n\tComputing the average value of the time derivative of the dipole squared ... ",end="")
-    norm_der = np.mean(data ** 2, axis=args.axis_time,keepdims=True)
-    print("done")
-    print("\tnorm shape: ",norm_der.shape)
-    
-    print("\tNormalizing autocorr ... ",end="")
-    autocorr /= norm_der
-    print("done")
-    print("\tautocorr shape: ",autocorr.shape)
-    
-    #------------------#
-    print("\tComputing normalizing factor ... ",end="")
-    norm_der = float(np.mean(np.sum(norm_der,axis=args.axis_components)))
-    print("done")
-    print("\tnormalizing factor: ",norm_der)
 
     #------------------#
     if args.axis_components is not None:
@@ -94,33 +76,35 @@ def main(args):
     if autocorr.ndim == 1:
         print("\tReshaping data  ... ", end="")
         autocorr = np.atleast_2d(autocorr)# .T
+        
         print("done")
-        print("\tdata shape: ",data.shape)
+        print("\tautocorr shape: ",autocorr.shape)
+
     raw_autocorr = np.copy(autocorr)  
+
 
     #------------------#
     if args.window != "none" :
         print("\n\tApplying the '{:s}' window ... ".format(args.window),end="")
+        #Define window to be used with DCT below.
         func = getattr(np, args.window)
         window = np.zeros(raw_autocorr.shape[args.axis_time])
         M = int(args.window_t / args.time_step)
         window[:M] = func(2*M)[M:]
         window /= window[0] # small correction so that the first value is 1
+        # window = np.atleast_2d(window)
         print("done")
         print("\twindow shape: ",window.shape)
+
         autocorr = raw_autocorr * window
 
     #------------------#
     print("\n\tComputing the spectrum ... ", end="")
     axis_fourier = args.axis_time if args.axis_time < args.axis_components else args.axis_time - 1
-    spectrum, freq = compute_spectrum(autocorr,axis=axis_fourier,pad=args.padding,method="rfft",dt=args.time_step) # e^2 ang^2 / fs
+    spectrum, freq = compute_spectrum(autocorr,axis=axis_fourier,pad=args.padding,method="rfft",dt=args.time_step) # e^2 ang^2
+    spectrum = -spectrum.real + 1j*spectrum.imag
     print("done")
     print("\tspectrum shape: :",spectrum.shape)
-    
-    #------------------#
-    print("\n\tMultiplying the spectrum by the normalizing factor  ... ", end="")
-    spectrum = spectrum.real*norm_der
-    print("done")
     
     #------------------#
     print("\tReading atomic structure from file '{:s}' ... ".format(args.input), end="")
@@ -132,32 +116,26 @@ def main(args):
     args.temperature = convert(args.temperature,"temperature","kelvin","atomic_unit")
     epsilon = 1/(4*np.pi)
     kB = 1
-    c = convert(299792458,"velocity","m/s","atomic_unit")
-    factor = 3*c*volume*args.temperature*epsilon*kB/np.pi
+    factor = 3*volume*args.temperature*epsilon * kB
     spectrum /= factor
-    spectrum /= convert(1,"length","atomic_unit","centimeter")
-    
-    # print(max(spectrum.real))
 
    #------------------#
     print("\n\tComputing the average over the trajectories ... ", end="")
     N = spectrum.shape[args.axis_samples]
-    std:np.ndarray      = np.std (spectrum,axis=args.axis_samples)
-    spectrum:np.ndarray = np.mean(spectrum,axis=args.axis_samples)
-    err:np.ndarray      = std/np.sqrt(N-1)
+    std:np.ndarray = np.std(spectrum.real,axis=args.axis_samples) + 1.j*np.std(spectrum.imag,axis=args.axis_samples)
+    spectrum:np.ndarray = spectrum.mean(axis=args.axis_samples)
+    err:np.ndarray = std/np.sqrt(N-1)
     print("done")
     print("\tspectrum shape: :",spectrum.shape)
 
     assert spectrum.ndim == 1, "the spectrum does not have 1 dimension"
-    
-    # print(max(spectrum.real))
 
     #------------------#
     print("\n\tComputing the frequencies ... ", end="")
     freq = get_freq(dt=args.time_step, N=len(spectrum),input_units="atomic_unit",output_units=args.freq_unit)
     # freq = convert(freq,'frequency','thz',args.freq_unit)
     print("done")
-    print("\tmax freq: ",freq[-1],f" {args.freq_unit}")
+
 
     #------------------#
     print("\n\tSaving the spectrum and the frequecies to file '{:s}' ... ".format(args.output), end="")
@@ -167,12 +145,14 @@ def main(args):
     if str(args.output).endswith("txt"):
         header = \
             f"Col 1: frequency in {args.freq_unit}\n" +\
-            f"Col 2: infrared absorption spectrum in inversecm\n" +\
+            f"Col 2: dielectric susceptibility\n" +\
             f"Col 3: std (over trajectories) of the spectrum\n"+\
             f"Col 4: error of the spectrum (std/sqrt(N-1), with N = n. of trajectories)"
         tmp.to_file(file=args.output,header=header)
     else:
         tmp.to_file(file=args.output)
+    
+    del tmp
     print("done")
 
     return 0

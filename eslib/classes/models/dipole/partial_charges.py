@@ -4,14 +4,15 @@ from typing import Any, Dict, List
 import numpy as np
 from ase import Atoms
 from ase.calculators.calculator import Calculator, all_changes
-
 from eslib.classes.models.dipole.baseclass import DipoleModel
 from eslib.tools import add_info_array
+from eslib.io_tools import read_json
 
 
 @dataclass
 class DipolePartialCharges(DipoleModel):
 
+    instructions:str 
     charges: Dict[str,float]
     compute_BEC: bool                      = field(default=False,init=True)         
     implemented_properties: Dict[str, Any] = field(init=False) 
@@ -19,6 +20,10 @@ class DipolePartialCharges(DipoleModel):
     def __post_init__(self) -> None:
         """Initialize DipolePartialCharges object."""
         Calculator.__init__(self)
+        if self.instructions is not None:
+            instructions = read_json(self.instructions)
+            self.charges = instructions["charges"]
+            self.compute_BEC = instructions["compute_BEC"] if "compute_BEC" in instructions else True
         self.implemented_properties = {"dipole" : (float, 3),}
         if self.compute_BEC:
             new_prop = {

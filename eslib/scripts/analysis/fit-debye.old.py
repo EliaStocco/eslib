@@ -85,9 +85,8 @@ def get_data(args):
     return data
 
 #---------------------------------------#
-def function(omega,time,ReP,ImP):
-    phi = 2*np.pi*omega*time
-    out = ReP*np.cos(phi)-ImP*np.sin(phi)
+def function(omega,time,P,phi):
+    out = P*np.cos(2*np.pi*omega*time-phi)# +ImP*np.cos(omega*time)
     return out
 
 #---------------------------------------#
@@ -118,10 +117,10 @@ def main(args):
         
         fit[omega] = {}
         
-        funcW = lambda time,ReP,ImP: function(omega,time,ReP,ImP)
+        funcW = lambda time,Amp,phase: function(omega,time,Amp,phase)
         time = np.append(*data[omega]["time"]) # ns
         pol = np.append(*data[omega]["dipole"]).reshape((-1,3))[:,2] # only z-component
-        popt, pcov = curve_fit(funcW,time,pol) # bounds=((0,0), (+np.inf,+np.inf))
+        popt, pcov = curve_fit(funcW,time,pol,bounds=((0,0), (+np.inf,2*np.pi)))
         fit[omega]["popt"] = popt
         fit[omega]["pcov"] = pcov
         fit[omega]["perr"] = np.sqrt(np.diag(pcov))
@@ -158,47 +157,37 @@ def main(args):
         
     #------------------#
     # eang
-    ReDipole = unp.uarray(
+    dipole = unp.uarray(
         nominal_values=np.asarray([ a["popt"][0] for a in fit.values() ]),
         std_devs=np.asarray([ a["perr"][0] for a in fit.values() ])
     )
-    ImDipole = unp.uarray(
+    dipole = convert(dipole,"electric-dipole","eang","atomic_unit")
+    volume = convert(volume,"volume","angstrom3","atomic_unit")
+    polarization = dipole/volume
+    
+    phase = unp.uarray(
         nominal_values=np.asarray([ a["popt"][1] for a in fit.values() ]),
         std_devs=np.asarray([ a["perr"][1] for a in fit.values() ])
     )
-    # dipole = ReDipole+1j*ImDipole
-    ReDipole = convert(ReDipole,"electric-dipole","eang","atomic_unit")
-    ImDipole = convert(ImDipole,"electric-dipole","eang","atomic_unit")
-    volume = convert(volume,"volume","angstrom3","atomic_unit")
-    RePol = ReDipole/volume
-    ImPol = ImDipole/volume
-    
-    # phase = unp.uarray(
-    #     nominal_values=np.asarray([ a["popt"][1] for a in fit.values() ]),
-    #     std_devs=np.asarray([ a["perr"][1] for a in fit.values() ])
-    # )
     
     Efields = np.asarray(args.Efields)
     Efields = convert(Efields,"electric-field","v/ang","atomic_unit")
     
-    # epsilon_0 = 8.8541878128  # e-12 C^2/Nm^2
-    # C2 = convert(1,"charge","coulomb","atomic_unit")**2
-    # m2 = convert(1,"length","meter","atomic_unit")**2
-    # N = convert(1,"force","newton","atomic_unit")
-    # factor = C2/(N*m2)
-    # epsilon_0 *= factor
-    # epsilon_0 *= 1e-12
-    
-    epsilon_0 = 1./(4*np.pi)
+    epsilon_0 = 8.8541878128  # e-12 C^2/Nm^2
+    C2 = convert(1,"charge","coulomb","atomic_unit")**2
+    m2 = convert(1,"length","meter","atomic_unit")**2
+    N = convert(1,"force","newton","atomic_unit")
+    factor = C2/(N*m2)
+    epsilon_0 *= factor
+    epsilon_0 *= 1e-12
     
     print("\tVacuum permittivity (E) in Hartree atomic units: ",epsilon_0)
     print("\t4piE: ",4*np.pi*epsilon_0)
     
-    # Xreal = np.abs(polarization*unp.cos(phase)/(Efields*epsilon_0))
-    # Ximag = np.abs(polarization*unp.sin(phase)/(Efields*epsilon_0))
-    
-    Xreal = np.abs(RePol/(Efields*epsilon_0))
-    Ximag = np.abs(ImPol/(Efields*epsilon_0))
+    epsilon_0 = 1./(4*np.pi)
+
+    Xreal = np.abs(polarization*unp.cos(phase)/(Efields*epsilon_0))
+    Ximag = np.abs(polarization*unp.sin(phase)/(Efields*epsilon_0))
     
     df = pd.DataFrame(columns=["freq [GHz]","Xreal","Ximag","Xreal-err","Ximag-err"])
     args.frequencies = np.asarray(args.frequencies)
@@ -267,7 +256,6 @@ def main(args):
         ax.set_xlim(0.1,1000)
         ax.set_xscale("log")
         plt.tight_layout()        
-        # plt.show()
         plt.savefig(args.plot) 
     
     return 0
