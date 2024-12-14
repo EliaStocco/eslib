@@ -102,7 +102,7 @@ class DipolePartialCharges(DipoleModel):
         super().calculate(atoms, properties, system_changes)
 
         # Get the dipole for the given atoms
-        self.results = self.compute([atoms])# .flatten()
+        self.results = self.compute([atoms],raw=True)# .flatten()
 
     def compute(self,traj:List[Atoms],prefix:str="",raw:bool=False):
         """
