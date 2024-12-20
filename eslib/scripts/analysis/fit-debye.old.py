@@ -215,7 +215,7 @@ def main(args):
         std_devs=np.asarray(fit["debye"]["perr"])
     )
     
-    epsilon_r = debye_real(0,parameters[0],parameters[1])
+    epsilon_r = debye_real(0,parameters[0],parameters[1])+1
     fit["epsilon_r"] = {
         "value" : unp.nominal_values(epsilon_r),
         "err"   : unp.std_devs(epsilon_r)

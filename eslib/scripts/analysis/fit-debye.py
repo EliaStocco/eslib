@@ -54,8 +54,18 @@ def get_data(args):
         time_files = glob.glob(args.time[n])
         dipole_files = glob.glob(args.dipole[n])
         
-        time_files = [ time_files[i] for i in np.argsort(np.asarray([ int(extract_number_from_filename(x)) for x in time_files ])) ]
-        dipole_files = [ dipole_files[i] for i in np.argsort(np.asarray([ int(extract_number_from_filename(x)) for x in dipole_files ])) ]
+        if type(time_files) == str:
+            time_files = [time_files]
+        elif len(time_files) == 1:
+            pass
+        else:
+            time_files = [ time_files[i] for i in np.argsort(np.asarray([ int(extract_number_from_filename(x)) for x in time_files ])) ]
+        if type(dipole_files) == str:
+            dipole_files = [dipole_files]
+        elif len(dipole_files) == 1:
+            pass
+        else:        
+            dipole_files = [ dipole_files[i] for i in np.argsort(np.asarray([ int(extract_number_from_filename(x)) for x in dipole_files ])) ]
         
         N = len(time_files)
         data[key] = {
@@ -119,8 +129,14 @@ def main(args):
         fit[omega] = {}
         
         funcW = lambda time,ReP,ImP: function(omega,time,ReP,ImP)
-        time = np.append(*data[omega]["time"]) # ns
-        pol = np.append(*data[omega]["dipole"]).reshape((-1,3))[:,2] # only z-component
+        try:
+            time = np.append(*data[omega]["time"]).flatten() # ns
+        except:
+            time = np.asarray(data[omega]["time"]).flatten() # ns
+        try:
+            pol = np.append(*data[omega]["dipole"]).reshape((-1,3))[:,2].flatten() # only z-component
+        except:
+            pol = np.asarray(data[omega]["dipole"]).reshape((-1,3))[:,2].flatten() # only z-component
         popt, pcov = curve_fit(funcW,time,pol) # bounds=((0,0), (+np.inf,+np.inf))
         fit[omega]["popt"] = popt
         fit[omega]["pcov"] = pcov
@@ -145,7 +161,7 @@ def main(args):
                 ax.plot(time,pol,color="blue",label="data")
                 yfit = funcW(time,*popt)
                 ax.plot(time,yfit,color="red",label="fit")
-                ax.plot(time,pol-yfit,color="green",label="data-fit")
+                # ax.plot(time,pol-yfit,color="green",label="data-fit")
                 ax.grid()
                 ax.legend(loc="upper right")
             fig.supxlabel("Time [ns]")
