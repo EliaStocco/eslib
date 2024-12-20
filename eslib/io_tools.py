@@ -5,6 +5,8 @@ import logging
 import os
 import re
 import subprocess
+import glob
+from eslib.functions import extract_number_from_filename
 
 #---------------------------------------#
 
@@ -209,3 +211,23 @@ def count_lines(file_path):
 # file_path = 'myfile.txt'
 # lines = count_lines(file_path)
 # print(f"The file {file_path} has {lines} lines.")
+
+def add_index2file(file,N):
+    dir_name = os.path.dirname(file)            # Extract the directory
+    base_name, ext = os.path.splitext(os.path.basename(file))  # Extract the base name and extension
+    new_output = os.path.join(dir_name, f"{base_name}.n={N}{ext}")  # Construct the new file path
+    return new_output
+
+def pattern2sorted_files(patter):
+    matched_files = glob.glob(patter)
+            
+    # Raise an error if no files were found
+    if not matched_files:
+        raise ValueError("No files found")
+    
+    if len(matched_files) > 1:            
+        try:
+            matched_files = [ matched_files[i] for i in np.argsort(np.asarray([ int(extract_number_from_filename(x)) for x in matched_files ])) ]
+        except:
+            pass
+    return matched_files

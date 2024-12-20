@@ -27,7 +27,7 @@ def prepare_args(description):
     parser.add_argument("-c" , "--charges"      , **argv, required=False, type=str, help="charges name (default: %(default)s)", default=None)
     parser.add_argument("-cf", "--charges_file" , **argv, required=False, type=str, help="charges file (default: %(default)s)", default=None)
     parser.add_argument("-p" , "--prefix"       , **argv, type=str, required=False, help="prefix to be prepended to the properties evaluated by the MACE model (default: %(default)s)", default="MACE_")
-    parser.add_argument("-o" , "--structures"       , **argv, type=str, required=False, help="structures file with the atomic structures and the predicted properties (default: %(default)s)", default=None)
+    parser.add_argument("-o" , "--output"       , **argv, type=str, required=False, help="output file with the atomic structures and the predicted properties (default: %(default)s)", default=None)
     parser.add_argument("-of", "--output_format", **argv, type=str, required=False, help="structures file format (default: %(default)s)", default=None)
     # Save data to txt/npy files
     parser.add_argument("-oia" , "--output_info_array", **argv, type=str, required=False, help="JSON file with the instructions to save info and array t file (default: %(default)s)", default=None)
@@ -38,7 +38,7 @@ def prepare_args(description):
 def main(args):
 
     #------------------#
-    if args.structures is None:
+    if args.output is None:
         print(f"\n\t {warning}: no structures file will be printed.")
     if args.output_info_array is None:
         print(f"\n\t {warning}: no info or arrays will be saved to file.")
@@ -131,9 +131,9 @@ def main(args):
     print(tmp.replace("\n", "\n\t"))
     
     #------------------#
-    if args.structures is not None:
-        print("\n\t Saving atomic structures to file '{:s}' ... ".format(args.structures), end="")
-        structures.to_file(file=args.structures,format=args.output_format)
+    if args.output is not None:
+        print("\n\t Saving atomic structures to file '{:s}' ... ".format(args.output), end="")
+        structures.to_file(file=args.output,format=args.output_format)
         print("done")
     
     #------------------#
