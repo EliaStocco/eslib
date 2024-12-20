@@ -11,7 +11,7 @@ from eslib.formatting import esfmt, warning, float_format, eslog
 from eslib.show import show_dict
 from eslib.tools import is_integer
 from eslib.io_tools import read_json, add_index2file, pattern2sorted_files
-from eslib.input import slist
+from eslib.input import str2bool
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -23,14 +23,15 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     # Input
-    parser.add_argument("-i" , "--input"        , **argv, type=str, required=True , help="list of files with the atomic structures")
-    parser.add_argument("-if", "--input_format" , **argv, type=str, required=False, help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-m" , "--model"        , **argv, type=str, required=True , help="*.pth file with the MACE model of JSON file with instructions")
-    parser.add_argument("-c" , "--charges"      , **argv, required=False, type=str, help="charges name (default: %(default)s)", default=None)
-    parser.add_argument("-cf", "--charges_file" , **argv, required=False, type=str, help="charges file (default: %(default)s)", default=None)
-    parser.add_argument("-p" , "--prefix"       , **argv, type=str, required=False, help="prefix to be prepended to the properties evaluated by the MACE model (default: %(default)s)", default="MACE_")
-    parser.add_argument("-o" , "--output"       , **argv, type=str, required=False, help="output file with the atomic structures and the predicted properties (default: %(default)s)", default=None)
-    parser.add_argument("-of", "--output_format", **argv, type=str, required=False, help="structures file format (default: %(default)s)", default=None)
+    parser.add_argument("-i" , "--input"        , **argv, type=str     , required=True , help="list of files with the atomic structures")
+    parser.add_argument("-if", "--input_format" , **argv, type=str     , required=False, help="input file format (default: %(default)s)" , default=None)
+    parser.add_argument("-m" , "--model"        , **argv, type=str     , required=True , help="*.pth file with the MACE model of JSON file with instructions")
+    parser.add_argument("-c" , "--charges"      , **argv, type=str     , required=False, help="charges name (default: %(default)s)", default=None)
+    parser.add_argument("-cf", "--charges_file" , **argv, type=str     , required=False, help="charges file (default: %(default)s)", default=None)
+    parser.add_argument("-p" , "--prefix"       , **argv, type=str     , required=False, help="prefix to be prepended to the properties evaluated by the MACE model (default: %(default)s)", default="MACE_")
+    parser.add_argument("-o" , "--output"       , **argv, type=str     , required=False, help="output file with the atomic structures and the predicted properties (default: %(default)s)", default=None)
+    parser.add_argument("-of", "--output_format", **argv, type=str     , required=False, help="structures file format (default: %(default)s)", default=None)
+    parser.add_argument("-ow", "--over_write"   , **argv, type=str2bool, required=False, help="whether to over write the output file (default: %(default)s)", default=True)
     # Save data to txt/npy files
     parser.add_argument("-oia" , "--output_info_array", **argv, type=str, required=False, help="JSON file with the instructions to save info and array t file (default: %(default)s)", default=None)
     return parser
@@ -105,6 +106,20 @@ def main(args):
     all_files = pattern2sorted_files(args.input)
     for n_file,file in enumerate(all_files):
         
+        if not args.over_write:
+            shall_compute = False
+            if args.output is not None:
+                new_output = add_index2file(args.output,n_file)
+                shall_compute = shall_compute or not os.path.exists(new_output)
+                    
+            if args.output_info_array is not None:
+                for key, instr in instructions.items():
+                    file = add_index2file(str(instr["file"]),n_file)
+                    shall_compute = shall_compute or not os.path.exists(file)
+                    
+            if not shall_compute:
+                continue
+        
         print("\n\t#---------------------------------------#\n")
         
         #------------------#
@@ -141,7 +156,6 @@ def main(args):
         
         #------------------#
         if args.output is not None:
-            new_output = add_index2file(args.output,n_file)
             print("\n\t Saving atomic structures to file '{:s}' ... ".format(new_output), end="")
             structures.to_file(new_output,format=args.output_format)
             print("done")
