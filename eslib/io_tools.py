@@ -3,6 +3,7 @@ import numpy as np
 from typing import Any, Union
 import logging
 import os
+import re
 
 #---------------------------------------#
 
@@ -140,3 +141,51 @@ def read_json(file: str) -> dict:
     with open(file, "r") as f:
         data = json.load(f)
     return convert_lists_to_arrays(data)
+
+def read_Natoms_homogeneous(file_path:str):
+    """
+    Reads the first line of a (ext)xyz file to extracts the number of atoms.
+    It will be assumed that all the atoms have the same number of atoms
+    
+    Args:
+        file_path (str): Path to the file from which to read.
+        
+    Returns:
+        int: The integer found on the first line of the file.
+        None: If no integer is found on the first line.
+    """
+    try:
+        with open(file_path, 'r') as file:
+            first_line = file.readline().strip()  # Read the first line and strip any surrounding whitespace
+            # Search for an integer in the first line
+            found = re.search(r'\d+', first_line)  # This will match the first sequence of digits
+            if found:
+                return int(found.group())
+            else:
+                print(f"No integer found in the first line of {file_path}")
+                return None
+    except FileNotFoundError:
+        print(f"The file {file_path} was not found.")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    
+def count_lines(file_path):
+    """
+    Count the number of lines in a file.
+
+    Args:
+        file_path (str): The path to the file.
+
+    Returns:
+        int: The number of lines in the file.
+
+    Raises:
+        CalledProcessError: If the subprocess command fails.
+    """
+    import subprocess
+    # Use wc -l to count the number of lines in the file
+    result = subprocess.run(['wc', '-l', file_path], stdout=subprocess.PIPE, text=True)
+    line_count = int(result.stdout.split()[0])
+    return line_count

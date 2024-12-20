@@ -4,6 +4,7 @@ import os
 import subprocess
 
 from eslib.formatting import esfmt
+from eslib.io_tools import count_lines
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -24,25 +25,6 @@ def prepare_args(description):
     parser.add_argument("-o" , "--output"       , required=True ,**argv,type=str, help="output prefix")
     parser.add_argument("-s" , "--suffix"       , required=False,**argv,type=str, help="suffix (default: .xyz)", default='.xyz')
     return parser
-
-#---------------------------------------#
-def count_lines(file_path):
-    """
-    Count the number of lines in a file.
-
-    Args:
-        file_path (str): The path to the file.
-
-    Returns:
-        int: The number of lines in the file.
-
-    Raises:
-        CalledProcessError: If the subprocess command fails.
-    """
-    # Use wc -l to count the number of lines in the file
-    result = subprocess.run(['wc', '-l', file_path], stdout=subprocess.PIPE, text=True)
-    line_count = int(result.stdout.split()[0])
-    return line_count
 
 #---------------------------------------#
 def verify_split(input_file, output_prefix, num_splits, lines_per_snapshot):
