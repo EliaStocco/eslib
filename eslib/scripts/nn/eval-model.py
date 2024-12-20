@@ -2,16 +2,14 @@
 import json
 
 import numpy as np
-import pandas as pd
 import torch
 
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.classes.models import eslibModel
-from eslib.classes.physical_tensor import PhysicalTensor
-from eslib.formatting import esfmt, float_format, warning
-from eslib.input import literal, nilist, slist
+from eslib.formatting import esfmt, warning, float_format
 from eslib.show import show_dict
 from eslib.tools import is_integer
+from eslib.io_tools import read_json
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -29,13 +27,10 @@ def prepare_args(description):
     parser.add_argument("-c" , "--charges"      , **argv, required=False, type=str, help="charges name (default: %(default)s)", default=None)
     parser.add_argument("-cf", "--charges_file" , **argv, required=False, type=str, help="charges file (default: %(default)s)", default=None)
     parser.add_argument("-p" , "--prefix"       , **argv, type=str, required=False, help="prefix to be prepended to the properties evaluated by the MACE model (default: %(default)s)", default="MACE_")
-    parser.add_argument("-o" , "--output"       , **argv, type=str, required=False, help="output file with the atomic structures and the predicted properties (default: %(default)s)", default=None)
-    parser.add_argument("-of", "--output_format", **argv, type=str, required=False, help="output file format (default: %(default)s)", default=None)
+    parser.add_argument("-o" , "--structures"       , **argv, type=str, required=False, help="structures file with the atomic structures and the predicted properties (default: %(default)s)", default=None)
+    parser.add_argument("-of", "--output_format", **argv, type=str, required=False, help="structures file format (default: %(default)s)", default=None)
     # Save data to txt/npy files
-    # parser.add_argument("-n" , "--names"        , **argv, type=literal, required=False, help="names for the info/arrays to be saved to txt/npy files (default: %(default)s)", default=None)
-    # parser.add_argument("-s" , "--shapes"       , **argv, type=nilist         , required=False, help="data reshapes (default: %(default)s)", default=None)  
-    # parser.add_argument("-do", "--data_output"  , **argv, type=literal, required=False, help="data output files (default: %(default)s)", default=None)
-    # parser.add_argument("-df", "--data_format"  , **argv, type=literal, required=False, help="output format for np.savetxt (default: %(default)s)", default=None)
+    parser.add_argument("-oia" , "--output_info_array", **argv, type=str, required=False, help="JSON file with the instructions to save info and array t file (default: %(default)s)", default=None)
     return parser
 
 #---------------------------------------#
@@ -43,8 +38,21 @@ def prepare_args(description):
 def main(args):
 
     #------------------#
+    if args.structures is None:
+        print(f"\n\t{warning}: no structures file will be printed.")
+    if args.output_info_array is None:
+        print(f"\n\t{warning}: no info or arrays will be saved to file.")
+    else:
+        print("\n\tReading instructions from file '{:s}' ... ".format(args.output_info_array), end="")
+        instructions = read_json(args.output_info_array)
+        print("done")
+        
+        for key, instr in instructions.items():
+            assert "file" in instr, f"No 'file' key in instructions for '{key}'."
+            
+    #------------------#
     print("\tCuda available: ",torch.cuda.is_available())
-
+                 
     #------------------#
     if str(args.model).endswith(".json"):
         print("\tReading MACE model input parameters from file '{:s}' ... ".format(args.model), end="")
@@ -67,7 +75,6 @@ def main(args):
 
     #------------------#
     model.summary()
-
 
     #------------------#
     # trajectory
@@ -100,7 +107,7 @@ def main(args):
             
         #------------------#
         print("\n\tCreating dipole model based on the charges ... ",end="")
-        model = DipolePartialCharges(charges)
+        model = DipolePartialCharges(charges=charges)
         print("done")
 
         #------------------#
@@ -118,21 +125,45 @@ def main(args):
 
     #------------------#
     print("\n\tEvaluating the MACE model ... ", end="")
-    output:AtomicStructures = model.compute(structures,args.prefix)
+    # overwrite structures to save space in memory
+    structures:AtomicStructures = model.compute(structures,args.prefix)
     print("done")
 
     #------------------#
-    print("\n\tSummary of the output atomic structures: ")
-    df = output.summary()
+    print("\n\tSummary of the structures atomic structures: ")
+    df = structures.summary()
     tmp = "\n"+df.to_string(index=False)
     print(tmp.replace("\n", "\n\t"))
     
-
     #------------------#
-    if args.output is not None:
-        print("\n\tSaving atomic structures to file '{:s}' ... ".format(args.output), end="")
-        output.to_file(file=args.output,format=args.output_format)
+    if args.structures is not None:
+        print("\n\tSaving atomic structures to file '{:s}' ... ".format(args.structures), end="")
+        structures.to_file(file=args.structures,format=args.output_format)
         print("done")
+    
+    #------------------#
+    if args.output_info_array is not None:
+        print("\n\tReading instructions from file '{:s}' ... ".format(args.output_info_array), end="")
+        instructions = read_json(args.output_info_array)
+        print("done")
+        
+        print("\n\tSaving info and array to file:", end="")
+        for key, instr in instructions.items():
+            print(f"\n\t - '{key}':", end="")
+            array = structures.get(key)
+            print(f"\n\t\t extracted with shape {array.shape}:", end="")
+            if "shape" in instr:
+                array = np.reshape(array, instr["shape"])
+                print(f"\n\t\t reshaped to {array.shape}:", end="")
+                file = str(instr["file"])
+                print(f"\n\t\t saved to {file}:", end="")
+                if file.endswith("txt"):
+                    np.savetxt(file,array,fmt=float_format)
+                elif file.endswith("npy"):
+                    np.save(file,array)
+                else:
+                    raise ValueError("Only `txt` and `npy` extensions are supported.")
+        print()
     
     # #------------------#
     # print("\n\tSaving info/arrays to file:")
@@ -157,7 +188,7 @@ def main(args):
     #     # try:
     #     for name,shape,file,data_format in zip(args.names,args.shapes,args.data_output,args.data_format):
     #         print("\t - '{:s}' ... ".format(name), end="")
-    #         data = output.get(name)
+    #         data = structures.get(name)
     #         if np.issubdtype(data.dtype, np.str_):
     #             data_format = "%s"
     #         elif data_format is None:
