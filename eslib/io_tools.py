@@ -189,3 +189,7 @@ def count_lines(file_path):
     result = subprocess.run(['wc', '-l', file_path], stdout=subprocess.PIPE, text=True)
     line_count = int(result.stdout.split()[0])
     return line_count
+
+def count_lines(filename):
+    with open(filename, 'r') as file:
+        return sum(1 for line in file)
