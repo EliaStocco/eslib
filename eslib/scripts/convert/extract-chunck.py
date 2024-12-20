@@ -2,6 +2,7 @@
 import subprocess
 from eslib.formatting import esfmt
 from eslib.io_tools import read_Natoms_homogeneous, count_lines
+from input import str2bool
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -15,10 +16,11 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i" , "--input"        , required=True ,**argv,type=str, help="xyz input file")
-    parser.add_argument("-n" , "--index"        , required=True ,**argv,type=int, help="index of the chunck to print to file")
-    parser.add_argument("-N" , "--chunck_size"  , required=True ,**argv,type=int, help="chunck size")
-    parser.add_argument("-o" , "--output"       , required=True ,**argv,type=str, help="output file")
+    parser.add_argument("-i" , "--input"        , required=True ,**argv,type=str     , help="xyz input file")
+    parser.add_argument("-l" , "--lines"        , required=True ,**argv,type=str2bool, help="read number of lines (default: %(default)s)", default=True)
+    parser.add_argument("-n" , "--index"        , required=True ,**argv,type=int     , help="index of the chunck to print to file")
+    parser.add_argument("-N" , "--chunck_size"  , required=True ,**argv,type=int     , help="chunck size")
+    parser.add_argument("-o" , "--output"       , required=True ,**argv,type=str     , help="output file")
     return parser
 
 #---------------------------------------#
@@ -33,20 +35,22 @@ def main(args):
     print(f'\t Number of atoms: {Natoms}')
         
     #------------------#
-    print("\n\t Reading number of lines from file '{:s}' ... ".format(args.input), end="")
-    Nlines = count_lines(args.input)
-    print("done")
-    assert Nlines is not None, "An error occurred while reading the number of lines from the file."
-    print(f'\t Number of lines: {Nlines}')
+    if args.lines:
+        print("\n\t Reading number of lines from file '{:s}' ... ".format(args.input), end="")
+        Nlines = count_lines(args.input)
+        print("done")
+        assert Nlines is not None, "An error occurred while reading the number of lines from the file."
+        print(f'\t Number of lines: {Nlines}')
     
     #------------------#
     chunck_size = args.chunck_size*(Natoms+2)
     line_start = args.index*chunck_size
     line_end = (args.index+1)*chunck_size
     print(f'\t Chunck range (line numbers): {line_start} - {line_end}')
-    if line_end > Nlines:
-        raise ValueError(f"The chunck size ({args.chunck_size}) is larger than the number of lines in the file ({Nlines})")
-    
+    if args.lines:
+        if line_end > Nlines:
+            raise ValueError(f"The chunck size ({args.chunck_size}) is larger than the number of lines in the file ({Nlines})")
+        
     #------------------#
     # Use sed to extract the chunk of lines directly from the file and save to the output
     print("\n\t Extracting chunk using 'sed':")
