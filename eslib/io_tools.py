@@ -4,6 +4,7 @@ from typing import Any, Union
 import logging
 import os
 import re
+import subprocess
 
 #---------------------------------------#
 
@@ -184,12 +185,27 @@ def count_lines(file_path):
     Raises:
         CalledProcessError: If the subprocess command fails.
     """
-    import subprocess
     # Use wc -l to count the number of lines in the file
     result = subprocess.run(['wc', '-l', file_path], stdout=subprocess.PIPE, text=True)
     line_count = int(result.stdout.split()[0])
     return line_count
 
-def count_lines(filename):
-    with open(filename, 'r') as file:
-        return sum(1 for line in file)
+# def count_lines(filename):
+#     with open(filename, 'r') as file:
+#         return sum(1 for line in file)
+    
+
+def count_lines(file_path):
+    # Run the wc -l command and get the output
+    result = subprocess.run(['wc', '-l', file_path], stdout=subprocess.PIPE, text=True)
+    
+    # The output will be in the format "lines filename"
+    # We split by space and take the first part, which is the line count
+    line_count = int(result.stdout.split()[0])
+    
+    return line_count
+
+# # Example usage
+# file_path = 'myfile.txt'
+# lines = count_lines(file_path)
+# print(f"The file {file_path} has {lines} lines.")
