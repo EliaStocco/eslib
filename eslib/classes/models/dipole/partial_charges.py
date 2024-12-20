@@ -12,10 +12,10 @@ from eslib.io_tools import read_json
 @dataclass
 class DipolePartialCharges(DipoleModel):
 
-    instructions:str 
     charges: Dict[str,float]
+    instructions:str                       = field(default=None)      
     compute_BEC: bool                      = field(default=False,init=True)         
-    implemented_properties: Dict[str, Any] = field(init=False) 
+    implemented_properties: Dict[str, Any] = field(init=False,default_factory=dict) 
 
     def __post_init__(self) -> None:
         """Initialize DipolePartialCharges object."""
