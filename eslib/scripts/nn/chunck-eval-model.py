@@ -104,7 +104,7 @@ def main(args):
         print("done")
 
     all_files = pattern2sorted_files(args.input)
-    for n_file,file in enumerate(all_files):
+    for n_file,pos_file in enumerate(all_files):
         
         if not args.over_write:
             shall_compute = False
@@ -114,19 +114,19 @@ def main(args):
                     
             if args.output_info_array is not None:
                 for key, instr in instructions.items():
-                    file = add_index2file(str(instr["file"]),n_file)
-                    shall_compute = shall_compute or not os.path.exists(file)
+                    pfile = add_index2file(str(instr["file"]),n_file)
+                    shall_compute = shall_compute or not os.path.exists(pfile)
                     
             if not shall_compute:
-                print("\t Skipping '{:s}' ... ".format(file))
+                print("\t Skipping '{:s}' ... ".format(pos_file))
                 continue
         
         print("\n\t#---------------------------------------#\n")
         
         #------------------#
         # trajectory
-        with eslog(f"Reading the atomic structures from file '{file}'"):
-            structures = AtomicStructures.from_file(file=file,format=args.input_format)
+        with eslog(f"Reading the atomic structures from file '{pos_file}'"):
+            structures = AtomicStructures.from_file(file=pos_file,format=args.input_format)
         print("\t n. of structures: {:d}".format(len(structures)))
     
         #------------------#
