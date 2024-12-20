@@ -100,10 +100,7 @@ def main(args):
         show_dict(charges,"\t\t",2)
         
         for k,c in charges.items():
-            if not is_integer(c):
-                print("\t{:s}: '{:s}' charge is not an integer".format(warning,k))
-            charges[k] = np.round(c,0)
-            
+            assert is_integer(c), f"'{k}' charge is not an integer."                  
             
         #------------------#
         print("\n\tCreating dipole model based on the charges ... ",end="")
@@ -165,52 +162,6 @@ def main(args):
                     raise ValueError("Only `txt` and `npy` extensions are supported.")
         print()
     
-    # #------------------#
-    # print("\n\tSaving info/arrays to file:")
-    # # args.names = slist(args.names)
-    # if args.names is not None and len(args.names) > 0 :
-    #     if isinstance(args.names, str):
-    #         args.names = [args.names]             
-    #         args.shapes      = [args.shapes]      if args.shapes       is not None else [None]
-    #         args.data_output = [args.data_output] if args.data_output is not None else [None]
-    #         args.data_format = [args.data_format] if args.data_format is not None else [None]
-    #     elif isinstance(args.names, list) or isinstance(args.names, np.ndarray):
-    #         args.shapes      = args.shapes      if args.shapes       is not None else [None]*len(args.names)
-    #         args.data_output = args.data_output if args.data_output is not None else [None]*len(args.names)
-    #         args.data_format = args.data_format if args.data_format is not None else [None]*len(args.names)
-    #     else:
-    #         raise TypeError("args.names must be either a string or a list of strings, but got '{:s}'".format(type(args.names)))
-        
-    #     # args.data_output = slist(args.data_output)
-    #     # args.data_format = slist(args.data_format)
-        
-    #     df = pd.DataFrame(columns=["name","shape","file","format"])
-    #     # try:
-    #     for name,shape,file,data_format in zip(args.names,args.shapes,args.data_output,args.data_format):
-    #         print("\t - '{:s}' ... ".format(name), end="")
-    #         data = structures.get(name)
-    #         if np.issubdtype(data.dtype, np.str_):
-    #             data_format = "%s"
-    #         elif data_format is None:
-    #             data_format = "%r"
-    #             data_format = float_format
-    #         if shape is not None:
-    #             data = data.reshape(shape)
-    #         data = PhysicalTensor(data)
-    #         data.to_file(file=file,fmt=data_format)
-    #         print("done")
-    #         df = pd.concat([df,\
-    #                 pd.DataFrame([{"name":name,"shape":str(data.shape),"file":file,"format":str(data_format)}])],\
-    #                 ignore_index=True)
-    #     # except Exception as e:
-    #     #    print(e)
-        
-    # print("\n\tSummary of the info/arrays saved to file:")
-    # df = "\n"+df.to_string(index=False)
-    # print(df.replace("\n", "\n\t"))
-    
-    return 0
-
 #---------------------------------------#
 if __name__ == "__main__":
     main()
