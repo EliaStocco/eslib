@@ -70,5 +70,22 @@ if __name__ == "__main__":
     parser.add_argument("-d", type=str, metavar="\b",help="dependency type [ok, any, none] (default: %(default)s)", default="any",choices=["ok", "any", "none"])
     parser.add_argument("-e", type=str, metavar="\b",help="slurm job ID to use as a prerequisite (default: %(default)s)",default=None)
     args = parser.parse_args()
+    
+    # 
+    # Get the folder/directory where the file is located
+    folder_path = os.path.dirname(args.f)
+
+    # Define the new folder name
+    new_folder_name = "slurm"  # Change this to the desired folder name
+
+    # Create the new folder path
+    new_folder_path = os.path.join(folder_path, new_folder_name)
+
+    # Check if the folder already exists, if not, create it
+    if not os.path.exists(new_folder_path):
+        os.makedirs(new_folder_path)
 
     submit_jobs(args.n, args.f, args.d, args.e)
+    
+    
+
