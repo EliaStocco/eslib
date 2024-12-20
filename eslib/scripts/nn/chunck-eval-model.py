@@ -118,6 +118,7 @@ def main(args):
                     shall_compute = shall_compute or not os.path.exists(file)
                     
             if not shall_compute:
+                print("\t Skipping '{:s}' ... ".format(file))
                 continue
         
         print("\n\t#---------------------------------------#\n")
