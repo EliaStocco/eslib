@@ -133,7 +133,7 @@ def main(args):
     epsilon = 1/(4*np.pi)
     kB = 1
     c = convert(299792458,"velocity","m/s","atomic_unit")
-    factor = 3*c*volume*args.temperature*epsilon*kB/np.pi
+    factor = 3*c*volume*args.temperature*kB*epsilon/np.pi
     spectrum /= factor
     spectrum /= convert(1,"length","atomic_unit","centimeter")
     
