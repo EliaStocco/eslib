@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-import numpy as np
-
+import math
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.io_tools import count_lines
@@ -45,7 +44,7 @@ def main(args):
     #------------------#
     if args.chunck_size is not None:
         print("\n\tChunck size: ",args.chunck_size)
-        Nchunks = int( Nstructures / args.chunck_size )
+        Nchunks = math.ceil( float(Nstructures) / float(args.chunck_size) )
         print("\tn. of chunks: ",Nchunks)
 
 #---------------------------------------#
