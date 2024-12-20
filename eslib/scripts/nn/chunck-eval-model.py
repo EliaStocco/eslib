@@ -172,12 +172,12 @@ def main(args):
                 if "shape" in instr:
                     array = np.reshape(array, instr["shape"])
                     print(f"\t\t reshaped to {array.shape}:")
-                    file = add_index2file(str(instr["file"]),n_file)
-                    print(f"\t\t saved to {file}:")
-                    if file.endswith("txt"):
-                        np.savetxt(file,array,fmt=float_format)
-                    elif file.endswith("npy"):
-                        np.save(file,array)
+                    pfile = add_index2file(str(instr["file"]),n_file)
+                    print(f"\t\t saved to {pfile}:")
+                    if pfile.endswith("txt"):
+                        np.savetxt(pfile,array,fmt=float_format)
+                    elif pfile.endswith("npy"):
+                        np.save(pfile,array)
                     else:
                         raise ValueError("Only `txt` and `npy` extensions are supported.")
         
