@@ -423,6 +423,11 @@ class AtomicStructures(Trajectory,aseio):
                 warn (f"Skipping {key} with shape {row['shape']}")
         return output
         
+    def fold(self:T):
+        pos = self.get("positions")
+        pos = pos % 1 
+        for n,_ in enumerate(self):
+            self[n].set_scaled_positions(pos[n])
         
         
 
