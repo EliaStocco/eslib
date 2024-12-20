@@ -37,16 +37,16 @@ def main(args):
 
     #------------------#
     Nlines = count_lines(args.input)
-    print("\n\tn. lines in input file: ",Nlines)
+    print("\tn. lines in input file: ",Nlines)
 
     Nstructures = int( Nlines / (Natoms+2) )
-    print("\n\tn. of structures: ",Nstructures)
+    print("\tn. of structures: ",Nstructures)
     
     #------------------#
     if args.chunck_size is not None:
         print("\n\tChunck size: ",args.chunck_size)
-        Nchunks = int( Nlines / args.chunck_size )
-        print("\n\tn. of chunks: ",Nchunks)
+        Nchunks = int( Nstructures / args.chunck_size )
+        print("\tn. of chunks: ",Nchunks)
 
 #---------------------------------------#
 if __name__ == "__main__":
