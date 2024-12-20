@@ -26,8 +26,9 @@ def prepare_args(description):
     parser.add_argument("-at" , "--axis_time"      , **argv, required=False, type=int     , help="axis corresponding to time (default: %(default)s)", default=1)
     parser.add_argument("-ac" , "--axis_components", **argv, required=False, type=int     , help="axis corresponding to dipole components (default: %(default)s)", default=2)
     parser.add_argument("-fu" , "--freq_unit"      , **argv, required=False, type=str     , help="unit of the frequency in IR plot and output file (default: %(default)s)", default="inversecm")
-    parser.add_argument("-w"  , "--window"         , **argv, required=False, type=str     , help="window type (default: %(default)s)", default='hanning', choices=['none','barlett','blackman','hamming','hanning','kaiser'])
+    parser.add_argument("-w"  , "--window"         , **argv, required=False, type=str     , help="window type (default: %(default)s)", default='hanning', choices=['none','bartlett','blackman','hamming','hanning','kaiser'])
     parser.add_argument("-wt" , "--window_t"       , **argv, required=False, type=int     , help="time span of the window [fs] (default: %(default)s)", default=5000)
+    parser.add_argument("-B"  , "--beta"           , **argv, required=False, type=float   , help="beta value for the Kaiser window (default: %(default)s)", default=1)
     return parser
     
 #---------------------------------------#
@@ -47,16 +48,26 @@ def main(args):
     print("\tdipole shape: ",dipole.shape)
     dipole = convert(dipole,"electric-dipole","eang","atomic_unit")
     
+    # #------------------#
+    # print("\n\tRemoving the mean ... ",end="")
+    # dipole -= np.mean(dipole, axis=args.axis_time,keepdims=True)
+    # print("done")
+    
     #------------------#
-    print("\n\tRemoving the mean ... ",end="")
-    dipole -= np.mean(dipole, axis=args.axis_time,keepdims=True)
+    # norm_der is the average value of the time derivative of the dipole
+    print("\n\tComputing the average value of the dipole squared ... ",end="")
+    norm_dip = np.mean(dipole ** 2, axis=args.axis_time,keepdims=True)# *data.shape[args.axis_components]
+    # norm_dip = np.squeeze(norm_dip)
+    norm_dip = float(np.mean(np.sum(norm_dip,axis=args.axis_components)))
     print("done")
+    print("\tdipole square: ",norm_dip)
+    dipole /= np.sqrt(norm_dip)   
     
     #------------------#
     print("\n\tComputing the derivative ... ",end="")
     time_der = np.gradient(dipole,axis=args.axis_time)/args.time_step # e ang / fs
     print("done")
-    print("\tdipole derivative shape: ",dipole.shape)    
+    print("\tdipole derivative shape: ",dipole.shape) 
 
     #------------------#
     print("\n\tComputing the autocorrelation function ... ", end="")
@@ -80,23 +91,29 @@ def main(args):
         print("done")
         print("\tautocorr shape: ",autocorr.shape)
 
-    raw_autocorr = np.copy(autocorr)  
-
-
     #------------------#
     if args.window != "none" :
         print("\n\tApplying the '{:s}' window ... ".format(args.window),end="")
         #Define window to be used with DCT below.
         func = getattr(np, args.window)
-        window = np.zeros(raw_autocorr.shape[args.axis_time])
+        window = np.zeros(autocorr.shape[args.axis_time])
         M = int(args.window_t / args.time_step)
-        window[:M] = func(2*M)[M:]
+        if "kaiser" in args.window:
+            W = func(2*M,args.beta)[M:]
+        else:
+            W = func(2*M)[M:]
+        if M < len(window):
+            window[:M] = W
+        else:
+            window = W[:len(window)]
         window /= window[0] # small correction so that the first value is 1
         # window = np.atleast_2d(window)
         print("done")
         print("\twindow shape: ",window.shape)
 
-        autocorr = raw_autocorr * window
+        autocorr = autocorr*window
+        # tmp = tmp - np.mean(tmp, axis=args.axis_samples,keepdims=True) + np.mean(autocorr, axis=args.axis_time,keepdims=True)
+        # autocorr = tmp/np.take(tmp,indices=0,axis=args.axis_time)
 
     #------------------#
     print("\n\tComputing the spectrum ... ", end="")
@@ -116,9 +133,14 @@ def main(args):
     args.temperature = convert(args.temperature,"temperature","kelvin","atomic_unit")
     epsilon = 1/(4*np.pi)
     kB = 1
-    factor = 3*volume*args.temperature*epsilon * kB
+    factor = 3*volume*args.temperature*epsilon * kB/np.pi
     spectrum /= factor
-
+    
+    #------------------#
+    print("\n\tMultiplying the spectrum by the average value of the dipole squared  ... ", end="")
+    spectrum *= norm_dip
+    print("done")
+        
    #------------------#
     print("\n\tComputing the average over the trajectories ... ", end="")
     N = spectrum.shape[args.axis_samples]
