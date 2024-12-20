@@ -107,15 +107,15 @@ def main(args):
             
         #------------------#
         print("\n\tCreating dipole model based on the charges ... ",end="")
-        model = DipolePartialCharges(charges=charges)
+        charges_model = DipolePartialCharges(charges=charges)
         print("done")
 
         #------------------#
         print("\n\tAdding charges as '{:s}' to the 'arrays' of the atomic structures ... ".format(args.charges),end="")
         for n,structure in enumerate(structures):
-            if not model.check_charge_neutrality(structure):
+            if not charges_model.check_charge_neutrality(structure):
                 raise ValueError("structure . {:d} is not charge neutral".format(n))
-            structure.arrays[args.charges] = model.get_all_charges(structure)
+            structure.arrays[args.charges] = charges_model.get_all_charges(structure)
         print("done")        
     
     #------------------#
