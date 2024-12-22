@@ -19,7 +19,6 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , required=True ,**argv,type=str, help="xyz input file")
-    # parser.add_argument("-a" , "--atoms"        , required=True ,**argv,type=int, help="number of atoms")
     parser.add_argument("-n" , "--number"       , required=True ,**argv,type=int, help="number of structures per file")
     parser.add_argument("-f" , "--folder"       , required=False,**argv,type=str, help="output folder (default: splitted)", default='splitted')
     parser.add_argument("-o" , "--output"       , required=True ,**argv,type=str, help="output prefix")
@@ -49,7 +48,7 @@ def verify_split(input_file, output_prefix, num_splits, lines_per_snapshot):
             print(f"\t - {warning}: {split_file} does not have lines proportional to {lines_per_snapshot}.")
         n_files += 1
 
-    print()
+    # print()
     if n_files != num_splits:
         print(f"\t - {error}: number of split files ({n_files}) does not match the expected number ({num_splits}).")
     else:
