@@ -2,7 +2,7 @@
 import glob
 import os
 import subprocess
-
+import numpy as np
 from eslib.formatting import esfmt
 from eslib.io_tools import count_lines
 
@@ -81,6 +81,8 @@ def main(args):
 
     print(f'\tNumber of splits: {num_splits}')
     print(f'\tLines per split file: {lines_per_file}')
+    suffix_length = int(np.ceil(np.log10(num_splits+1)))
+    print(f'\tSuffix length: {suffix_length}')
 
     if args.folder is not None and args.folder not in ['', ' ']:
         os.makedirs(args.folder, exist_ok=True)
@@ -91,6 +93,7 @@ def main(args):
         'split',
         '-l', str(lines_per_file),
         '-d', f'--additional-suffix={args.suffix}',
+        f'--suffix-length={suffix_length}',
         args.input,
         args.output
     ]
