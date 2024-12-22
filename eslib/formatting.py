@@ -166,6 +166,8 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
             #     #     print()
             # else:
             #     print("no conda env")
+            
+            print("{:20s}: {:d}".format("SLURM job ID",os.getenv('SLURM_JOB_ID')))
             print("{:20s}: {:d}".format("PID",os.getpid()))
             print("{:20s}: {:s}".format("start date",start_date))
             print("{:20s}: {:s}".format("start time",start_time))
