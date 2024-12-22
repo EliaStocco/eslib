@@ -3,12 +3,12 @@ import glob
 import os
 import subprocess
 import numpy as np
-from eslib.formatting import esfmt
+from eslib.formatting import esfmt, warning, error
 from eslib.io_tools import count_lines, read_Natoms_homogeneous
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Split a xyz file."
+description = "Split an (ext)xyz file."
 
 #---------------------------------------#
 def prepare_args(description):
@@ -46,22 +46,22 @@ def verify_split(input_file, output_prefix, num_splits, lines_per_snapshot):
         #print(f'{split_file}: {split_lines} lines')
         total_lines += split_lines
         if split_lines % lines_per_snapshot != 0:
-            print(f"\tWarning: {split_file} does not have lines proportional to {lines_per_snapshot}.")
+            print(f"\t - {warning}: {split_file} does not have lines proportional to {lines_per_snapshot}.")
         n_files += 1
 
     print()
     if n_files != num_splits:
-        print(f"\tError: Number of split files ({n_files}) does not match the expected number ({num_splits}).")
+        print(f"\t - {error}: number of split files ({n_files}) does not match the expected number ({num_splits}).")
     else:
-        print(f"\tSuccess: Number of split files matches the expected number.")
+        print(f"\t - Success: number of split files matches the expected number.")
 
     # Count the lines in the original file
     original_lines = count_lines(input_file)
 
     if total_lines != original_lines:
-        print(f"\tError: Total lines in split files ({total_lines}) do not match original file ({original_lines}).")
+        print(f"\t - {error}: total lines in split files ({total_lines}) do not match original file ({original_lines}).")
     else:
-        print(f"\tSuccess: Total lines in split files match the original file.")
+        print(f"\t - Success: total lines in split files match the original file.")
 
 #---------------------------------------#
 @esfmt(prepare_args, description)
@@ -73,7 +73,9 @@ def main(args):
     print(f'\n\tNumber of atoms: {Natoms}')
     
     # Count the number of lines in the input file
+    print("\n\t Reading number of lines from file '{:s}' ... ".format(args.input), end="")
     total_lines = count_lines(args.input)
+    print("done")
     print(f'\n\tTotal lines in the file: {total_lines}')
 
     # Compute the number of lines per split file    
@@ -104,13 +106,16 @@ def main(args):
     ]
     
     cmd = ' '.join(split_command)
-    print(f'\n\tRun the following command:\n\t{cmd}')
+    print(f'\n\tRunning the following command:\n\t{cmd}')
 
+    print("\n\tSplitting file '{:s}' into {:d} parts ... ".format(args.input, num_splits), end="")
     # Execute the split command
     subprocess.run(split_command, check=True)
-    print(f'\n\tFile has been split into {num_splits} parts.')
+    print("done")
+    # print(f'\n\tFile has been split into {num_splits} parts.')
 
     # Verify the split files
+    print("\n\tVerifying the split files:")
     verify_split(args.input, args.output, num_splits, lines_per_snapshot)
 
 if __name__ == "__main__":
