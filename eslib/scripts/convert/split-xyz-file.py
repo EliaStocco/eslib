@@ -4,7 +4,7 @@ import os
 import subprocess
 import numpy as np
 from eslib.formatting import esfmt
-from eslib.io_tools import count_lines
+from eslib.io_tools import count_lines, read_Natoms_homogeneous
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -19,11 +19,11 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , required=True ,**argv,type=str, help="xyz input file")
-    parser.add_argument("-a" , "--atoms"        , required=True ,**argv,type=int, help="number of atoms")
+    # parser.add_argument("-a" , "--atoms"        , required=True ,**argv,type=int, help="number of atoms")
     parser.add_argument("-n" , "--number"       , required=True ,**argv,type=int, help="number of structures per file")
     parser.add_argument("-f" , "--folder"       , required=False,**argv,type=str, help="output folder (default: splitted)", default='splitted')
     parser.add_argument("-o" , "--output"       , required=True ,**argv,type=str, help="output prefix")
-    parser.add_argument("-s" , "--suffix"       , required=False,**argv,type=str, help="suffix (default: .xyz)", default='.xyz')
+    parser.add_argument("-s" , "--suffix"       , required=False,**argv,type=str, help="suffix (default: xyz)", default='xyz')
     return parser
 
 #---------------------------------------#
@@ -67,12 +67,17 @@ def verify_split(input_file, output_prefix, num_splits, lines_per_snapshot):
 @esfmt(prepare_args, description)
 def main(args):
 
+    args.suffix = str("." + args.suffix).replace('..', '.')
+
+    Natoms = read_Natoms_homogeneous(args.input)
+    print(f'\n\tNumber of atoms: {Natoms}')
+    
     # Count the number of lines in the input file
     total_lines = count_lines(args.input)
     print(f'\n\tTotal lines in the file: {total_lines}')
 
-    # Compute the number of lines per split file
-    lines_per_snapshot = args.atoms + 2
+    # Compute the number of lines per split file    
+    lines_per_snapshot = Natoms + 2
     print(f'\tLines per snapshot: {lines_per_snapshot}')
     lines_per_file = args.number * lines_per_snapshot
     num_splits = total_lines // lines_per_file
@@ -86,7 +91,7 @@ def main(args):
 
     if args.folder is not None and args.folder not in ['', ' ']:
         os.makedirs(args.folder, exist_ok=True)
-        args.output = os.path.join(args.folder, args.output)
+        args.output = os.path.join(args.folder, args.output)+"."
 
     # Construct the split command
     split_command = [
@@ -97,6 +102,9 @@ def main(args):
         args.input,
         args.output
     ]
+    
+    cmd = ' '.join(split_command)
+    print(f'\n\tRun the following command:\n\t{cmd}')
 
     # Execute the split command
     subprocess.run(split_command, check=True)
