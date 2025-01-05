@@ -231,3 +231,39 @@ def pattern2sorted_files(patter):
         except:
             pass
     return matched_files
+
+def load_data(file: str, **kwargs) -> np.ndarray:
+    if file.endswith(".txt"):
+        data = np.loadtxt(fname=file, **kwargs)
+    elif file.endswith(".npy"):
+        data = np.load(file, **kwargs)
+    else:
+        raise ValueError(f"Unsupported file format: {file}")
+    return data
+
+def pattern2data(pattern:str)->np.ndarray:
+    """
+    Load data from multiple files matching a pattern.
+
+    Parameters:
+    pattern (str): A glob pattern to match files.
+
+    Returns:
+    np.ndarray: A 1D array of data, where each element is a 1D array loaded from a file matching the pattern.
+
+    Raises:
+    FileNotFoundError: If no files match the pattern.
+    """
+    all_files = pattern2sorted_files(pattern)
+    if not all_files:
+        raise FileNotFoundError(f"No files matched the pattern '{pattern}'")
+    
+    try:
+        matched_files = [ matched_files[i] for i in np.argsort(np.asarray([ int(extract_number_from_filename(x)) for x in matched_files ])) ]
+    except:
+        pass
+    
+    results = [None]*len(all_files)
+    for n,matched_file in enumerate(all_files):
+        results[n] = load_data(matched_file)
+    return np.asarray(results)

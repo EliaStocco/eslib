@@ -1,56 +1,31 @@
 #!/usr/bin/env python
 import numpy as np
 from ase.io import read, write
-from eslib.tools import segment
-
+from ase import Atoms
+from typing import List
+from eslib.formatting import esfmt
+from eslib.input import str2bool
 
 #---------------------------------------#
 description     = "Create a path bridging two atomic structures (useful for NEB calculations)."
-warning         = "***Warning***"
-closure         = "Job done :)"
-keywords        = "It's up to you to modify the required keywords."
-input_arguments = "Input arguments"
 
 #---------------------------------------#
-# colors
-try :
-    import colorama
-    from colorama import Fore, Style
-    colorama.init(autoreset=True)
-    description     = Fore.GREEN  + Style.BRIGHT + description             + Style.RESET_ALL
-    warning         = Fore.MAGENTA    + Style.BRIGHT + warning.replace("*","") + Style.RESET_ALL
-    closure         = Fore.BLUE   + Style.BRIGHT + closure                 + Style.RESET_ALL
-    keywords        = Fore.YELLOW + Style.NORMAL + keywords                + Style.RESET_ALL
-    input_arguments = Fore.GREEN  + Style.NORMAL + input_arguments         + Style.RESET_ALL
-except:
-    pass
-
-#---------------------------------------#
-def prepare_parser():
+def prepare_parser(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
-    parser.add_argument("-a", "--structure_A",  type=str,**argv,help="atomic structure A")
-    parser.add_argument("-b", "--structure_B",  type=str,**argv,help="atomic structure B")
-    parser.add_argument("-n", "--number"     ,  type=int,**argv,help="number of inner structures")
-    parser.add_argument("-e", "--external"     ,  type=float,**argv,help="external structures [between 0 and 1] (default: %(default)s)", default=0)
-    parser.add_argument("-o", "--output"     ,  type=str,**argv,help="output file with the path", default="path.xyz")
-    options = parser.parse_args()
-    return options
+    parser.add_argument("-a", "--structure_A",  type=str     , **argv, help="atomic structure A")
+    parser.add_argument("-b", "--structure_B",  type=str     , **argv, help="atomic structure B")
+    parser.add_argument("-n", "--number"     ,  type=int     , **argv, help="number of inner structures")
+    parser.add_argument("-e", "--external"   ,  type=float   , **argv, help="external structures [between 0 and 1] (default: %(default)s)", default=0)
+    parser.add_argument("-f", "--fix_com"    ,  type=str2bool, **argv, help="fix the center of mass (default: %(default)s)", default=False)
+    parser.add_argument("-N", "--index_com"  ,  type=int     , **argv, help="index of the structure whose center of mass will be considered (default: %(default)s)", default=0)
+    parser.add_argument("-o", "--output"     ,  type=str     , **argv, help="output file with the path", default="path.xyz")
+    return parser
 
 #---------------------------------------#
-def main():
-
-    #-------------------#
-    args = prepare_parser()
-
-    # Print the script's description
-    print("\n\t{:s}".format(description))
-    # print("done")
-    print("\n\t{:s}:".format(input_arguments))
-    for k in args.__dict__.keys():
-        print("\t{:>20s}:".format(k),getattr(args,k))
-    print()
+@esfmt(prepare_parser,description)
+def main(args):
 
     #-------------------#
     print("\tReading atomic structure A from file '{:s}' ... ".format(args.structure_A), end="")
@@ -89,11 +64,20 @@ def main():
 
     #-------------------#
     print("\tCreating the path ... ", end="")
-    path = [None]*N
+    path:List[Atoms] = [None]*N
     for n in range(N):
         path[n] = A.copy()
         path[n].set_scaled_positions(pathpos[n])
     print("done")
+    
+    #-------------------#
+    if args.fix_com:
+        print("\tFixing the center of mass ... ", end="")
+        reference:Atoms = path[args.index_com]
+        com = reference.get_center_of_mass()
+        for n in range(N):
+            path[n].set_center_of_mass(com,scaled=False)
+        print("done")
 
     #-------------------#
     print("\n\tSaving the path to file '{:s}' ... ".format(args.output), end="")
@@ -103,8 +87,6 @@ def main():
         print("\n\tError: {:s}".format(e))
     print("done")
 
-    #-------------------#
-    print("\n\t{:s}\n".format(closure))
 
 #---------------------------------------#
 if __name__ == "__main__":

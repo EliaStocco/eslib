@@ -7,6 +7,7 @@ import xarray as xr
 from eslib.classes.io import pickleIO
 from eslib.formatting import complex_format, float_format
 from eslib.units import *
+from eslib.functions import extract_number_from_filename
 
 T = TypeVar('T', bound='TensorData')
 # Suppress warnings in this specific file

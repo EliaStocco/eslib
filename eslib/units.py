@@ -27,7 +27,8 @@ families = {    "energy"          : ["conserved","kinetic_md","potential"],
                 "polarization"    : ["polarization"],
                 "electric-dipole" : ["dipole"],
                 "time"            : ["time"],
-                "electric-field"  : ["Efield","Eenvelope"]
+                "electric-field"  : ["Efield","Eenvelope"],
+                "fluence"         : ["fluence"]
 }
 
 def remove_unit(array:dtype)->Tuple[dtype,utype]:

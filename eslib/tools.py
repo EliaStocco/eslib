@@ -137,6 +137,12 @@ add_conversion("polarization","C/m^2",value)
 value = convert(1,"electric-field","V/ang","atomic_unit")
 add_conversion("electric-field","MV/cm",1e-2*value)
 
+value = convert(1,"energy","joule","atomic_unit")/( convert(1,"length","centimeter","atomic_unit")**2)
+add_conversion("fluence","J/cm2",value)
+
+value = convert(1,"energy","millijoule","atomic_unit")/( convert(1,"length","centimeter","atomic_unit")**2)
+add_conversion("fluence","mJ/cm2",value)
+
 #---------------------------------------#
 # Decorator to convert ase.Cell to np.array and transpose
 def ase_cell_to_np_transpose(func):

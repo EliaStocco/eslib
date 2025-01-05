@@ -1,6 +1,12 @@
+from git import Optional
 import numpy as np
 
 from typing import Tuple
+
+def mean_std_err(array: np.ndarray, axis: int) -> Tuple[np.ndarray, np.ndarray]:
+    mean = np.mean(array, axis=axis)
+    std, err = std_err(array, axis=axis)
+    return mean, std, err
 
 def std_err(array: np.ndarray, axis: int) -> Tuple[np.ndarray, np.ndarray]:
     """
@@ -141,3 +147,17 @@ def histogram_along_axis(data: np.ndarray, bins: int, axis: int) -> np.ndarray:
     hist_transposed = np.transpose(hist, np.roll(np.arange(hist.ndim), axis))
 
     return hist_transposed
+
+def cumulative_mean(x:np.ndarray,axis:Optional[int]=0)->np.ndarray:
+    """
+    Compute the cumulative mean of an array along a specified axis.
+
+    Parameters:
+        x (np.ndarray): Input array for which to compute the cumulative mean.
+        axis (int, optional): The axis along which to compute the cumulative mean. Default is 0.
+
+    Returns:
+        np.ndarray: An array of the same shape as `x` with the cumulative means computed along the specified axis.
+    """
+
+    return np.cumsum(x,axis=axis)/np.arange(1,x.shape[axis]+1)

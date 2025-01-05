@@ -38,6 +38,10 @@ UnitMap = {
         "cal/mol": 0.0000015946679,
         "kelvin": 3.1668152e-06,
         "rydberg" : 0.5,
+        "hartree": 1.0,
+        "joule" : 229371044869059970,
+        "J" : 229371044869059970,
+        "mj": 229371044869059.970
     },
     "charge" : {
         "" : 1.00,
@@ -140,6 +144,11 @@ UnitMap = {
         "atomic_unit": 1.00,
         "ev/ang^2": 0.010290858,
     },
+    "fluence" : {
+        "": 1.00,
+        "automatic": 1.00,
+        "atomic_unit": 1.00
+    }
 }
 
 # a list of magnitude prefixes
