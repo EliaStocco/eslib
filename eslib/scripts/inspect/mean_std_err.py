@@ -38,7 +38,7 @@ def main(args):
     
     #------------------#
     print("\n\tWriting the dataframe to file '{:s}' ... ".format(args.output), end="")
-    df.to_csv(args.output)
+    df.to_csv(args.output,index=False)
     print("done")
     
     #------------------#
