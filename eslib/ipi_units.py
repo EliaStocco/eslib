@@ -79,7 +79,8 @@ UnitMap = {
         "": 1.00,
         "automatic": 1.00,
         "atomic_unit": 1.00,
-        "eang": 1.8897261,  # electron charge * angstrom
+        "eang": 1.8897261,  # electron charge * angstrom,
+        "debye" : 0.3934303, # https://en.wikipedia.org/wiki/Debye#cite_note-10
     },
     "polarization": {  # electron charge * Bohr
         "": 1.00,

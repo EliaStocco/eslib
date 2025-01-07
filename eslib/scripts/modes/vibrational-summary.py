@@ -67,10 +67,15 @@ def main(args):
     print("\tunit cell [au] :")    
     line = matrix2str(structure.cell.array.T,col_names=["1","2","3"],cols_align="^",width=10,digits=4)
     print(line)
-
+    
+    norm = np.linalg.norm(nm.eigvec.to_data(),axis=0).mean()
+    print("\n\teigvec normalized to {:.2f}".format(norm))
+    norm = np.linalg.norm(nm.mode.to_data(),axis=0).mean()
+    print("\tmodes normalized to {:.2f}".format(norm))
+    
     #---------------------------------------#
     # dataframe
-    print("\tPreparing dataframe with the information ... ", end="")
+    print("\n\tPreparing dataframe with the information ... ", end="")
     df = pd.DataFrame()
     eigvals = nm.eigval.to_numpy()
     df["index"] = np.arange(len(eigvals)).astype(int)

@@ -1,6 +1,6 @@
-from git import Optional
+from typing import Optional
 import numpy as np
-
+import pandas as pd
 from typing import Tuple
 
 def mean_std_err(array: np.ndarray, axis: int) -> Tuple[np.ndarray, np.ndarray]:
@@ -8,6 +8,10 @@ def mean_std_err(array: np.ndarray, axis: int) -> Tuple[np.ndarray, np.ndarray]:
     std, err = std_err(array, axis=axis)
     return mean, std, err
 
+def mean_std_err2pandas(array: np.ndarray, axis: int)->pd.DataFrame:
+    mean, std, err = mean_std_err(array,axis)
+    return pd.DataFrame({"mean":mean,"std":std,"err":err})
+    
 def std_err(array: np.ndarray, axis: int) -> Tuple[np.ndarray, np.ndarray]:
     """
     Compute the standard deviation and standard error along a specified axis.
