@@ -68,7 +68,7 @@ def main(args):
     rmse *= 1000
     print("\tRMSE (meAng): ",rmse)
     
-    rmse = convert(rmse,"electric-dipole","eang","millidebye")
+    rmse = convert(rmse,"electric-dipole","millieang","millidebye")
     print("\tRMSE (mDebye): ",rmse)
     
 #---------------------------------------#
