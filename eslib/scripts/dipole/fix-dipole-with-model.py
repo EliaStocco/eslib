@@ -3,8 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.classes.models.dipole.baseclass import (DipoleLinearModel,
-                                                   DipoleModel)
+from eslib.classes.models.dipole.baseclass import DipoleModel
 from eslib.formatting import esfmt, everythingok, float_format, warning
 from eslib.output import output_folder
 from eslib.physics import compute_dipole_quanta
@@ -76,16 +75,16 @@ def main(args):
     #------------------#
     model.summary()
 
-    #------------------#
-    if isinstance(model,DipoleLinearModel): 
-        print("\tCheck the distances w.r.t. the reference configuration ... ", end="")
-        indices = model.control_periodicity(list(trajectory))
-        print("done")
-        if indices is None or len(indices) == 0:
-            print("\t{:s}".format(everythingok))
-        else:
-            print("\t{:s}: found {:d} structures that could be wrong.".format(warning,len(indices)))
-            # print("\tatomic structures indices: ", indices.tolist())
+    # #------------------#
+    # if isinstance(model,DipoleLinearModel): 
+    #     print("\tCheck the distances w.r.t. the reference configuration ... ", end="")
+    #     indices = model.control_periodicity(list(trajectory))
+    #     print("done")
+    #     if indices is None or len(indices) == 0:
+    #         print("\t{:s}".format(everythingok))
+    #     else:
+    #         print("\t{:s}: found {:d} structures that could be wrong.".format(warning,len(indices)))
+    #         # print("\tatomic structures indices: ", indices.tolist())
 
     #------------------#
     # dipole
