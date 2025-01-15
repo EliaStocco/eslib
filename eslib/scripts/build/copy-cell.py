@@ -29,7 +29,7 @@ def main(args):
     #------------------#
     # cell
     print("\tReading the first atomic structure from file '{:s}' ... ".format(args.cell), end="")
-    periodic:Atoms = list(AtomicStructures.from_file(file=args.cell,format=args.cell_format,index=0))[0]
+    periodic:Atoms = AtomicStructures.from_file(file=args.cell,format=args.cell_format,index=0)[0]
     cell = periodic.get_cell()
     pbc = periodic.get_pbc()
     print("done")
