@@ -15,11 +15,11 @@ from ase.cell import Cell
 from ase import io
 from ase.io import string2index, write
 from ase.io.formats import filetype
-from ase.io.netcdftrajectory import (read_netcdftrajectory,
-                                     write_netcdftrajectory)
+# from ase.io.netcdftrajectory import (read_netcdftrajectory,
+#                                      write_netcdftrajectory)
 
 from eslib.classes.file_formats.hdf5 import read_hdf5, write_hdf5
-from eslib.classes.file_formats.netcdf import read_netcdf, write_netcdf
+# from eslib.classes.file_formats.netcdf import read_netcdf, write_netcdf
 from eslib.classes.file_formats.pdb import read_pdb
 # from eslib.classes.trajectory import AtomicStructures
 from eslib.classes.io import pickleIO
@@ -208,16 +208,16 @@ class aseio(List[Atoms], pickleIO):
             index = argv['index'] if 'index' in argv else slice(None,None,None)
             index = integer_to_slice_string(index)
             traj = read_hdf5(filename=file,index=index)
-        elif format.lower() in ["nc","netcdftrajectory"]:
-            warn("NetCDF trajectory format is deprecated. Use 'hdf5/h5' format instead.",DeprecationWarning)
-            index = argv['index'] if 'index' in argv else slice(None,None,None)
-            index = integer_to_slice_string(index)
-            traj = read_netcdftrajectory(filename=argv['file'],index=index)    
-            if not isinstance(traj,list):
-                traj = [traj]             
-        elif format.lower() in ["netcdf"]: 
-            warn("NetCDF trajectory format is deprecated. Use 'hdf5/h5' format instead.",DeprecationWarning)
-            traj = read_netcdf(file)
+        # elif format.lower() in ["nc","netcdftrajectory"]:
+        #     warn("NetCDF trajectory format is deprecated. Use 'hdf5/h5' format instead.",DeprecationWarning)
+        #     index = argv['index'] if 'index' in argv else slice(None,None,None)
+        #     index = integer_to_slice_string(index)
+        #     traj = read_netcdftrajectory(filename=argv['file'],index=index)    
+        #     if not isinstance(traj,list):
+        #         traj = [traj]             
+        # elif format.lower() in ["netcdf"]: 
+        #     warn("NetCDF trajectory format is deprecated. Use 'hdf5/h5' format instead.",DeprecationWarning)
+        #     traj = read_netcdf(file)
         elif format.lower() in ["pdb"]:
             traj = [read_pdb(file)]
         else:
@@ -252,10 +252,10 @@ class aseio(List[Atoms], pickleIO):
                 string = " positions{angstrom} cell{angstrom}"
                 comment = fmt_header%(*params,string)
                 write(file, atoms, format="xyz", append=True, comment=comment)
-        elif format.lower() in ["nc","netcdftrajectory"]:
-            write_netcdftrajectory(filename=file,images=self.to_list())
-        elif format.lower() in ["netcdf"]:
-            write_netcdf(file,self.to_list())
+        # elif format.lower() in ["nc","netcdftrajectory"]:
+        #     write_netcdftrajectory(filename=file,images=self.to_list())
+        # elif format.lower() in ["netcdf"]:
+        #     write_netcdf(file,self.to_list())
         elif format.lower() in ["h5","hdf5"]:
             write_hdf5(file,self.to_list())
         else:

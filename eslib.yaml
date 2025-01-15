@@ -15,7 +15,6 @@ dependencies:
   - importlib-metadata
   - matplotlib
   - matscipy
-  - netCDF4
   - nbconvert
   - numexpr>=2.8.4
   - numpy
