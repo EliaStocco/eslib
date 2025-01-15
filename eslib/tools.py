@@ -19,6 +19,12 @@ from scipy.spatial.distance import cdist
 from eslib.ipi_units import UnitMap, unit_to_internal, unit_to_user
 
 
+def pandas_append(df: pd.DataFrame, data: dict) -> pd.DataFrame:
+    # Convert the dictionary into a single-row DataFrame
+    new_row = pd.DataFrame([data])
+    # Concatenate the new row with the existing DataFrame
+    return pd.concat([df, new_row], ignore_index=True)
+
 def take(arr, axis, indices,keepdims=False):
     # Take the values along the specified axis
     result = np.take(arr, indices=indices, axis=axis)
