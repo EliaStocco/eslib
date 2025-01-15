@@ -10,6 +10,13 @@ from eslib.classes.bec import bec as BEC
 from eslib.tools import cart2frac
 from eslib.tools import convert
 
+def compute_density(atoms:Atoms)->float:
+    tot_mass = atoms.get_masses().sum()
+    volume = atoms.get_volume()
+    tot_mass = convert(tot_mass,"mass","dalton","atomic_unit")
+    volume = volume*convert(1,"length","angstrom","atomic_unit")**3
+    density = convert(tot_mass/volume,"density","atomic_unit","g/cm3")
+    return density
 
 #---------------------------------------#
 def debye_real(w: np.ndarray, chi0: float, tau: float) -> np.ndarray:
