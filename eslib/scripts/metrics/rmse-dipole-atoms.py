@@ -28,7 +28,7 @@ def main(args):
         print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
         atoms = AtomicStructures.from_file(file=args.input,format="extxyz")
         print("done")
-        Natoms = atoms[0].get_global_number_of_atoms()
+        Natoms =  np.asarray([ a.get_global_number_of_atoms() for a in atoms ])
 
         predicted = atoms.get(args.predicted)
         expected = atoms.get(args.expected)
@@ -58,7 +58,7 @@ def main(args):
     #------------------#
     print("\tComputing metrics ... ", end="")
     diff  = predicted - expected        
-    err_atoms = diff/Natoms
+    err_atoms = diff/Natoms[:,None]
     err_atoms_2 = np.square(err_atoms)
     diff2 = err_atoms_2.sum(axis=1)      # sum over x,y,z
     mean = np.mean(diff2)                # mean over snapshots
