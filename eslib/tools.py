@@ -501,7 +501,7 @@ def reshape_info_array(traj:List[Atoms],props:Dict[str,np.ndarray],shapes)->Dict
     Dict[str,np.ndarray]: Reshaped dictionary of properties.
     """
     Nconf  = len(traj)
-    Natoms = traj[0].get_global_number_of_atoms()
+    Natoms = [ a.get_global_number_of_atoms() for a in traj ]
     # print("N conf.  : {:d}".format(Nconf))
     # print("N atoms. : {:d}".format(Natoms))
     whereto = {}
@@ -523,12 +523,26 @@ def reshape_info_array(traj:List[Atoms],props:Dict[str,np.ndarray],shapes)->Dict
         if whereto[k] == "info":
             props[k] = props[k].reshape((Nconf,-1))
         elif whereto[k] == "arrays":
-            props[k] = props[k].reshape((Nconf,Natoms,-1))
+            props[k] = reshape_mixed_Natoms(props[k],shapes[k],Natoms,Nconf) # props[k].reshape((Nconf,Natoms,-1))
         else:
             raise ValueError("`whereto[{k}]` can be either `info` or `arrays`.")
         # print(" to {}".format(props[k].shape))
     
     return props, whereto
+
+def reshape_mixed_Natoms(props:np.ndarray,shape:tuple,Natoms:list,Nconf:int):
+    if np.all(Natoms==Natoms[0]):
+        return props.reshape((Nconf,Natoms[0],-1))
+    else:
+        out = [None]*Nconf
+        init = 0
+        Ncomp = shape[1][-1]
+        for n in range(Nconf):
+            final = Natoms[n]*Ncomp
+            tmp = props[init:init+final]
+            out[n] = tmp.reshape((Natoms[n],Ncomp))
+            init += final
+        return out
 
 #---------------------------------------#
 def add_info_array(traj:List[Atoms],props:Dict[str,np.ndarray],shapes)->List[Atoms]:

@@ -232,6 +232,7 @@ class MACEModel(eslibModel):
         warnings = []
         outputs: Dict[str, np.ndarray] = dict()
 
+        # TODO: optimize!
         # Iterate over batches
         for batch in data_loader:
             batch: torch_geometric.batch.Batch = batch.to(self.device)

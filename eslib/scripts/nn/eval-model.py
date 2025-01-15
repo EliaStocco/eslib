@@ -125,10 +125,13 @@ def main(args):
         structures:AtomicStructures = model.compute(structures,args.prefix)
     
     #------------------#
-    print("\n\t Summary of the structures atomic structures: ")
-    df = structures.summary()
-    tmp = "\n"+df.to_string(index=False)
-    print(tmp.replace("\n", "\n\t"))
+    try:
+        print("\n\t Summary of the structures atomic structures: ")
+        df = structures.summary()
+        tmp = "\n"+df.to_string(index=False)
+        print(tmp.replace("\n", "\n\t"))
+    except:
+        print(f"\t {warning}: could not print the summary of the atomic structures.")
     
     #------------------#
     if args.output is not None:
