@@ -1,0 +1,31 @@
+
+# ------------------------------------------------------------------------
+# This is the script saved via the "File-->Save Current State and
+# Structure" menu. This feature saves the currently displayed
+# structure. When it will be loaded again it will recall all the
+# display parameters, such as orientation, zoom, perspective, ...
+#
+# Execute this script as: xcrysden --script /home/stoccoel/google-personal/simulations/LiNbO3/PBEsol/steering/phonopy/phonons/jmol/test.xcrysden
+#
+# File created by stoccoel on localhost.
+# File creation date: Thu Jan 16 15:03:43 CET 2025    
+# ------------------------------------------------------------------------
+        
+
+        
+# ======================================================================== #
+#                                                                          #
+#                      STRUCTURE-PART OF THE FILE                          #
+#                                                                          #
+# ======================================================================== #
+
+    
+
+# ------------------------------------------------------------------------
+# BEGIN: XSF structure data
+# ------------------------------------------------------------------------
+
+# Store the content of the XSF file in the xsfStructure variable
+
+set xsfStructure {
+    
