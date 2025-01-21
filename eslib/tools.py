@@ -18,6 +18,23 @@ from scipy.spatial.distance import cdist
 
 from eslib.ipi_units import UnitMap, unit_to_internal, unit_to_user
 
+def read_file_content(file_path:str)->str:
+    """
+    Reads the content of a file and returns it as a string.
+
+    Parameters
+    ----------
+    file_path : str
+        The path to the file to be read.
+
+    Returns
+    -------
+    content : str
+        The content of the file.
+    """
+    with open(file_path, 'r') as f:
+        content = f.read()
+    return content
 
 def pandas_append(df: pd.DataFrame, data: dict) -> pd.DataFrame:
     # Convert the dictionary into a single-row DataFrame
@@ -531,9 +548,10 @@ def reshape_info_array(traj:List[Atoms],props:Dict[str,np.ndarray],shapes)->Dict
     return props, whereto
 
 def reshape_mixed_Natoms(props:np.ndarray,shape:tuple,Natoms:list,Nconf:int):
-    if np.all(Natoms==Natoms[0]):
+    if np.all([a==Natoms[0] for a in Natoms]):
         return props.reshape((Nconf,Natoms[0],-1))
     else:
+        assert props.ndim == 1, "props should be a 1D array"
         out = [None]*Nconf
         init = 0
         Ncomp = shape[1][-1]
@@ -681,3 +699,11 @@ def phonopy2ase(atoms_phonopy: "PhonopyAtoms") -> Atoms:
         pbc=True,  # Set periodic boundary conditions to True
     )
     return ase_atoms
+
+def clean_structure(atoms:Atoms):
+    clean = Atoms(
+        cell=atoms.get_cell(),
+        positions=atoms.get_positions(),
+        numbers=atoms.get_atomic_numbers(),
+        pbc=atoms.get_pbc())
+    return clean

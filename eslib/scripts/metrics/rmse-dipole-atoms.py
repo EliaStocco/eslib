@@ -66,10 +66,10 @@ def main(args):
     print("done")
     
     rmse *= 1000
-    print("\tRMSE (meAng): ",rmse)
+    print("\tRMSE (meAng/atoms): ",rmse)
     
     rmse = convert(rmse,"electric-dipole","millieang","millidebye")
-    print("\tRMSE (mDebye): ",rmse)
+    print("\tRMSE (mDebye/atoms): ",rmse)
     
 #---------------------------------------#
 if __name__ == "__main__":

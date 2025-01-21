@@ -98,7 +98,7 @@ def add_common_legend(fig: Figure, ax: Axes, ax2: Axes, **argv: Any) -> None:
     options = add_default(argv, legend_options)
     
     # Add the common legend to the figure
-    ax.legend(common_handles, common_labels, **options)
+    fig.legend(common_handles, common_labels, **options)
 
 
 def generate_continuous_color_map(vmin: float, vmax: float, color1: str = 'red', color2: str = 'blue') -> callable:

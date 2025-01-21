@@ -2,6 +2,7 @@ from copy import deepcopy
 from typing import List, TypeVar, Union
 from warnings import warn
 
+from ase import Atoms
 import numpy as np
 import pandas as pd
 
@@ -23,6 +24,16 @@ class AtomicStructures(Trajectory,aseio):
         - method for checking the presence of an attribute in `info`, `array`, or both
         - method for subsampling the AtomicStructures object
     """
+    
+    @classmethod
+    def from_atoms(cls,atoms:Atoms,repeat:int=1,clean:bool=False):
+        """
+        Convert ase.Atoms object to AtomicStructures object.
+        """
+        if clean:
+            from eslib.tools import clean_structure
+            atoms = clean_structure(atoms)
+        return cls([ atoms.copy() for _ in range(repeat) ])
     
     def num_atoms(self:T):
         n_atoms = [s.get_global_number_of_atoms(s) for s in self]
