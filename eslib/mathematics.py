@@ -2,6 +2,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 from typing import Tuple
+from warnings import warn
 
 def mean_std_err(array: np.ndarray, axis: int) -> Tuple[np.ndarray, np.ndarray]:
     mean = np.mean(array, axis=axis)
@@ -35,8 +36,10 @@ def std_err(array: np.ndarray, axis: int) -> Tuple[np.ndarray, np.ndarray]:
     # Compute standard error of the mean along the specified axis
     n = array.shape[axis]
     if n <= 1:
-        raise ValueError("Standard error requires at least two elements along the axis.")
-    err = std / np.sqrt(n - 1)
+        warn("Standard error requires at least two elements along the axis.")
+        err = np.full_like(std,np.nan)
+    else:
+        err = std / np.sqrt(n - 1)
 
     return std, err
 
