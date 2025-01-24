@@ -142,12 +142,12 @@ def main(args):
             tmp = "{:d}-{:d}-{:d}".format(*[ int(i) for i in qstr])
         else:
             tmp = names["[{:.3f},{:.3f},{:.3f}]".format(*[ i for i in q])]
-        file = os.path.normpath("{:s}/{:s}-unitcell.{:s}.yaml".format(args.output_folder,args.output,tmp))
+        file = os.path.normpath("{:s}/{:s}-unitcell.{:s}.pickle".format(args.output_folder,args.output,tmp))
 
         print("\t    * saving normal modes (unit cell) to file {:s}".format(file))
         nm.to_file(file=file)
         
-        file = os.path.normpath("{:s}/{:s}-supercell.{:s}.yaml".format(args.output_folder,args.output,tmp))
+        file = os.path.normpath("{:s}/{:s}-supercell.{:s}.pickle".format(args.output_folder,args.output,tmp))
         print("\t    * saving normal modes (supercell) to file {:s}".format(file))
         snm = nm.build_supercell_displacement(size=size,q=q,info=info)
         snm.to_file(file=file)
