@@ -303,7 +303,7 @@ class NormalModes(pickleIO):
         if np.linalg.norm(tmp.mode.data-self.mode.data)    /len(self.mode.data)   > threshold:  warn("Normal modes do not match")
 
     # @unsafe
-    def eigvec2modes(self:T,_test:bool=True):
+    def eigvec2modes(self:T):
         """
         Convert the eigenvectors to the normal modes.
 
@@ -321,12 +321,14 @@ class NormalModes(pickleIO):
             index = {'dof': i}
             self.non_ortho_mode[index] = self.eigvec[index] / np.sqrt(self.masses[index])
         # self.old_mode = self.mode.copy()
-        self.mode = self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof")
-        if _test:
-            test = self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof")
-            if not np.allclose(test.data,self.mode.data):
-                raise ValueError('some coding error')
-        pass
+        normalization = np.sqrt(np.prod(self.size))
+        self.mode = normalization*self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof")
+        
+        # if _test:
+        #     test = self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof")
+        #     if not np.allclose(test.data,self.mode.data):
+        #         raise ValueError('some coding error')
+        # pass
     
     # @unsafe
     def build_supercell_displacement(self:T,size,q,info:dict)->T:
