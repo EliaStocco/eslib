@@ -6,8 +6,6 @@ from ase.io import read, write
 from ase.neighborlist import neighbor_list
 from icecream import ic
 
-from eslib.classes.normal_modes import NormalModes
-from eslib.geometry import angle_between_vectors
 from eslib.plot import histogram
 from eslib.tools import max_pbc_distance, relative_vectors
 

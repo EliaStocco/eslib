@@ -1,6 +1,5 @@
 import os
 from copy import deepcopy
-from itertools import product
 from typing import Dict, List, TypeVar
 from warnings import warn
 
@@ -8,14 +7,13 @@ import numpy as np
 import pandas as pd
 import pint
 from ase import Atoms
-from icecream import ic
 
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.classes.io import pickleIO
 from eslib.classes.physical_tensor import *
 from eslib.formatting import warning
 from eslib.functional import improvable, unsafe
-from eslib.functions import get_one_file_in_folder  # , nparray2list_in_dict
+from eslib.functions import get_one_file_in_folder 
 from eslib.tools import cart2frac, convert, is_sorted_ascending, w2_to_w
 from eslib.units import *
 
@@ -491,8 +489,6 @@ class NormalModes(pickleIO):
         eigvec = self.eigvec.copy() * atomic_unit["dimensionless"]
         A = self.eigvec.rename({'mode': 'mode-a', 'dof': 'dof'})
         B = self.eigvec.rename({'mode': 'mode-b', 'dof': 'dof'})
-        ic(type(self.eigvec))
-        ic(type(A))
         test = A.dot(B,dim="dof")
         if test.shape != (self.Nmodes,self.Nmodes):
             raise ValueError("wrong shape")

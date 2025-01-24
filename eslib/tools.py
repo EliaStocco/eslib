@@ -336,8 +336,6 @@ def relative_vectors(structure:Atoms,_all=False):
     df["Si"] = [ symbols[i] for i in df["i"] ]
     df["Sj"] = [ symbols[i] for i in df["j"] ]
 
-    from icecream import ic
-
     pos = structure.get_positions()
     vec = np.asarray([ pos[i,:] - pos[j,:]  for i,j in zip(df["i"],df["j"]) ])
     df["uwdx"] = vec[:,0]

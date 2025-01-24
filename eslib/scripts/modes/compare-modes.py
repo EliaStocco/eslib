@@ -3,7 +3,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-from icecream import ic
 from matplotlib.colors import LinearSegmentedColormap
 
 from eslib.classes.normal_modes import NormalModes

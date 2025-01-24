@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from ase.io import read
-from icecream import ic
 
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.classes.normal_modes import NormalModes
