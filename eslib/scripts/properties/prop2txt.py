@@ -4,8 +4,9 @@ import numpy as np
 from eslib.classes.properties import Properties
 from eslib.formatting import esfmt, everythingok, warning, float_format
 from eslib.functions import suppress_output
-from eslib.input import str2bool
+from eslib.input import str2bool, itype
 from eslib.tools import convert
+from eslib.classes.aseio import integer_to_slice_string
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -20,6 +21,7 @@ def prepare_args(description):
     parser.add_argument("-k" , "--keyword"        , type=str     , **argv, required=True , help='keyword')
     parser.add_argument("-f" , "--family"         , type=str     , **argv, required=False, help="family (default: %(default)s)", default=None)
     parser.add_argument("-u" , "--unit"           , type=str     , **argv, required=False, help="output unit (default: %(default)s)", default=None)
+    parser.add_argument("-n" , "--index"          , type=itype   , **argv, required=False, help="index to be read from input file (default: %(default)s)", default=':')
     parser.add_argument("-rr", "--remove_replicas", type=str2bool, **argv, required=False, help='whether to remove replicas (default: %(default)s)', default=False)
     parser.add_argument("-d" , "--delimiter"      , type=str     , **argv, required=False, help='delimiter (default: %(default)s)', default=' ')
     parser.add_argument("-o" , "--output"         , type=str     , **argv, required=False, help='output file (default: %(default)s)', default=None)
@@ -28,14 +30,18 @@ def prepare_args(description):
 #---------------------------------------#
 @esfmt(prepare_args,description)
 def main(args):
+    
+    assert not args.remove_replicas, "-rr,--remove_replicas no longer supported."
 
     #------------------#
+    index = integer_to_slice_string(args.index)
     print("\tReading properties from file '{:s}' ... ".format(args.input), end="")
     with suppress_output():
         if str(args.input).endswith(".pickle"):
+            assert index is None, "`index` must be None when reading from `*.pickle` files."                
             allproperties = Properties.from_pickle(file_path=args.input)
         else:
-            allproperties = Properties.load(file=args.input)
+            allproperties = Properties.load(file=args.input,index=index)
     print("done")
 
     #---------------------------------------#

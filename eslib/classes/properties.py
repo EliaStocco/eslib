@@ -75,9 +75,9 @@ class Properties(Trajectory):
         self.length = length
     
     @classmethod
-    def load(cls,file):
+    def load(cls,file,index=None):
         header = get_property_header(file,search=True)
-        properties,units = getproperty(file,header)
+        properties,units = getproperty(file,header,index=index)
         # header  = get_property_header(file,search=False)
         info = {
             "header"     : header,
@@ -206,7 +206,7 @@ def get_property_header(inputfile, N=1000, search=True):
         return [ str(n).split("{")[0] for n in out ]
 
 
-def getproperty(inputfile, propertyname, data=None, skip="0", show=False):
+def getproperty(inputfile, propertyname, data=None, skip="0", show=False,index=None):
     def check(p, l):
         if not l.find(p):
             return False  # not found
@@ -223,6 +223,8 @@ def getproperty(inputfile, propertyname, data=None, skip="0", show=False):
         out = dict()
         units = dict()
         data = np.loadtxt(inputfile)
+        if index is not None:
+            data = data[index]
         for p in propertyname:
             p = p.split("{")[0]
             out[p], units[p] = getproperty(inputfile, p, data, skip=skip)
