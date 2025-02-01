@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from eslib.classes import Trajectory
+from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.tools import convert
 
@@ -52,7 +52,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading the first atomic structure from file '{:s}' ... ".format(args.input), end="")
-    atoms = Trajectory.from_file(file=args.input,format=args.input_format)
+    atoms = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done")
 
     #------------------#

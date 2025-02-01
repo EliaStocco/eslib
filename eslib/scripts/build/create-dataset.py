@@ -66,6 +66,8 @@ def main(args):
     sizes = np.arange(args.initial_size, len(trajectory)+1, args.incremental_size)
     if len(sizes) > args.number_of_files:
         sizes = sizes[:args.number_of_files]
+    if sizes[-1] != len(trajectory):
+        sizes = np.append(sizes, len(trajectory))
     print("\tDataset sizes: ",list(sizes))
 
     for n,size in enumerate(sizes):

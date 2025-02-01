@@ -45,19 +45,21 @@ def main(args):
     #------------------#
     print("\tExtracting '{:s}' from the atomic structures... ".format(args.ref_name), end="")
     real = trajectory.get(args.ref_name)
+    # real = np.atleast_2d(real)
     print("done")
     print("\t'{:s}' shape: ".format(args.ref_name),real.shape,end="\n\n")
 
     #------------------#
     print("\tExtracting '{:s}' from the atomic structures... ".format(args.pred_name), end="")
     pred = trajectory.get(args.pred_name)
+    # pred = np.atleast_2d(pred)
     print("done")
     print("\t'{:s}' shape: ".format(args.pred_name),pred.shape,end="\n\n")
 
     #------------------#
     print("\tComputing RMSE ... ", end="")
-    norm_fun:callable = metrics["norm"]
-    rmse = norm_fun(real,pred,axis=1)
+    norm_fun:callable = metrics["rmse"]
+    rmse = norm_fun(real,pred)#,axis=1)
     assert rmse.shape[0] ==  real.shape[0]
     print("done")
 

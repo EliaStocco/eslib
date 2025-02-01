@@ -59,13 +59,14 @@ def main(args):
     print("done")
 
     #------------------#
+    pc = model.compute(atoms,raw=True)
+    pc = pc.get("dipole")
     print("\n\tRemoving point-charges contribution to '{:s}' and saving it to '{:s}' ... ".format(args.in_dipole,args.out_dipole),end="")
     for n,structure in enumerate(atoms):
         if not model.check_charge_neutrality(structure):
             raise ValueError("structure . {:d} is not charge neutral".format(n))
-        pc = model.compute([structure])[0]
         dipole = structure.info[args.in_dipole]
-        structure.info[args.out_dipole] = dipole - pc
+        structure.info[args.out_dipole] = dipole - pc[n]
     print("done")
     
     #------------------#

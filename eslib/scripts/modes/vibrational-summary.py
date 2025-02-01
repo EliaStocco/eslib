@@ -8,6 +8,7 @@ from eslib.classes.normal_modes import NormalModes
 from eslib.formatting import esfmt
 from eslib.show import matrix2str, print_df
 from eslib.tools import convert
+from eslib.physics import lorentzian
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -23,27 +24,6 @@ def prepare_args(description):
     parser.add_argument("-p", "--plot"        , type=str, required=False, **argv, help="plot with the harmonic IR spectrum (default: %(default)s)", default=None)
     parser.add_argument("-o", "--output"      , type=str, required=False, **argv, help="output file with the summary as a dataframe (default: %(default)s)", default=None)
     return parser
-
-#---------------------------------------#
-def lorentzian(x, x0, y0, gamma):
-    """
-    Lorentzian function.
-    
-    Parameters:
-    x : array-like
-        The x-values where the function is evaluated.
-    x0 : float
-        The x-value at which the Lorentzian is centered.
-    y0 : float
-        The height of the Lorentzian peak.
-    gamma : float
-        The half-width at half-maximum (HWHM) of the Lorentzian peak.
-        
-    Returns:
-    array-like
-        The Lorentzian function evaluated at each x-value.
-    """
-    return y0 * gamma**2 / ((x - x0)**2 + gamma**2)
 
 #---------------------------------------#
 @esfmt(prepare_args,description)

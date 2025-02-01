@@ -7,9 +7,8 @@ import numpy as np
 import torch
 from ase.io import read
 
-from eslib.formatting import esfmt
-from eslib.functions import str2bool
-from eslib.input import size_type
+from eslib.formatting import esfmt 
+from eslib.input import size_type, str2bool
 from eslib.nn.dataset import make_dataset
 
 #---------------------------------------#

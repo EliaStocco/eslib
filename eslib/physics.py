@@ -10,6 +10,30 @@ from eslib.classes.bec import bec as BEC
 from eslib.tools import cart2frac
 from eslib.tools import convert
 
+#---------------------------------------#
+def lorentzian(x, x0, y0, gamma):
+    """
+    Lorentzian function.
+    
+    Parameters:
+    x : array-like
+        The x-values where the function is evaluated.
+    x0 : float
+        The x-value at which the Lorentzian is centered.
+    y0 : float
+        The height of the Lorentzian peak.
+    gamma : float
+        The half-width at half-maximum (HWHM) of the Lorentzian peak.
+        
+    Returns:
+    array-like
+        The Lorentzian function evaluated at each x-value.
+    """
+    out = y0 * gamma**2 / ((x - x0)**2 + gamma**2)
+    # assert np.allclose(np.max(out), y0), "y0 != max(out)"
+    return out
+
+#---------------------------------------#
 def compute_density(atoms:Atoms)->float:
     tot_mass = atoms.get_masses().sum()
     volume = atoms.get_volume()

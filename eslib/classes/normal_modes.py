@@ -198,7 +198,7 @@ class NormalModes(pickleIO):
 
         # mode
         # self.mode[:,:] = diag_matrix(self.masses,"-1/2") @ self.eigvec
-        self.eigvec2modes(_test=False)
+        self.eigvec2modes()
 
         # proj
         # self.proj[:,:] = self.eigvec.T @ diag_matrix(self.masses,"1/2")
@@ -273,7 +273,7 @@ class NormalModes(pickleIO):
         eigval,eigvec = np.linalg.eigh(dm)
         self.eigvec.values = eigvec
         self.eigval.values = eigval
-        self.eigvec2modes(_test=False)
+        self.eigvec2modes()
         self.sort()
         pass
 
@@ -320,7 +320,7 @@ class NormalModes(pickleIO):
             self.non_ortho_mode[index] = self.eigvec[index] / np.sqrt(self.masses[index])
         # self.old_mode = self.mode.copy()
         normalization = np.sqrt(np.prod(self.size))
-        self.mode = normalization*self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof")
+        self.mode = PhysicalTensor(normalization*self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof"))
         
         # if _test:
         #     test = self.non_ortho_mode / norm_by(self.non_ortho_mode,"dof")
