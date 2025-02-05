@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import List, TypeVar, Union
+from typing import List, TypeVar, Union, Tuple
 from warnings import warn
 
 from ase import Atoms
@@ -372,6 +372,10 @@ class AtomicStructures(Trajectory,aseio):
             raise ValueError("`where` can be only None, ['i', 'info'], or ['a', 'array', 'arrays'] ")
         return np.all(booleans) if _all else np.any(booleans)
     
+    def __getitem__(self, item)->T:
+        result = super().__getitem__(item)
+        return AtomicStructures(result) if isinstance(result, list) else result
+    
     def subsample(self:T, indices: List[int]) -> T:
         """
         Subsample the AtomicStructures object using the provided indices.
@@ -389,6 +393,20 @@ class AtomicStructures(Trajectory,aseio):
             subsampled_structures = self[indices]
             subsampled_structures = AtomicStructures(subsampled_structures)
         return subsampled_structures
+    
+    def extract_random(self:T,N:int) -> Tuple[np.ndarray,T]:
+        import random
+        indices = np.arange(len(self))
+        random.shuffle(indices)
+        indices = indices[:N]
+        assert len(indices) == N, "coding error"
+        return indices,self.subsample(indices)
+    
+    def remove(self:T,indices) ->T :
+        assert len(indices) == len(set(indices)), "The indices are not unique."
+        filtered_structures = [item for i, item in enumerate(self) if i not in indices]
+        return AtomicStructures(filtered_structures)
+
 
     # def call(self: T, func) -> np.ndarray:
     #     t = easyvectorize(Atoms)(self)
