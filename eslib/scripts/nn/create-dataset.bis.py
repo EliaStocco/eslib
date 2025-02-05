@@ -63,7 +63,7 @@ def main(args):
     for n,size in enumerate(sizes):
         subsample = train.subsample(":{:d}".format(size))
         file = os.path.normpath(f"{args.output}/train.n={n}.extxyz")
-        print(f"\t - size {size:4} --> '{file}' ")
+        print(f"\t - {n:2}) size {size:4} --> '{file}' ")
         subsample.to_file(file=file)
 
 #---------------------------------------#
