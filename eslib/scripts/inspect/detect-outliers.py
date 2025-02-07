@@ -59,7 +59,7 @@ def main(args):
     #------------------#
     print("\tComputing RMSE ... ", end="")
     norm_fun:callable = metrics["rmse"]
-    rmse = norm_fun(real,pred)#,axis=1)
+    rmse = norm_fun(real,pred,axis=1)
     assert rmse.shape[0] ==  real.shape[0]
     print("done")
 

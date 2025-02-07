@@ -35,6 +35,7 @@ def lorentzian(x, x0, y0, gamma):
 
 #---------------------------------------#
 def compute_density(atoms:Atoms)->float:
+    """Return the density of an atomic structure in g/cm3"""
     tot_mass = atoms.get_masses().sum()
     volume = atoms.get_volume()
     tot_mass = convert(tot_mass,"mass","dalton","atomic_unit")
