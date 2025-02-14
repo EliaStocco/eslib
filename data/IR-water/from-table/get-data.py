@@ -20,7 +20,7 @@ for n, row in df.iterrows():
     
 
     # Compute frequencies
-    frequencies = float(row["cm-1"]) - 15798.002 / 16384 * J[ii] * np.power(2, row["XE"])
+    frequencies = float(row["cm-1"]) - 15798.002 / 16384. * J[ii] * np.power(2, row["XE"])
     frequencies = np.asarray(frequencies)
 
     assert np.all(frequencies > 0), "error"
@@ -80,7 +80,7 @@ for n, row in df.iterrows():
     
 
     # Compute frequencies
-    frequencies = float(row["cm-1"]) - 15798.002 / 16384 * J[ii] * np.power(2, row["XE"])
+    frequencies = float(row["cm-1"]) - 15798.002 / 16384. * J[ii] * np.power(2, row["XE"])
     frequencies = np.asarray(frequencies)
 
     assert np.all(frequencies > 0), "error"

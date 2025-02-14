@@ -20,7 +20,7 @@ from eslib.classes.aseio import integer_to_slice_string
 from eslib.mathematics import mean_std_err
 
 #---------------------------------------#
-description = "Fit the Debye model for susceptibility."
+description = "Fit the Debye model for susceptibility with higher harmonics."
 
 #---------------------------------------#
 def prepare_args(description):

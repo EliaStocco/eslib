@@ -16,14 +16,14 @@ def prepare_args(description):
     argv = {"metavar":"\b"}
     parser.add_argument("-i" , "--input"         , **argv, required=True , type=str  , help="file with an atomic structure")
     parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str  , help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-c" , "--com"           , **argv, required=True , type=flist, help="file with an atomic structure")
+    parser.add_argument("-c" , "--com"           , **argv, required=True , type=flist, help="center of mass")
     parser.add_argument("-o" , "--output"        , **argv, required=True , type=str  , help="output file")
     parser.add_argument("-of" , "--output_format", **argv, required=False, type=str  , help="output file format (default: %(default)s)", default=None)
     return parser
 #---------------------------------------#
 @esfmt(prepare_args,description)
 def main(args):
-
+    
     #------------------#
     print("\tReading atomic structure A from input file '{:s}' ... ".format(args.input), end="")
     structure:Atoms = AtomicStructures.from_file(file=args.input,format=args.input_format,index=0)[0]
@@ -36,6 +36,11 @@ def main(args):
     
     #------------------#
     print("\tCenter of mass [ang]:",structure.get_center_of_mass())
+    
+    #------------------#
+    print("\tWriting the atomic structure to file '{:s}' ... ".format(args.output), end="")
+    AtomicStructures([structure]).to_file(file=args.output,format=args.output_format)
+    print("done")
     
     return 0
     
