@@ -42,6 +42,7 @@ def main(args):
     # replace
     print("\tReplacing cell ... ", end="")
     atoms.set_cell(cell)
+    atoms.set_pbc([True,True,True])
     print("done")
 
     #------------------#
