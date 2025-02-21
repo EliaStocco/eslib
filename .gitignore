@@ -4,3 +4,4 @@ __pycache__/
 eslib.egg-info/
 tmp/
 *.so
+.git-backup*
