@@ -5,15 +5,15 @@ help_message() {
     echo "Options:"
     echo "  --gc                Perform basic garbage collection"
     echo "  --aggressive        Perform aggressive garbage collection"
-    echo "  --prune             Remove unreferenced objects (Not recommended)"
-    echo "  --large-files       Identify large files in the repository"
+    # echo "  --prune             Remove unreferenced objects (Not recommended)"
+    # echo "  --large-files       Identify large files in the repository"
     echo "  --clean-branches    Remove merged branches"
     echo "  --help              Show this help message"
 }
 
 # Check if the first argument is a recognized option
 case "$1" in
-    --gc|--aggressive|--prune|--large-files|--clean-branches|--help)
+    --gc|--aggressive|--clean-branches|--help)
         OPTION="$1"
         ;;
     *)
@@ -72,18 +72,29 @@ git_aggressive_gc() {
 #     du -sh .git
 # }
 
-# Function to find large files
-git_large_files() {
-    echo "Identifying large files..."
-    git rev-list --objects --all | sort -k 2 -n | tail -n 10
-}
+# # Function to find large files
+# git_large_files() {
+#     echo "Identifying large files..."
+#     git rev-list --objects --all | \
+#     git cat-file --batch-check='%(objectname) %(objecttype) %(rest)' | \
+#     grep '^blob' | \
+#     cut -d' ' -f1 | \
+#     xargs -n1 -I{} git ls-tree -r --name-only HEAD | \
+#     xargs -n1 git rev-list --objects --all | \
+#     sort -k2 -n | \
+#     tail -n 10
+# }
 
 # Function to remove merged branches
 git_clean_branches() {
     echo "Removing merged branches..."
-    git branch --merged | grep -v "\*" | xargs -n 1 git branch -d
+    merged_branches=$(git branch --merged | grep -v "\*")
+    if [ -z "$merged_branches" ]; then
+        echo "No merged branches to remove."
+    else
+        echo "$merged_branches" | xargs -n 1 git branch -d
+    fi
 }
-
 # Main script execution
 case "$OPTION" in
     --gc)
@@ -95,9 +106,9 @@ case "$OPTION" in
     # --prune)
     #     git_prune
     #     ;;
-    --large-files)
-        git_large_files
-        ;;
+    # --large-files)
+    #     git_large_files
+    #     ;;
     --clean-branches)
         git_clean_branches
         ;;
