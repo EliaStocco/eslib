@@ -38,7 +38,7 @@ def main(args):
     if not args.isolated:
         try:
             quanta_A = "quanta-{:s}".format(args.dipole_A)
-            quanta_B = "quanta-{:s}".format(args.dipole_A)
+            quanta_B = "quanta-{:s}".format(args.dipole_B)
             print("\tComputing dipole quanta for '{:s}' ... ".format(args.dipole_A), end="")
             atoms: AtomicStructures = compute_dipole_quanta(atoms,args.dipole_A,quanta_A)[0]
             print("done")

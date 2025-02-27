@@ -4,10 +4,13 @@ from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, warning
 from eslib.input import str2bool
 from eslib.classes.models.dipole.partial_charges import DipolePartialCharges
+from eslib.mathematics import levi_civita
 
 #---------------------------------------#
 # Description of the script's purpose
 description = "Check that the BECs satisfy the Acoustic and Rotational Sum Rules."
+
+TEST = False
 
 #---------------------------------------#
 def prepare_args(description):
@@ -16,7 +19,8 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"       , **argv, required=True , type=str, help="atomic structures file [extxyz]")
     parser.add_argument("-if", "--input_format", **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-k" , "--keyword"     , **argv, required=False, type=str, help="keyword for BEC tensors (default: %(default)s)", default="bec")
+    parser.add_argument("-d" , "--dipole"     , **argv, required=False, type=str, help="keyword for dipole (default: %(default)s)", default="dipole")
+    parser.add_argument("-b" , "--bec"     , **argv, required=False, type=str, help="keyword for BEC tensors (default: %(default)s)", default="bec")
     parser.add_argument("-c" , "--check"     , **argv, required=False, type=str2bool, help="check that BEC tensors are correctly formatted (default: %(default)s)", default=True)
     parser.add_argument("-o" , "--output"      , **argv, required=False, type=str, help="output file with the BEC tensors (default: %(default)s)", default='bec.txt')
     return parser
@@ -81,7 +85,7 @@ def main(args):
         "z":np.full(shape,np.nan),
     }
     for key in all_bec.keys():
-        name = "{:s}{:s}".format(args.keyword,key)
+        name = "{:s}{:s}".format(args.bec,key)
         print("\tExtracting '{:s}' from the trajectory".format(name), end="")
         all_bec[key] = trajectory.get(name)
         print(" --> shape: ",all_bec[key].shape," ... ",end="")
@@ -95,6 +99,15 @@ def main(args):
     print('\t - 1st axis: snapshot')
     print('\t - 2nd axis: dof')
     print('\t - 3rd axis: dipole xyz')
+    
+    #------------------#
+    # dipole 
+    print("\n\tExtracting the dipole from the trajectory ... ", end="")
+    dipole = trajectory.get(args.dipole)
+    print("done")
+    print("\tdipole.shape: ",dipole.shape)
+    print('\t - 1st axis: snapshot')
+    print('\t - 2nd axis: dipole xyz')
 
     #------------------#
     for n,key in enumerate(["x","y","z"]):
@@ -104,24 +117,27 @@ def main(args):
     assert np.isnan(BEC).sum() == 0, "Found nan values in BEC"
 
     if args.check:
-        if not trajectory.is_there(args.keyword):
-            print("\n\t{:s}: '{:s}' not found --> it's not possible to check whether BECs are correctly formatted.".format(warning,args.keyword))
+        if not trajectory.is_there(args.bec):
+            print("\n\t{:s}: '{:s}' not found --> it's not possible to check whether BECs are correctly formatted.".format(warning,args.bec))
         else:
-            tmp = trajectory.get(args.keyword)
+            tmp = trajectory.get(args.bec)
             tmp = tmp.reshape((tmp.shape[0],-1,3))
             if not np.allclose(BEC,tmp):
-                print("\t{:s}: '{:s}' and the ones reconstructued differ".format(warning,args.keyword))
+                print("\t{:s}: '{:s}' and the ones reconstructued differ".format(warning,args.bec))
             # np.savetxt("TEST.txt",tmp[0],fmt=dec_format)
             
-    model = DipolePartialCharges({"H":1,"O":-2},compute_BEC=True)
-    test = model.compute(trajectory,raw=True)["BEC"]
-    
+    if TEST :
+        model = DipolePartialCharges({"H":1,"O":-2},compute_BEC=True)
+        test = model.compute(trajectory,raw=True)
+        dipole = test["dipole"]
+        test = test["BEC"]  
             
     #------------------#
     # reshape
     print("\n\tReshaping the BEC tensors ... ", end="")
     BEC = BEC.reshape((N,Natoms,3,3))
-    BEC = test.reshape(BEC.shape)
+    if TEST:
+        BEC = test.reshape(BEC.shape)
     print("done")
     print("\tBEC.shape: ",BEC.shape)
     assert BEC.ndim == 4, "BEC.ndim: {:d}".format(BEC.ndim)
@@ -161,7 +177,15 @@ def main(args):
     
     RSM = np.einsum("ijkl,ijlm->ijkm", skew, BEC)
     assert np.allclose(skew @ BEC, RSM), "coding error"
-    RSM = np.abs(np.mean(RSM,axis=1))
+    # RSM = np.moveaxis(RSM,2,3)
+    
+    epsilon = levi_civita()
+    rot_dipole = (epsilon@dipole.T).T
+    
+    RSM = ( np.sum(RSM,axis=1) - rot_dipole ) / RSM.shape[1]
+    # - rot_dipole
+    
+    RSM = np.abs(RSM)
     # norm = 1./np.linalg.norm(pos,axis=1)
     # RSM = RSM * norm[:,:,np.newaxis]
     print("\n\tRotational Sum Rule:")

@@ -2,6 +2,7 @@
 import argparse
 import os
 import subprocess
+import time
 
 SCRIPT = "main.sh"
 
@@ -49,6 +50,8 @@ def submit_jobs(n, filepath, dependency_type, existing_job_id=None):
         
         # Submit the job with or without dependency and capture the output
         result = subprocess.run(command, capture_output=True, text=True)
+        
+        time.sleep(0.1)
         
         # Extract the job ID from the captured output
         output_lines = result.stdout.splitlines()

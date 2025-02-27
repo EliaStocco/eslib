@@ -4,6 +4,18 @@ import pandas as pd
 from typing import Tuple
 from warnings import warn
 
+def levi_civita():
+    """Returns the 3x3x3 Levi-Civita tensor."""
+    tensor = np.zeros((3, 3, 3), dtype=int)
+    indices = [(i, j, k) for i in range(3) for j in range(3) for k in range(3)]
+    
+    for i, j, k in indices:
+        tensor[i, j, k] = (1 if (i, j, k) in [(0, 1, 2), (1, 2, 0), (2, 0, 1)]
+                            else -1 if (i, j, k) in [(0, 2, 1), (1, 0, 2), (2, 1, 0)]
+                            else 0)
+    return tensor
+    
+
 def mean_std_err(array: np.ndarray, axis: int) -> Tuple[np.ndarray, np.ndarray]:
     mean = np.mean(array, axis=axis)
     std, err = std_err(array, axis=axis)
