@@ -49,7 +49,7 @@ def main(args):
     
     if args.number == -1:
         args.number = len(frames)
-    if args.number < len(frames):
+    if args.number > len(frames):
         args.number = len(frames)
     
     print("\tExtracting structures using the FPS algorithm:")
