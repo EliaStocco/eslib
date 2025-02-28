@@ -6,7 +6,7 @@ from eslib.formatting import error, esfmt
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Save an 'array' or 'info' from an extxyz file to a txt file."
+description = "Rename an 'array' or 'info' in an extxyz file."
 
 #---------------------------------------#
 def prepare_args(description):

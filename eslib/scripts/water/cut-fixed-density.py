@@ -9,7 +9,7 @@ from eslib.physics import compute_density
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Save an 'array' or 'info' from an extxyz file to a txt file."
+description = "Do somehting with the density"
 
 #---------------------------------------#
 def prepare_args(description):
