@@ -31,11 +31,12 @@ def main(args):
     print("\n\tNumber of indices : {:d}".format(len(indices)))
 
     #------------------#
-    unique = np.unique(indices)
+    unique,ii = np.unique(indices, return_index=True)
+    assert np.allclose(unique,indices[ii]), "The indices are not unique."
     print("\tNumber of unique indices : {:d}".format(len(unique)))
     
     #------------------#
-    test = np.arange(0,len(unique),dtype=int)
+    test = np.arange(0,len(ii),dtype=int)
     ok = np.allclose(unique,test)
     if not ok:
         print("\n\t{:s}: the indices are not consecutive.".format(warning))
@@ -44,7 +45,7 @@ def main(args):
     
     #------------------#
     print("\n\tWriting unique indices to file '{:s}' ... ".format(args.output), end="")
-    np.savetxt(args.output, unique, fmt="%d")
+    np.savetxt(args.output, ii, fmt="%d")
     print("done")
     
     pass
