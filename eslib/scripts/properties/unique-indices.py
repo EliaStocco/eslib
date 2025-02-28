@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
-
-from eslib.classes.properties import Properties
 from eslib.formatting import esfmt, everythingok, warning
-from eslib.functions import suppress_output
-from eslib.input import str2bool
 
 #---------------------------------------#
 # Description of the script's purpose

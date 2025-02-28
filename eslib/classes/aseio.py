@@ -4,27 +4,18 @@ import math
 import os
 import re
 from concurrent.futures import ProcessPoolExecutor
-from io import TextIOWrapper
-from typing import Any, Callable, Dict, List, Match, TypeVar, Union, cast
-# from eslib.formatting import float_format
-from warnings import warn
-
+from typing import Any, Callable, Dict, List, Match, TypeVar, Union
 import numpy as np
-from ase import Atoms
+from ase import Atoms, io
 from ase.cell import Cell
-from ase import io
-from ase.io import string2index, write
 from ase.io.formats import filetype
-# from ase.io.netcdftrajectory import (read_netcdftrajectory,
-#                                      write_netcdftrajectory)
 
 from eslib.classes.file_formats.hdf5 import read_hdf5, write_hdf5
-# from eslib.classes.file_formats.netcdf import read_netcdf, write_netcdf
 from eslib.classes.file_formats.pdb import read_pdb
-# from eslib.classes.trajectory import AtomicStructures
 from eslib.classes.io import pickleIO
 from eslib.functions import extract_number_from_filename
 from eslib.tools import convert
+from eslib.io_tools import read_comments_ipi, integer_to_slice_string
 
 T = TypeVar('T', bound='aseio')
 M = TypeVar('M', bound=Callable[..., Any])
@@ -251,7 +242,7 @@ class aseio(List[Atoms], pickleIO):
                 fmt_header = "# CELL(abcABC): {:s}  {:s}  {:s}  {:s}  {:s}  {:s}  %s".format(*([float_format]*6))
                 string = " positions{angstrom} cell{angstrom}"
                 comment = fmt_header%(*params,string)
-                write(file, atoms, format="xyz", append=True, comment=comment)
+                io.write(file, atoms, format="xyz", append=True, comment=comment)
         # elif format.lower() in ["nc","netcdftrajectory"]:
         #     write_netcdftrajectory(filename=file,images=self.to_list())
         # elif format.lower() in ["netcdf"]:
@@ -259,7 +250,7 @@ class aseio(List[Atoms], pickleIO):
         elif format.lower() in ["h5","hdf5"]:
             write_hdf5(file,self.to_list())
         else:
-            write(images=self, filename=file, format=format)
+            io.write(images=self, filename=file, format=format)
 
     #------------------#
     def to_pickle(self:T, file:str)->None:
@@ -371,7 +362,7 @@ def read_trajectory(file:str,
         with open(file,"r") as ffile:
 
             # units
-            comment = read_comments_xyz(ffile,slice(0,1,None))[0]
+            comment = read_comments_ipi(ffile,slice(0,1,None))[0]
             units["positions"] = str(comment).split("positions{")[1].split("}")[0]
             units["cell"] = str(comment).split("cell{")[1].split("}")[0]
             factor = {
@@ -380,10 +371,10 @@ def read_trajectory(file:str,
             }
 
             if same_cell:
-                # comment = read_comments_xyz(ffile,slice(0,1,None))[0]
+                # comment = read_comments_ipi(ffile,slice(0,1,None))[0]
                 comments = FakeList(comment,len(atoms))
             else:
-                comments = read_comments_xyz(ffile,index)
+                comments = read_comments_ipi(ffile,index)
                 read_all_comments = True
                 if len(comments) != len(atoms):
                     raise ValueError("coding error: found comments different from atomic structures: {:d} comments != {:d} atoms (using index {})."\
@@ -406,7 +397,7 @@ def read_trajectory(file:str,
 
             if remove_replicas:
                 if not read_all_comments:
-                    comments = read_comments_xyz(ffile,index)
+                    comments = read_comments_ipi(ffile,index)
                 if PARALLEL:
                     with ProcessPoolExecutor() as executor:
                         steps = executor.map(parallel_steps, comments)
@@ -498,108 +489,6 @@ def parallel_steps(comment: str)->int:
         return int(string)
     else:
         raise ValueError("Invalid comment format")
-
-#------------------#
-def is_convertible_to_integer(s):
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
-
-#------------------#
-def integer_to_slice_string(index):
-    """
-    Convert integer index to slice string.
-
-    Args:
-        index: Index to convert.
-
-    Returns:
-        slice: Converted slice.
-    """
-    if isinstance(index, slice):
-        return index
-    
-    if is_convertible_to_integer(index):
-        index=int(index)
-
-    if isinstance(index, int):
-        return string2index(f"{index}:{index+1}")
-    elif index is None:
-        return slice(None,None,None)
-    elif isinstance(index, str):
-        try:
-            return string2index(index)
-        except:
-            raise ValueError("error creating slice from string {:s}".format(index))
-    # elif isinstance(index, slice):
-    #     return index
-    else:
-        raise ValueError("`index` can be int, str, or slice, not {}".format(index))
-
-#------------------#
-def get_offset(file:TextIOWrapper,
-               Nmax:int=1000000,
-               line_offset_old:list=None,
-               index:slice=None):
-    """
-    Get line offsets in a file.
-
-    Args:
-        file (TextIOWrapper): File object.
-        Nmax (int, optional): Maximum number of offsets. Defaults to 1000000.
-        line_offset_old (list, optional): Old line offsets. Defaults to None.
-        index (slice, optional): Slice index. Defaults to None.
-
-    Returns:
-        list: List of line offsets.
-    """
-    # Read in the file once and build a list of line offsets
-    n = 0 
-    line_offset = [None]*Nmax
-    if line_offset_old is not None:
-        line_offset[:len(line_offset_old)] = line_offset_old
-        n = len(line_offset_old)
-        del line_offset_old
-    offset = 0
-    restart = False
-    if n == 0 : file.seek(0) # start from the beginning of the file
-    for line in file: # cycle over all lines
-        if n >= Nmax: # create a bigger list
-            restart = True
-            break
-        if line.replace(" ","").startswith("#"): # check if the line contains a comment
-            line_offset[n] = offset 
-            n += 1
-        if index is not None and index.stop is not None and n >= index.stop: # stop
-            break
-        offset += len(line)        
-    if restart: return get_offset(file, Nmax=Nmax * 2, line_offset_old=line_offset, index=index)
-    file.seek(0)
-    return line_offset[:n]
-
-#------------------#
-def read_comments_xyz(file:TextIOWrapper,
-                      index:slice=None):
-    """
-    Read comments from an XYZ file.
-
-    Args:
-        file (TextIOWrapper): File object.
-        index (slice, optional): Slice index. Defaults to None.
-
-    Returns:
-        list: List of comments.
-    """
-    offset = get_offset(file=file,index=index)
-    if index is not None:
-        offset = offset[index]
-    comments = [None]*len(offset)
-    for n,l in enumerate(offset):
-        file.seek(l)
-        comments[n] = file.readline()
-    return comments
 
 #------------------#
 class FakeList:

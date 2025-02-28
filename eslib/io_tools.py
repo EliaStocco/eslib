@@ -7,9 +7,11 @@ import re
 import subprocess
 import glob
 from eslib.functions import extract_number_from_filename
+from io import TextIOWrapper
+from ase.io import string2index
+from eslib.classes.append import AppendableList
 
 #---------------------------------------#
-
 def setup_logging(log_file: str = None) -> logging.Logger:
     """
     Set up a logger that writes logs to a file and handles exceptions cleanly.
@@ -148,7 +150,7 @@ def read_json(file: str) -> dict:
 def read_Natoms_homogeneous(file_path:str):
     """
     Reads the first line of a (ext)xyz file to extracts the number of atoms.
-    It will be assumed that all the atoms have the same number of atoms
+    It will be assumed that all the snapshots have the same number of atoms
     
     Args:
         file_path (str): Path to the file from which to read.
@@ -267,3 +269,209 @@ def pattern2data(pattern:str)->np.ndarray:
     for n,matched_file in enumerate(all_files):
         results[n] = load_data(matched_file)
     return np.asarray(results)
+
+#------------------#
+def is_convertible_to_integer(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+#------------------#
+def integer_to_slice_string(index):
+    """
+    Convert integer index to slice string.
+
+    Args:
+        index: Index to convert.
+
+    Returns:
+        slice: Converted slice.
+    """
+    if isinstance(index, slice):
+        return index
+    
+    if is_convertible_to_integer(index):
+        index=int(index)
+
+    if isinstance(index, int):
+        return string2index(f"{index}:{index+1}")
+    elif index is None:
+        return slice(None,None,None)
+    elif isinstance(index, str):
+        try:
+            return string2index(index)
+        except:
+            raise ValueError("error creating slice from string {:s}".format(index))
+    # elif isinstance(index, slice):
+    #     return index
+    else:
+        raise ValueError("`index` can be int, str, or slice, not {}".format(index))
+
+#------------------#
+def get_offset_ipi(file:TextIOWrapper,
+               Nmax:int=1000000,
+               line_offset_old:list=None,
+               index:slice=None):
+    """
+    Get line offsets in a file.
+
+    Args:
+        file (TextIOWrapper): File object.
+        Nmax (int, optional): Maximum number of offsets. Defaults to 1000000.
+        line_offset_old (list, optional): Old line offsets. Defaults to None.
+        index (slice, optional): Slice index. Defaults to None.
+
+    Returns:
+        list: List of line offsets.
+    """
+    # Read in the file once and build a list of line offsets
+    n = 0 
+    line_offset = [None]*Nmax
+    if line_offset_old is not None:
+        line_offset[:len(line_offset_old)] = line_offset_old
+        n = len(line_offset_old)
+        del line_offset_old
+    offset = 0
+    restart = False
+    if n == 0 : file.seek(0) # start from the beginning of the file
+    for line in file: # cycle over all lines
+        if n >= Nmax: # create a bigger list
+            restart = True
+            break
+        if line.replace(" ","").startswith("#"): # check if the line contains a comment
+            line_offset[n] = offset 
+            n += 1
+        if index is not None and index.stop is not None and n >= index.stop: # stop
+            break
+        offset += len(line)        
+    if restart: return get_offset_ipi(file, Nmax=Nmax * 2, line_offset_old=line_offset, index=index)
+    file.seek(0)
+    return line_offset[:n]
+
+#------------------#
+def read_comments_ipi(file:TextIOWrapper,
+                      index:slice=None):
+    """
+    Read comments from an XYZ file.
+
+    Args:
+        file (TextIOWrapper): File object.
+        index (slice, optional): Slice index. Defaults to None.
+
+    Returns:
+        list: List of comments.
+    """
+    offset = get_offset_ipi(file=file,index=index)
+    if index is not None:
+        offset = offset[index]
+    comments = [None]*len(offset)
+    for n,l in enumerate(offset):
+        file.seek(l)
+        comments[n] = file.readline()
+    return comments
+
+#------------------#
+def get_comment_offsets_extxyz(file: TextIOWrapper, Nmax: int = 1000000, line_offset_old: list = None, index: slice = None):
+    """
+    Get line offsets for comment lines in an extxyz file.
+
+    Args:
+        file (TextIOWrapper): File object.
+        Nmax (int, optional): Maximum number of offsets. Defaults to 1000000.
+        line_offset_old (list, optional): Old line offsets. Defaults to None.
+        index (slice, optional): Slice index. Defaults to None.
+
+    Returns:
+        list: List of line offsets for comment lines.
+    """
+    n = 0
+    line_offset = [None] * Nmax
+    if line_offset_old is not None:
+        line_offset[:len(line_offset_old)] = line_offset_old
+        n = len(line_offset_old)
+        del line_offset_old
+    offset = 0
+    restart = False
+    if n == 0:
+        file.seek(0)  # start from the beginning of the file
+    while True:
+        if n >= Nmax:  # create a bigger list
+            restart = True
+            break
+        line = file.readline()
+        if not line:
+            break
+        num_atoms = int(line.strip())
+        offset += len(line)
+        comment_line = file.readline()
+        if not comment_line:
+            break
+        line_offset[n] = offset
+        n += 1
+        offset += len(comment_line)
+        for _ in range(num_atoms):
+            line = file.readline()
+            if not line:
+                break
+            offset += len(line)
+        if index is not None and index.stop is not None and n >= index.stop:  # stop
+            break
+    if restart:
+        return get_comment_offsets_extxyz(file, Nmax=Nmax * 2, line_offset_old=line_offset, index=index)
+    file.seek(0)
+    return line_offset[:n]
+
+def read_comments_extxyz(file_path: str, index: slice = None):
+    """
+    Extract all comment lines from an extxyz file.
+
+    Parameters:
+    file_path (str): Path to the extxyz file.
+    index (slice, optional): Slice index. Defaults to None.
+
+    Returns:
+    list: A list of comment lines.
+    """
+    with open(file_path, 'r') as file:
+        offsets = get_comment_offsets_extxyz(file, index=index)
+        if index is not None:
+            offsets = offsets[index]
+        comments = [None] * len(offsets)
+        for n, offset in enumerate(offsets):
+            file.seek(offset)
+            comments[n] = file.readline().strip()
+    return comments
+
+
+#------------------#
+def read_comments_extxyz(file_path):
+    """
+    Extract all comment lines from an extxyz file.
+
+    Parameters:
+    file_path (str): Path to the extxyz file.
+
+    Returns:
+    list: A list of comment lines.
+    """
+    with open(file_path, "r") as file:
+        file.seek(0)
+        comments = AppendableList()
+        while True:
+            line = file.readline()
+            if not line:
+                break
+            num_atoms = int(line.strip())
+            comment_line = file.readline()
+            comments.append(comment_line)
+            
+            for _ in range(num_atoms):
+                line = file.readline()
+                if not line:
+                    raise ValueError("Unexpected end of file.")
+                
+    return comments.finalize()
+            
+            
