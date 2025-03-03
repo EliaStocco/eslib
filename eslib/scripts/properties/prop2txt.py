@@ -22,6 +22,7 @@ def prepare_args(description):
     parser.add_argument("-f" , "--family"         , type=str     , **argv, required=False, help="family (default: %(default)s)", default=None)
     parser.add_argument("-u" , "--unit"           , type=str     , **argv, required=False, help="output unit (default: %(default)s)", default=None)
     parser.add_argument("-n" , "--index"          , type=itype   , **argv, required=False, help="index to be read from input file (default: %(default)s)", default=':')
+    parser.add_argument("-s" , "--subsample"      , type=str     , **argv, required=False, help="txt file with the indices to keep (default: %(default)s)", default=None)
     parser.add_argument("-rr", "--remove_replicas", type=str2bool, **argv, required=False, help='whether to remove replicas (default: %(default)s)', default=False)
     parser.add_argument("-d" , "--delimiter"      , type=str     , **argv, required=False, help='delimiter (default: %(default)s)', default=' ')
     parser.add_argument("-o" , "--output"         , type=str     , **argv, required=False, help='output file (default: %(default)s)', default=None)
@@ -32,6 +33,9 @@ def prepare_args(description):
 def main(args):
     
     assert not args.remove_replicas, "-rr,--remove_replicas no longer supported."
+    
+    if args.index != ':' and args.subsample is not None:
+        print(f"\n\t{warning}: pay attention when using both --index and --subsample.")
 
     #------------------#
     index = integer_to_slice_string(args.index)
@@ -79,6 +83,15 @@ def main(args):
     print(f"\t{args.keyword}.shape: {data.shape}")
     
     print(f"\t{args.keyword} unit: {allproperties.units[args.keyword]}")
+    
+    #------------------#
+    if args.subsample is not None:
+        subsample = np.loadtxt(args.subsample).astype(int)
+        assert subsample.ndim == 1, f"'{args.subsample}' should contain a 1D array."
+        print("\n\tSubsampling data:")
+        print("\tdata.shape : ",data.shape," (before subsampling)")
+        data = data[subsample]
+        print("\tdata.shape : ",data.shape," (after subsampling)")
     
     #------------------#
     if args.unit is not None:
