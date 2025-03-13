@@ -315,7 +315,7 @@ def compute_dielectric_gradients(dielectric: torch.Tensor, positions: torch.Tens
         torch.Tensor: Spatial derivatives of dielectric tensor.
     """
     # dielectric = dielectric[:,0:2]
-    d_dielectric_dr = []
+    d_dielectric_dr = [None]*dielectric.shape[-1]
     for i in range(dielectric.shape[-1]):
         grad_outputs: List[Optional[torch.Tensor]] = [
             torch.ones((dielectric.shape[0], 1)).to(dielectric.device)
@@ -328,7 +328,7 @@ def compute_dielectric_gradients(dielectric: torch.Tensor, positions: torch.Tens
             create_graph=True,
             allow_unused=True,
         )[0]
-        d_dielectric_dr.append(gradient)
+        d_dielectric_dr[i] = gradient
     d_dielectric_dr = torch.stack(d_dielectric_dr, dim=1)
     if gradient is None:
         return torch.zeros((positions.shape[0], dielectric.shape[-1], 3))

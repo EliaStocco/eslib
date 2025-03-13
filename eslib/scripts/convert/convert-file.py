@@ -196,9 +196,12 @@ def main(args):
     #------------------#
     # summary
     print("\n\t  Summary of the properties: ")
-    df = atoms.summary()
-    tmp = "\n"+df.to_string(index=False)
-    print(tmp.replace("\n", "\n\t "))
+    try:
+        df = atoms.summary()
+        tmp = "\n"+df.to_string(index=False)
+        print(tmp.replace("\n", "\n\t "))
+    except:
+        print(f"\t{error}: an error occurred while retrieving the properties")
 
 
     #------------------#

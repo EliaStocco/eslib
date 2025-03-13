@@ -85,13 +85,15 @@ class FileIOBatchedMACE:
 
             # Process and store results per folder
             self.logger.debug("Processing results.")
+            start_time = time.time()
             for n, _ in enumerate(single_results):
+                # ToDo:
+                # this might be optimized by avoiding destructing the dict all the times
                 single_results[n] = {}
                 for key in results.keys():
                     value = np.take(results[key], indices=n, axis=0)
                     # If the value array has more than one element, use it as is, else convert it to a float
                     single_results[n][key] = value if value.size > 1 else float(value)
-
 
             # Write results to output files
             self.logger.info("Writing output files.")
@@ -99,3 +101,6 @@ class FileIOBatchedMACE:
                 with FileLock(f"{ofile}.lock"):
                     save2json(ofile, res)
                     self.logger.debug(f"Results written: {ofile}")
+            
+            elapsed_time = time.time() - start_time
+            self.logger.info(f"Finished processing results: it took {elapsed_time:.2f} seconds.")
