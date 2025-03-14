@@ -310,13 +310,13 @@ def read_trajectory(file:str,
     if format in [None,"xyz","extxyz"]:
         # `extxyz.read`` from https://github.com/libAtoms/extxyz
         # this function should be faster than `ASE.io.read``
-        try:
-            from extxyz import read
-            atoms = read(file,index=index)
-            if len(atoms) == 0 :
-                raise ValueError("some error occurred")
-        except:
-            atoms = io.read(file,index=index,format=f)
+        # try:
+        #     from extxyz import read
+        #     atoms = read(file,index=index)
+        #     if len(atoms) == 0 :
+        #         raise ValueError("some error occurred")
+        # except:
+        atoms = io.read(file,index=index,format=f)
     else:
         # ASE.io.read
         atoms = io.read(file,index=index,format=f)
