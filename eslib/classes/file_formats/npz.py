@@ -97,7 +97,7 @@ def write_npz(filename: str, atoms_list: List[Atoms], parallel: bool = True) -> 
     for name in ref_info:
         key = f"_info_{name}"
         value = np.asarray([atoms.info[name] for atoms in atoms_list])
-        assert value.shape == (num_snapshots,), "error: info shape mismatch"
+        assert value.shape[0] == num_snapshots, "error: info shape mismatch"
         to_save[key] = value
         
     # Process each arrays key.
