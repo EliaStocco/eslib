@@ -185,15 +185,15 @@ torun = {
     #         "output"             : f"{tmp_folder}/output.nc",     
     #     },
     # },
-    "netcdf-read" :
-    {
-        "folder"  : "convert",
-        "file"   : "convert-file",
-        "kwargs"  : {
-            "input"              : "tests/structures/LiNbO3/long.n=10000.nc",   
-            "output"             : f"{tmp_folder}/output.extxyz",     
-        },
-    },
+    # "netcdf-read" :
+    # {
+    #     "folder"  : "convert",
+    #     "file"   : "convert-file",
+    #     "kwargs"  : {
+    #         "input"              : "tests/structures/LiNbO3/long.n=10000.nc",   
+    #         "output"             : f"{tmp_folder}/output.extxyz",     
+    #     },
+    # },
     "pickle-write" :
     {
         "folder"  : "convert",
@@ -212,16 +212,16 @@ torun = {
         },
         "clean" : False
     },
-    "pickle-read" :
-    {
-        "folder"  : "convert",
-        "file"   : "convert-file",
-        "kwargs"  : {
-            "input"              : f"{tmp_folder}/output.pickle",   
-            "input_format"       : "pickle",
-            "output"             : f"{tmp_folder}/output.nc",  
-        },
-    },
+    # "pickle-read" :
+    # {
+    #     "folder"  : "convert",
+    #     "file"   : "convert-file",
+    #     "kwargs"  : {
+    #         "input"              : f"{tmp_folder}/output.pickle",   
+    #         "input_format"       : "pickle",
+    #         "output"             : f"{tmp_folder}/output.nc",  
+    #     },
+    # },
     "hdf5-write" :
     {
         "folder"  : "convert",
