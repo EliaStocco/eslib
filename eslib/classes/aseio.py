@@ -12,6 +12,7 @@ from ase.io.formats import filetype
 
 from eslib.classes.file_formats.hdf5 import read_hdf5, write_hdf5
 from eslib.classes.file_formats.pdb import read_pdb
+from classes.file_formats.npz import read_npz, write_npz
 from eslib.classes.io import pickleIO
 from eslib.functions import extract_number_from_filename
 from eslib.tools import convert
@@ -211,6 +212,8 @@ class aseio(List[Atoms], pickleIO):
         #     traj = read_netcdf(file)
         elif format.lower() in ["pdb"]:
             traj = [read_pdb(file)]
+        elif format.lower() in ["npz"]:
+            traj = read_npz(file)
         else:
             traj = read_trajectory(**argv)
         return cls(traj)
@@ -249,6 +252,8 @@ class aseio(List[Atoms], pickleIO):
         #     write_netcdf(file,self.to_list())
         elif format.lower() in ["h5","hdf5"]:
             write_hdf5(file,self.to_list())
+        elif format.lower() in ["npz"]:
+            write_npz(file,self.to_list())
         else:
             io.write(images=self, filename=file, format=format)
 
