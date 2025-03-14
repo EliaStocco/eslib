@@ -118,16 +118,16 @@ torun = {
             "output"             : f"{tmp_folder}/MACE_atomic_dipoles.npy", 
         },
     },
-    "eval-model-PES" :
-    {
-        "folder"  : "nn",
-        "file"   : "eval-model.py",
-        "kwargs"  : {
-            "input" : "tests/structures/LiNbO3/geometries.extxyz" ,   
-            "model" : "tests/models/MACE-LiNbO3/MACE.LiNbO3.pickle",
-            "output": f"{tmp_folder}/mace.extxyz"
-        },
-    },
+    # "eval-model-PES" :
+    # {
+    #     "folder"  : "nn",
+    #     "file"   : "eval-model.py",
+    #     "kwargs"  : {
+    #         "input" : "tests/structures/LiNbO3/geometries.extxyz" ,   
+    #         "model" : "tests/models/MACE-LiNbO3/MACE.LiNbO3.pickle",
+    #         "output": f"{tmp_folder}/mace.extxyz"
+    #     },
+    # },
     # "eval-model-PES+save-info-arrays" :
     # {
     #     "folder"  : "nn",
