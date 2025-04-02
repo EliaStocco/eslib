@@ -154,6 +154,10 @@ def read_npz(filename: str) -> List[Atoms]:
     Raises:
       ValueError: If the file cannot be read or if required keys are missing.
     """
+    
+    # ToDo:
+    # - add 'index'
+    
     data = np.load(filename, allow_pickle=True)
 
     # Extract global metadata.
