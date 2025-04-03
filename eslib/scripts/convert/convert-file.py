@@ -185,13 +185,13 @@ def main(args):
     #------------------#
     # remove properties
     if args.remove_properties:
-        properties = []
-        print("\t Removing the following info: ",properties)  
-        print("\t Removing the following arrays: ",['initial_magnoms'])
+        # properties = []
+        print("\t Removing all the infos: ")  
+        # print("\t Removing the following arrays: ",['initial_magnoms'])
         for n in range(len(atoms)):
             atoms[n].info = {}
-            if 'initial_magmoms' in atoms[n].arrays:
-                del atoms[n].arrays['initial_magmoms']
+            # if 'initial_magmoms' in atoms[n].arrays:
+            #     del atoms[n].arrays['initial_magmoms']
                 
     #------------------#
     # summary
