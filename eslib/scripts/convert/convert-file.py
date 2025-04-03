@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import enum
 import os
 from typing import List
 
@@ -33,7 +34,8 @@ def prepare_args(description):
     parser.add_argument("-i"  , "--input"            , **argv,required=True , type=str     , help="input file")
     parser.add_argument("-if" , "--input_format"     , **argv,required=False, type=str     , help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-rr" , "--remove_replicas"  , **argv,required=False, type=str2bool, help='whether to remove replicas (default: %(default)s)', default=False)
-    parser.add_argument("-rp" , "--remove_properties", **argv,required=False, type=str2bool, help='whether to remove properties/info (default: %(default)s)', default=False)
+    parser.add_argument("-rp" , "--remove_properties", **argv,required=False, type=str2bool, help='whether to remove info (default: %(default)s)', default=False)
+    parser.add_argument("-ra" , "--remove_arrays"    , **argv,required=False, type=str2bool, help='whether to remove arrays (default: %(default)s)', default=False)
     parser.add_argument("-pbc", "--pbc"              , **argv,required=False, type=str2bool, help="whether pbc should be removed, enforced, or nothig (default: %(default)s)", default=None)
     parser.add_argument("-iu" , "--input_unit"       , **argv,required=False, type=str     , help="input positions unit (default: %(default)s)"  , default=None)
     parser.add_argument("-iuc", "--input_unit_cell"  , **argv,required=False, type=str     , help="input cell unit (default: %(default)s)"  , default=None)
@@ -193,6 +195,13 @@ def main(args):
             # if 'initial_magmoms' in atoms[n].arrays:
             #     del atoms[n].arrays['initial_magmoms']
                 
+    if args.remove_arrays:
+        print("\t Removing all the arrays: ")  
+        for n,structure in enumerate(atoms):
+            structure.arrays = {
+                "positions": structure.get_positions(),
+                "numbers": structure.get_atomic_numbers(),
+            }
     #------------------#
     # summary
     print("\n\t  Summary of the properties: ")
