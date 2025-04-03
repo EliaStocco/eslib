@@ -78,13 +78,9 @@ def main(args):
         print("done")
         print("\t\tZ.shape: ",Z.shape)
         
-        # print("\n\tReshaping Born Charges ... ",end="")
-        # Z =
-        # print("done")
-        
         Zx[n] = Z[:,:,0::3] # d mu_x / d R 
-        Zy[n] = Z[:,:,1::3] # d mu_x / d R
-        Zz[n] = Z[:,:,2::3] # d mu_x / d R
+        Zy[n] = Z[:,:,1::3] # d mu_y / d R
+        Zz[n] = Z[:,:,2::3] # d mu_z / d R
     
         #------------------#
         print(f"\n\t\tExtracting the velocities using the keyword '{args.velocities}' ... ", end="")
@@ -118,23 +114,7 @@ def main(args):
     print("\n\tHere we have:")
     print(f"\t - {data.shape[args.axis_samples]} samples") 
     print(f"\t - {data.shape[args.axis_time]} time steps") 
-    print(f"\t - {data.shape[args.axis_components]} components") 
-    
-    
-    # print("\n\tReading the input array from file '{:s}' ... ".format(args.dipole), end="")
-    # args.dipole = str(args.dipole)
-    # data:np.ndarray = PhysicalTensor.from_file(file=args.dipole).to_data() # e ang
-    # print("done")
-    # if data.ndim == 2:
-    #     data = data[np.newaxis,:,:]
-    # print("\tdata shape: ",data.shape)
-    # data = convert(data,"electric-dipole","eang","atomic_unit")
-
-    # #------------------#
-    # print("\n\tComputing the derivative ... ",end="")
-    # data = np.gradient(data,axis=args.axis_time)/args.time_step # e ang/fs
-    # print("done")
-    # print("\tdata shape: ",data.shape)    
+    print(f"\t - {data.shape[args.axis_components]} components")   
     
     #------------------#
     print("\n\tRemoving the mean ... ",end="")
