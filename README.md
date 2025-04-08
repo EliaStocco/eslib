@@ -13,7 +13,6 @@ pip install torch-scatter -f https://data.pyg.org/whl/torch-2.2.0+cpu.html
 conda install anaconda::pandas -y
 pip install -r requirements.txt
 # optional
-pytest 
 ```
 
 Install the package in `edit` mode with:
@@ -25,6 +24,12 @@ and make all the scripts executable:
 source install.sh
 ```
 In case add `source eslib_path/install.sh` to `~/.bashrc`.
+
+# Testing
+Run the automatic tests using `pytest` by typing
+```bash
+./run-test.sh
+```
 
 ## Help
 You don't find a script? Just type:
