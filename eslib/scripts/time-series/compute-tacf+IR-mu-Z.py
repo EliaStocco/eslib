@@ -19,8 +19,9 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i"  , "--input"          , **argv, required=True , type=str  , help="npz file with the data")
     parser.add_argument("-dt" , "--time_step"      , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
-    parser.add_argument("-s"  , "--stride"         , **argv, required=False, type=int, help="stride (default: %(default)s)", default=1)
-    parser.add_argument("-T"  , "--temperature"    , **argv, required=True , type=float   , help="temperature [K]")
+    parser.add_argument("-t0" , "--starting_time"  , **argv, required=False, type=float, help="starting time [ps] (default: %(default)s)", default=0)
+    parser.add_argument("-s"  , "--stride"         , **argv, required=False, type=int  , help="stride (default: %(default)s)", default=1)
+    parser.add_argument("-T"  , "--temperature"    , **argv, required=True , type=float, help="temperature [K]")
     parser.add_argument("-o"  , "--output"         , **argv, required=False, type=str  , help="txt/npy output file (default: %(default)s)", default='IR.txt')
     parser.add_argument("-pad", "--padding"        , **argv, required=False, type=int  , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
     parser.add_argument("-as" , "--axis_samples"   , **argv, required=False, type=int  , help="axis corresponding to independent trajectories/samples (default: %(default)s)", default=0)
@@ -36,7 +37,8 @@ def prepare_args(description):
 def main(args):
     
     #------------------#
-    args.time_step = convert(args.stride*args.time_step,"time","femtosecond","atomic_unit")
+    time_step = args.stride*args.time_step # fs
+    args.time_step = convert(time_step,"time","femtosecond","atomic_unit")
     args.window_t = convert(args.window_t,"time","femtosecond","atomic_unit")
     
     print("\tAxes:")
@@ -55,7 +57,20 @@ def main(args):
     print("\n\tHere we have:")
     print(f"\t - {data.shape[args.axis_samples]} samples") 
     print(f"\t - {data.shape[args.axis_time]} time steps") 
-    print(f"\t - {data.shape[args.axis_components]} components")   
+    print(f"\t - {data.shape[args.axis_components]} components") 
+    
+    print("\n\tTotal time spanned: {:.2f} ps".format(data.shape[args.axis_time]*time_step/1000))
+    if args.starting_time > 0:
+        print("\n\tStarting time: {:.2f} ps".format(args.starting_time))
+        discard = args.starting_time*1000/time_step
+        print("\tDiscarding the first {:d} steps".format(discard))
+        data = np.take(data,indices=range(discard,data.shape[args.axis_time]),axis=args.axis_time)
+        print("\tTotal time spanned: {:.2f} ps".format(data.shape[args.axis_time]*time_step/1000))
+        
+        print("\n\tHere we have:")
+        print(f"\t - {data.shape[args.axis_samples]} samples") 
+        print(f"\t - {data.shape[args.axis_time]} time steps") 
+        print(f"\t - {data.shape[args.axis_components]} components") 
     
     #------------------#
     print("\n\tRemoving the mean ... ",end="")
