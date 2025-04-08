@@ -54,9 +54,10 @@ def main(args):
     for n,file in enumerate(files):
         
         # print(f"\t - {n}) {file}")
-        print(f"\n\t{n}) Reading the atomic structures from file '{args.input}' ... ", end="")
-        structures = AtomicStructures.from_file(file=args.input,format=args.input_format)
+        print(f"\n\t{n}) Reading the atomic structures from file '{file}' ... ", end="")
+        structures = AtomicStructures.from_file(file=file,format=args.input_format)
         print("done")
+        print("\tn. of structures: ",len(structures))
         volumes = np.asarray([ atoms.get_volume() for atoms in structures ])
         print("\n\t\tvolume [ang^3]: ",volumes.mean()," +/- ",volumes.std())
         V[n] = convert(volumes.mean(),"volume","angstrom3","atomic_unit")
