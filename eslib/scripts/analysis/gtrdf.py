@@ -15,8 +15,6 @@ import matplotlib.pyplot as plt
 matplotlib.use('Agg')
 import numpy as np
 
-from extxyz import read
-
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, float_format, warning, eslog
 from eslib.fortran import fortran_rdfs_fixed_cell, fortran_rdfs_variable_cell
