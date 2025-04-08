@@ -12,7 +12,7 @@ from ase.io.formats import filetype
 
 from eslib.classes.file_formats.hdf5 import read_hdf5, write_hdf5
 from eslib.classes.file_formats.pdb import read_pdb
-from classes.file_formats.npz import read_npz, write_npz
+from eslib.classes.file_formats.npz import read_npz, write_npz
 from eslib.classes.io import pickleIO
 from eslib.functions import extract_number_from_filename
 from eslib.tools import convert
