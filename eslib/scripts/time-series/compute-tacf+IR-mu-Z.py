@@ -62,7 +62,7 @@ def main(args):
     print("\n\tTotal time spanned: {:.2f} ps".format(data.shape[args.axis_time]*time_step/1000))
     if args.starting_time > 0:
         print("\n\tStarting time: {:.2f} ps".format(args.starting_time))
-        discard = args.starting_time*1000/time_step
+        discard = int(args.starting_time*1000/time_step)
         print("\tDiscarding the first {:d} steps".format(discard))
         data = np.take(data,indices=range(discard,data.shape[args.axis_time]),axis=args.axis_time)
         print("\tTotal time spanned: {:.2f} ps".format(data.shape[args.axis_time]*time_step/1000))
