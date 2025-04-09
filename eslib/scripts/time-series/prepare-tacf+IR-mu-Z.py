@@ -57,20 +57,34 @@ def main(args):
         print(f"\n\t{n}) Reading the atomic structures from file '{file}' ... ", end="")
         structures = AtomicStructures.from_file(file=file,format=args.input_format)
         print("done")
-        print("\tn. of structures: ",len(structures))
+        print("\t\tn. of structures: ",len(structures))
         volumes = np.asarray([ atoms.get_volume() for atoms in structures ])
         print("\n\t\tvolume [ang^3]: ",volumes.mean()," +/- ",volumes.std())
         V[n] = convert(volumes.mean(),"volume","angstrom3","atomic_unit")
 
-        #------------------#
-        print(f"\n\t\tExtracting the Born Charges using the keyword '{args.bec}' ... ", end="")
-        Z = structures.get(args.bec)
-        print("done")
-        print("\t\tZ.shape: ",Z.shape)
+        # #------------------#
+        # print(f"\n\t\tExtracting the Born Charges using the keyword '{args.bec}' ... ", end="")
+        # Z = structures.get(args.bec)
+        # print("done")
+        # print("\t\tZ.shape: ",Z.shape)
         
-        Zx[n] = Z[:,:,0::3] # d mu_x / d R 
-        Zy[n] = Z[:,:,1::3] # d mu_y / d R
-        Zz[n] = Z[:,:,2::3] # d mu_z / d R
+        # Zx[n] = Z[:,:,0::3] # d mu_x / d R 
+        # Zy[n] = Z[:,:,1::3] # d mu_y / d R
+        # Zz[n] = Z[:,:,2::3] # d mu_z / d R
+        
+        #------------------#
+        for n,comp in enumerate(["x","y","z"]):
+            print(f"\n\t\tExtracting the Born Charges using the keyword '{args.bec}_{comp}' ... ", end="")
+            Z = structures.get(f"{args.bec}_{comp}")
+            print("done")
+            print("\t\tZ.shape: ",Z.shape)
+            
+            if n == 0:
+                Zx[n] = Z[:,:] # d mu_x / d R 
+            elif n == 1 :
+                Zy[n] = Z[:,:] # d mu_y / d R
+            else:
+                Zz[n] = Z[:,:] # d mu_z / d R    
     
         #------------------#
         print(f"\n\t\tExtracting the velocities using the keyword '{args.velocities}' ... ", end="")
