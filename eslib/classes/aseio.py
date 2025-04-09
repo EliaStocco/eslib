@@ -213,7 +213,9 @@ class aseio(List[Atoms], pickleIO):
         elif format.lower() in ["pdb"]:
             traj = [read_pdb(file)]
         elif format.lower() in ["npz"]:
-            traj = read_npz(file)
+            index = argv['index'] if 'index' in argv else slice(None,None,None)
+            index = integer_to_slice_string(index)
+            traj = read_npz(filename=file,index=index)
         else:
             traj = read_trajectory(**argv)
         return cls(traj)

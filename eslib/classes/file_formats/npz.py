@@ -1,3 +1,4 @@
+import enum
 import numpy as np
 from typing import List, Tuple, Set
 from ase import Atoms
@@ -119,7 +120,7 @@ def write_npz(filename: str, atoms_list: List[Atoms], parallel: bool = True) -> 
     
     np.savez_compressed(root, **to_save)
     
-def read_npz(filename: str) -> List[Atoms]:
+def read_npz(filename: str,index:slice=None) -> List[Atoms]:
     """
     Read a compressed NPZ file created with write_npz and reconstruct the list of ASE Atoms objects.
 
@@ -163,9 +164,15 @@ def read_npz(filename: str) -> List[Atoms]:
     # Extract global metadata.
     num_snapshots = int(data["num_snapshots"])
     num_atoms = data["num_atoms"]  # 1D array, shape (num_snapshots,)
-    pbc = data["pbc"]              # shape (num_snapshots, 3)
-    cell = data["cell"]            # shape (num_snapshots, 3, 3)
-
+    # Compute the cumulative sum of num_atoms to determine splitting indices.
+    cumsum = np.cumsum(num_atoms)
+    
+    all_index = np.arange(num_snapshots)
+    required_index = all_index[index]
+    
+    pbc = data["pbc"][required_index]   # shape (num_snapshots, 3)
+    cell = data["cell"][required_index] # shape (num_snapshots, 3, 3)
+    
     # Identify the keys for info and arrays.
     info_keys:List[str] = [key for key in data.keys() if key.startswith("_info_")]
     array_keys:List[str] = [key for key in data.keys() if key.startswith("_array_")]
@@ -179,37 +186,39 @@ def read_npz(filename: str) -> List[Atoms]:
         orig_key = key.replace("_info_", "", 1)
         info_arr = data[key]  # Expected shape: (num_snapshots,)
         # Convert to a list of scalars (one per snapshot).
-        info_dict[orig_key] = [info_arr[i] for i in range(num_snapshots)]
+        info_dict[orig_key] = [ a for n,a in enumerate(info_arr) if n in required_index ]
+        # [info_arr[i] for i in range(num_snapshots) if i in required_index]
 
     # Reconstruct per-snapshot arrays.
     arrays_dict = {}
     for key in array_keys:
         orig_key = key.replace("_array_", "", 1)
         stacked_array = data[key]  # 2D array with shape (sum(num_atoms), d)
-        # Compute the cumulative sum of num_atoms to determine splitting indices.
-        cumsum = np.cumsum(num_atoms)
+        
         # Split the stacked array into pieces; use cumsum[:-1] as split indices.
         per_snapshot_arrays = np.split(stacked_array, cumsum[:-1], axis=0)
-        arrays_dict[orig_key] = per_snapshot_arrays
+        arrays_dict[orig_key] = [ a for n,a in enumerate(per_snapshot_arrays) if n in required_index ]
 
     # Reconstruct each Atoms object.
-    atoms_list = [None]*num_snapshots
-    for i in range(num_snapshots):
+    atoms_list = [None]*len(required_index)
+    for n in range(len(required_index)):
         # Use the "positions" array (if available) to initialize the Atoms object.
-        pos = np.asarray(arrays_dict["positions"][i])
-        atoms = Atoms(cell=cell[i], pbc=pbc[i], positions=pos)
+        pos = np.asarray(arrays_dict["positions"][n])
+        atoms = Atoms(cell=cell[n], pbc=pbc[n], positions=pos)
+        
         # Assign the remaining arrays (other than "positions").
-        for key, arrays in arrays_dict.items():
-            if key == "positions":
+        for key in arrays_dict.keys():
+          if key == "positions":
                 continue
-            arr = np.asarray(arrays[i])
-            # If the stored array was originally 1D (converted to 2D with one column), flatten it.
-            if arr.ndim == 2 and arr.shape[1] == 1:
-                arr = arr.ravel()
-            atoms.set_array(key, arr)
+          arr = np.asarray(arrays_dict[key][n])
+          # If the stored array was originally 1D (converted to 2D with one column), flatten it.
+          if arr.ndim == 2 and arr.shape[1] == 1:
+              arr = arr.ravel()
+          atoms.arrays[key] = arr
+          
         # Assign the info values.
-        for key, values in info_dict.items():
-            atoms.info[key] = values[i]
-        atoms_list[i] = atoms
+        for key in info_dict.keys():
+          atoms.info[key] = info_dict[key][n]
+        atoms_list[n] = atoms
         
     return atoms_list
