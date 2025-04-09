@@ -80,11 +80,11 @@ def main(args):
             print("\t\tZ.shape: ",Z.shape)
             
             if n == 0:
-                Zx[n] = Z[:,:] # d mu_x / d R 
+                Zx[n] = Z[:,:,:] # d mu_x / d R 
             elif n == 1 :
-                Zy[n] = Z[:,:] # d mu_y / d R
+                Zy[n] = Z[:,:,:] # d mu_y / d R
             else:
-                Zz[n] = Z[:,:] # d mu_z / d R    
+                Zz[n] = Z[:,:,:] # d mu_z / d R    
     
         #------------------#
         print(f"\n\t\tExtracting the velocities using the keyword '{args.velocities}' ... ", end="")
