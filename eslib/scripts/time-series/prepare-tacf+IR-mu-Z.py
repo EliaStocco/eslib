@@ -74,8 +74,8 @@ def main(args):
         
         #------------------#
         for n,comp in enumerate(["x","y","z"]):
-            print(f"\n\t\tExtracting the Born Charges using the keyword '{args.bec}_{comp}' ... ", end="")
-            Z = structures.get(f"{args.bec}_{comp}")
+            print(f"\n\t\tExtracting the Born Charges using the keyword '{args.bec}{comp}' ... ", end="")
+            Z = structures.get(f"{args.bec}{comp}")
             print("done")
             print("\t\tZ.shape: ",Z.shape)
             
