@@ -73,18 +73,18 @@ def main(args):
         # Zz[n] = Z[:,:,2::3] # d mu_z / d R
         
         #------------------#
-        for n,comp in enumerate(["x","y","z"]):
+        for m,comp in enumerate(["x","y","z"]):
             print(f"\n\t\tExtracting the Born Charges using the keyword '{args.bec}{comp}' ... ", end="")
             Z = structures.get(f"{args.bec}{comp}")
             print("done")
             print("\t\tZ.shape: ",Z.shape)
             
-            if n == 0:
-                Zx[n] = Z[:,:,:] # d mu_x / d R 
-            elif n == 1 :
-                Zy[n] = Z[:,:,:] # d mu_y / d R
+            if m == 0:
+                Zx[m] = Z[:,:,:].copy() # d mu_x / d R 
+            elif m == 1 :
+                Zy[m] = Z[:,:,:].copy() # d mu_y / d R
             else:
-                Zz[n] = Z[:,:,:] # d mu_z / d R    
+                Zz[m] = Z[:,:,:].copy() # d mu_z / d R    
     
         #------------------#
         print(f"\n\t\tExtracting the velocities using the keyword '{args.velocities}' ... ", end="")
