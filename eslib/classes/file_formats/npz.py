@@ -147,17 +147,16 @@ def read_npz(filename: str,index:slice=None) -> List[Atoms]:
     Parameters:
       filename : str
           The filename of the compressed NPZ file.
+      index : slice, optional
+          A slice object to specify which snapshots to load. If None, all snapshots are read.
 
     Returns:
       List[Atoms]
-          A list of reconstructed ASE Atoms objects.
+          A list of reconstructed ASE Atoms objects corresponding to the selected snapshots.
 
     Raises:
       ValueError: If the file cannot be read or if required keys are missing.
     """
-    
-    # ToDo:
-    # - add 'index'
     
     data = np.load(filename, allow_pickle=True)
 
