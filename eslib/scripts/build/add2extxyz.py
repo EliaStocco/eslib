@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import numpy as np
-from ase.io import write
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import warning, error, esfmt
+from eslib.formatting import warning, esfmt
 from eslib.classes.physical_tensor import PhysicalTensor
+from eslib.input import str2bool
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -14,11 +14,12 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i" , "--input" , **argv,type=str, help="input file [extxyz]")
-    parser.add_argument("-n" , "--name"  , **argv,type=str, help="name for the new info/array")
-    parser.add_argument("-d" , "--data"  , **argv,type=str, help="file (txt or csv) with the data to add")
-    parser.add_argument("-w" , "--what"  , **argv,type=str, help="what the data is: 'i' (info) or 'a' (arrays)")
-    parser.add_argument("-o" , "--output", **argv,type=str, help="output file (default: %(default)s)", default="output.extxyz")
+    parser.add_argument("-i" , "--input"    , **argv,type=str     , required=True , help="input file [extxyz]")
+    parser.add_argument("-n" , "--name"     , **argv,type=str     , required=True , help="name for the new info/array")
+    parser.add_argument("-d" , "--data"     , **argv,type=str     , required=True , help="file (txt or csv) with the data to add")
+    parser.add_argument("-w" , "--what"     , **argv,type=str     , required=True , help="what the data is: 'i' (info) or 'a' (arrays)")
+    parser.add_argument("-r" , "--replicate", **argv,type=str2bool, required=False, help="replicate the same array for each structure", default=False)
+    parser.add_argument("-o" , "--output"   , **argv,type=str     , required=True , help="output file (default: %(default)s)", default="output.extxyz")
     return parser# .parse_args()
 
 #---------------------------------------#
@@ -38,8 +39,14 @@ def main(args):
     print("\tReading data from file '{:s}' ... ".format(args.data), end="")
     data = PhysicalTensor.from_file(file=args.data).data # np.loadtxt(args.data)
     print("done")
-
     print("\tData shape: ",data.shape)
+    
+    #---------------------------------------#
+    if args.replicate:
+        print("\tReplicating data for each structure ... ", end="")
+        data = np.tile(data,(len(atoms),1))
+        print("done")
+        print("\tData shape: ",data.shape)
 
     #---------------------------------------#
     if data.shape[0] != N and args.what in ['i','info'] :

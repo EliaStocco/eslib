@@ -5,8 +5,69 @@ import os
 import re
 import sys
 from copy import copy
-
 import numpy as np
+from typing import Any, List, Union
+
+#------------------#
+class FakeList:
+    """
+    A fake list implementation.
+    """
+    def __init__(self, value: Any, length: int):
+        self.value = value
+        self.length = length
+
+    def __len__(self) -> int:
+        return self.length
+
+    def __getitem__(self, index: Union[int, slice]) -> Union[Any, List[Any]]:
+        if isinstance(index, slice):
+            start, stop, step = index.indices(self.length)
+            return [self.value] * ((stop - start + step - 1) // step)
+        elif 0 <= index < self.length:
+            return self.value
+        else:
+            raise IndexError("FakeList index out of range")
+        
+    @property
+    def shape(self) -> tuple:
+        return (self.length,*np.asarray(self.value).shape)
+
+def invert_indices(indices):
+    """
+    Given a list of indices that map atoms_A to atoms_B,
+    returns the reverted indices that would restore atoms_A from atoms_B.
+    """
+    inverted_indices = np.argsort(indices)
+    return inverted_indices
+
+def unique_elements(lst):
+    """
+    Returns:
+    - unique_lst: list of unique elements (preserving order)
+    - indices: list mapping each element in lst to its index in unique_lst
+    - inverse_indices: list of lists, where each sublist contains indices in lst where that unique element appears
+    """
+    seen = {}
+    unique_lst = []
+    indices = []
+    inverse_indices = []
+
+    for i, item in enumerate(lst):
+        if item not in seen:
+            seen[item] = len(unique_lst)
+            unique_lst.append(item)
+            inverse_indices.append([i])
+        else:
+            inverse_indices[seen[item]].append(i)
+        indices.append(seen[item])
+        
+    assert len(inverse_indices) == len(unique_lst), \
+        f"Number of unique elements ({len(unique_lst)}) does not match the number of inverse indices ({len(inverse_indices)})"
+    assert len(indices) == len(lst), \
+        f"Number of indices ({len(indices)}) does not match the length of the original list ({len(lst)})"
+
+    return unique_lst, indices, inverse_indices
 
 
 #---------------------------------------#

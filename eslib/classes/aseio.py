@@ -17,6 +17,7 @@ from eslib.classes.io import pickleIO
 from eslib.functions import extract_number_from_filename
 from eslib.tools import convert
 from eslib.io_tools import read_comments_ipi, integer_to_slice_string
+from eslib.functions import FakeList
 
 T = TypeVar('T', bound='aseio')
 M = TypeVar('M', bound=Callable[..., Any])
@@ -497,23 +498,3 @@ def parallel_steps(comment: str)->int:
     else:
         raise ValueError("Invalid comment format")
 
-#------------------#
-class FakeList:
-    """
-    A fake list implementation.
-    """
-    def __init__(self, value: Any, length: int):
-        self.value = value
-        self.length = length
-
-    def __len__(self) -> int:
-        return self.length
-
-    def __getitem__(self, index: Union[int, slice]) -> Union[Any, List[Any]]:
-        if isinstance(index, slice):
-            start, stop, step = index.indices(self.length)
-            return [self.value] * ((stop - start + step - 1) // step)
-        elif 0 <= index < self.length:
-            return self.value
-        else:
-            raise IndexError("FakeList index out of range")
