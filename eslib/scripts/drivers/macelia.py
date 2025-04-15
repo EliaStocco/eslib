@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # from mace.calculators import MACECalculator
-import torch
 from ase.calculators.socketio import SocketClient
 from ase.io import read
 from mace.calculators import MACECalculator, MACEliaCalculator
@@ -39,11 +38,59 @@ def prepare_args(description):
     parser.add_argument("-sc", "--socket_client"      , **argv, required=False, type=str     , help="socket client (default: %(default)s)", choices=['eslib','ase'], default='eslib')
     parser.add_argument("-sp", "--suppress_properties", **argv, required=False, type=slist   , help="list of the properties to suppress (default: %(default)s)", default=None)
     parser.add_argument("-us" , "--use_stress"        , **argv, required=False, type=str2bool, help="use stress (default: %(default)s)", default=False)
+    parser.add_argument("-osg" , "--oversubscribe_gpu", **argv, required=False, type=str2bool, help="whether to oversubscribe GPU (default: %(default)s)", default=False)
     return parser
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
 def main(args):
+    
+    if args.oversubscribe_gpu:
+        
+        import os
+        import sys
+        # Get SLURM_LOCALID for per-task identification
+        local_id = os.environ.get("SLURM_LOCALID", "unknown")
+        # Set up output file
+        log_file = f"macelia.localid={local_id}.log"
+        
+        sys.stdout = open(log_file, "w")
+        sys.stderr = sys.stdout  # Optional, to capture warnings/errors too
+        
+        print("\nOversubscribing GPUs based on SLURM_LOCALID:")
+
+        # Get total number of GPUs on this node
+        num_gpus = len([gpu for gpu in os.popen("nvidia-smi -L").readlines()])
+        print(f"\t - n. of GPUs available: {num_gpus}")
+
+        # Get this task's local ID
+        local_id = int(os.environ.get("SLURM_LOCALID", 0))
+        print(f"\t - SLURM_LOCALID: {local_id}")
+
+        # Total number of tasks on this node
+        num_tasks = int(os.environ.get("SLURM_NTASKS_PER_NODE", 1))
+        print(f"\t - total tasks per node (SLURM_NTASKS_PER_NODE): {num_tasks}")
+
+        # Tasks per GPU
+        tasks_per_gpu = max(1, num_tasks // num_gpus)
+        print(f"\t - assigning ~{tasks_per_gpu} tasks per GPU")
+
+        # Assign GPU ID
+        gpu_id = local_id // tasks_per_gpu
+        gpu_id = min(gpu_id, num_gpus - 1)
+        print(f"\t - task {local_id} assigned to GPU {gpu_id}")
+
+        # Set the environment variable for CUDA
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
+        print(f"\t - CUDA_VISIBLE_DEVICES set to: {os.environ['CUDA_VISIBLE_DEVICES']}")
+        
+    #------------------#
+    print("\n\tImporting torch ... ", end="")
+    import torch
+    print("done")
+    print("\tTorch version: ",torch.__version__)
+    print("\tTorch device: ",torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU")
+    
     
     #------------------#
     print("\tCuda available: ",torch.cuda.is_available())
