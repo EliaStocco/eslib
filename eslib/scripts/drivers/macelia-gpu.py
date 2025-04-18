@@ -14,8 +14,9 @@ import os
 import sys
 # Get SLURM_LOCALID for per-task identification
 local_id = os.environ.get("SLURM_LOCALID", "unknown")
+name = os.environ.get("OUTPUT_SCRIPT_NAME", "unknown")
 # Set up output file
-log_file = f"macelia-gpu.localid={local_id}.log"
+log_file = f"{name}.localid={local_id}.log"
 
 sys.stdout = open(log_file, "w")
 sys.stderr = sys.stdout  # Optional, to capture warnings/errors too
