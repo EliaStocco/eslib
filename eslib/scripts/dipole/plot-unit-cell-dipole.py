@@ -1,4 +1,4 @@
-#!/usr/bin/env pythons
+#!/usr/bin/env python
 import numpy as np
 import pandas as pd
 import os
@@ -115,7 +115,7 @@ def main(args):
         
         
         # Create a figure and an axis for 3D plotting
-        fig = plt.figure()
+        fig = plt.figure(figsize=(4,4))
         ax = fig.add_subplot(111, projection='3d')
 
         # Define the colormap
@@ -138,14 +138,15 @@ def main(args):
                     ax.bar3d(i, j, k, 1, 1, 1, color=color, shade=True)
 
         # Set labels and title
-        ax.set_xlabel('X axis')
-        ax.set_ylabel('Y axis')
-        ax.set_zlabel('Z axis')
+        # ax.set_xlabel('X axis')
+        # ax.set_ylabel('Y axis')
+        # ax.set_zlabel('Z axis')
         # ax.set_title('3D Cube of Small Cubes Colored by Data')
 
         # Show the plot
         
-        plt.savefig(pfile,dpi=600)
+        plt.tight_layout()
+        plt.savefig(pfile,dpi=600,transparent=True,bbox_inches='tight')
         plt.close(fig)
     
     

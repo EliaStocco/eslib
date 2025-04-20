@@ -1,4 +1,4 @@
-#!/usr/bin/env pythons
+#!/usr/bin/env python
 import numpy as np
 import pandas as pd
 from eslib.classes.atomic_structures import AtomicStructures

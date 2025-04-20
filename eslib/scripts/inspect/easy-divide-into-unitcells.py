@@ -1,4 +1,4 @@
-#!/usr/bin/env pythons
+#!/usr/bin/env python
 import numpy as np
 from ase import Atoms
 from eslib.classes.atomic_structures import AtomicStructures

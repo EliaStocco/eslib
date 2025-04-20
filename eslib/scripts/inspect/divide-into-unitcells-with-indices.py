@@ -1,4 +1,4 @@
-#!/usr/bin/env pythons
+#!/usr/bin/env python
 import numpy as np
 from ase import Atoms
 from eslib.classes.atomic_structures import AtomicStructures
@@ -51,8 +51,11 @@ def main(args):
     
     #------------------#
     if args.plot is not None:
+        import os
         from ase.visualize.plot import plot_atoms
         import matplotlib.pyplot as plt
+        
+        os.makedirs(args.plot, exist_ok=True)
         # for i in range(N):
         #     tmp = atoms[i::N]       
             
@@ -62,13 +65,33 @@ def main(args):
         #     plt.close(fig)
             
         
+        # First, calculate the common axis limits using all atoms
+        x_all = atoms.positions[:, 0]
+        y_all = atoms.positions[:, 1]
+        z_all = atoms.positions[:, 2]
+
+        xlim = (x_all.min(), x_all.max())
+        ylim = (y_all.min(), y_all.max())
+        zlim = (z_all.min(), z_all.max()) if atoms.positions.shape[1] > 2 else None
+
         for i in range(N):
-            tmp = atoms[unit_cell_index==i]
-            
+            tmp = atoms[unit_cell_index == i]
+
             fig, ax = plt.subplots()
-            plot_atoms(tmp, ax)  # Optional rotation
-            plt.savefig(f"{args.plot}/unitcell.n={i}.png") 
+
+            plot_atoms(tmp, ax)  # Optional: include any rotation settings here
+
+            # Fix axis limits
+            ax.set_xlim(xlim)
+            ax.set_ylim(ylim)
+            if zlim and hasattr(ax, 'set_zlim'):  # For 3D plots
+                ax.set_zlim(zlim)
+
+            ax.set_aspect('equal')  # Keeps the same aspect ratio
+
+            plt.savefig(f"{args.plot}/unitcell.n={i}.png")
             plt.close(fig)
+
     
     #------------------#
     print("\tPreparing output ... ", end="")
