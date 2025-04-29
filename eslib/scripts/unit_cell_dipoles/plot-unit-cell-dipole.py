@@ -146,7 +146,7 @@ def main(args):
         # Show the plot
         
         plt.tight_layout()
-        plt.savefig(pfile,dpi=600,transparent=True,bbox_inches='tight')
+        plt.savefig(pfile,dpi=600,transparent=False,bbox_inches='tight')
         plt.close(fig)
     
     
