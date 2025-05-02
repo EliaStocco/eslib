@@ -4,6 +4,8 @@ import pandas as pd
 from typing import Tuple, List, Optional, Dict
 from warnings import warn
 
+from functional import extend2NDarray
+
 def levi_civita():
     """Returns the 3x3x3 Levi-Civita tensor."""
     tensor = np.zeros((3, 3, 3), dtype=int)
@@ -393,3 +395,53 @@ def melt(
 #     return np.array(aggregated_A)
 
 
+def centered_window(window_name: str, cf_len: int, window_width: int) -> np.ndarray:
+    """
+    Create a zero-padded, centered window over cf_len samples,
+    with tapering defined by `window_name` and `window_width`.
+
+    Parameters:
+        window_name (str): Name of the window function (e.g., 'hanning', 'hamming', 'blackman')
+        cf_len (int): Length of the correlation function (should be 2 * n_data - 1)
+        window_width (int): Half-width of the active window region around zero-lag
+
+    Returns:
+        np.ndarray: A window array of shape (cf_len,) with zeros outside the taper.
+    """
+    zero_lag_idx = cf_len // 2  # Zero-lag index is in the center
+
+    # Initialize full-length zero window
+    window = np.zeros(cf_len)
+
+    # Length of taper (must be odd)
+    taper_len = 2 * window_width + 1
+
+    # Generate desired window shape
+    if window_name.lower() == 'hanning':
+        taper = np.hanning(taper_len)
+    elif window_name.lower() == 'hamming':
+        taper = np.hamming(taper_len)
+    elif window_name.lower() == 'blackman':
+        taper = np.blackman(taper_len)
+    else:
+        raise ValueError(f"Unsupported window type: {window_name}")
+
+    # Bounds of taper placement
+    start = max(zero_lag_idx - window_width, 0)
+    end = min(zero_lag_idx + window_width + 1, cf_len)
+
+    # Slice taper appropriately if near edge
+    taper_start = window_width - (zero_lag_idx - start)
+    taper_end = taper_start + (end - start)
+
+    window[start:end] = taper[taper_start:taper_end]
+
+    return window
+
+@extend2NDarray
+def divide_and_swap(x,N):
+    first = x[:N]
+    second = x[N:]
+    x[:len(second)] = second
+    x[len(second):] = first
+    return x

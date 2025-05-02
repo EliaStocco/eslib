@@ -5,7 +5,9 @@ from eslib.classes.physical_tensor import PhysicalTensor
 from eslib.classes.tcf import TimeAutoCorrelation, compute_spectrum, get_freq, autocorrelate
 from eslib.formatting import esfmt
 from eslib.tools import convert
-from eslib.mathematics import centered_window
+from scipy import interpolate
+# from scipy.signal import butter, filtfilt, correlate
+import scipy
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -81,33 +83,26 @@ def main(args):
 
     #------------------#
     print("\n\tComputing the autocorrelation function ... ", end="")
-    # obj = TimeAutoCorrelation(data)
-    # autocorr = obj.tcf(axis=args.axis_time) # e^2 ang^2 / fs^2
-    autocorr = autocorrelate(data,axis=args.axis_time,mode="full") # e^2 ang^2 / fs^2
-    # ii = np.arange(autocorr.shape[args.axis_time]/2).astype(int)
-    # autocorr = np.take(autocorr,ii,axis=args.axis_time)
-    print("done")
-    print("\tautocorr shape: ",autocorr.shape)
+    obj = TimeAutoCorrelation(data)
+    autocorr = obj.tcf(axis=args.axis_time,mode="full") # e^2 ang^2 / fs^2
     
     
-    #------------------#
-    print("\n\tComputing the average value of the time derivative of the dipole squared ... ",end="")
-    norm_der = np.mean(data ** 2, axis=args.axis_time,keepdims=True)
-    print("done")
-    print("\tnorm shape: ",norm_der.shape)
     
-    print("\tNormalizing autocorr ... ",end="")
-    assert np.allclose(autocorr[:,int(autocorr.shape[1]/2),:],norm_der[:,0,:]), "the normalization factor is not correct"
-    autocorr /= norm_der
-    assert np.allclose(autocorr[:,int(autocorr.shape[1]/2),:],1), "the normalization factor is not correct"
     print("done")
-    print("\tautocorr shape: ",autocorr.shape)
+    # print("\tautocorr shape: ",autocorr.shape)
     
-    #------------------#
-    print("\tComputing normalizing factor ... ",end="")
-    norm_der = float(np.mean(np.sum(norm_der,axis=args.axis_components)))
-    print("done")
-    print("\tnormalizing factor: ",norm_der)
+    test = autocorrelate(data,axis=args.axis_time)
+    
+    import matplotlib.pyplot as plt
+    
+    plt.plot(test[0,int(test.shape[1]/2):,0],label="test")
+    plt.plot(autocorr[0,:,0],label="autocorr")
+    plt.legend()
+    plt.show()
+    
+    n_data = data.shape[1]
+    norm = n_data - np.abs(np.arange(1-n_data, n_data), dtype=float)
+    cf = correlate(data[0,:,0], data[0,:,0], method="auto")[::-1] / norm
 
     #------------------#
     if args.axis_components is not None:
@@ -115,6 +110,25 @@ def main(args):
         autocorr = np.sum(autocorr,axis=args.axis_components)
         print("done")
         print("\tautocorr shape: ",autocorr.shape)
+        
+    # #------------------#
+    # print("\n\tComputing the average value of the time derivative of the dipole squared ... ",end="")
+    # norm_der = np.mean(data ** 2, axis=args.axis_time,keepdims=True)
+    # print("done")
+    # print("\tnorm shape: ",norm_der.shape)
+    
+    # print("\tNormalizing autocorr ... ",end="")
+    # autocorr /= autocorr[:,0][:,np.newaxis]
+    # print("done")
+    # print("\tautocorr shape: ",autocorr.shape)
+    
+    # #------------------#
+    # print("\tComputing normalizing factor ... ",end="")
+    # norm_der = float(np.mean(np.sum(norm_der,axis=args.axis_components)))
+    # print("done")
+    # print("\tnormalizing factor: ",norm_der)
+    
+    # autocorr = cf
 
     #------------------#
     if autocorr.ndim == 1:
@@ -122,29 +136,19 @@ def main(args):
         autocorr = np.atleast_2d(autocorr)# .T
         print("done")
         print("\tdata shape: ",data.shape)
-    
     raw_autocorr = np.copy(autocorr)  
 
     #------------------#
     if args.window != "none" :
         print("\n\tApplying the '{:s}' window ... ".format(args.window),end="")
+        func = getattr(np, args.window)
+        window = np.zeros(raw_autocorr.shape[args.axis_time])
         M = int(args.window_t / args.time_step)
-        window = centered_window(args.window,raw_autocorr.shape[args.axis_time],M)
-        # func = getattr(np, args.window)
-        # window = np.zeros(raw_autocorr.shape[args.axis_time])
-        # M = int(args.window_t / args.time_step)
-        # window[:M] = func(2*M)[M:]
-        # window[:M] = func(M)
-        # window /= window[0] # small correction so that the first value is 1
+        window[:M] = func(2*M)[M:]
+        window /= window[0] # small correction so that the first value is 1
         print("done")
         print("\twindow shape: ",window.shape)
         autocorr = raw_autocorr * window
-        
-        # import matplotlib.pyplot as plt
-        # plt.plot(window,label="window")
-        # plt.plot(autocorr[0,:]/np.max(autocorr[0,:]),label="autocorr")
-        # plt.legend()
-        # plt.show()
         
         # #------------------#
         # print("\n\tPerforming inverse Fourier transform ... ", end="")
@@ -162,17 +166,17 @@ def main(args):
         # autocorr = np.fft.rfft(autocorr_time_domain, axis=args.axis_time)
         # print("done")
         # print("\tautocorr shape: ", autocorr.shape)
-    
+
     #------------------#
     print("\n\tComputing the spectrum ... ", end="")
-    # axis_fourier = args.axis_time if args.axis_time < args.axis_components else args.axis_time - 1
-    spectrum, freq = compute_spectrum(autocorr,axis=args.axis_time,pad=args.padding,dt=args.time_step,shift=True) # e^2 ang^2 / fs
+    axis_fourier = args.axis_time if args.axis_time < args.axis_components else args.axis_time - 1
+    spectrum, freq = compute_spectrum(autocorr,axis=axis_fourier,pad=args.padding,method="rfft",dt=args.time_step) # e^2 ang^2 / fs
     print("done")
     print("\tspectrum shape: :",spectrum.shape)
     
     #------------------#
     print("\n\tMultiplying the spectrum by the normalizing factor  ... ", end="")
-    spectrum = spectrum.real*norm_der
+    spectrum = spectrum.real# *norm_der
     print("done")
     
     #------------------#

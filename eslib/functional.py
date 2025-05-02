@@ -1,7 +1,36 @@
+import enum
 import functools
 import warnings
 from typing import Any, Callable
+from functools import wraps
+import numpy as np
 
+def extend2NDarray(func_1d)->Callable:
+    @wraps(func_1d)
+    def wrapper(x, *args, axis=-1, **kwargs):
+        x = np.asarray(x)
+        x_moved = np.moveaxis(x, axis, 0)
+        shape_rest = x_moved.shape[1:]
+        
+        
+        it = np.nditer(np.empty(shape_rest), flags=['multi_index'])
+        k = 0 
+        for _ in it:
+            k += 1
+        results = [None]*k
+
+        # Iterate over slices along axis
+        it = np.nditer(np.empty(shape_rest), flags=['multi_index'])
+        for n,_ in enumerate(it):
+            idx = it.multi_index
+            x1d = x_moved[(slice(None),) + idx]
+            results[n] = func_1d(x1d, *args, **kwargs)
+
+        # Stack and restore axis position
+        result_shape = results[0].shape
+        stacked = np.stack(results).reshape(shape_rest + result_shape)
+        return np.moveaxis(stacked, -1, axis)
+    return wrapper
 
 def custom_deprecated(reason: str = "", name: str = "deprecated", warning:Warning=DeprecationWarning) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
