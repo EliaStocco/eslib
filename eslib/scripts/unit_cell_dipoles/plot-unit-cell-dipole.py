@@ -6,6 +6,7 @@ from eslib.formatting import esfmt
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import colors
+from matplotlib.cm import ScalarMappable
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -19,6 +20,8 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"  , **argv, required=True , type=str, help="*.txt file with the results produced by 'unit-cell-dipole.py'")
     parser.add_argument("-N" , "--step"   , **argv, required=False, type=int, help="consider only every N-th snapshot (default: %(default)s)", default=1)
     parser.add_argument("-n" , "--indices", **argv, required=True , type=str, help="*.txt file with the indices produced by 'divide-into-unitcells-with-indices.py'")
+    parser.add_argument("-k" , "--keyword", **argv, required=True , type=str, help="keyword to print")
+    # parser.add_argument("-l" , "--limits", **argv, required=True , type=str, help="keyword to print")
     parser.add_argument("-o" , "--output" , **argv, required=True , type=str, help="output folder")
     return parser
 
@@ -41,9 +44,11 @@ def main(args):
 
         #------------------#
         print("\tReading data from '{:s}' ... ".format(args.input), end="")
-        data = np.loadtxt(args.input)
+        df = pd.read_csv(args.input, sep='\s+')
+        df["structure"] = df["structure"].astype(int)
+        df["unit_cell"] = df["unit_cell"].astype(int)
         print("done")
-        print("\tdata.shape: ",data.shape)
+        print("\tdf.shape: ",df.shape)
         
         #------------------#
         print("\tReading indices from '{:s}' ... ".format(args.input), end="")
@@ -55,11 +60,6 @@ def main(args):
         indices = pd.DataFrame(data=indices,columns=["unit_cell","R_1","R_2","R_3"])
         indices.set_index("unit_cell",inplace=True)
         indices = indices[~indices.index.duplicated(keep='first')]
-        
-        df = pd.DataFrame(data,columns=["structure","unit_cell","dipole_x","dipole_y","dipole_z"])
-        # Ensure correct dtypes
-        df["structure"] = df["structure"].astype(int)
-        df["unit_cell"] = df["unit_cell"].astype(int)
 
         Rxyz = indices.loc[np.asarray(df["unit_cell"],dtype=int)]
         for n in range(1,4):
@@ -87,11 +87,11 @@ def main(args):
         del sub_df["structure"]
         del sub_df["unit_cell"]
         
-        tmp = sub_df.loc[:,["dipole_x","dipole_y","dipole_z"]].values
-        sub_df.loc[:, "dipole"] = np.linalg.norm(tmp, axis=1)
-        del sub_df["dipole_x"]
-        del sub_df["dipole_y"]
-        del sub_df["dipole_z"]
+        # tmp = sub_df.loc[:,["dipole_x","dipole_y","dipole_z"]].values
+        # sub_df.loc[:, "dipole"] = np.linalg.norm(tmp, axis=1)
+        # del sub_df["dipole_x"]
+        # del sub_df["dipole_y"]
+        # del sub_df["dipole_z"]
         
         N1 = len(np.unique(sub_df["R_1"]))
         N2 = len(np.unique(sub_df["R_2"]))
@@ -103,7 +103,7 @@ def main(args):
                 for nz in range(N3):
                     value = sub_df.loc[
                         (sub_df["R_1"]==nx) & (sub_df["R_2"]==ny) & (sub_df["R_3"]==nz),
-                        "dipole"
+                        args.keyword
                     ].values
                     assert len(value) == 1, \
                         f"Number of values ({len(value)}) does not match the expected number (1)"
@@ -118,11 +118,12 @@ def main(args):
         fig = plt.figure(figsize=(4,4))
         ax = fig.add_subplot(111, projection='3d')
 
-        # Define the colormap
-        cmap = plt.get_cmap('viridis')  # You can change the colormap as needed
+        # Create custom blue-white-red colormap
+        cmap = colors.LinearSegmentedColormap.from_list("bwr_custom", ["blue", "white", "red"])
 
-        # Create a color normalization based on your data's range
-        norm = colors.Normalize(vmin=np.min(data), vmax=np.max(data))
+        # Normalize with midpoint (vcenter) at zero
+        max_abs = np.max(np.abs(data))
+        norm = colors.TwoSlopeNorm(vmin=-max_abs, vcenter=0, vmax=max_abs)
 
         # Plot small cubes within the 3D space
         for i in range(N1):
@@ -137,14 +138,42 @@ def main(args):
                     # Create the position for each cube and plot it
                     ax.bar3d(i, j, k, 1, 1, 1, color=color, shade=True)
 
-        # Set labels and title
-        # ax.set_xlabel('X axis')
-        # ax.set_ylabel('Y axis')
-        # ax.set_zlabel('Z axis')
-        # ax.set_title('3D Cube of Small Cubes Colored by Data')
+        
 
+        # Remove ticks
+        # ax.set_xticks([])
+        # ax.set_yticks([])
+        # ax.set_zticks([])
+
+        # Remove axis panes (backgrounds)
+        ax.xaxis.pane.fill = False
+        ax.yaxis.pane.fill = False
+        ax.zaxis.pane.fill = False
+        
+        # Remove axis labels
+        ax.set_xlabel('')
+        ax.set_ylabel('')
+        ax.set_zlabel('')
+        # ax.set_xlabel(r"a$_1$")
+        # ax.set_ylabel(r"a$_2$")
+        # ax.set_zlabel(r"a$_3$")
+        
+        # Adjust padding (distance) from the axes
+        ax.tick_params(axis='x', pad=0)  # For x-axis
+        ax.tick_params(axis='y', pad=0)  # For y-axis
+        ax.tick_params(axis='z', pad=0)  # For z-axis
+
+        # Remove grid lines
+        ax.grid(False)
         # Show the plot
         
+        # Create a mappable for the colorbar
+        mappable = ScalarMappable(norm=norm, cmap=cmap)
+        mappable.set_array([])  # Dummy array to avoid warning
+        # cbar = plt.colorbar(mappable, ax=ax, pad=0.1)    
+        fig.colorbar(mappable, ax=ax, shrink=0.6, pad=0.1, label=r"dipole $\mu$ [e/$\mathrm{\AA}$]")
+        
+        ax.grid(False)
         plt.tight_layout()
         plt.savefig(pfile,dpi=600,transparent=False,bbox_inches='tight')
         plt.close(fig)

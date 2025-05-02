@@ -2,171 +2,205 @@
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from itertools import chain
+from multiprocessing import Process, Manager, cpu_count
 from ase.cell import Cell
+from ase import Atoms
+from typing import List
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, eslog, warning, float_format
 from eslib.tools import cart2frac
-
+from eslib.input import flist
+from eslib.mathematics import dcast, melt
 
 #---------------------------------------#
 description = "Analyse the unit-cells dipoles."
-MULTIPROCESSING = False
 
 #---------------------------------------#
 def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
-    argv = {"metavar" : "\b",}
-    parser.add_argument("-i" , "--input"         , **argv, required=True , type=str, help="input file with the atomic structures")
-    parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: %(default)s)", default=None)
-    parser.add_argument("-d" , "--dipoles"       , **argv, required=True , type=str, help="*.txt file with the results produced by 'unit-cell-dipole.py'")
-    parser.add_argument("-o" , "--output"        , **argv, required=True , type=str, help="*.txt output file with the analysed unit-cells dipoles")
+    argv = {"metavar": "\b"}
+    parser.add_argument("-i" , "--input"       , **argv, required=True , type=str  , help="input file with the atomic structures")
+    parser.add_argument("-if", "--input_format", **argv, required=False, type=str  , help="input file format (default: %(default)s)", default=None)
+    parser.add_argument("-d" , "--dipoles"     , **argv, required=True , type=str  , help="*.txt file with the results produced by 'unit-cell-dipole.py'")
+    parser.add_argument("-v" , "--vector"      , **argv, required=False, type=flist, help="vector along which evalute the projection [factional] (default: %(default)s)", default=None)
+    parser.add_argument("-o" , "--output"      , **argv, required=True , type=str  , help="*.txt output file with the analysed unit-cells dipoles")
     return parser
 
 #---------------------------------------#
-if MULTIPROCESSING:
-    
-    from multiprocessing import Pool, cpu_count, Value, Lock
-    
-    num_cores = 4 # cpu_count()
-    
-    # Shared variables for progress tracking
-    progress = None
-    lock = None
-    
-    # Helper function to split a list into chunks
-    def split_into_chunks(data, num_chunks):
-        """Split a list into num_chunks approximately equal parts."""
-        chunk_size = len(data) // num_chunks
-        remainder = len(data) % num_chunks
-        chunks = []
-        start = 0
-        for i in range(num_chunks):
-            end = start + chunk_size + (1 if i < remainder else 0)
-            chunks.append(data[start:end])
-            start = end
-        return chunks
-
-    # Function to process a chunk of structures
-    def process_chunk(chunk_args):
-        global progress, lock
-        chunk, dipoles, unit_cell = chunk_args
-        results = []
-        for n, atoms in chunk:
-            sub_df = dipoles[dipoles["structure"] == n]
-            mu = sub_df[["dipole_x", "dipole_y", "dipole_z"]].to_numpy()
-            frac = cart2frac(cell=unit_cell, v=mu)
-            
-            result = {
-                "index": sub_df.index,
-                "dipole_1": frac[:, 0],
-                "dipole_2": frac[:, 1],
-                "dipole_3": frac[:, 2],
-            }
-            results.append(result)
-            
-            # Update progress
-            with lock:
-                progress.value += 1
-        return results
-
-#---------------------------------------#
-@esfmt(prepare_args,description)
+@esfmt(prepare_args, description)
 def main(args):
-
+    
     #------------------#
     with eslog(f"Reading the first atomic structure from file '{args.input}'"):
-        structures = AtomicStructures.from_file(file=args.input,format=args.input_format)
-    print("\tn. of strctures: ",len(structures))
-    print("\tn. of atoms: ",structures[0].get_global_number_of_atoms())
-    
+        structures:List[Atoms] = AtomicStructures.from_file(file=args.input,format=args.input_format)
+    print("\tn. of structures: ", len(structures))
+    print("\tn. of atoms:     ", structures[0].get_global_number_of_atoms())
+
     #------------------#
     print("\tReading dipoles from '{:s}' ... ".format(args.dipoles), end="")
-    dipoles = np.loadtxt(args.dipoles)
-    dipoles = pd.DataFrame(dipoles,columns=["structure","unit_cell","dipole_x","dipole_y","dipole_z"])
+    # dipoles = np.loadtxt(args.dipoles)
+    # dipoles = pd.DataFrame(dipoles,
+    #                        columns=["structure", "unit_cell",
+    #                                 "dipole_x", "dipole_y", "dipole_z"])
+    dipoles = pd.read_csv(args.dipoles, sep='\s+')
     dipoles["structure"] = dipoles["structure"].astype(int)
-    dipoles["unit_cell"] = dipoles["unit_cell"].astype(int)
-    print("done")
+    dipoles["unit_cell"]  = dipoles["unit_cell"].astype(int)
     
+    dipole_array = dcast(dipoles, ["structure","unit_cell"])
+
+    print("done")
+
     #------------------#
-    atoms = structures[0]
-    super_cell = atoms.get_cell()
+    # atoms = structures[0]
+    # super_cell = atoms.get_cell()
     sub_df = dipoles[dipoles["structure"] == 0]
     n_unit_cells = len(sub_df)
-    size = np.round(n_unit_cells ** (1./3)).astype(int)
-    print(f"\n\t{warning}:\n\tWe deduced that you have provided a supercell of size {size}x{size}x{size}.\n\tBe sure that this is correct.\n")
-    unit_cell = np.asarray(super_cell)/size
-    unit_cell = Cell(unit_cell)
+    size = int(round(n_unit_cells ** (1./3)))
+    print(f"\n\t{warning}:\n\t"
+          f"We deduced a supercell of size {size}x{size}x{size}.\n")
+    # unit_cell = Cell(np.asarray(super_cell) / size)
     
     #------------------#
-    dipoles["dipole_1"] = None
-    dipoles["dipole_2"] = None
-    dipoles["dipole_3"] = None
+    with eslog("Extracting unit-cells"):
+        unit_cells = np.asarray([ atoms.get_cell().array.T for atoms in structures ])/size
+        
+    #------------------#
+    print("\n\t  dipoles.shape: ", dipole_array.shape)
+    print("\t unit_cells.shape: ", unit_cells.shape)
     
-    N = len(structures)
-    # num_cores = cpu_count()
+    #------------------#
+    with eslog("Computing the fractional coordinates of the dipoles"):
+        original_shape = unit_cells.shape[:-2]
+        reshaped = unit_cells.reshape(-1, 3, 3)
+        inverted = np.linalg.inv(reshaped)
+        inverted = inverted.reshape(*original_shape, 3, 3)
+        frac = np.asarray(np.einsum('aij,abj->abi', inverted, dipole_array))
+        assert frac.shape == dipole_array.shape, "Result shape mismatch!"
     
-    if MULTIPROCESSING:
+    with eslog("Merging dataframes"):
+        frac = melt(frac, index={0: "structure", 1: "unit_cell"}, value_names=["frac_1", "frac_2", "frac_3"])
+        assert frac.shape == dipoles.shape, "Result shape mismatch!"
+        data = pd.merge(dipoles, frac, on=["structure","unit_cell"], how='inner')
         
-        global progress, lock
+    #------------------#
+    with eslog("Computing extra information"):
+        data["dipole_norm"] = np.linalg.norm(data[["dipole_x", "dipole_y", "dipole_z"]].to_numpy(), axis=1)
         
-        # Divide structures into chunks
-        chunks = split_into_chunks(list(enumerate(structures)), num_cores)
-        pool_args = [(chunk, dipoles, unit_cell) for chunk in chunks]
-
-        # Initialize shared variables for progress tracking
-        progress = Value('i', 0)  # Shared integer for progress
-        lock = Lock()
-        
-        # Preallocate chunk_results with the correct size
-        chunk_results = [None] * len(pool_args)
-
-        # Use multiprocessing to process chunks in parallel
-        print(f"\tUsing {num_cores} CPU cores for parallel processing.")
-        with Pool(processes=num_cores) as pool:
-            # Use tqdm to display a progress bar
-            with tqdm(total=len(pool_args), desc="Processing structures") as pbar:
-                for i, result in enumerate(pool.imap_unordered(process_chunk, pool_args)):
-                    chunk_results[i] = result  # Assign result to the preallocated list
-                    with lock:
-                        pbar.update(1)
-
-        # Update the dipoles DataFrame with results
-        with eslog(f"Assembling results"):
-            for results in chunk_results:
-                for result in results:
-                    dipoles.loc[result["index"], "dipole_1"] = result["dipole_1"]
-                    dipoles.loc[result["index"], "dipole_2"] = result["dipole_2"]
-                    dipoles.loc[result["index"], "dipole_3"] = result["dipole_3"]
-                
+    #------------------#s
+    column_names = [
+        "structure", "unit_cell", "dipole_x", "dipole_y", "dipole_z",
+        "frac_1", "frac_2", "frac_3", "dipole_norm"
+    ]
+    header = ''.join(f"{col:>24s}" for col in column_names)
+    
+    if args.vector is None:
+        N = 7
     else:
+        N = 8
+        header += f"{'dipole_projection':>24s}"
+
+        vector = np.asarray(args.vector)
+        vectors = np.asarray(np.einsum('aij,j->ai',unit_cells, vector))
+        assert vectors.shape == (len(structures), 3), "Result shape mismatch!"
+        vectors = vectors/np.linalg.norm(vectors, axis=1)[:,None]
+        assert np.allclose(np.linalg.norm(vectors, axis=1), 1.0), "Vectors are not unit vectors!"
+        vectors = vectors[:,None,:] # add unit-cell
+        projection = np.asarray(np.einsum('abi,abi->ab',dipole_array, vectors))
+        projection = melt(projection,index={0: "structure", 1: "unit_cell"}, value_names="dipole_projection")
+        data = pd.merge(data, projection, on=["structure","unit_cell"], how='inner')
         
-        for n, atoms in tqdm(enumerate(structures), total=len(structures), desc="Processing structures"):
-            sub_df = dipoles[dipoles["structure"] == n]
-            mu = sub_df[["dipole_x", "dipole_y", "dipole_z"]].to_numpy()
-            frac = cart2frac(cell=unit_cell, v=mu)
+    #------------------#
+    with eslog(f"Saving results to file '{args.output}' ... "):
+        np.savetxt(args.output,
+                data.to_numpy(),
+                fmt=["%24d", "%24d"] + [float_format]*N,
+                header=header,comments="")
 
-            dipoles.loc[sub_df.index, "dipole_1"] = frac[:, 0]
-            dipoles.loc[sub_df.index, "dipole_2"] = frac[:, 1]
-            dipoles.loc[sub_df.index, "dipole_3"] = frac[:, 2]
-
-    #------------------# 
-    print("\n\tSaving results to file '{:s}' ... ".format(args.output), end="")
-    header = \
-            f"Col 1: structure index\n" +\
-            f"Col 2: unit-cell index\n" +\
-            f"Col 3: dipole_x\n" +\
-            f"Col 4: dipole_y\n"+\
-            f"Col 5: dipole_z\n"+\
-            f"Col 6: frac_1\n" +\
-            f"Col 7: frac_2\n"+\
-            f"Col 8: frac_3"
-    np.savetxt(args.output, dipoles.to_numpy(), fmt=["%8d","%8d"]+[float_format]*6, header=header)
-    print("done")
-    
-    return
-    
 #---------------------------------------#
 if __name__ == "__main__":
     main()
+
+#------------------#
+# dipoles["dipole_1"] = np.nan
+# dipoles["dipole_2"] = np.nan
+# dipoles["dipole_3"] = np.nan
+
+# if MULTIPROCESSING:
+#     # 1) split structures for worker processes
+#     num_chunks = min(cpu_count(), 8)
+#     struct_chunks = np.array_split(range(len(structures)), num_chunks)
+
+#     manager = Manager()
+#     return_dict = manager.dict()
+#     procs = []
+#     for i, chunk in enumerate(struct_chunks):
+#         # slice the dipoles DataFrame for this chunk
+#         dipoles_chunk = dipoles[dipoles["structure"].isin(chunk)]
+#         p = Process(target=worker_chunk,
+#                     args=(i, chunk, dipoles_chunk,
+#                           unit_cell, return_dict))
+#         p.start()
+#         procs.append(p)
+#     for p in procs:
+#         p.join()
+
+#     # 2) gather all results
+#     all_results = list(chain.from_iterable(return_dict.values()))
+#     if not all_results:
+#         raise RuntimeError("No results produced by worker_chunk!")
+
+#     # 3) sequential merge back into dipoles with tqdm
+#     for idxs, frac in tqdm(all_results, desc="Merging results", mininterval=0.5):
+#         dipoles.loc[idxs, "dipole_1"] = frac[:, 0]
+#         dipoles.loc[idxs, "dipole_2"] = frac[:, 1]
+#         dipoles.loc[idxs, "dipole_3"] = frac[:, 2]
+
+# else:
+#     # Single‐process fallback
+#     for n, atoms in tqdm(enumerate(structures),
+#                           total=len(structures),
+#                           desc="Processing structures",
+#                           mininterval=0.5):
+#         sub_df = dipoles[dipoles["structure"] == n]
+#         mu = sub_df[["dipole_x", "dipole_y", "dipole_z"]].to_numpy()
+#         frac = cart2frac(cell=unit_cell, v=mu)
+#         dipoles.loc[sub_df.index, "dipole_1"] = frac[:, 0]
+#         dipoles.loc[sub_df.index, "dipole_2"] = frac[:, 1]
+#         dipoles.loc[sub_df.index, "dipole_3"] = frac[:, 2]
+
+# #------------------#
+# dipoles["dipole_norm"] = np.linalg.norm(dipoles[["dipole_x", "dipole_y", "dipole_z"]].to_numpy(), axis=1)
+# print("\n\tDipole norm summary:")
+# print("\tdipole min: ", dipoles["dipole_norm"].min())
+# print("\tdipole max: ", dipoles["dipole_norm"].max())
+
+# if args.vector is not None:
+#     # Projection along a vector
+#     vector = np.loadtxt(args.vector)
+#     vector = vector / np.linalg.norm(vector)
+#     dipoles["projection"] = np.dot(dipoles[["dipole_x", "dipole_y", "dipole_z"]].to_numpy(), vector)
     
+# else:
+#     # Projection along the dipole
+#     dipoles["projection"] = np.nan
+
+#---------------------------------------#
+# def worker_chunk(chunk_id, structure_ids, dipoles, unit_cell, return_dict):
+#     local_result = [None]*len(structure_ids)
+#     k = 0
+#     for n in tqdm(structure_ids,
+#                   position=chunk_id,
+#                   desc=f"Worker {chunk_id}",
+#                   leave=True,
+#                   mininterval=0.5):
+#         sub_df = dipoles[dipoles["structure"] == n]
+#         if sub_df.empty:
+#             continue
+#         mu = sub_df[["dipole_x", "dipole_y", "dipole_z"]].to_numpy()
+#         frac = np.atleast_2d(cart2frac(cell=unit_cell, v=mu))
+#         local_result[k] = (sub_df.index.to_numpy(), frac)
+#         k += 1
+#     assert len(local_result) == len(structure_ids), "Not all results were produced!"
+#     return_dict[chunk_id] = local_result

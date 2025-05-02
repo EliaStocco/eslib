@@ -47,21 +47,21 @@ def main(args):
     
     #------------------#
     with eslog("\nCreating atomic dipoles dataframe"):
-        testAD = melt(atomic_dipoles,name="atomic_dipoles")
+        testAD = melt(atomic_dipoles,index={0:'structure',1:'atom',2:'component'},value_names="atomic_dipoles")
         
     with eslog("Creating unit cells dataframe"):
-        testUC = melt(unit_cell.astype(int),name="unit_cell")
+        testUC = melt(unit_cell.astype(int),index={0:'structure',1:'atom'},value_names="unit_cell")
         
     with eslog("Merging dataframes"):
         data = pd.merge(testAD, testUC)
 
     #------------------#
     with eslog("Preparing results for output"):
-        data = data.rename(columns={
-            'dim_0': 'structure',
-            'dim_1': 'atom',
-            'dim_2': 'component',
-        })
+        # data = data.rename(columns={
+        #     'dim_0': 'structure',
+        #     'dim_1': 'atom',
+        #     'dim_2': 'component',
+        # })
 
         data = (
             data
@@ -75,13 +75,18 @@ def main(args):
         
     #------------------# 
     print("\n\tSaving results to file '{:s}' ... ".format(args.output), end="")
-    header = \
-            f"Col 1: structure index\n" +\
-            f"Col 2: unit-cell index\n" +\
-            f"Col 3: dipole_x\n" +\
-            f"Col 4: dipole_y\n"+\
-            f"Col 5: dipole_z"
-    np.savetxt(args.output, data.to_numpy(), fmt=["%8d","%8d",float_format,float_format,float_format], header=header)
+    # header = \
+    #         f"Col 1: structure index\n" +\
+    #         f"Col 2: unit-cell index\n" +\
+    #         f"Col 3: dipole_x\n" +\
+    #         f"Col 4: dipole_y\n"+\
+    #         f"Col 5: dipole_z"
+    # np.savetxt(args.output, data.to_numpy(), fmt=["%8d","%8d",float_format,float_format,float_format], header=header)
+    header = ''.join(f"{col:>24s}" for col in ['structure', 'unit_cell', 'dipole_x', 'dipole_y', 'dipole_z'])
+    np.savetxt(args.output,
+        data.to_numpy(),
+        fmt=["%24d", "%24d"] + [float_format]*3,
+        header=header,comments="")
     print("done")
     
     return
