@@ -1,7 +1,7 @@
 from typing import Optional
 import numpy as np
 import pandas as pd
-from typing import Tuple
+from typing import Tuple, List, Optional, Dict
 from warnings import warn
 
 def levi_civita():
@@ -181,24 +181,165 @@ def cumulative_mean(x:np.ndarray,axis:Optional[int]=0)->np.ndarray:
 
     return np.cumsum(x,axis=axis)/np.arange(1,x.shape[axis]+1)
 
-def melt(A: np.ndarray, name: str = "value") -> pd.DataFrame:
+def dcast(df:pd.DataFrame, index_columns:List[str], ignore_columns:List[str]=[]):
     """
-    R-like function to melt a numpy array into a long-format pandas DataFrame.
-    Returns a DataFrame with integer index columns and a value column matching A's dtype.
-    """
-    shape = A.shape
-    ndim = len(shape)
-    indices = np.indices(shape).reshape(ndim, -1)  # shape: (n_dims, n_elements)
-    values = A.flatten()  # flatten A
+    R-like dcast function that reshapes a pandas DataFrame into a 3D NumPy array.
     
-    # Prepare dictionary with correct types directly
-    data = {
-        f"dim_{i}": indices[i].astype(np.int32)  # or int64 if preferred
-        for i in range(ndim)
-    }
-    data[name] = values  # inherits dtype from A
+    This function mimics the behavior of R's `dcast` function. It transforms long-format
+    data (with index columns and value columns) into a 3D array, where the first two 
+    dimensions correspond to the index columns, and the third dimension holds the values 
+    from the remaining columns.
+    
+    Parameters:
+        df (pd.DataFrame): Input DataFrame with index columns and value columns.
+        index_columns (list): List of column names to be used as indices for the resulting array.
+        ignore_columns (list): List of column names to ignore (these will not be included in the values).
+        
+    Returns:
+        np.ndarray: 3D NumPy array, where indices correspond to values in the index columns
+                    and values correspond to the remaining columns.
+    """
+    # Ensure correct data types for index columns (integer or category)
+    df[index_columns] = df[index_columns].astype(int)
 
-    return pd.DataFrame(data)
+    # Determine the value columns by excluding index_columns and ignore_columns
+    value_columns = [col for col in df.columns if col not in index_columns and col not in ignore_columns]
+
+    # Combine the value columns into a single list column
+    NAME = "values"
+    if NAME in df.columns:
+        NAME = "_values_"
+    
+    df[NAME] = df[value_columns].values.tolist()
+
+    # Pivot the DataFrame: this will arrange data such that indices form the axes
+    pivot = df.pivot(index=index_columns[0], columns=index_columns[1], values=NAME)
+
+    # Convert the pivoted DataFrame into a 3D NumPy array
+    result_array = np.array(pivot.values.tolist())
+    
+    del df[NAME]  # Clean up the temporary column
+
+    return result_array
+
+# def melt(A: np.ndarray, name: str = "value") -> pd.DataFrame:
+#     """
+#     R-like function to melt a numpy array into a long-format pandas DataFrame.
+#     Returns a DataFrame with integer index columns and a value column matching A's dtype.
+#     """
+#     shape = A.shape
+#     ndim = len(shape)
+#     indices = np.indices(shape).reshape(ndim, -1)  # shape: (n_dims, n_elements)
+#     values = A.flatten()  # flatten A
+    
+#     # Prepare dictionary with correct types directly
+#     data = {
+#         f"dim_{i}": indices[i].astype(np.int32)  # or int64 if preferred
+#         for i in range(ndim)
+#     }
+#     data[name] = values  # inherits dtype from A
+
+#     return pd.DataFrame(data)
+
+def get_indices(shapes:List[int])->np.ndarray:
+    return np.indices(shapes).reshape(len(shapes),-1).T
+
+def flatten_except(A: np.ndarray, value_axes: list) -> np.ndarray:
+    """
+    Flatten all dimensions of a numpy array except for those specified in value_axes.
+
+    Parameters:
+        A (np.ndarray): The input N-dimensional array.
+        value_axes (list): List of axes that should be preserved (not flattened).
+
+    Returns:
+        np.ndarray: The reshaped (flattened) array.
+    """
+    # Get the shape of the input array
+    shape = A.shape
+    ndim = A.ndim
+    
+    # Validate that the value_axes are within the valid range
+    assert all(axis < ndim for axis in value_axes), "All value_axes must be less than the number of dimensions"
+    
+    # Determine the axes that will be flattened
+    flatten_axes = [i for i in range(ndim) if i not in value_axes]
+    
+    # Calculate the new shape: Keep value_axes dimensions and flatten the others
+    new_shape = tuple(shape[axis] for axis in value_axes) + (-1,)  # Flatten other axes
+    reshaped_array = A.reshape(new_shape)
+    
+    return reshaped_array
+
+
+def melt(
+    A: np.ndarray,
+    index: Dict[int, str],  # Use a dictionary for index axes with names
+    value_names: Optional[List[str]] = None
+) -> pd.DataFrame:
+    """
+    R-like function to melt a numpy array into a long-format pandas DataFrame with support for multiple value columns.
+
+    Parameters:
+        A (np.ndarray): Input N-dimensional array.
+        index (Dict[int, str]): Dictionary where keys are the axis indices and values are the column names.
+        value_names (List[str], optional): List of names for the value columns. If None, the default names are used as "value_1", "value_2", ...
+
+    Returns:
+        pd.DataFrame: A long-format DataFrame with index columns and value columns.
+    """
+    # Ensure A is a NumPy array
+    A = np.asarray(A)
+    
+    # Get the shape of the N-dimensional array
+    shape = A.shape
+    ndim = A.ndim
+
+    # Extract the indices for the index columns from the provided dictionary
+    index_axes = list(index.keys())
+    
+    
+    # Determine value axes by excluding index axes
+    value_axes = [i for i in range(ndim) if i not in index_axes]
+    if len(value_axes) == 0:
+        A = A[...,np.newaxis]  # Add a new axis if no value axes are found
+        return melt(A, index, [value_names])
+    
+    assert len(value_axes) == 1, "There should be exactly one value axis."
+    value_axes = value_axes[0]  # Get the single value axis index
+    
+    # If value names are not provided, create default names for the value columns
+    if value_names is None:
+        value_names = [f"value_{i+1}" for i in range(len(value_axes))]
+    
+    # Generate meshgrid for all indices in the array
+    ii = np.asarray(shape)[index_axes]
+    assert len(ii) == A.ndim-1 , "Mismatch between index axes and array dimensions."
+    indices = get_indices(ii)  # shape: (n_elements, n_dims)
+    
+    assert indices.ndim == 2, "Indices should be 2D after reshaping."
+    assert indices.shape[0] == np.prod(ii), "Indices shape mismatch with the product of index axes."
+    assert indices.shape[1] == len(index_axes), "Indices shape mismatch with index axes."
+    
+    # Create a dictionary to hold the reshaped data
+    data = {}
+    
+    for i, (axis, name) in enumerate(index.items()):
+        data[name] = indices[:, i].astype(np.int32)  # Convert to int32 for index columns
+    
+    A = np.moveaxis(A,value_axes,-1)
+    A = A.reshape((-1,A.shape[-1]))
+    assert A.ndim == 2, "Reshaped array should be 2D after moving axes."
+    assert A.shape[0] == np.prod(ii), "Reshaped array shape mismatch with the product of original shape."
+    
+    for n in range(A.shape[1]):
+        data[value_names[n]] = A[:,n]
+    
+    df = pd.DataFrame(data)
+    
+    # Return DataFrame
+    return df
+
 
 
 # def aggregate_by_group(A: np.ndarray, B: np.ndarray, axis: int, aggregation_function=np.sum) -> np.ndarray:
