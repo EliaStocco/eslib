@@ -268,7 +268,7 @@ def PL_correlate(observable):
     return autoCorr
 
 
-def correlate(data1, data2, mean1=0.0, mean2=0.0, method='auto', normalize=False,mode="half"):
+def correlate(data1, data2, mean1=0.0, mean2=0.0, method='auto', normalize=False,mode="full"):
     """Correlation function of `data1` and `data2`.
 
     The mean of the input data can be shifted before calculating the CF using

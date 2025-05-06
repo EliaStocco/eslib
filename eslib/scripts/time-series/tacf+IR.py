@@ -83,7 +83,7 @@ def main(args):
     print("\n\tComputing the autocorrelation function ... ", end="")
     # obj = TimeAutoCorrelation(data)
     # autocorr = obj.tcf(axis=args.axis_time) # e^2 ang^2 / fs^2
-    autocorr = autocorrelate(data,axis=args.axis_time,mode="full") # e^2 ang^2 / fs^2
+    autocorr = autocorrelate(data,axis=args.axis_time) # e^2 ang^2 / fs^2
     # ii = np.arange(autocorr.shape[args.axis_time]/2).astype(int)
     # autocorr = np.take(autocorr,ii,axis=args.axis_time)
     print("done")
