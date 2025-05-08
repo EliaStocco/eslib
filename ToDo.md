@@ -18,6 +18,7 @@
 - add documentations ad `pdf` (e.g. `phonon projection`)
 
 # To Do
+- fix all `time-series` scripts as done for `tacf+IR.py`
 - save `Properties` to `hdf5` files in stead of `pickle`
 - optimize `hdf5` `IO` by defining a way to store trajectories optimized for MD
 - `dot` and `rbc` in `physical_tensor.py` should be made the same function (debugging necessary)

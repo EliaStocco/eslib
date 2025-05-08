@@ -1,7 +1,7 @@
 from typing import Optional
 import numpy as np
 import pandas as pd
-from typing import Tuple, List, Optional, Dict
+from typing import Tuple, List, Optional, Dict, Any
 from warnings import warn
 
 from functional import extend2NDarray
@@ -183,7 +183,60 @@ def cumulative_mean(x:np.ndarray,axis:Optional[int]=0)->np.ndarray:
 
     return np.cumsum(x,axis=axis)/np.arange(1,x.shape[axis]+1)
 
-def dcast(df:pd.DataFrame, index_columns:List[str], ignore_columns:List[str]=[]):
+def pandas2ndarray(
+    df: pd.DataFrame,
+    index_columns: List[str],
+    ignore_columns: List[str] = []
+) -> Tuple[np.ndarray, Dict[str, List[Any]]]:
+    """
+    Converts a DataFrame into an N-dimensional NumPy array and returns axis interpretation.
+
+    Parameters:
+        df (pd.DataFrame): Input DataFrame.
+        index_columns (List[str]): Columns used as index dimensions (int or str).
+        ignore_columns (List[str]): Columns to ignore when selecting value columns.
+
+    Returns:
+        Tuple:
+            - np.ndarray: The resulting array.
+            - Dict: Mapping of axis names (e.g., 'region_axis_0') to original labels used as indices.
+    """
+    _df = df.copy()
+    axis_info: Dict[str, List[Any]] = {}
+
+    # Map categorical/string index columns to integer codes
+    for axis_idx, col in enumerate(index_columns):
+        dtype = _df[col].dtype
+        if np.issubdtype(dtype, np.str_):
+            cats = pd.Categorical(_df[col])
+            _df[col] = cats.codes
+            axis_info[f'{col}_axis_{axis_idx}'] = cats.categories.tolist()
+        elif np.issubdtype(dtype, np.integer):
+            unique_vals = sorted(_df[col].unique())
+            val_to_idx = {val: i for i, val in enumerate(unique_vals)}
+            _df[col] = _df[col].map(val_to_idx)
+            axis_info[f'{col}'] = unique_vals
+        else:
+            raise TypeError(f"Index column '{col}' must be int or str, got {dtype}")
+
+    # Determine value columns
+    value_columns = [c for c in _df.columns if c not in index_columns and c not in ignore_columns]
+    values = np.stack(_df[value_columns].to_numpy())
+
+    # Create output array
+    shape = [_df[col].max() + 1 for col in index_columns] + [len(value_columns)]
+    result = np.full(shape, np.nan, dtype=float)
+
+    # Fill values
+    idx = tuple(_df[col].to_numpy() for col in index_columns)
+    result[idx] = values
+    
+    for n,(_,r) in enumerate(axis_info.items()):
+        assert result.shape[n] == len(r), f"axis {n} has length {result.shape[n]} but {len(r)} values"
+
+    return result, axis_info
+
+def dcast(df:pd.DataFrame, index_columns:List[str], ignore_columns:List[str]=[])->np.ndarray:
     """
     R-like dcast function that reshapes a pandas DataFrame into a 3D NumPy array.
     
