@@ -1,35 +1,41 @@
-import enum
 import functools
 import warnings
 from typing import Any, Callable
 from functools import wraps
 import numpy as np
+import multiprocessing as mp
 
-def extend2NDarray(func_1d)->Callable:
+def extend2NDarray(func_1d) -> Callable:
     @wraps(func_1d)
-    def wrapper(x, *args, axis=-1, **kwargs):
+    def wrapper(x, *args, axis=-1, use_parallel=False, **kwargs):
+        if use_parallel and kwargs:
+            raise ValueError("**kwargs not supported with use_parallel=True")
+
         x = np.asarray(x)
         x_moved = np.moveaxis(x, axis, 0)
         shape_rest = x_moved.shape[1:]
-        
-        
-        it = np.nditer(np.empty(shape_rest), flags=['multi_index'])
-        k = 0 
-        for _ in it:
-            k += 1
-        results = [None]*k
+        indices = list(np.ndindex(shape_rest))
 
-        # Iterate over slices along axis
-        it = np.nditer(np.empty(shape_rest), flags=['multi_index'])
-        for n,_ in enumerate(it):
-            idx = it.multi_index
+        def worker(idx):
             x1d = x_moved[(slice(None),) + idx]
-            results[n] = func_1d(x1d, *args, **kwargs)
+            return func_1d(x1d, *args)
 
-        # Stack and restore axis position
-        result_shape = results[0].shape
-        stacked = np.stack(results).reshape(shape_rest + result_shape)
-        return np.moveaxis(stacked, -1, axis)
+        if use_parallel:
+            with mp.Pool(mp.cpu_count()) as pool:
+                results = pool.map(worker, indices)
+        else:
+            results = [func_1d(x_moved[(slice(None),) + idx], *args, **kwargs)
+                       for idx in indices]
+
+        # Handle output
+        first_result = results[0]
+        if isinstance(first_result, np.ndarray):
+            result_shape = first_result.shape
+            stacked = np.stack(results).reshape(shape_rest + result_shape)
+            return np.moveaxis(stacked, -1, axis)
+        else:
+            return np.array(results, dtype=object).reshape(shape_rest)
+
     return wrapper
 
 def custom_deprecated(reason: str = "", name: str = "deprecated", warning:Warning=DeprecationWarning) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
