@@ -3,6 +3,7 @@ from typing import List, TypeVar, Union, Tuple
 from warnings import warn
 
 from ase import Atoms
+from ase.cell import Cell
 import numpy as np
 import pandas as pd
 
@@ -457,7 +458,10 @@ class AtomicStructures(Trajectory,aseio):
         pos = pos % 1 
         for n,_ in enumerate(self):
             self[n].set_scaled_positions(pos[n])
-        
+    
+    def get_cells(self:T)->List[Cell]:
+        """Return a list of ase.cell.Cells"""
+        return [a.get_cell() for a in self]
         
 
 def random_water_structure(num_molecules=1):
