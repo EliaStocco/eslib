@@ -95,6 +95,7 @@ class AtomicStructures(Trajectory,aseio):
         return list(check.keys())
        
 
+    # ToDo: this might be parallelized with 'multiprocessing'
     def get_info(self:T,name:str,default:np.ndarray=None)->np.ndarray:
         """
         Get information attribute values for all structures.
@@ -130,6 +131,7 @@ class AtomicStructures(Trajectory,aseio):
                 output = set_output(output,n,structure.info[name])
         return np.asarray(output)
     
+    # ToDo: this might be parallelized with 'multiprocessing'
     def get_array(self:T,name:str,default:np.ndarray=None)->np.ndarray:
         """
         Get array attribute values for all structures.
@@ -201,6 +203,7 @@ class AtomicStructures(Trajectory,aseio):
         message = message.replace("\n", f"\n{string}")
         print(message)
 
+    # ToDo: this should be generalized to handle structures with different number of atoms
     def summary(self: T) -> pd.DataFrame:
         """
         Create a pandas DataFrame summarizing the content of the AtomicStructures object.
@@ -247,6 +250,7 @@ class AtomicStructures(Trajectory,aseio):
 
         return df
 
+    # ToDo: this might be parallelized with 'multiprocessing'
     @custom_deprecated(reason="Use `set` instead")
     def set_info(self:T,name:str,data:np.ndarray)->None:
         """
@@ -260,6 +264,7 @@ class AtomicStructures(Trajectory,aseio):
         for n,atoms in enumerate(self):
             atoms.info[name] = data[n]
 
+    # ToDo: this might be parallelized with 'multiprocessing'
     @custom_deprecated(reason="Use `set` instead")
     def set_array(self:T,name:str,data:np.ndarray)->None:
         """
@@ -274,6 +279,7 @@ class AtomicStructures(Trajectory,aseio):
             atoms.arrays[name] = data[n]
         pass    
 
+    # ToDo: this might be parallelized with 'multiprocessing'
     def set(self:T,name:str,data:np.ndarray,what:str="unknown")->None:
         """
         Set information or array attribute values for all structures.
