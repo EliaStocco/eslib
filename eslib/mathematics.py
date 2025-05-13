@@ -234,7 +234,7 @@ def pandas2ndarray(
     for n,(_,r) in enumerate(axis_info.items()):
         assert result.shape[n] == len(r), f"axis {n} has length {result.shape[n]} but {len(r)} values"
 
-    return result, axis_info
+    return result, {**axis_info,"values":value_columns}
 
 def dcast(df:pd.DataFrame, index_columns:List[str], ignore_columns:List[str]=[])->np.ndarray:
     """
@@ -277,25 +277,6 @@ def dcast(df:pd.DataFrame, index_columns:List[str], ignore_columns:List[str]=[])
 
     return result_array
 
-# def melt(A: np.ndarray, name: str = "value") -> pd.DataFrame:
-#     """
-#     R-like function to melt a numpy array into a long-format pandas DataFrame.
-#     Returns a DataFrame with integer index columns and a value column matching A's dtype.
-#     """
-#     shape = A.shape
-#     ndim = len(shape)
-#     indices = np.indices(shape).reshape(ndim, -1)  # shape: (n_dims, n_elements)
-#     values = A.flatten()  # flatten A
-    
-#     # Prepare dictionary with correct types directly
-#     data = {
-#         f"dim_{i}": indices[i].astype(np.int32)  # or int64 if preferred
-#         for i in range(ndim)
-#     }
-#     data[name] = values  # inherits dtype from A
-
-#     return pd.DataFrame(data)
-
 def get_indices(shapes:List[int])->np.ndarray:
     return np.indices(shapes).reshape(len(shapes),-1).T
 
@@ -325,7 +306,6 @@ def flatten_except(A: np.ndarray, value_axes: list) -> np.ndarray:
     reshaped_array = A.reshape(new_shape)
     
     return reshaped_array
-
 
 def melt(
     A: np.ndarray,
@@ -358,7 +338,7 @@ def melt(
     value_axes = [i for i in range(ndim) if i not in index_axes]
     if len(value_axes) == 0:
         A = A[...,np.newaxis]  # Add a new axis if no value axes are found
-        return melt(A, index, [value_names])
+        return melt(A, index, value_names)
     
     assert len(value_axes) == 1, "There should be exactly one value axis."
     value_axes = value_axes[0]  # Get the single value axis index
@@ -394,59 +374,6 @@ def melt(
     
     # Return DataFrame
     return df
-
-
-
-# def aggregate_by_group(A: np.ndarray, B: np.ndarray, axis: int, aggregation_function=np.sum) -> np.ndarray:
-#     """
-#     General function to aggregate values of A along the specified axis based on 
-#     the grouping indices in B.
-    
-#     A: numpy array of shape (n_structures, ..., n_atoms, n_features) 
-#        where ... represents other dimensions (if applicable).
-#     B: numpy array of shape (n_structures, ..., n_atoms) with integer grouping indices (e.g., unit-cell indices).
-#     axis: the axis along which the aggregation happens (e.g., atoms dimension).
-#     aggregation_function: function (default: np.sum) to apply to the grouped elements.
-    
-#     Returns:
-#     aggregated_A: numpy array of shape (n_structures, ..., n_groups, n_features),
-#                   where each group is aggregated along the specified axis.
-#     """
-    
-#     A_tmp = transform_to_indexed_values(A)
-#     # Extract the shape information for generalization
-#     shape = A.shape
-#     n_structures = shape[0]
-#     n_atoms = shape[axis]  # size along the specified axis (e.g., atoms)
-#     n_features = shape[-1]  # size along the features axis
-    
-#     # Initialize the list to store the aggregated results
-#     aggregated_A = []
-    
-#     for i in range(n_structures):
-#         # Initialize an empty list to store aggregated results for this structure
-#         structure_aggregated = []
-        
-#         # Get the unique group indices for the current structure (along the atoms dimension)
-#         unique_groups = np.unique(B[i])
-        
-#         for group in unique_groups:
-#             # Find all the elements in A that belong to the current group
-#             group_indices = (B[i] == group)
-#             group_elements = A[i][group_indices]
-            
-#             # Apply the aggregation function to the atoms in the current group along the specified axis
-#             group_aggregated = aggregation_function(group_elements, axis=axis)
-            
-#             # Append the aggregated group result
-#             structure_aggregated.append(group_aggregated)
-        
-#         # Append the aggregated results for the current structure
-#         aggregated_A.append(structure_aggregated)
-    
-#     # Convert the list of results into a numpy array and return
-#     return np.array(aggregated_A)
-
 
 def centered_window(window_name: str, cf_len: int, window_width: int) -> np.ndarray:
     """
@@ -498,3 +425,28 @@ def divide_and_swap(x,N):
     x[:len(second)] = second
     x[len(second):] = first
     return x
+
+# @vectorize_along_axis
+# def np2tuple(x)->List[Tuple]:
+#     return tuple(x)
+
+def merge_dataframes(dfs: List[pd.DataFrame], on: List[str], how: str = 'inner') -> pd.DataFrame:
+    """
+    Merge a list of dataframes on specified columns.
+    
+    Parameters:
+    - dfs: List of pandas DataFrames to merge.
+    - on: List of column names to merge on.
+    - how: Type of join – 'inner', 'outer', 'left', 'right'. Default is 'inner'.
+
+    Returns:
+    - A single merged DataFrame.
+    """
+    if not dfs:
+        raise ValueError("The list of dataframes is empty.")
+
+    merged = dfs[0]
+    for df in dfs[1:]:
+        merged = merged.merge(df, on=on, how=how)
+    
+    return merged
