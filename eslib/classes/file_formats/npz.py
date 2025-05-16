@@ -1,4 +1,3 @@
-import enum
 import numpy as np
 from typing import List, Tuple, Set
 from ase import Atoms
