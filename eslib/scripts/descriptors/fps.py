@@ -53,6 +53,7 @@ def main(args):
         args.number = len(frames)
     
     print("\tExtracting structures using the FPS algorithm:")
+    # ToDo: replace `initialize=0` with what Philipp suggested.
     struct_idx = FPS(n_to_select=args.number, progress_bar = True, initialize=0).fit(X.T).selected_idx_
     X_fps = X[struct_idx]
 
