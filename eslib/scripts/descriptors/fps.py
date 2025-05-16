@@ -53,8 +53,14 @@ def main(args):
         args.number = len(frames)
     
     print("\tExtracting structures using the FPS algorithm:")
-    # ToDo: replace `initialize=0` with what Philipp suggested.
-    struct_idx = FPS(n_to_select=args.number, progress_bar = True, initialize=0).fit(X.T).selected_idx_
+    # mean over structures of each descriptor
+    mean = X.mean(axis=0,keepdims=True) # axis = 0:  structures, axis = 1: descriptors
+    delta = X - mean
+    # norm over descriptors of each structure
+    norm = np.linalg.norm(delta,axis=1)
+    # initialize the FPS algorithm with the structure with the largest norm
+    initial = np.argmax(norm)
+    struct_idx = FPS(n_to_select=args.number, progress_bar = True, initialize=initial).fit(X.T).selected_idx_
     X_fps = X[struct_idx]
 
     print("\n\tFPS selected indices: {:d}".format(struct_idx.shape[0]))
