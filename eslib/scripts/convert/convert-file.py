@@ -1,18 +1,14 @@
 #!/usr/bin/env python
-import enum
 import os
-from typing import List
-
 import numpy as np
 from ase.cell import Cell
 
 from eslib.classes.aseio import integer_to_slice_string
-# from elia.functions import str2bool, suppress_output, convert
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import error, esfmt, eslog, warning
-from eslib.functions import suppress_output
 from eslib.input import itype, str2bool
 from eslib.tools import convert
+from eslib.functions import get_file_size_human_readable
 
 DEBUG = True
 #---------------------------------------#
@@ -219,12 +215,14 @@ def main(args):
     except:
         print(f"\t{error}: an error occurred while retrieving the properties")
 
+    
 
     #------------------#
     # Write the data to the specified output file with the specified format
     if args.folder is None:
         with eslog(f"\nWriting data to file '{args.output}'"):
             atoms.to_file(file=args.output,format=args.output_format)
+            
         # print("done")
         # try:
         #     write(images=atoms,filename=args.output, format=args.output_format) # fmt)
@@ -247,6 +245,20 @@ def main(args):
                 # except Exception as e:
                 #     print("\n\tError: {:s}".format(e))
         # print("done")
+        
+    #------------------#
+    try:
+        value, unit = get_file_size_human_readable(args.input)
+        print(f"\n\t  Input file size: {value} {unit}")
+    except:
+        print(f"\n\t{warning}: an error occurred while retrieving the input file size")
+        
+    #------------------#
+    try:
+        value, unit = get_file_size_human_readable(args.output)
+        print(f"\t Output file size: {value} {unit}")
+    except:
+        print(f"\t{warning}: an error occurred while retrieving the input file size")
 
 if __name__ == "__main__":
     main()
