@@ -7,6 +7,7 @@ import sys
 from copy import copy
 import numpy as np
 from typing import Any, List, Union
+import subprocess
 
 #------------------#
 class FakeList:
@@ -438,15 +439,27 @@ def get_file_size_human_readable(file_path):
     """
     Return disk allocation size of a file as (value, unit),
     where value is between 0 and 1024 and unit is one of B, KB, MB, GB, etc.
+    Falls back to 'du -sb' if st_blocks is unavailable or returns 0.
     """
-    stat = os.stat(file_path)
-    block_size = 512  # st_blocks is in 512-byte units (POSIX standard)
-    size_bytes = stat.st_blocks * block_size
+    try:
+        stat = os.stat(file_path)
+        size_bytes = stat.st_blocks * 512  # st_blocks is in 512-byte units
+        if size_bytes == 0:
+            raise ValueError("st_blocks is zero or unsupported")
+    except Exception:
+        # Fallback: use 'du -sb' to get accurate disk usage
+        try:
+            output = subprocess.check_output(['du', '-sb', file_path])
+            size_bytes = int(output.decode().split()[0])
+        except Exception as e:
+            raise RuntimeError(f"Could not determine disk usage for {file_path}: {e}")
 
+    # Convert to human-readable
     units = ["B", "KB", "MB", "GB", "TB"]
     size = float(size_bytes)
     for unit in units:
         if size < 1024:
             return round(size, 2), unit
         size /= 1024.0
-    return round(size, 2), units[-1]  # fallback to TB or higher
+    return round(size, 2), units[-1]
+
