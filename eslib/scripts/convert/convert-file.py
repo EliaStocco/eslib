@@ -40,6 +40,7 @@ def prepare_args(description):
     parser.add_argument("-iu" , "--input_unit"       , **argv,required=False, type=str     , help="input positions unit (default: %(default)s)"  , default=None)
     parser.add_argument("-iuc", "--input_unit_cell"  , **argv,required=False, type=str     , help="input cell unit (default: %(default)s)"  , default=None)
     parser.add_argument("-ou" , "--output_unit"      , **argv,required=False, type=str     , help="output unit (default: %(default)s)", default=None)
+    parser.add_argument("-pk" , "--pos_keyword"      , **argv,required=False, type=str     , help="positions keyword (default: %(default)s)", default="positions")
     parser.add_argument("-sc" , "--same_cell"        , **argv,required=False, type=str2bool, help="whether the atomic structures have all the same cell (default: %(default)s)", default=False)
     parser.add_argument("-s"  , "--scaled"           , **argv,required=False, type=str2bool, help="whether to output the scaled positions (default: %(default)s)", default=False)
     parser.add_argument("-r"  , "--rotate"           , **argv,required=False, type=str2bool, help="whether to rotate the cell s.t. to be compatible with i-PI (default: %(default)s)", default=False)
@@ -100,7 +101,13 @@ def main(args):
             # atoms:List[Atoms] = list(atoms)
     # print("done")
     print("\t n. of atomic structures: {:d}".format(len(atoms)))
-
+    
+    #------------------#
+    if args.pos_keyword != "positions":
+        with eslog(f"Using the keyword '{args.pos_keyword}' as positions"):
+            pos = atoms.get(args.pos_keyword)
+            atoms.set("positions",pos)
+            
     #------------------#
     if args.input_format in ["espresso-in","espresso-out"] and args.output_format in ["espresso-in","espresso-out"] :
         if args.input_unit is not None and args.input_unit != "angstrom":
