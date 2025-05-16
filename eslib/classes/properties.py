@@ -208,6 +208,7 @@ class Properties(Trajectory):
         new_data[usteps, :] = data
         
         if not np.any(np.isnan(new_data)):
+            self.from_numpy(new_data)
             return self, "removed replicas"
         
         if func is None:
