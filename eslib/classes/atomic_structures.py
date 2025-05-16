@@ -2,6 +2,8 @@ from copy import deepcopy
 from typing import List, TypeVar, Union, Tuple
 from warnings import warn
 
+from sympy import symbols
+
 from ase import Atoms
 from ase.cell import Cell
 import numpy as np
@@ -37,12 +39,24 @@ class AtomicStructures(Trajectory,aseio):
         return cls([ atoms.copy() for _ in range(repeat) ])
     
     def num_atoms(self:T):
-        n_atoms = [s.get_global_number_of_atoms(s) for s in self]
+        n_atoms = [s.get_global_number_of_atoms() for s in self]
         n_atoms = np.unique(n_atoms)
         if len(n_atoms) > 1:
             raise ValueError("Not all atomic structures have the same number of atoms")
         return n_atoms[0]
 
+    def is_trajectory(self:T)->bool:
+        """
+        Check if the object is a trajectory.
+        """
+        # check that all structures have the same number of atoms
+        n_atoms = [s.get_global_number_of_atoms() for s in self]
+        n_atoms = np.unique(n_atoms)
+        if len(n_atoms) > 1:
+            return False
+        symbols = [s.get_chemical_symbols() for s in self]
+        return all([s == symbols[0] for s in symbols])
+    
     def get_keys(self:T,what:str="all")->List[str]:
         """
         Get the keys present in all atomic structures, according to the `what` parameter.
@@ -459,17 +473,61 @@ class AtomicStructures(Trajectory,aseio):
                 warn (f"Skipping {key} with shape {row['shape']}")
         return output
         
-    def fold(self:T):
-        pos = self.get("positions")
-        pos = pos % 1 
-        for n,_ in enumerate(self):
-            self[n].set_scaled_positions(pos[n])
+    # def fold(self:T):
+    #     pos = self.get("positions")
+    #     cells = self.get_cells()
+    #     pos = pos % 1 
+    #     for n,_ in enumerate(self):
+    #         self[n].set_scaled_positions(pos[n])
     
-    def get_cells(self:T)->List[Cell]:
+    def get_cells(self:T,as_numpy:bool=False)->List[Cell]:
         """Return a list of ase.cell.Cells"""
-        return [a.get_cell() for a in self]
+        if as_numpy:
+            cells = self.get_cells(as_numpy=False)
+            cells = np.asarray([np.asarray(c).T for c in cells])
+            return cells
+        else:
+            return [a.get_cell() for a in self]
+    
+    def get_chemical_symbols(self:T,unique:bool=False):
+        """Return a list of chemical symbols"""
+        if unique:
+            species = [ np.unique(a.get_chemical_symbols()) for a in self]
+            species = np.asarray(species).flatten()
+            return np.unique(species).tolist()
+        else:
+            return [a.get_chemical_symbols() for a in self]
         
-
+    # ToDo: this might be parallelized with 'multiprocessing'
+    def get_scaled_positions(self:T)->Union[List[np.ndarray],np.ndarray]:
+        """Return a list of scaled positions"""
+        if self.is_trajectory():
+            out = np.zeros((len(self),self.num_atoms(),3))
+            for n,a in enumerate(self):
+                out[n,:,:] = a.get_scaled_positions()
+            return out
+        else:
+            out = [None]*len(self)
+            for n,a in enumerate(self):
+                out[n] = a.get_scaled_positions()
+            return out
+        
+    def unwrap(self:T,inplace:bool=True)->np.ndarray:
+        """Unwrap the positions of the atoms in the structures"""
+        assert self.is_trajectory(), "The atomic structures should all have the same number of atoms."
+        frac = self.get_scaled_positions()
+        frac = frac % 1
+        assert frac.shape == (len(self),self.num_atoms(),3)
+        new_frac = np.unwrap(frac,axis=0,period=1)
+        cells = self.get_cells(as_numpy=True)
+        pos = np.einsum("sij,saj->sai", cells, new_frac) # s: structure, a: atom, i,j: xyz
+        if inplace:
+            self.set("positions",pos)
+        return pos
+          
+        
+        
+            
 def random_water_structure(num_molecules=1):
     from ase import Atoms
     symbols = ['H', 'H', 'O']  # Atomic symbols for water molecule
