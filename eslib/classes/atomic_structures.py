@@ -146,7 +146,7 @@ class AtomicStructures(Trajectory,aseio):
         return np.asarray(output)
     
     # ToDo: this might be parallelized with 'multiprocessing'
-    def get_array(self:T,name:str,default:np.ndarray=None)->np.ndarray:
+    def get_array(self:T,name:str,default:np.ndarray=None)->Union[np.ndarray,List[np.ndarray]]:
         """
         Get array attribute values for all structures.
 
@@ -157,24 +157,29 @@ class AtomicStructures(Trajectory,aseio):
         Returns:
         - np.ndarray: Array of array attribute values.
         """
-        output = None
-        def set_output(output,n,value):
-            if output is None:
-                output = np.zeros((len(self),*value.shape))
-            try:
-                output[n] = np.asarray(value)
-            except:
-                output[n] = value
-            return output
+        # output = None
+        # def set_output(output,n,value):
+        #     if output is None:
+        #         output = np.zeros((len(self),*value.shape))
+        #     try:
+        #         output[n] = np.asarray(value)
+        #     except:
+        #         output[n] = value
+        #     return output
             
+        output = [None]*len(self)
+        # shapes = [None]*len(self)
         for n,structure in enumerate(self):
             if name not in structure.arrays:
                 if default is None:
-                    raise ValueError("structure n. {:n} does not have '{:s}' in `arrays`".format(n,name))
+                    raise ValueError(f"structure n. {n} does not have '{name}' in `arrays`")
                 else:
-                    output = set_output(output,n,default)
+                    output[n] = default
+                    # shapes[n] = default.shape
             else:
-                output = set_output(output,n,structure.arrays[name])
+                # value = structure.arrays[name]
+                output[n] = structure.arrays[name]
+                # shapes[n] = value.shape
         return output
 
     def get(self:T,name:str,default:np.ndarray=None,what:str="all")->np.ndarray:
@@ -236,6 +241,8 @@ class AtomicStructures(Trajectory,aseio):
         df["key"] = self.get_keys()
         info = self.get_keys("info")
         array = self.get_keys("arrays")
+        
+        is_traj = self.is_trajectory()
 
         # Iterate over the columns
         for n,key in enumerate(df["key"]):
@@ -250,6 +257,9 @@ class AtomicStructures(Trajectory,aseio):
                 raise ValueError("Unknown attribute type")
 
             # Get the value of the attribute
+            what = self.search(key)
+            if what == "arrays" and not is_traj:
+                continue
             value = self.get(key)
             try:
                 # If the value is numeric, get its dtype and shape
