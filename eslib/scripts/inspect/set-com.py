@@ -26,20 +26,21 @@ def main(args):
     
     #------------------#
     print("\tReading atomic structure A from input file '{:s}' ... ".format(args.input), end="")
-    structure:Atoms = AtomicStructures.from_file(file=args.input,format=args.input_format,index=0)[0]
+    structure = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done")
     
     #------------------#
     print("\n\tSetting the center of mass ... ", end="")
-    structure.set_center_of_mass(args.com)
+    for i in range(len(structure)):
+        structure[i].set_center_of_mass(args.com)
     print("done")
     
     #------------------#
-    print("\tCenter of mass [ang]:",structure.get_center_of_mass())
+    print("\tCenter of mass [ang]:",structure[0].get_center_of_mass())
     
     #------------------#
     print("\tWriting the atomic structure to file '{:s}' ... ".format(args.output), end="")
-    AtomicStructures([structure]).to_file(file=args.output,format=args.output_format)
+    structure.to_file(file=args.output,format=args.output_format)
     print("done")
     
     return 0
