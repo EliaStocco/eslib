@@ -178,13 +178,21 @@ class Properties(Trajectory):
         lengths = self._get_columns_lenght()
         data = np.atleast_2d(data)
         i = 0
+        
+        def is_1D(x:np.ndarray):
+            if len(x.shape) == 1:
+                return True
+            shape = np.asarray(x.shape)[1:].astype(int)
+            return np.allclose(shape,1)
+            
         for n,k in enumerate(self.header):
             j = lengths[n] + i
-            shape = self.properties[k].shape
-            if len(shape) == 1:
-                self.properties[k][:] = data[:,i:j].flatten()
-            else:
-                self.properties[k][:,:] = data[:,i:j]
+            # shape = self.properties[k].shape
+            to_assign = data[:,i:j]
+            if is_1D(to_assign):
+                to_assign = to_assign.flatten()
+            # assert (len(shape) == 1 and to_assign.shape[1] ==1) or shape[1] == to_assign.shape[1], f"'{k}' has a different number of columns than the data."
+            self.properties[k] = to_assign
             i = j
         self.set_length()
     
