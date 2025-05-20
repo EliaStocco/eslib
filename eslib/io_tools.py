@@ -308,6 +308,17 @@ def integer_to_slice_string(index):
     #     return index
     else:
         raise ValueError("`index` can be int, str, or slice, not {}".format(index))
+    
+def numpy_take(array, index,axis):
+    """
+    Take elements from a NumPy array along a specified axis.
+    """
+    index = integer_to_slice_string(index)
+    array = np.asarray(array)
+    array = np.moveaxis(array, axis, 0)
+    arrays = array[index]
+    arrays = np.moveaxis(arrays, 0, axis)
+    return arrays
 
 #------------------#
 def get_offset_ipi(file:TextIOWrapper,
