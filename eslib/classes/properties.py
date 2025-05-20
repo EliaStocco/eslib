@@ -5,6 +5,7 @@ from typing import Callable, TypeVar, Union
 import numpy as np
 import pandas as pd
 from requests import head
+from torch import le
 
 from eslib.classes import Trajectory
 from eslib.classes.io import pickleIO
@@ -174,11 +175,17 @@ class Properties(Trajectory):
         Parameters:
             data (np.ndarray): 2D numpy array containing the data.
         """
+        lengths = self._get_columns_lenght()
+        data = np.atleast_2d(data)
+        i = 0
         for n,k in enumerate(self.header):
-            if len(data.shape) == 1:
-                self.properties[k] = data
+            j = lengths[n] + i
+            shape = self.properties[k].shape
+            if len(shape) == 1:
+                self.properties[k][:] = data[:,i:j].flatten()
             else:
-                self.properties[k] = data[:,n]
+                self.properties[k][:,:] = data[:,i:j]
+            i = j
         self.set_length()
     
     def fix(self: T,func:Callable=None):
