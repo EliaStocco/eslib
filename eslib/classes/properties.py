@@ -26,6 +26,12 @@ FamilyMap = {
     "time"   : ["time"]
 }
 
+def is_1D(x:np.ndarray):
+    if len(x.shape) == 1:
+        return True
+    shape = np.asarray(x.shape)[1:].astype(int)
+    return np.allclose(shape,1)
+
 class Properties(Trajectory):
 
     def __init__(self,info:dict=None):
@@ -157,12 +163,19 @@ class Properties(Trajectory):
     
     def to_numpy(self):
         lengths = self._get_columns_lenght()
-        data = np.zeros((self.length, sum(lengths)),dtype=float)
+        data = np.full((self.length, sum(lengths)),np.nan,dtype=float)
+        i = 0 
         for n,k in enumerate(self.header):
-            if len(self.properties[k].shape) == 1:
-                data[:,n] = self.properties[k]
-            else:
-                data[:,n:n+lengths[n]] = self.properties[k]
+            j = lengths[n] + i
+            values = self.properties[k]
+            if is_1D(values):
+                values = values[:,np.newaxis]
+            # if len(self.properties[k].shape) == 1:
+            #     data[:,i:j] = self.properties[k]
+            # else:
+            data[:,i:j] = values
+            i = j
+        assert not np.any(np.isnan(data)), "Data contains NaN values."
         return data, lengths
     
     def from_numpy(self,data:np.ndarray):
@@ -177,14 +190,9 @@ class Properties(Trajectory):
         """
         lengths = self._get_columns_lenght()
         data = np.atleast_2d(data)
-        i = 0
-        
-        def is_1D(x:np.ndarray):
-            if len(x.shape) == 1:
-                return True
-            shape = np.asarray(x.shape)[1:].astype(int)
-            return np.allclose(shape,1)
+        assert sum(lengths) == data.shape[1], f"Data has {data.shape[1]} columns, but the properties have {sum(lengths)} columns."
             
+        i = 0 
         for n,k in enumerate(self.header):
             j = lengths[n] + i
             # shape = self.properties[k].shape
