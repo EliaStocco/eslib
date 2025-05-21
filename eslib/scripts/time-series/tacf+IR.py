@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 from ase.io import read
+from scipy import signal
 from eslib.classes.physical_tensor import PhysicalTensor
 from eslib.classes.tcf import compute_spectrum, get_freq, autocorrelate
 from eslib.formatting import esfmt, eslog
@@ -8,7 +9,6 @@ from eslib.tools import convert
 from eslib.mathematics import centered_window
 from eslib.input import itype, str2bool
 from eslib.io_tools import numpy_take
-from scipy import signal
 from eslib.mathematics import mean_std_err
 
 #---------------------------------------#
@@ -23,20 +23,24 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
+    # input
     parser.add_argument("-d"  , "--dipole"          , **argv, required=True , type=str  , help="txt/npy input file")
-    parser.add_argument("-id" , "--is_derivative"   , **argv, required=False, type=str2bool, help="whether the input is the time derivative of the dipole [or the dipole itself] (default: %(default)s)", default=False)
-    parser.add_argument("-iu" , "--input_unit"      , **argv, required=False, type=str  , help="input unit (default: %(default)s)", default=None)
-    parser.add_argument("-o"  , "--output"          , **argv, required=False, type=str  , help="txt output file with the spectrum (default: %(default)s)", default='IR.txt')
-    parser.add_argument("-oac", "--output_autocorr" , **argv, required=False, type=str  , help="txt output file with autocorrelation function (default: %(default)s)", default=None)
-    parser.add_argument("-dt" , "--time_step"       , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
-    parser.add_argument("-T"  , "--temperature"     , **argv, required=True , type=float, help="temperature [K]")
-    parser.add_argument("-i"  , "--input"           , **argv, required=True , type=str  , help="file with the atomic structure")
-    parser.add_argument("-if" , "--input_format"    , **argv, required=False, type=str  , help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-pad", "--padding"         , **argv, required=False, type=int  , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
     parser.add_argument("-n"  , "--index"           , **argv, required=False, type=itype, help="index to be read from input file (default: %(default)s)", default=':')
     parser.add_argument("-as" , "--axis_samples"    , **argv, required=False, type=int  , help="axis corresponding to independent trajectories/samples (default: %(default)s)", default=0)
     parser.add_argument("-at" , "--axis_time"       , **argv, required=False, type=int  , help="axis corresponding to time (default: %(default)s)", default=1)
     parser.add_argument("-ac" , "--axis_components" , **argv, required=False, type=int  , help="axis corresponding to dipole components (default: %(default)s)", default=2)
+    parser.add_argument("-id" , "--is_derivative"   , **argv, required=False, type=str2bool, help="whether the input is the time derivative of the dipole [or the dipole itself] (default: %(default)s)", default=False)
+    parser.add_argument("-iu" , "--input_unit"      , **argv, required=False, type=str  , help="input unit (default: %(default)s)", default=None)
+    # output
+    parser.add_argument("-o"  , "--output"          , **argv, required=False, type=str  , help="txt output file with the spectrum (default: %(default)s)", default='IR.txt')
+    parser.add_argument("-oac", "--output_autocorr" , **argv, required=False, type=str  , help="txt output file with autocorrelation function (default: %(default)s)", default=None)
+    # parameters
+    parser.add_argument("-dt" , "--time_step"       , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
+    parser.add_argument("-T"  , "--temperature"     , **argv, required=True , type=float, help="temperature [K]")
+    parser.add_argument("-i"  , "--input"           , **argv, required=True , type=str  , help="file with the atomic structure")
+    parser.add_argument("-if" , "--input_format"    , **argv, required=False, type=str  , help="input file format (default: %(default)s)" , default=None)
+    # signal processing
+    parser.add_argument("-pad", "--padding"         , **argv, required=False, type=int  , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
     parser.add_argument("-fu" , "--freq_unit"       , **argv, required=False, type=str  , help="unit of the frequency in IR plot and output file (default: %(default)s)", default="inversecm")
     parser.add_argument("-w"  , "--window"          , **argv, required=False, type=str  , help="window type (default: %(default)s)", default='hanning', choices=['none','barlett','blackman','hamming','hanning','kaiser'])
     parser.add_argument("-wt" , "--window_t"        , **argv, required=False, type=int  , help="time span of the window [fs] (default: %(default)s)", default=5000)
@@ -65,12 +69,16 @@ def main(args):
         data = data[np.newaxis,:,:]
     print("\t data shape: ",data.shape)
     
+    assert data.ndim == 3, "the input array should have 3 dimensions"
+    
+    #------------------#
     if args.index is not None and args.index != ":":
         print("\n\t Resampling data ... ", end="")
         data = numpy_take(data, args.index, axis=args.axis_time)
         print("done")
         print("\t data shape: ",data.shape)
         
+    #------------------#
     if not args.is_derivative:
         
         if args.input_unit is None:
@@ -186,8 +194,6 @@ def main(args):
     spectrum /= factor
     spectrum /= convert(1,"length","atomic_unit","centimeter")
     
-    # print(max(spectrum.real))
-
    #------------------#
     print("\n\t Computing the average over the trajectories ... ", end="")
     N = spectrum.shape[args.axis_samples]
@@ -198,8 +204,6 @@ def main(args):
     print("\t spectrum shape: :",spectrum.shape)
 
     assert spectrum.ndim == 1, "the spectrum does not have 1 dimension"
-    
-    # print(max(spectrum.real))
 
     #------------------#
     print("\n\t Computing the frequencies ... ", end="")
