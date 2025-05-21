@@ -7,6 +7,8 @@ from eslib.formatting import esfmt
 from eslib.tools import convert
 from eslib.io_tools import pattern2sorted_files
 
+# ToDo: this script has a bug
+
 #---------------------------------------#
 # Description of the script's purpose
 description = "Compute the Infrared (IR) absorption spectrum from Born Charges and velocities time series in arbitrary units."
