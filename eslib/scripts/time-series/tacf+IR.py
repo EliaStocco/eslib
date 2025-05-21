@@ -2,13 +2,12 @@
 import numpy as np
 from ase.io import read
 from eslib.classes.physical_tensor import PhysicalTensor
-from eslib.classes.tcf import TimeAutoCorrelation, compute_spectrum, get_freq, autocorrelate
+from eslib.classes.tcf import compute_spectrum, get_freq, autocorrelate
 from eslib.formatting import esfmt
 from eslib.tools import convert
 from eslib.mathematics import centered_window
 from eslib.input import itype
 from eslib.io_tools import numpy_take
-from eslib.functional import extend2NDarray
 from scipy import signal
 from eslib.mathematics import mean_std_err
 
@@ -31,8 +30,6 @@ def prepare_args(description):
     parser.add_argument("-if" , "--input_format"    , **argv, required=False, type=str     , help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-pad", "--padding"         , **argv, required=False, type=int  , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
     parser.add_argument("-n"  , "--index"           , **argv, required=False, type=itype, help="index to be read from input file (default: %(default)s)", default=':')
-    # parser.add_argument("-int", "--interpolate"     , **argv, required=False, type=int  , help="interpolation sampling multiplier (default: %(default)s)", default=1)
-    # parser.add_argument("-inm", "--interpolate_mode", **argv, required=False, type=int  , help="interpolation mode (default: %(default)s)", default="none",choices=['linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', 'next','none'])
     parser.add_argument("-as" , "--axis_samples"    , **argv, required=False, type=int  , help="axis corresponding to independent trajectories/samples (default: %(default)s)", default=0)
     parser.add_argument("-at" , "--axis_time"       , **argv, required=False, type=int  , help="axis corresponding to time (default: %(default)s)", default=1)
     parser.add_argument("-ac" , "--axis_components" , **argv, required=False, type=int  , help="axis corresponding to dipole components (default: %(default)s)", default=2)
@@ -66,7 +63,6 @@ def main(args):
     
     data = convert(data,"electric-dipole","eang","atomic_unit")
 
-
     #------------------#
     print("\n\tComputing the derivative ... ",end="")
     data = np.gradient(data,axis=args.axis_time)/args.time_step # e ang/fs
@@ -77,34 +73,12 @@ def main(args):
     print("\n\tRemoving the mean ... ",end="")
     data -= np.mean(data, axis=args.axis_time,keepdims=True)
     print("done")
-    
-    # #------------------#
-    # print("\n\tApplying high-pass filter ... ", end="")
-    # cutoff_frequency = 1e-4  # Define the cutoff frequency in normalized units (0 to 0.5)
-    # b, a = butter(N=4, Wn=cutoff_frequency, btype='high', fs=1/args.time_step)
-    # data = filtfilt(b, a, data, axis=args.axis_time)
-    # print("done")
-    # print("\tdata shape after filtering: ", data.shape)
-    
-    #------------------#
-    # if args.interpolate_mode != "none":
-    # args.interpolate = 1
-    # t_original = np.linspace(0,1, data.shape[args.axis_time])
-    # t_new = np.linspace(0,1, data.shape[args.axis_time]*args.interpolate)
-    # interp_func = interpolate.interp1d(t_original, data, kind=args.interpolate_mode,axis=args.axis_time)  # cubic spline interpolation
-    # data = interp_func(t_new)
-    # args.time_step /= args.interpolate
 
     #------------------#
     print("\n\tComputing the autocorrelation function ... ", end="")
-    # obj = TimeAutoCorrelation(data)
-    # autocorr = obj.tcf(axis=args.axis_time) # e^2 ang^2 / fs^2
     autocorr = autocorrelate(data,axis=args.axis_time) # e^2 ang^2 / fs^2
-    # ii = np.arange(autocorr.shape[args.axis_time]/2).astype(int)
-    # autocorr = np.take(autocorr,ii,axis=args.axis_time)
     print("done")
     print("\tautocorr shape: ",autocorr.shape)
-    
     
     #------------------#
     print("\n\tComputing the average value of the time derivative of the dipole squared ... ",end="")
@@ -164,24 +138,7 @@ def main(args):
         print("done")
         print("\twindow shape: ",window.shape)
         autocorr = raw_autocorr * window
-            
-        # #------------------#
-        # print("\n\tPerforming inverse Fourier transform ... ", end="")
-        # autocorr_time_domain = np.fft.irfft(autocorr, axis=args.axis_time)
-        # print("done")
-        # print("\tautocorr_time_domain shape: ", autocorr_time_domain.shape)
-
-        # #------------------#
-        # print("\n\tRemoving the mean from the time-domain data ... ", end="")
-        # autocorr_time_domain -= np.mean(np.sqrt(autocorr_time_domain), axis=args.axis_time, keepdims=True)
-        # print("done")
-
-        # #------------------#
-        # print("\n\tTransforming the data back to the frequency domain ... ", end="")
-        # autocorr = np.fft.rfft(autocorr_time_domain, axis=args.axis_time)
-        # print("done")
-        # print("\tautocorr shape: ", autocorr.shape)
-    
+                
     #------------------#
     print("\n\tComputing the spectrum ... ", end="")
     # axis_fourier = args.axis_time if args.axis_time < args.axis_components else args.axis_time - 1
