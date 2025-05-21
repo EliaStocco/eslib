@@ -16,6 +16,8 @@ from eslib.mathematics import mean_std_err
 description = "Compute the Infrared (IR) absorption spectrum from dipole time series in arbitrary units."
 documentation = "This script computes the frequency dependent Beer-Lambert absorption coefficient of IR spectroscopy from the time derivative of dipole."
 
+PARALLEL = False # better for few samples
+
 #---------------------------------------#
 def prepare_args(description):
     import argparse
@@ -75,9 +77,8 @@ def main(args):
     print("done")
 
     #------------------#
-    print("\n\t Computing the autocorrelation function ... ", end="")
-    autocorr = autocorrelate(data,axis=args.axis_time) # e^2 ang^2 / fs^2
-    print("done")
+    with eslog("\n Computing the autocorrelation function"):
+        autocorr = autocorrelate(data,axis=args.axis_time,use_parallel=PARALLEL) # e^2 ang^2 / fs^2
     print("\t autocorr shape: ",autocorr.shape)
     
     #------------------#

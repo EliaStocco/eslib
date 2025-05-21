@@ -4,30 +4,27 @@ from typing import Any, Callable
 from functools import wraps
 import numpy as np
 import multiprocessing as mp
+from joblib import Parallel, delayed
 
 def extend2NDarray(func_1d) -> Callable:
     @wraps(func_1d)
     def wrapper(x, *args, axis=-1, use_parallel=False, **kwargs):
-        if use_parallel and kwargs:
-            raise ValueError("**kwargs not supported with use_parallel=True")
-
         x = np.asarray(x)
         x_moved = np.moveaxis(x, axis, 0)
         shape_rest = x_moved.shape[1:]
         indices = list(np.ndindex(shape_rest))
 
-        def worker(idx):
+        def apply_idx(idx):
             x1d = x_moved[(slice(None),) + idx]
-            return func_1d(x1d, *args)
+            return func_1d(x1d, *args, **kwargs)
 
         if use_parallel:
-            with mp.Pool(mp.cpu_count()) as pool:
-                results = pool.map(worker, indices)
+            results = Parallel(n_jobs=-1)(
+                delayed(apply_idx)(idx) for idx in indices
+            )
         else:
-            results = [func_1d(x_moved[(slice(None),) + idx], *args, **kwargs)
-                       for idx in indices]
+            results = [apply_idx(idx) for idx in indices]
 
-        # Handle output
         first_result = results[0]
         if isinstance(first_result, np.ndarray):
             result_shape = first_result.shape
