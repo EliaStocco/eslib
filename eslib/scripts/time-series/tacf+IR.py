@@ -3,7 +3,7 @@ import numpy as np
 from ase.io import read
 from eslib.classes.physical_tensor import PhysicalTensor
 from eslib.classes.tcf import compute_spectrum, get_freq, autocorrelate
-from eslib.formatting import esfmt
+from eslib.formatting import esfmt, eslog
 from eslib.tools import convert
 from eslib.mathematics import centered_window
 from eslib.input import itype
@@ -25,9 +25,9 @@ def prepare_args(description):
     parser.add_argument("-o"  , "--output"          , **argv, required=False, type=str  , help="txt output file with the spectrum (default: %(default)s)", default='IR.txt')
     parser.add_argument("-oac", "--output_autocorr" , **argv, required=False, type=str  , help="txt output file with autocorrelation function (default: %(default)s)", default=None)
     parser.add_argument("-dt" , "--time_step"       , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
-    parser.add_argument("-T"  , "--temperature"     , **argv, required=True , type=float   , help="temperature [K]")
-    parser.add_argument("-i"  , "--input"           , **argv, required=True , type=str     , help="file with the atomic structure")
-    parser.add_argument("-if" , "--input_format"    , **argv, required=False, type=str     , help="input file format (default: %(default)s)" , default=None)
+    parser.add_argument("-T"  , "--temperature"     , **argv, required=True , type=float, help="temperature [K]")
+    parser.add_argument("-i"  , "--input"           , **argv, required=True , type=str  , help="file with the atomic structure")
+    parser.add_argument("-if" , "--input_format"    , **argv, required=False, type=str  , help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-pad", "--padding"         , **argv, required=False, type=int  , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
     parser.add_argument("-n"  , "--index"           , **argv, required=False, type=itype, help="index to be read from input file (default: %(default)s)", default=':')
     parser.add_argument("-as" , "--axis_samples"    , **argv, required=False, type=int  , help="axis corresponding to independent trajectories/samples (default: %(default)s)", default=0)
@@ -42,121 +42,121 @@ def prepare_args(description):
 @esfmt(prepare_args,description)
 def main(args):
     
+    #------------------#
     dt = args.time_step
     args.time_step = convert(args.time_step,"time","femtosecond","atomic_unit")
     args.window_t = convert(args.window_t,"time","femtosecond","atomic_unit")
+    args.dipole = str(args.dipole)
 
     #------------------#
-    print("\n\tReading the input array from file '{:s}' ... ".format(args.dipole), end="")
-    args.dipole = str(args.dipole)
-    data:np.ndarray = PhysicalTensor.from_file(file=args.dipole).to_data() # e ang
-    print("done")
+    with eslog(f"\nReading the input array from file '{args.dipole}'"):
+        data:np.ndarray = PhysicalTensor.from_file(file=args.dipole).to_data() # e ang
     if data.ndim == 2:
         data = data[np.newaxis,:,:]
-    print("\tdata shape: ",data.shape)
+    print("\t data shape: ",data.shape)
     
     if args.index is not None and args.index != ":":
-        print("\n\tResampling data ... ", end="")
+        print("\n\t Resampling data ... ", end="")
         data = numpy_take(data, args.index, axis=args.axis_time)
         print("done")
-        print("\tdata shape: ",data.shape)
+        print("\t data shape: ",data.shape)
     
     data = convert(data,"electric-dipole","eang","atomic_unit")
 
     #------------------#
-    print("\n\tComputing the derivative ... ",end="")
+    print("\n\t Computing the derivative ... ",end="")
     data = np.gradient(data,axis=args.axis_time)/args.time_step # e ang/fs
     print("done")
-    print("\tdata shape: ",data.shape)    
+    print("\t data shape: ",data.shape)    
     
     #------------------#
-    print("\n\tRemoving the mean ... ",end="")
+    print("\n\t Removing the mean ... ",end="")
     data -= np.mean(data, axis=args.axis_time,keepdims=True)
     print("done")
 
     #------------------#
-    print("\n\tComputing the autocorrelation function ... ", end="")
+    print("\n\t Computing the autocorrelation function ... ", end="")
     autocorr = autocorrelate(data,axis=args.axis_time) # e^2 ang^2 / fs^2
     print("done")
-    print("\tautocorr shape: ",autocorr.shape)
+    print("\t autocorr shape: ",autocorr.shape)
     
     #------------------#
-    print("\n\tComputing the average value of the time derivative of the dipole squared ... ",end="")
+    print("\n\t Computing the average value of the time derivative of the dipole squared ... ",end="")
     norm_der = np.mean(data ** 2, axis=args.axis_time,keepdims=True)
     print("done")
-    print("\tnorm shape: ",norm_der.shape)
+    print("\t norm shape: ",norm_der.shape)
     
-    print("\tNormalizing autocorr ... ",end="")
+    print("\t Normalizing autocorr ... ",end="")
     assert np.allclose(autocorr[:,int(autocorr.shape[1]/2),:],norm_der[:,0,:]), "the normalization factor is not correct"
     autocorr /= norm_der
     assert np.allclose(autocorr[:,int(autocorr.shape[1]/2),:],1), "the normalization factor is not correct"
     print("done")
-    print("\tautocorr shape: ",autocorr.shape)
+    print("\t autocorr shape: ",autocorr.shape)
     
     #------------------#
-    print("\n\tPrinting <mu_i^2>:")
+    print("\n\t Printing <mu_i^2>:")
     tmp = np.moveaxis(norm_der, [args.axis_samples,args.axis_components], [0,1])
     assert tmp.shape[2] == 1, "the shape of the array is not correct"
     tmp = tmp[:,:,0]
-    print("\t---------------------------------------------------")
-    print("\t| {:>8} | {:>10} | {:>10} | {:>10} |".format("sample","x","y","z"))
-    print("\t---------------------------------------------------")
+    print("\t ---------------------------------------------------")
+    print("\t | {:>8} | {:>10} | {:>10} | {:>10} |".format("sample","x","y","z"))
+    print("\t ---------------------------------------------------")
     for i in range(tmp.shape[0]):
-        print(f"\t| {i:>8} | {tmp[i,0]:10.4e} | {tmp[i,1]:10.4e} | {tmp[i,2]:10.4e} |")
-    print("\t---------------------------------------------------")
+        print(f"\t | {i:>8} | {tmp[i,0]:10.4e} | {tmp[i,1]:10.4e} | {tmp[i,2]:10.4e} |")
+    print("\t ---------------------------------------------------")
     
     #------------------#
-    print("\n\tComputing normalizing factor ... ",end="")
+    print("\n\t Computing normalizing factor ... ",end="")
     norm_std = float(np.std(np.sum(norm_der,axis=args.axis_components)))
     norm_der = float(np.mean(np.sum(norm_der,axis=args.axis_components)))
     print("done")
-    print(f"\t    norm. factor: {norm_der:.2e} [e^2ang^2]")
-    print(f"\tnorm. factor std: {norm_std:.2e} [e^2ang^2]")
-    print(f"\tnorm. factor std: {100*norm_std/norm_der:.2f} [%]")
+    print(f"\t     norm. factor: {norm_der:.2e} [e^2ang^2]")
+    print(f"\t norm. factor std: {norm_std:.2e} [e^2ang^2]")
+    print(f"\t norm. factor std: {100*norm_std/norm_der:.2f} [%]")
 
     #------------------#
     if args.axis_components is not None:
-        print("\n\tComputing the sum along the axis {:d} ... ".format(args.axis_components),end="")
+        print("\n\t Computing the sum along the axis {:d} ... ".format(args.axis_components),end="")
         autocorr = np.sum(autocorr,axis=args.axis_components)# /np.sqrt(autocorr.shape[args.axis_components])
         print("done")
-        print("\tautocorr shape: ",autocorr.shape)
+        print("\t autocorr shape: ",autocorr.shape)
 
     #------------------#
     if autocorr.ndim == 1:
-        print("\tReshaping data  ... ", end="")
+        print("\t Reshaping data  ... ", end="")
         autocorr = np.atleast_2d(autocorr)# .T
         print("done")
-        print("\tdata shape: ",data.shape)
+        print("\t data shape: ",data.shape)
     
     raw_autocorr = np.copy(autocorr)  
 
     #------------------#
     if args.window != "none" :
-        print("\n\tApplying the '{:s}' window ... ".format(args.window),end="")
+        print("\n\t Applying the '{:s}' window ... ".format(args.window),end="")
         M = int(args.window_t / args.time_step)
         window = centered_window(args.window,raw_autocorr.shape[args.axis_time],M)
         print("done")
-        print("\twindow shape: ",window.shape)
+        print("\t window shape: ",window.shape)
         autocorr = raw_autocorr * window
                 
     #------------------#
-    print("\n\tComputing the spectrum ... ", end="")
+    print("\n\t Computing the spectrum ... ", end="")
     # axis_fourier = args.axis_time if args.axis_time < args.axis_components else args.axis_time - 1
     spectrum, freq = compute_spectrum(autocorr,axis=args.axis_time,pad=args.padding,dt=args.time_step,shift=True) # e^2 ang^2 / fs
     print("done")
-    print("\tspectrum shape: :",spectrum.shape)
+    print("\t spectrum shape: :",spectrum.shape)
     
     #------------------#
-    print("\n\tMultiplying the spectrum by the normalizing factor  ... ", end="")
+    print("\n\t Multiplying the spectrum by the normalizing factor  ... ", end="")
     spectrum = spectrum.real*norm_der
     print("done")
     
     #------------------#
-    print("\tReading atomic structure from file '{:s}' ... ".format(args.input), end="")
+    print("\t Reading atomic structure from file '{:s}' ... ".format(args.input), end="")
     atoms = read(args.input,format=args.input_format,index=0)
     print("done")
     volume = atoms.get_volume()
-    print(f"\tvolume: {volume:.2f} ang3")
+    print(f"\t volume: {volume:.2f} ang3")
     volume = convert(volume,"volume","angstrom3","atomic_unit")
     args.temperature = convert(args.temperature,"temperature","kelvin","atomic_unit")
     epsilon = 1/(4*np.pi)
@@ -169,27 +169,27 @@ def main(args):
     # print(max(spectrum.real))
 
    #------------------#
-    print("\n\tComputing the average over the trajectories ... ", end="")
+    print("\n\t Computing the average over the trajectories ... ", end="")
     N = spectrum.shape[args.axis_samples]
     std:np.ndarray      = np.std (spectrum,axis=args.axis_samples)
     spectrum:np.ndarray = np.mean(spectrum,axis=args.axis_samples)
     err:np.ndarray      = std/np.sqrt(N-1)
     print("done")
-    print("\tspectrum shape: :",spectrum.shape)
+    print("\t spectrum shape: :",spectrum.shape)
 
     assert spectrum.ndim == 1, "the spectrum does not have 1 dimension"
     
     # print(max(spectrum.real))
 
     #------------------#
-    print("\n\tComputing the frequencies ... ", end="")
+    print("\n\t Computing the frequencies ... ", end="")
     freq = get_freq(dt=args.time_step, N=len(spectrum),input_units="atomic_unit",output_units=args.freq_unit)
     # freq = convert(freq,'frequency','thz',args.freq_unit)
     print("done")
-    print("\tmax freq: ",freq[-1],f" {args.freq_unit}")
+    print("\t max freq: ",freq[-1],f" {args.freq_unit}")
 
     #------------------#
-    print("\n\tSaving the spectrum and the frequecies to file '{:s}' ... ".format(args.output), end="")
+    print("\n\t Saving the spectrum and the frequecies to file '{:s}' ... ".format(args.output), end="")
     tmp =  np.vstack((freq,spectrum,std,err)).T
     assert tmp.ndim == 2, "this array should have 2 dimensions"
     tmp = PhysicalTensor(tmp)
@@ -206,7 +206,7 @@ def main(args):
     
     #------------------#
     if args.output_autocorr is not None:
-        print("\n\tSaving the autocorrelation and time to file '{:s}' ... ".format(args.output_autocorr), end="")
+        print("\n\t Saving the autocorrelation and time to file '{:s}' ... ".format(args.output_autocorr), end="")
         
         # func = extend2NDarray(np.fft.ifftshift)
         # autocorr = func(autocorr,axis=args.axis_time)   
