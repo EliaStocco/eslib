@@ -6,6 +6,11 @@ from eslib.classes.tcf import TimeAutoCorrelation, compute_spectrum, get_freq, a
 from eslib.formatting import esfmt
 from eslib.tools import convert
 from eslib.mathematics import centered_window
+from eslib.input import itype
+from eslib.io_tools import numpy_take
+from eslib.functional import extend2NDarray
+from scipy import signal
+from eslib.mathematics import mean_std_err
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -18,12 +23,14 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-d"  , "--dipole"          , **argv, required=True , type=str  , help="txt/npy input file")
-    parser.add_argument("-o"  , "--output"          , **argv, required=False, type=str  , help="txt/npy output file (default: %(default)s)", default='IR.txt')
+    parser.add_argument("-o"  , "--output"          , **argv, required=False, type=str  , help="txt output file with the spectrum (default: %(default)s)", default='IR.txt')
+    parser.add_argument("-oac", "--output_autocorr" , **argv, required=False, type=str  , help="txt output file with autocorrelation function (default: %(default)s)", default=None)
     parser.add_argument("-dt" , "--time_step"       , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
     parser.add_argument("-T"  , "--temperature"     , **argv, required=True , type=float   , help="temperature [K]")
     parser.add_argument("-i"  , "--input"           , **argv, required=True , type=str     , help="file with the atomic structure")
     parser.add_argument("-if" , "--input_format"    , **argv, required=False, type=str     , help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-pad", "--padding"         , **argv, required=False, type=int  , help="padding length w.r.t. TACF length (default: %(default)s)", default=2)
+    parser.add_argument("-n"  , "--index"           , **argv, required=False, type=itype, help="index to be read from input file (default: %(default)s)", default=':')
     # parser.add_argument("-int", "--interpolate"     , **argv, required=False, type=int  , help="interpolation sampling multiplier (default: %(default)s)", default=1)
     # parser.add_argument("-inm", "--interpolate_mode", **argv, required=False, type=int  , help="interpolation mode (default: %(default)s)", default="none",choices=['linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', 'next','none'])
     parser.add_argument("-as" , "--axis_samples"    , **argv, required=False, type=int  , help="axis corresponding to independent trajectories/samples (default: %(default)s)", default=0)
@@ -38,6 +45,7 @@ def prepare_args(description):
 @esfmt(prepare_args,description)
 def main(args):
     
+    dt = args.time_step
     args.time_step = convert(args.time_step,"time","femtosecond","atomic_unit")
     args.window_t = convert(args.window_t,"time","femtosecond","atomic_unit")
 
@@ -49,7 +57,15 @@ def main(args):
     if data.ndim == 2:
         data = data[np.newaxis,:,:]
     print("\tdata shape: ",data.shape)
+    
+    if args.index is not None and args.index != ":":
+        print("\n\tResampling data ... ", end="")
+        data = numpy_take(data, args.index, axis=args.axis_time)
+        print("done")
+        print("\tdata shape: ",data.shape)
+    
     data = convert(data,"electric-dipole","eang","atomic_unit")
+
 
     #------------------#
     print("\n\tComputing the derivative ... ",end="")
@@ -104,15 +120,30 @@ def main(args):
     print("\tautocorr shape: ",autocorr.shape)
     
     #------------------#
-    print("\tComputing normalizing factor ... ",end="")
+    print("\n\tPrinting <mu_i^2>:")
+    tmp = np.moveaxis(norm_der, [args.axis_samples,args.axis_components], [0,1])
+    assert tmp.shape[2] == 1, "the shape of the array is not correct"
+    tmp = tmp[:,:,0]
+    print("\t---------------------------------------------------")
+    print("\t| {:>8} | {:>10} | {:>10} | {:>10} |".format("sample","x","y","z"))
+    print("\t---------------------------------------------------")
+    for i in range(tmp.shape[0]):
+        print(f"\t| {i:>8} | {tmp[i,0]:10.4e} | {tmp[i,1]:10.4e} | {tmp[i,2]:10.4e} |")
+    print("\t---------------------------------------------------")
+    
+    #------------------#
+    print("\n\tComputing normalizing factor ... ",end="")
+    norm_std = float(np.std(np.sum(norm_der,axis=args.axis_components)))
     norm_der = float(np.mean(np.sum(norm_der,axis=args.axis_components)))
     print("done")
-    print("\tnormalizing factor: ",norm_der)
+    print(f"\t    norm. factor: {norm_der:.2e} [e^2ang^2]")
+    print(f"\tnorm. factor std: {norm_std:.2e} [e^2ang^2]")
+    print(f"\tnorm. factor std: {100*norm_std/norm_der:.2f} [%]")
 
     #------------------#
     if args.axis_components is not None:
         print("\n\tComputing the sum along the axis {:d} ... ".format(args.axis_components),end="")
-        autocorr = np.sum(autocorr,axis=args.axis_components)
+        autocorr = np.sum(autocorr,axis=args.axis_components)# /np.sqrt(autocorr.shape[args.axis_components])
         print("done")
         print("\tautocorr shape: ",autocorr.shape)
 
@@ -130,22 +161,10 @@ def main(args):
         print("\n\tApplying the '{:s}' window ... ".format(args.window),end="")
         M = int(args.window_t / args.time_step)
         window = centered_window(args.window,raw_autocorr.shape[args.axis_time],M)
-        # func = getattr(np, args.window)
-        # window = np.zeros(raw_autocorr.shape[args.axis_time])
-        # M = int(args.window_t / args.time_step)
-        # window[:M] = func(2*M)[M:]
-        # window[:M] = func(M)
-        # window /= window[0] # small correction so that the first value is 1
         print("done")
         print("\twindow shape: ",window.shape)
         autocorr = raw_autocorr * window
-        
-        # import matplotlib.pyplot as plt
-        # plt.plot(window,label="window")
-        # plt.plot(autocorr[0,:]/np.max(autocorr[0,:]),label="autocorr")
-        # plt.legend()
-        # plt.show()
-        
+            
         # #------------------#
         # print("\n\tPerforming inverse Fourier transform ... ", end="")
         # autocorr_time_domain = np.fft.irfft(autocorr, axis=args.axis_time)
@@ -227,6 +246,27 @@ def main(args):
     else:
         tmp.to_file(file=args.output)
     print("done")
+    
+    #------------------#
+    if args.output_autocorr is not None:
+        print("\n\tSaving the autocorrelation and time to file '{:s}' ... ".format(args.output_autocorr), end="")
+        
+        # func = extend2NDarray(np.fft.ifftshift)
+        # autocorr = func(autocorr,axis=args.axis_time)   
+        N = data.shape[args.axis_time]
+        lags = signal.correlation_lags(N,N, mode="full")*dt
+        mean,std,err = mean_std_err(autocorr,axis=args.axis_samples)
+        
+        tmp =  np.vstack((lags,mean,std,err)).T
+        assert tmp.ndim == 2, "this array should have 2 dimensions"
+        tmp = PhysicalTensor(tmp)
+        header = \
+            f"Col 1: time/lag in femtosecond\n" +\
+            f"Col 2: autocorrelation function (normalized)\n" +\
+            f"Col 3: std (over trajectories) of the autocorrelation\n"+\
+            f"Col 4: error of the autocorrelation (std/sqrt(N-1), with N = n. of trajectories)"
+        tmp.to_file(file=args.output_autocorr,header=header)
+        print("done")
 
     return 0
 
