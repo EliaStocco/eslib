@@ -6,7 +6,7 @@ from eslib.classes.tcf import compute_spectrum, get_freq, autocorrelate
 from eslib.formatting import esfmt, eslog
 from eslib.tools import convert
 from eslib.mathematics import centered_window
-from eslib.input import itype
+from eslib.input import itype, str2bool
 from eslib.io_tools import numpy_take
 from scipy import signal
 from eslib.mathematics import mean_std_err
@@ -24,6 +24,8 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-d"  , "--dipole"          , **argv, required=True , type=str  , help="txt/npy input file")
+    parser.add_argument("-id" , "--is_derivative"   , **argv, required=False, type=str2bool, help="whether the input is the time derivative of the dipole [or the dipole itself] (default: %(default)s)", default=False)
+    parser.add_argument("-iu" , "--input_unit"      , **argv, required=False, type=str  , help="input unit (default: %(default)s)", default=None)
     parser.add_argument("-o"  , "--output"          , **argv, required=False, type=str  , help="txt output file with the spectrum (default: %(default)s)", default='IR.txt')
     parser.add_argument("-oac", "--output_autocorr" , **argv, required=False, type=str  , help="txt output file with autocorrelation function (default: %(default)s)", default=None)
     parser.add_argument("-dt" , "--time_step"       , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
@@ -45,6 +47,12 @@ def prepare_args(description):
 def main(args):
     
     #------------------#
+    print("\tAxes:")
+    print("\t - samples:",args.axis_samples)
+    print("\t - time:",args.axis_time)
+    print("\t - components:",args.axis_components)    
+    
+    #------------------#
     dt = args.time_step
     args.time_step = convert(args.time_step,"time","femtosecond","atomic_unit")
     args.window_t = convert(args.window_t,"time","femtosecond","atomic_unit")
@@ -62,22 +70,33 @@ def main(args):
         data = numpy_take(data, args.index, axis=args.axis_time)
         print("done")
         print("\t data shape: ",data.shape)
-    
-    data = convert(data,"electric-dipole","eang","atomic_unit")
-
-    #------------------#
-    print("\n\t Computing the derivative ... ",end="")
-    data = np.gradient(data,axis=args.axis_time)/args.time_step # e ang/fs
-    print("done")
-    print("\t data shape: ",data.shape)    
-    
+        
+    if not args.is_derivative:
+        
+        if args.input_unit is None:
+            args.input_unit = "eang"
+        
+        print(f"\n\t Converting data from '{args.input_unit}' to 'atomic_unit' ... ",end="")
+        data = convert(data,"electric-dipole",args.input_unit,"atomic_unit")
+        print("done")
+        
+        #------------------#
+        print("\n\t Computing the time derivative ... ",end="")
+        data = np.gradient(data,axis=args.axis_time)/args.time_step # e ang/fs
+        print("done")
+        print("\t data shape: ",data.shape)   
+        
+    else:
+        
+        assert args.input_unit == None, "No unit conversion suppported for the time derivative of the dipole." 
+        
     #------------------#
     print("\n\t Removing the mean ... ",end="")
     data -= np.mean(data, axis=args.axis_time,keepdims=True)
     print("done")
 
     #------------------#
-    with eslog("\n Computing the autocorrelation function"):
+    with eslog("\nComputing the autocorrelation function"):
         autocorr = autocorrelate(data,axis=args.axis_time,use_parallel=PARALLEL) # e^2 ang^2 / fs^2
     print("\t autocorr shape: ",autocorr.shape)
     
@@ -87,7 +106,7 @@ def main(args):
     print("done")
     print("\t norm shape: ",norm_der.shape)
     
-    print("\t Normalizing autocorr ... ",end="")
+    print("\n\t Normalizing autocorr ... ",end="")
     assert np.allclose(autocorr[:,int(autocorr.shape[1]/2),:],norm_der[:,0,:]), "the normalization factor is not correct"
     autocorr /= norm_der
     assert np.allclose(autocorr[:,int(autocorr.shape[1]/2),:],1), "the normalization factor is not correct"
@@ -113,7 +132,7 @@ def main(args):
     print("done")
     print(f"\t     norm. factor: {norm_der:.2e} [e^2ang^2]")
     print(f"\t norm. factor std: {norm_std:.2e} [e^2ang^2]")
-    print(f"\t norm. factor std: {100*norm_std/norm_der:.2f} [%]")
+    print(f"\t norm. factor std: {100*norm_std/norm_der:.2f} [%] (this should be small)")
 
     #------------------#
     if args.axis_components is not None:
