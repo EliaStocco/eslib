@@ -108,7 +108,7 @@ def main(args):
         assert np.allclose(np.linalg.norm(vectors, axis=1), 1.0), "Vectors are not unit vectors!"
         vectors = vectors[:,None,:] # add unit-cell
         projection = np.asarray(np.einsum('abi,abi->ab',dipole_array, vectors))
-        projection = melt(projection,index={0: "structure", 1: "unit_cell"}, value_names="dipole_projection")
+        projection = melt(projection,index={0: "structure", 1: "unit_cell"}, value_names=["dipole_projection"])
         data = pd.merge(data, projection, on=["structure","unit_cell"], how='inner')
         
     #------------------#

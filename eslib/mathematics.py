@@ -344,8 +344,8 @@ def melt(
     value_axes = value_axes[0]  # Get the single value axis index
     
     # If value names are not provided, create default names for the value columns
-    if value_names is None:
-        value_names = [f"value_{i+1}" for i in range(len(value_axes))]
+    assert value_names is not None, "error"
+    # value_names = [f"value_{i+1}" for i in range(len(value_axes))]
     
     # Generate meshgrid for all indices in the array
     ii = np.asarray(shape)[index_axes]

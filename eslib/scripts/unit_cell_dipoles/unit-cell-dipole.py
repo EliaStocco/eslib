@@ -47,10 +47,10 @@ def main(args):
     
     #------------------#
     with eslog("\nCreating atomic dipoles dataframe"):
-        testAD = melt(atomic_dipoles,index={0:'structure',1:'atom',2:'component'},value_names="atomic_dipoles")
+        testAD = melt(atomic_dipoles,index={0:'structure',1:'atom',2:'component'},value_names=["atomic_dipoles"])
         
     with eslog("Creating unit cells dataframe"):
-        testUC = melt(unit_cell.astype(int),index={0:'structure',1:'atom'},value_names="unit_cell")
+        testUC = melt(unit_cell.astype(int),index={0:'structure',1:'atom'},value_names=["unit_cell"])
         
     with eslog("Merging dataframes"):
         data = pd.merge(testAD, testUC)

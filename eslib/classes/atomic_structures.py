@@ -180,7 +180,10 @@ class AtomicStructures(Trajectory,aseio):
                 # value = structure.arrays[name]
                 output[n] = structure.arrays[name]
                 # shapes[n] = value.shape
-        return output
+        try:
+            return np.asarray(output)
+        except:
+            return output
 
     def get(self:T,name:str,default:np.ndarray=None,what:str="all")->np.ndarray:
         """

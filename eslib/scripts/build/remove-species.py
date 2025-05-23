@@ -8,7 +8,7 @@ from eslib.classes.physical_tensor import PhysicalTensor
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Remove species for a file."
+description = "Remove structures containing some chemical species from a file."
 
 #---------------------------------------#
 def prepare_args(description):
@@ -36,15 +36,29 @@ def main(args):
 
     #-------------------#
     # remove species
-    print("\n\tRemoving species: ",args.species)
+    print("\n\tFinding structures that contains the following species: ",args.species)
+    keep = np.zeros(len(structures),dtype=bool)
     for n,atoms in enumerate(structures):
         print("\t - {:d}/{:d}".format(n+1,N),end="\r")
         symbols = atoms.get_chemical_symbols()
-        indices = [ i for i,s in enumerate(symbols) if s not in args.species ]
+        symbols = set(symbols)
+        if not any( [s in args.species for s in symbols]):
+            keep[n] = True
+        # indices = [ i for i,s in enumerate(symbols) if s not in args.species ]
         # if len(indices) != len(atoms):
         #     pass
-        structures[n] = atoms[indices]
+        # structures[n] = atoms[indices]
     print("\tdone")
+    
+    #-------------------#
+    N = np.sum(~keep)
+    print(f"\tFound {N} structures containig ",args.species)
+    print("\n\tRemoving these structures ... ",end="")
+    ii = np.arange(len(structures))
+    ii = ii[keep]
+    structures = structures.subsample(ii)
+    print("done")
+    print("\n\tn. of remaining structures: ",len(structures))
         
     #-------------------#
     # output
