@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import json
-from typing import List
+# from typing import List
 
 import numpy as np
-from ase import Atoms
+# from ase import Atoms
 
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.classes.models.dipole import DipolePartialCharges
