@@ -4,13 +4,13 @@ from typing import Any, Dict, List
 import numpy as np
 from ase import Atoms
 from ase.calculators.calculator import Calculator, all_changes
-from eslib.classes.models.dipole.baseclass import DipoleModel
+# from eslib.classes.models.dipole.baseclass import DipoleModel
 from eslib.tools import add_info_array
 from eslib.io_tools import read_json
 
 
 @dataclass
-class DipolePartialCharges(DipoleModel):
+class DipolePartialCharges(Calculator):
 
     charges: Dict[str,float]
     instructions:str                       = field(default=None)      
