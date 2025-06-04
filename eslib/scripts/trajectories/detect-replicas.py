@@ -70,7 +70,6 @@ def main(args):
                 structures.to_file(file=args.output,format=args.output_format)
         
     #------------------#
-    usteps = np.append(usteps[:10],usteps[12:])
     all_steps = np.arange(np.max(usteps) + 1, dtype=int)
     if usteps.shape == all_steps.shape and np.allclose(usteps, all_steps):
         msg = "no missing values found"
