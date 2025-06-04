@@ -2,8 +2,6 @@ from copy import deepcopy
 from typing import List, TypeVar, Union, Tuple
 from warnings import warn
 
-from sympy import symbols
-
 from ase import Atoms
 from ase.cell import Cell
 import numpy as np
