@@ -16,9 +16,9 @@ def prepare_args(description):
     parser.add_argument("-i"  , "--input"        , **argv, required=True , type=str, help="input file [extxyz]")
     parser.add_argument("-if" , "--input_format" , **argv, required=False, type=str, help="input file format (default: %(default)s)", default=None)
     parser.add_argument("-k"  , "--keyword"      , **argv, required=False, type=str, help="keyword of the info/array (default: %(default)s)", default="ipi_comment")
-    parser.add_argument("-n"  , "--indices"      , **argv, required=False, type=str, help="output file with all the steps read from the input file (default: %(default)s)", default="MD_steps.txt")
-    parser.add_argument("-u"  , "--unique"       , **argv, required=False, type=str, help="output file with the indices of the unique steps for subsampling (default: %(default)s)", default="unique-MD_steps.txt")
-    parser.add_argument("-m"  , "--missing"      , **argv, required=False, type=str, help="output file with the missing steps (default: %(default)s)", default="unique-MD_steps.txt")
+    parser.add_argument("-s"  , "--steps"        , **argv, required=False, type=str, help="output file with all the steps read from the input file (default: %(default)s)", default="None")
+    parser.add_argument("-u"  , "--unique"       , **argv, required=False, type=str, help="output file with the indices of the unique steps for subsampling (default: %(default)s)", default="indices.txt")
+    parser.add_argument("-m"  , "--missing"      , **argv, required=False, type=str, help="output file with the missing steps (default: %(default)s)", default="missing.txt")
     parser.add_argument("-o"  , "--output"       , **argv, required=False, type=str, help="output file with the unique indices/steps(default: %(default)s)", default=None)
     parser.add_argument("-of" , "--output_format", **argv, required=False, type=str, help="output format for np.savetxt (default: %(default)s)", default=None)
     return parser
@@ -40,8 +40,9 @@ def main(args):
         steps = np.asarray([int(re.search(r'Step:\s+(\d+)', line).group(1)) for line in ipi_comments]).astype(int)
         
     #------------------#
-    with eslog(f"Saving indices to file '{args.indices}'"):
-        np.savetxt(args.indices,steps)
+    if args.steps is not None:
+        with eslog(f"Saving indices to file '{args.steps}'"):
+            np.savetxt(args.steps,steps)
     
     #------------------#        
     all_steps = np.arange(np.max(steps) + 1, dtype=int)
