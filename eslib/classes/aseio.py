@@ -3,19 +3,16 @@ import glob
 import math
 import os
 import re
+import numpy as np
+
 from concurrent.futures import ProcessPoolExecutor
 from typing import Any, Callable, Dict, List, Match, TypeVar, Union
-import numpy as np
+
 from ase import Atoms, io
 from ase.cell import Cell
 from ase.io.formats import filetype
 
-from eslib.classes.file_formats.hdf5 import read_hdf5, write_hdf5
-from eslib.classes.file_formats.pdb import read_pdb
-from eslib.classes.file_formats.npz import read_npz, write_npz
 from eslib.classes.io import pickleIO
-from eslib.functions import extract_number_from_filename
-from eslib.tools import convert
 from eslib.io_tools import read_comments_ipi, integer_to_slice_string
 from eslib.functions import FakeList
 
@@ -142,6 +139,7 @@ def file_pattern(method: M) -> M:
             
             if len(matched_files) > 1:            
                 try:
+                    from eslib.functions import extract_number_from_filename
                     matched_files = [ matched_files[i] for i in np.argsort(np.asarray([ int(extract_number_from_filename(x)) for x in matched_files ])) ]
                 except:
                     pass
@@ -198,24 +196,18 @@ class aseio(List[Atoms], pickleIO):
             _,format = os.path.splitext(file)
             format = format[1:]
         if format.lower() in ["h5","hdf5"]:
+            raise ValueError("Disabled HDF5")
+            from eslib.classes.file_formats.hdf5 import read_hdf5
             index = argv['index'] if 'index' in argv else slice(None,None,None)
             index = integer_to_slice_string(index)
             traj = read_hdf5(filename=file,index=index)
-        # elif format.lower() in ["nc","netcdftrajectory"]:
-        #     warn("NetCDF trajectory format is deprecated. Use 'hdf5/h5' format instead.",DeprecationWarning)
-        #     index = argv['index'] if 'index' in argv else slice(None,None,None)
-        #     index = integer_to_slice_string(index)
-        #     traj = read_netcdftrajectory(filename=argv['file'],index=index)    
-        #     if not isinstance(traj,list):
-        #         traj = [traj]             
-        # elif format.lower() in ["netcdf"]: 
-        #     warn("NetCDF trajectory format is deprecated. Use 'hdf5/h5' format instead.",DeprecationWarning)
-        #     traj = read_netcdf(file)
         elif format.lower() in ["pdb"]:
+            from eslib.classes.file_formats.pdb import read_pdb
             traj = [read_pdb(file)]
         elif format.lower() in ["npz"]:
             index = argv['index'] if 'index' in argv else slice(None,None,None)
             index = integer_to_slice_string(index)
+            from eslib.classes.file_formats.npz import read_npz
             traj = read_npz(filename=file,index=index)
         else:
             traj = read_trajectory(**argv)
@@ -249,13 +241,12 @@ class aseio(List[Atoms], pickleIO):
                 string = " positions{angstrom} cell{angstrom}"
                 comment = fmt_header%(*params,string)
                 io.write(file, atoms, format="xyz", append=True, comment=comment)
-        # elif format.lower() in ["nc","netcdftrajectory"]:
-        #     write_netcdftrajectory(filename=file,images=self.to_list())
-        # elif format.lower() in ["netcdf"]:
-        #     write_netcdf(file,self.to_list())
         elif format.lower() in ["h5","hdf5"]:
+            raise ValueError("Disabled HDF5")
+            from eslib.classes.file_formats.hdf5 import write_hdf5
             write_hdf5(file,self.to_list())
         elif format.lower() in ["npz"]:
+            from eslib.classes.file_formats.npz import write_npz
             write_npz(file,self.to_list())
         else:
             io.write(images=self, filename=file, format=format)
@@ -368,6 +359,8 @@ def read_trajectory(file:str,
         pbc = pbc if pbc is not None else True
 
         with open(file,"r") as ffile:
+            
+            from eslib.tools import convert
 
             # units
             comment = read_comments_ipi(ffile,slice(0,1,None))[0]
