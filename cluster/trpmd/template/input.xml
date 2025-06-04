@@ -1,0 +1,62 @@
+<simulation verbosity='high'>
+
+  <total_steps>440000 </total_steps>
+  <total_time> 28000 </total_time>
+
+  <ffsocket mode='unix' name='PES' pbc='False'>
+    <address>HOSTNAME_PES</address>
+  </ffsocket>
+
+  <ffsocket mode='unix' name='DIPOLE' pbc='False'>
+    <address>HOSTNAME_DIP</address>
+  </ffsocket>
+
+  <output prefix='i-pi'>         
+    <trajectory stride='4' format='ase' filename='xc' > x_centroid </trajectory>
+    <trajectory stride='4' format='ase' filename='vc' > v_centroid </trajectory>
+    <properties stride='1'              filename='properties.out'> 
+      [ step, time{picosecond}, conserved{electronvolt}, potential{electronvolt}, kinetic_md{electronvolt}, temperature{kelvin}, dipole{eang}, dipole_dtime  ] 
+    </properties>
+  </output>
+
+  <prng>
+    <seed>SEED</seed>
+  </prng>
+
+  <system>
+
+    <forces> 
+      <force forcefield='PES'> </force>
+      <force forcefield='DIPOLE'> </force>
+    </forces>
+
+    <initialize nbeads='32'>
+      <file mode='ase'>  start.extxyz </file>
+      <velocities mode='thermal' units='kelvin'> 300 </velocities>
+    </initialize>
+
+    <ensemble>
+      <temperature units='kelvin'>300</temperature>
+    </ensemble>
+
+    <motion mode='driven_dynamics'>
+      <driven_dynamics mode='eda-nvt'>
+          <timestep units='femtosecond'> 0.25 </timestep>
+          <thermostat mode='pile_g'>
+              <tau units='femtosecond'> 500 </tau>
+              <pile_lambda> 0.5 </pile_lambda>
+          </thermostat>
+          <bec mode="driver"> </bec>
+          <efield>
+            <amp units="v/ang"> [ 0 , 0, EFIELD ] </amp>             <!-- amplitude of the electric field pulse in a.u. -->
+            <freq units="thz"> 0 </freq>            <!-- frequency of the electric field pulse in THz -->
+          </efield>
+        </driven_dynamics>
+    </motion>
+
+  </system>
+</simulation>
+
+
+
+
