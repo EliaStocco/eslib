@@ -46,6 +46,7 @@ def main(args):
     
     #------------------#        
     all_steps = np.arange(np.max(steps) + 1, dtype=int)
+    usteps, indices = np.unique(steps, return_index=True)
 
     if steps.shape == all_steps.shape and np.allclose(steps, all_steps):
         msg = "no replicas found"
@@ -54,7 +55,7 @@ def main(args):
         msg = "found replicas"
         print(f"\n\t {warning}: {msg}.") 
         
-        usteps, indices = np.unique(steps, return_index=True)
+        # usteps, indices = np.unique(steps, return_index=True)
         # assert np.allclose(steps,usteps[indices]), "coding error"
         # if msg == "no replicas found":
         #     assert np.allclose(usteps,steps), "coding error"
