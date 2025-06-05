@@ -46,7 +46,7 @@ def main(args):
     
     #------------------#        
     all_steps = np.arange(np.max(steps) + 1, dtype=int)
-    usteps, indices = np.unique(steps, return_index=True)
+    usteps, indices = np.unique(steps, return_inverse=True)
 
     if steps.shape == all_steps.shape and np.allclose(steps, all_steps):
         msg = "no replicas found"
@@ -54,12 +54,7 @@ def main(args):
     else:
         msg = "found replicas"
         print(f"\n\t {warning}: {msg}.") 
-        
-        # usteps, indices = np.unique(steps, return_index=True)
-        # assert np.allclose(steps,usteps[indices]), "coding error"
-        # if msg == "no replicas found":
-        #     assert np.allclose(usteps,steps), "coding error"
-        #     assert np.allclose(usteps,indices), "coding error"
+        print(f"\tn. of replicas: {len(all_steps)-len(usteps):d}")
         
         with eslog(f"Saving unique indices to file '{args.unique}'"):
             np.savetxt(args.unique,indices)
@@ -69,6 +64,11 @@ def main(args):
                 structures  = structures.subsample(indices)
             with eslog(f"Saving structures to file '{args.output}'"):
                 structures.to_file(file=args.output,format=args.output_format)
+                
+    assert np.allclose(steps[indices],usteps), "coding error"
+    if msg == "no replicas found":
+        assert np.allclose(usteps,steps), "coding error"
+        assert np.allclose(usteps,indices), "coding error"
         
     #------------------#
     all_steps = np.arange(np.max(usteps) + 1, dtype=int)
