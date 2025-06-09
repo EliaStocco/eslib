@@ -12,7 +12,7 @@ description = "Create a supercell for the given atomic structures."
 
 documentation = \
 """
--t/--type: 
+    -t/--type: 
     str (ASE default: "cell-major")
     how to order the atoms in the supercell
 
@@ -40,7 +40,7 @@ def prepare_parser(description):
     argv = {"metavar":"\b"}
     parser.add_argument("-i" , "--input"        , **argv, type=str, help="file with the atomic structures")
     parser.add_argument("-if", "--input_format" , **argv, type=str, help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-m" , "--matrix"       , **argv, type=str, help="txt file with the 3x3 transformation matrix")
+    parser.add_argument("-m" , "--matrix"       , **argv, type=str, help="txt file with the 3x3 transformation matrix or 3/9 integers separated by spaces")
     parser.add_argument("-t" , "--type"         , **argv, type=str, help=f"order type {choices}"+" (default: %(default)s)" , default="phonopy",choices=choices)
     parser.add_argument("-o" , "--output"       , **argv, type=str, help="output file")
     parser.add_argument("-of", "--output_format", **argv, type=str, help="output file format (default: %(default)s)", default=None)
