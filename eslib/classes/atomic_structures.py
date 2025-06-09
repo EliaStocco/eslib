@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import List, TypeVar, Union, Tuple
+from typing import List, TypeVar, Union, Tuple, Callable, Optional
 from warnings import warn
 
 from ase import Atoms
@@ -536,8 +536,31 @@ class AtomicStructures(Trajectory,aseio):
             self.set("positions",pos)
         return pos
           
-        
-        
+    def apply(self, func: Callable[[Atoms], None], parallel: bool = False, processes: Optional[int] = None):
+        """
+        Apply a function to each Atoms object.
+
+        Parameters:
+            func: function to apply to each Atoms
+            parallel: run in parallel if True
+            processes: number of worker processes (default: number of CPUs)
+
+        Returns:
+            None
+        """
+        if parallel:
+            from multiprocessing import Pool
+            if processes is None:
+                import os
+                processes = os.cpu_count()
+            with Pool(processes=processes) as pool:
+                pool.map(func, [ a for a in self])
+        else:
+            for structure in self:
+                structure = func(structure)
+        return
+
+    
             
 def random_water_structure(num_molecules=1):
     from ase import Atoms
