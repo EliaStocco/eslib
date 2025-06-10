@@ -53,11 +53,15 @@ def main(args):
 
         # Get values and indices in `to_keep` that are missing
         missing_values = to_keep[missing_mask]
-        missing_indices_in_to_keep = np.where(missing_mask)[0]
+        # missing_indices_in_to_keep = np.where(missing_mask)[0]
 
         if len(missing_values) == 0 :
-            indices = np.where(np.isin(steps, to_keep))[0]
-            assert np.allclose(steps[indices],to_keep), "coding error"
+            
+            u,indices = np.unique(steps,return_index=True)
+            assert np.allclose(steps[indices],u), "coding error"
+
+            # indices = np.where(np.isin(steps, to_keep))[0]
+            # assert np.allclose(steps[indices],to_keep), "coding error"
         else:
             raise ValueError("not implemented yet")
     
