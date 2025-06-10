@@ -29,6 +29,7 @@ def main(args):
     #------------------#
     with eslog(f"Reading structures from file '{args.input}'"):
         structures = AtomicStructures.from_file(file=args.input,format=args.input_format)
+    print(f"\tn. of structures: {len(structures)}")
         
     #------------------#
     with eslog(f"Extracting '{args.keyword}'"):
@@ -71,6 +72,7 @@ def main(args):
         ipi_comments = structures.get(args.keyword)
         steps = np.asarray([int(re.search(r'Step:\s+(\d+)', line).group(1)) for line in ipi_comments]).astype(int)
         assert np.allclose(steps,to_keep), "coding error"
+    print(f"\tn. of structures: {len(structures)}")
     
     #------------------#
     with eslog(f"Saving structures to file '{args.output}'"):
