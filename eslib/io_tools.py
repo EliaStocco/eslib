@@ -225,7 +225,7 @@ def pattern2sorted_files(patter):
             
     # Raise an error if no files were found
     if not matched_files:
-        raise ValueError("No files found")
+        raise ValueError(f"No files found for {patter} (working directory is: {os.getcwd()})")
     
     if len(matched_files) > 1:            
         try:

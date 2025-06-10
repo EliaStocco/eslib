@@ -135,7 +135,7 @@ def file_pattern(method: M) -> M:
             
             # Raise an error if no files were found
             if not matched_files:
-                raise ValueError("No files found")
+                raise ValueError(f"No files found for {kwargs['file']} (working directory is: {os.getcwd()})")
             
             if len(matched_files) > 1:            
                 try:
