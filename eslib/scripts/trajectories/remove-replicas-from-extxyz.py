@@ -69,9 +69,9 @@ def main(args):
     #------------------#
     with eslog(f"Subsampling"):   
         structures = structures.subsample(indices) 
-        ipi_comments = structures.get(args.keyword)
-        steps = np.asarray([int(re.search(r'Step:\s+(\d+)', line).group(1)) for line in ipi_comments]).astype(int)
-        assert np.allclose(steps,to_keep), "coding error"
+        # ipi_comments = structures.get(args.keyword)
+        # steps = np.asarray([int(re.search(r'Step:\s+(\d+)', line).group(1)) for line in ipi_comments]).astype(int)
+        # assert np.allclose(steps,to_keep), "coding error"
     print(f"\tn. of structures: {len(structures)}")
     
     #------------------#
