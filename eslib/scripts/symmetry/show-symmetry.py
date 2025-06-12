@@ -7,7 +7,6 @@ import spglib
 from ase import Atoms
 from ase.spacegroup import get_spacegroup
 from ase.spacegroup.spacegroup import Spacegroup
-from joblib import PrintTime
 from phonopy.cui.show_symmetry import _get_symmetry_yaml
 from phonopy.structure.atoms import PhonopyAtoms
 from phonopy.structure.cells import (Primitive, get_primitive,

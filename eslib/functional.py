@@ -4,7 +4,6 @@ from typing import Any, Callable
 from functools import wraps
 import numpy as np
 import multiprocessing as mp
-from joblib import Parallel, delayed
 
 def extend2NDarray(func_1d) -> Callable:
     @wraps(func_1d)
@@ -19,6 +18,7 @@ def extend2NDarray(func_1d) -> Callable:
             return func_1d(x1d, *args, **kwargs)
 
         if use_parallel:
+            from joblib import Parallel, delayed
             results = Parallel(n_jobs=-1)(
                 delayed(apply_idx)(idx) for idx in indices
             )
