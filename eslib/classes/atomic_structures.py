@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import List, TypeVar, Union, Tuple, Callable, Optional
+from typing import Any, List, TypeVar, Union, Tuple, Callable, Optional
 from warnings import warn
 
 from ase import Atoms
@@ -559,6 +559,45 @@ class AtomicStructures(Trajectory,aseio):
             for structure in self:
                 structure = func(structure)
         return
+
+    def call(self, func: Callable[[Atoms], List[Any]], parallel: bool = True, processes: Optional[int] = None)->List[Any]:
+        """
+        Apply a function to each Atoms object.
+
+        Parameters:
+            func: function to apply to each Atoms (can be lambda)
+            parallel: run in parallel if True
+            processes: number of threads (default: number of CPUs)
+
+        Returns:
+            List of results from applying func to each Atoms
+        """
+        structures = list(self)
+
+        if not parallel:
+            return [func(a) for a in structures]
+
+        if processes is None:
+            from os import cpu_count
+            processes = cpu_count()
+        
+            
+        from concurrent.futures import ThreadPoolExecutor
+        from itertools import chain
+        from math import ceil
+
+        # Split into chunks ~1 per thread
+        chunk_size = ceil(len(structures) / processes)
+        chunks = [structures[i:i + chunk_size] for i in range(0, len(structures), chunk_size)]
+
+        def batch_worker(batch):
+            return [func(a) for a in batch]
+
+        with ThreadPoolExecutor(max_workers=processes) as executor:
+            results = executor.map(batch_worker, chunks)
+
+        return list(chain.from_iterable(results))
+
 
     
             
