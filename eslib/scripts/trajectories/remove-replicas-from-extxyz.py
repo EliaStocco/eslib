@@ -9,6 +9,8 @@ from eslib.input import ilist
 # Description of the script's purpose
 description = "Detect the replicas in a extxyz file."
 
+# TODO: still to debug
+
 #---------------------------------------#
 def prepare_args(description):
     import argparse
