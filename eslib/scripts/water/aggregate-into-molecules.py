@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 import numpy as np
-import torch
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import esfmt, eslog, float_format
-from eslib.input import slist, str2bool
-from eslib.mathematics import melt, pandas2ndarray
-from ase import Atoms
 import pandas as pd
+from eslib.classes.atomic_structures import AtomicStructures
+from eslib.formatting import esfmt, eslog
+from eslib.input import slist
+from eslib.mathematics import melt
 
 #---------------------------------------#
 # Description of the script's purpose
