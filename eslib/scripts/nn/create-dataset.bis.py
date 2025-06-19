@@ -57,7 +57,7 @@ def main(args):
     #------------------#
     # train
     train = trajectory.remove(indices)
-    sizes = np.arange(args.incremental_size,len(train),args.incremental_size)
+    sizes = np.arange(args.incremental_size,len(train)+1,args.incremental_size)
     # print("\ttrain dataset sizes: ",list(sizes))
     print("\tWriting train datasets:")
     for n,size in enumerate(sizes):
