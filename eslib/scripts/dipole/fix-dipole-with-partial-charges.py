@@ -1,30 +1,34 @@
 #!/usr/bin/env python
 import matplotlib.pyplot as plt
 import numpy as np
+import json
 
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.classes.models.dipole.baseclass import DipoleModel
-from eslib.formatting import esfmt, everythingok, float_format, warning
+from eslib.classes.models.dipole import DipolePartialCharges
+from eslib.formatting import esfmt, float_format
 from eslib.output import output_folder
 from eslib.physics import compute_dipole_quanta
 from eslib.plot import correlation_plot
 from eslib.tools import frac2cart
+from eslib.show import show_dict
+from eslib.tools import is_integer
+
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Fix the dipole jumps using a (previously created) model."
+description = "Fix the dipole jumps using a point-charges model."
 
 #---------------------------------------#
 def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i", "--input"    , **argv, type=str, help="extxyz file with the atomic configurations [a.u]")
-    parser.add_argument("-id", "--in_dipole"  , **argv, type=str, help="name of the input dipoles (default: %(default)s)", default='dipole')
-    parser.add_argument("-od", "--out_dipole"  , **argv, type=str, help="name of the output dipoles (default: %(default)s)", default='dipole')
-    parser.add_argument("-m", "--model"    , **argv, type=str, help="pickle file with the dipole linear model (default: %(default)s)", default='DipoleModel.pickle')
-    parser.add_argument("-o", "--output"   , **argv, type=str, help="output file with the fixed trajectory (default: %(default)s)", default="trajectory.fixed.extxyz")
-    parser.add_argument("-f", "--folder"   , **argv, type=str, help="output folder with additional output files (default: %(default)s)", default=None)
+    parser.add_argument("-i" , "--input"     , **argv, type=str, required=True , help="extxyz file with the atomic configurations [a.u]")
+    parser.add_argument("-id", "--in_dipole" , **argv, type=str, required=True , help="name of the input dipoles")
+    parser.add_argument("-od", "--out_dipole", **argv, type=str, required=True , help="name of the output dipoles")
+    parser.add_argument("-c" , "--charges"   , **argv, type=str, required=True , help="JSON file with the partial charges")
+    parser.add_argument("-o" , "--output"    , **argv, type=str, required=True , help="output file with the fixed trajectory")
+    parser.add_argument("-f" , "--folder"    , **argv, type=str, required=False, help="output folder with additional output files (default: %(default)s)", default="fix-dipole")
     return parser# .parse_args()
 
 #---------------------------------------#
@@ -37,32 +41,38 @@ def main(args):
     trajectory = AtomicStructures.from_file(file=args.input)
     print("done")
     print("\tn. of atomic structures: ",len(trajectory))
+    
+    #------------------#
+    # charges
+    print("\tReading the charges from file '{:s}' ... ".format(args.charges), end="")
+    with open(args.charges, 'r') as json_file:
+        charges:dict = json.load(json_file)
+    print("done")
+
+    #------------------#
+    print("\n\tCharges: ")
+    show_dict(charges,"\t\t",2)
+        
+    #------------------#
+    print("\n\tCreating dipole model based on the charges ... ",end="")
+    model = DipolePartialCharges(charges)
+    print("done")
+    
+    model.summary()
+
+    #------------------#
+    # print("\n\tAdding charges as '{:s}' to the 'arrays' of the atomic structures ... ".format(args.out_dipole),end="")
+    for n,structure in enumerate(trajectory):
+        if not model.check_charge_neutrality(structure):
+            raise ValueError("structure . {:d} is not charge neutral".format(n))
+        # structure.arrays[args.out_dipole] = model.get_all_charges(structure)
+    # print("done")
 
     #------------------#
     # dipole
-    print("\tExtracting '{:s}' from the provided atomic structures ... ".format(args.in_dipole), end="")
+    print("\n\tExtracting '{:s}' from the provided atomic structures ... ".format(args.in_dipole), end="")
     dft = trajectory.get(args.in_dipole)
     print("done")
-
-    #------------------#
-    # linear model
-    print("\tLoading the dipole linear model from file '{:s}' ... ".format(args.model), end="")
-    model = DipoleModel.from_pickle(args.model)
-    print("done")
-
-    #------------------#
-    model.summary()
-
-    # #------------------#
-    # if isinstance(model,DipoleLinearModel): 
-    #     print("\tCheck the distances w.r.t. the reference configuration ... ", end="")
-    #     indices = model.control_periodicity(list(trajectory))
-    #     print("done")
-    #     if indices is None or len(indices) == 0:
-    #         print("\t{:s}".format(everythingok))
-    #     else:
-    #         print("\t{:s}: found {:d} structures that could be wrong.".format(warning,len(indices)))
-    #         # print("\tatomic structures indices: ", indices.tolist())
 
     #------------------#
     # dipole

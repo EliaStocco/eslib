@@ -461,3 +461,25 @@ def tablelegend(ax, col_labels=None, row_labels=None, title_label="", *args, **k
         ax.legend_ = mlegend.Legend(ax, leg_handles, leg_labels, ncol=ncol+int(row_labels is not None), handletextpad=handletextpad, **kwargs)
         ax.legend_._remove_method = ax._remove_legend
         return ax.legend_
+    
+#---------------------------------------#
+def correlation_plot(A,B,nameA,nameB,file,bisectors:bool=True):
+    fig,axes = plt.subplots(ncols=3,figsize=(15,5))
+
+    labels = ["x","y","z"]
+    for n,ax in enumerate(axes):
+        ax.scatter(A[:,n],B[:,n],label=labels[n])
+        ax.grid()
+        if bisectors:
+            xlims = ax.get_xlim()
+            ylims = ax.get_ylim()
+            for n in range(-20,20):
+                plot_bisector(ax,n)
+            ax.set_xlim(*xlims)
+            ax.set_ylim(*ylims)
+        
+    axes[1].set_xlabel(nameA)
+    axes[0].set_ylabel(nameB)
+
+    plt.tight_layout()
+    plt.savefig(file)

@@ -7,7 +7,7 @@ from scipy.optimize import minimize
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.classes.models.dipole import DipolePartialCharges
 from eslib.formatting import esfmt
-from eslib.metrics import metrics
+from eslib.metrics import L2_norm
 from eslib.show import show_dict
 
 #---------------------------------------#
@@ -52,6 +52,10 @@ def main(args):
     _charges = build_charges(charges)
     model = DipolePartialCharges(_charges)
     reference = trajectory[0]
+    cells = trajectory.get_cells()
+    cells = np.asarray( [c.T for c in cells ])
+    icells = np.linalg.inv(cells)
+    frac_yreal = np.einsum("ijk,ik->ij",icells,yreal)
     # model = DipolePartialCharges(ref=reference,dipole=dipole,bec=None)
 
 
@@ -69,8 +73,15 @@ def main(args):
     def loss(charges):
         model = model_PC(charges)
         model.impose_charge_neutrality(reference)
-        ypred = model.compute(trajectory)
-        return metrics["rmse"](yreal,ypred)
+        ypred = model.compute(trajectory,raw=True)["dipole"]
+        
+        frac_ypred = np.einsum("ijk,ik->ij",icells,ypred)
+        frac_delta = frac_ypred - frac_yreal
+        frac_delta = np.mod(frac_delta,1)
+        delta = np.einsum("ijk,ik->ij",cells,frac_delta)
+        # assert np.allclose(ypred-yreal,delta), "coding error"
+        
+        return L2_norm(delta)
     
     def constraint_func(charges):
         model = model_PC(charges)

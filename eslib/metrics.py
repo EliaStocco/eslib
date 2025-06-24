@@ -123,6 +123,13 @@ def RMS(x:np.ndarray,axis:Union[Tuple[int],int],**kwargs)->np.ndarray:
 
 #---------------------------------------#
 # Error/distances/loss functions
+
+def L2_norm(x: np.ndarray,**kwargs)->Union[float,np.ndarray]:
+    se   = np.square(x)         #           squared error
+    mse  = np.mean(se,**kwargs) #      mean squared error
+    rmse = np.sqrt(mse)         # root mean squared error
+    return rmse
+
 def MSE(pred:np.ndarray,ref:np.ndarray,**kwargs)->Union[float,np.ndarray]:
     """Mean Squared Error"""
     err  = pred - ref           #              error
@@ -132,20 +139,14 @@ def MSE(pred:np.ndarray,ref:np.ndarray,**kwargs)->Union[float,np.ndarray]:
 
 def RMSE(pred:np.ndarray,ref:np.ndarray,**kwargs)->Union[float,np.ndarray]:
     """Root Mean Squared Error"""
-    err  = pred - ref           #                   error
-    se   = np.square(err)       #           squared error
-    mse  = np.mean(se,**kwargs) #      mean squared error
-    rmse = np.sqrt(mse)         # root mean squared error
-    return rmse
+    err  = pred - ref           # error
+    return L2_norm(err)
 
 def RMSRE(pred:np.ndarray,ref:np.ndarray,**kwargs)->Union[float,np.ndarray]:
     """Root Mean Squared Relative Error"""
     err   = pred - ref            #                            error
     rel   = err / ref             #                   relative error
-    sre   = np.square(rel)        #           squared relative error
-    msre  = np.mean(sre,**kwargs) #      mean squared relative error
-    rmsre = np.sqrt(msre)         # root mean squared relative error
-    return rmsre
+    return L2_norm(rel)
 
 def RRMSE(pred:np.ndarray,ref:np.ndarray,**kwargs)->Union[float,np.ndarray]:
     """Relative Root Mean Squared Error"""

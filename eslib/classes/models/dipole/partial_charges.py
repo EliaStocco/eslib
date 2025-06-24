@@ -203,8 +203,11 @@ class DipolePartialCharges(Calculator):
 
 
     def summary(self, string: str = "\t") -> None:
-        """Print summary of the model."""       
-        super().summary(string=string)
+        """Print summary of the model."""    
+        try:   
+            super().summary(string=string)
+        except:
+            pass
         args = {
             "compute_BEC": self.compute_BEC,
             "properties": list(self.implemented_properties.keys())
