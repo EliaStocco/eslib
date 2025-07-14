@@ -11,7 +11,6 @@ from eslib.physics import compute_dipole_quanta
 from eslib.plot import correlation_plot
 from eslib.tools import frac2cart
 from eslib.show import show_dict
-from eslib.tools import is_integer
 
 
 #---------------------------------------#
