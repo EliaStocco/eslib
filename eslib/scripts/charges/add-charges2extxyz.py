@@ -46,7 +46,7 @@ def main(args):
     for k,c in charges.items():
         if not is_integer(c):
             print("\t{:s}: '{:s}' charge is not an integer".format(warning,k))
-        charges[k] = np.round(c,0)
+        # charges[k] = np.round(c,0)
 
     #------------------#
     # trajectory
