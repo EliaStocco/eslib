@@ -9,8 +9,7 @@ from ase.io import read
 
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, float_format, warning
-from eslib.functions import check_pattern_in_file, extract_number_from_filename
-from eslib.regex import extract_float
+from eslib.functions import check_pattern_in_file, extract_number_from_filename, extract_float
 from eslib.tools import convert
 
 #---------------------------------------#
