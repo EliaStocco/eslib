@@ -360,7 +360,8 @@ def melt(
     data = {}
     
     for i, (axis, name) in enumerate(index.items()):
-        data[name] = indices[:, i].astype(np.int32)  # Convert to int32 for index columns
+        tmp = indices[:, i].astype(np.int32)  
+        data[name] = tmp  # Convert to int32 for index columns
     
     A = np.moveaxis(A,value_axes,-1)
     A = A.reshape((-1,A.shape[-1]))
