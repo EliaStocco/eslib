@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import numpy as np
 from ase.io.formats import filetype
-
+from eslib.functions import get_file_size_human_readable
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import esfmt
+from eslib.formatting import esfmt, warning
 
 #---------------------------------------#
 description = "Summary of an MD trajectory."
@@ -20,6 +20,13 @@ def prepare_args(description):
 #---------------------------------------#
 @esfmt(prepare_args, description)
 def main(args):
+    
+    #------------------#
+    try:
+        value, unit = get_file_size_human_readable(args.input)
+        print(f"\n\tInput file size: {value} {unit}")
+    except:
+        print(f"\n\t{warning}: an error occurred while retrieving the input file size")
 
     #---------------------------------------#
     # atomic structures
