@@ -47,7 +47,10 @@ def main(args):
     elif np.all(~pbc):
         print("\tperiodic (any axis): false")
     else:
-        print("\tperiodic along axis x,y,z: ", [str(a) for a in np.all(pbc, axis=0) == ~ np.all(~pbc, axis=0)])
+        try:
+            print("\tperiodic along axis x,y,z: ", [str(a) for a in np.all(pbc, axis=0) == ~ np.all(~pbc, axis=0)])
+        except:
+            print("\tmixed periodicity")
 
     #---------------------------------------#
     # summary
