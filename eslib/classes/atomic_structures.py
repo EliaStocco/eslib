@@ -6,6 +6,7 @@ from ase import Atoms
 from ase.cell import Cell
 import numpy as np
 import pandas as pd
+from os import cpu_count
 
 from eslib.classes import Trajectory
 from eslib.classes.aseio import aseio, integer_to_slice_string
@@ -14,6 +15,11 @@ from eslib.tools import convert
 from eslib.formatting import warning
 
 T = TypeVar('T', bound='AtomicStructures')
+
+#---------------------------------------#
+NPROC_DEFAULT = 4
+PARALLEL = True
+NPROC = min(NPROC_DEFAULT,cpu_count())
 
 #---------------------------------------#
 class AtomicStructures(Trajectory,aseio):
@@ -38,7 +44,7 @@ class AtomicStructures(Trajectory,aseio):
         return cls([ atoms.copy() for _ in range(repeat) ])
     
     def num_atoms(self:T):
-        n_atoms = [s.get_global_number_of_atoms() for s in self]
+        n_atoms = self.call(lambda x: x.get_global_number_of_atoms()) # [s.get_global_number_of_atoms() for s in self]
         n_atoms = np.unique(n_atoms)
         if len(n_atoms) > 1:
             raise ValueError("Not all atomic structures have the same number of atoms")
@@ -49,11 +55,11 @@ class AtomicStructures(Trajectory,aseio):
         Check if the object is a trajectory.
         """
         # check that all structures have the same number of atoms
-        n_atoms = [s.get_global_number_of_atoms() for s in self]
+        n_atoms = self.call(lambda x: x.get_global_number_of_atoms()) # [s.get_global_number_of_atoms() for s in self]
         n_atoms = np.unique(n_atoms)
         if len(n_atoms) > 1:
             return False
-        symbols = [s.get_chemical_symbols() for s in self]
+        symbols = self.call(lambda x: x.get_chemical_symbols()) # [s.get_chemical_symbols() for s in self]
         return all([s == symbols[0] for s in symbols])
     
     def get_keys(self:T,what:str="all")->List[str]:
@@ -443,6 +449,19 @@ class AtomicStructures(Trajectory,aseio):
         filtered_structures = [item for i, item in enumerate(self) if i not in indices]
         return AtomicStructures(filtered_structures)
 
+    def remove_info_array(self:T,key:str,what:str=None)->T:
+        if what is None:
+            what = self.search(key)
+        if what == "info":
+            for structure in self:
+                if key in structure.info:
+                    del structure.info[key]
+        elif what == "arrays":
+            for structure in self:
+                if key in structure.arrays:
+                    del structure.arrays[key]
+        else:
+            raise ValueError(f"Unknown attribute '{key}' in {what}.")
 
     # def call(self: T, func) -> np.ndarray:
     #     t = easyvectorize(Atoms)(self)
@@ -540,7 +559,7 @@ class AtomicStructures(Trajectory,aseio):
             self.set("positions",pos)
         return pos
           
-    def apply(self, func: Callable[[Atoms], None], parallel: bool = False, processes: Optional[int] = None):
+    def apply(self, func: Callable[[Atoms], None], parallel: bool = None, processes: Optional[int] = None):
         """
         Apply a function to each Atoms object.
 
@@ -552,11 +571,12 @@ class AtomicStructures(Trajectory,aseio):
         Returns:
             None
         """
+        if parallel is None:
+            parallel = PARALLEL
         if parallel:
             from multiprocessing import Pool
             if processes is None:
-                import os
-                processes = os.cpu_count()
+                processes = NPROC
             with Pool(processes=processes) as pool:
                 pool.map(func, [ a for a in self])
         else:
@@ -564,7 +584,7 @@ class AtomicStructures(Trajectory,aseio):
                 structure = func(structure)
         return
 
-    def call(self, func: Callable[[Atoms], List[Any]], parallel: bool = True, processes: Optional[int] = None)->List[Any]:
+    def call(self, func: Callable[[Atoms], List[Any]], parallel: bool = None, processes: Optional[int] = None)->List[Any]:
         """
         Apply a function to each Atoms object.
 
@@ -577,15 +597,16 @@ class AtomicStructures(Trajectory,aseio):
             List of results from applying func to each Atoms
         """
         structures = list(self)
+        
+        if parallel is None:
+            parallel = PARALLEL
 
         if not parallel:
             return [func(a) for a in structures]
 
         if processes is None:
-            from os import cpu_count
-            processes = cpu_count()
+            processes = NPROC
         
-            
         from concurrent.futures import ThreadPoolExecutor
         from itertools import chain
         from math import ceil
@@ -602,9 +623,23 @@ class AtomicStructures(Trajectory,aseio):
 
         return list(chain.from_iterable(results))
 
+    @staticmethod
+    def set_parallel(parallel: bool = True, nproc: Optional[int] = None):
+        """
+        Set the parallelization mode and number of processes for AtomicStructures.
 
+        Parameters:
+            parallel: If True, run in parallel.
+            nproc: Number of worker processes (default: min among 4 and number of CPUs).
+        """
+        global PARALLEL, NPROC
+        PARALLEL = parallel
+        if nproc is None:
+            NPROC = min(NPROC_DEFAULT,cpu_count())
+        else:
+            NPROC = nproc
     
-            
+#---------------------------------------#
 def random_water_structure(num_molecules=1):
     from ase import Atoms
     symbols = ['H', 'H', 'O']  # Atomic symbols for water molecule
