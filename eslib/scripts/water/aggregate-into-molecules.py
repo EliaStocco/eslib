@@ -70,13 +70,13 @@ def main(args):
     
     #------------------#
     with eslog(f"\nConstructing dataset with atoms positions"):
-        df = melt(pos,{0:"structure",1:"atom"},["Rx","Ry","Rz"])
+        df = melt(pos,{0:"time",1:"atom"},["Rx","Ry","Rz"])
         
     with eslog(f"Constructing dataset with the molecules indices"):
-        mol = melt(molecules[:,:,None],{0:"structure",1:"atom"},["molecule"])
+        mol = melt(molecules[:,:,None],{0:"time",1:"atom"},["molecule"])
         
     with eslog(f"Merging datasets with positions and the molecules indices"):
-        df = pd.merge(df,mol,on=["structure","atom"])        
+        df = pd.merge(df,mol,on=["time","atom"])        
         
     #------------------#
     for key,prop in extra_properties.items():
@@ -86,15 +86,15 @@ def main(args):
                 prop = prop[:,:,None]
             assert prop.ndim == 3, "error"
             names = [f"{key}_{i}" for i in range(prop.shape[2])]
-            prop_df = melt(prop,{0:"structure",1:"atom"},names)   
+            prop_df = melt(prop,{0:"time",1:"atom"},names)   
             
         with eslog(f"Merging this dataset to the general one"):  
-            df = pd.merge(df,prop_df,on=["structure","atom"])    
+            df = pd.merge(df,prop_df,on=["time","atom"])    
         
     #------------------#
     with eslog(f"Aggregating over the molecules"):
-        columns = [col for col in df.columns if col not in ['structure', 'molecule','atom']]
-        df = df.groupby(['structure', 'molecule'])[columns].sum().reset_index()
+        columns = [col for col in df.columns if col not in ['time', 'molecule','atom']]
+        df = df.groupby(['time', 'molecule'])[columns].sum().reset_index()
         
     print("\n\t Final dataframe information:")
     print("\t - shape: ",df.shape)
