@@ -38,6 +38,16 @@ def main(args):
     print("done")
     N = len(structures) 
     print("\tn. of atomic structures: ",N)
+    
+    #------------------#
+    # summary
+    print("\n\t  Summary of the properties: ")
+    try:
+        df = structures.summary()
+        tmp = "\n"+df.to_string(index=False)
+        print(tmp.replace("\n", "\n\t "))
+    except:
+        print(f"\t{error}: an error occurred while retrieving the properties")
 
     #------------------#
     # data
