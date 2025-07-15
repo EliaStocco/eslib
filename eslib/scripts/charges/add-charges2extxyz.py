@@ -69,10 +69,13 @@ def main(args):
     
     #------------------#
     # summary
-    print("\n\tSummary of the properties: ")
-    df = atoms.summary()
-    tmp = "\n"+df.to_string(index=False)
-    print(tmp.replace("\n", "\n\t"))
+    try:
+        print("\n\tSummary of the properties: ")
+        df = atoms.summary()
+        tmp = "\n"+df.to_string(index=False)
+        print(tmp.replace("\n", "\n\t"))
+    except:
+        pass
 
     
     #------------------#
