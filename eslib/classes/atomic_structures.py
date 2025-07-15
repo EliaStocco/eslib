@@ -11,6 +11,7 @@ from eslib.classes import Trajectory
 from eslib.classes.aseio import aseio, integer_to_slice_string
 from eslib.functional import custom_deprecated
 from eslib.tools import convert
+from eslib.formatting import warning
 
 T = TypeVar('T', bound='AtomicStructures')
 
@@ -98,9 +99,12 @@ class AtomicStructures(Trajectory,aseio):
             raise ValueError("`what` can be only 'all', 'info', or 'arrays' ")
 
         check = {**check_info,**check_array}
-
-        if False in check.values():
-            raise ValueError("Some checks failed")
+        
+        for key,value in check.items():
+            if not value:
+                print(f"{warning}: '{key}' is not present in all structrues.")
+        # if False in check.values():
+        #     raise ValueError("Some checks failed")
 
         check = {k:v for k,v in check.items() if v is True}
 
@@ -382,7 +386,7 @@ class AtomicStructures(Trajectory,aseio):
         if info:                    return "info"
         if arrays:                  return "arrays"
 
-    def is_there(self:T,name:str,_all:bool=True,where:str=None)->np.ndarray:
+    def has(self:T,name:str,_all:bool=True,where:str=None)->np.ndarray:
         """
         Check if attribute is present in 'info', 'arrays', or both.
 
