@@ -37,7 +37,7 @@ def check_atoms_consistency(atoms_list: List[Atoms])->Tuple[Set,Set]:
             raise ValueError(f"Mismatch in info keys at index {i}: {set(atoms.info.keys())} vs {ref_info}")
     return ref_arrays, ref_info
 
-def write_npz(filename: str, atoms_list: List[Atoms], parallel: bool = True) -> None:
+def write_npz(filename: str, atoms_list: List[Atoms]) -> None:
     """
     Save a list of ASE Atoms objects in a memory-efficient way to a compressed NPZ file.
 
@@ -112,7 +112,10 @@ def write_npz(filename: str, atoms_list: List[Atoms], parallel: bool = True) -> 
         if dims[0] == 1:
             value = [v[:, None] for v in value]
         # Stack all snapshots vertically.
-        value:np.ndarray = np.vstack(value)
+        try:
+          value:np.ndarray = np.vstack(value)
+        except Exception as e:
+          raise ValueError(f"Error stacking arrays for key '{name}': {e}")
         # The total rows of the stacked array must equal the sum of atoms.
         assert value.shape[0] == np.sum(num_atoms), "error: stacked array shape mismatch"
         to_save[key] = value
