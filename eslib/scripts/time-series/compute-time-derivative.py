@@ -22,7 +22,8 @@ def prepare_args(description):
     parser.add_argument("-dt", "--time_step"    , **argv, type=float, required=True , help="time step [fs]")
     parser.add_argument("-in", "--in_name"      , **argv, type=str  , required=True , help="name of the info/array")
     parser.add_argument("-on", "--out_name"     , **argv, type=str  , required=True , help="name of the time derivative of the info/array")
-    parser.add_argument("-o" , "--output"       , **argv, type=str  , required=True , help="output file (default: %(default)s)", default="output.extxyz")
+    parser.add_argument("-od", "--output_data"  , **argv, type=str  , required=False, help="output data [npy] (default: %(default)s)", default=None)
+    parser.add_argument("-o" , "--output"       , **argv, type=str  , required=False, help="output file (default: %(default)s)", default=None)
     parser.add_argument("-of", "--output_format", **argv, type=str  , required=False, help="output file format (default: %(default)s)", default=None)
     return parser
 
@@ -51,11 +52,17 @@ def main(args):
     #-------------------#
     with eslog(f"\nSaving the time derivative in '{args.out_name}'"):
         structures.set(args.out_name,data,what)
+        
+    #-------------------#
+    if args.output_data is not None:
+        with eslog(f"\nSaving the time derivative data to file '{args.output_data}'"):
+            np.save(args.output_data,data)
     
     #-------------------#
-    with eslog(f"\nSaving structures to file '{args.output}'"):
-        structures.to_file(file=args.output,format=args.output_format)
-    
+    if args.output is not None:
+        with eslog(f"\nSaving structures to file '{args.output}'"):
+            structures.to_file(file=args.output,format=args.output_format)
+        
     return 0
     
 #---------------------------------------#
