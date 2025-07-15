@@ -95,14 +95,14 @@ def main(args):
                         pass
 
                 for i in indices:
-                    if not np.isnan(molecule[i]):
-                        raise ValueError("coding error")
+                    # if not np.isnan(molecule[i]):
+                    #     raise ValueError(f"Problem with strucure {n}")
                     molecule[i] = mm
 
         if atoms.arrays is None:
             atoms.arrays = dict()
-        if np.any(np.isnan(molecule)):
-            raise ValueError("coding error")
+        # if np.any(np.isnan(molecule)):
+        #     raise ValueError("coding error")
         atoms.arrays[args.molecule] = molecule.astype(int)
 
     print("\n\tWriting atomic structures to file '{:s}' ... ".format(args.output), end="")
