@@ -36,7 +36,7 @@ def main(args):
     with eslog(f"Reading atomic structures from file '{args.input}'"):
         structures = AtomicStructures.from_file(file=args.input,format=args.input_format)
     N = len(structures) 
-    print("\tn. of atomic structures: ",N)
+    print("\t n. of atomic structures: ",N)
 
     #-------------------#
     with eslog(f"Extracting '{args.in_name}'"):
