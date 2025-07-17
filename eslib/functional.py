@@ -3,7 +3,6 @@ import warnings
 from typing import Any, Callable
 from functools import wraps
 import numpy as np
-import multiprocessing as mp
 
 def extend2NDarray(func_1d) -> Callable:
     @wraps(func_1d)
