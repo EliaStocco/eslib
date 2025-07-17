@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from eslib.formatting import esfmt, float_format
 from eslib.mathematics import pandas2ndarray, melt
+from eslib.input import str2bool
 
 #---------------------------------------#
 description = "Autocorrelate unit-cells dipoles."
@@ -13,9 +14,10 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar": "\b"}
-    parser.add_argument("-i" , "--indices"     , **argv, required=True , type=str  , help="input file with the indices produced by 'divide-into-unitcells-with-indices.py'")
-    parser.add_argument("-d" , "--dipoles"     , **argv, required=True , type=str  , help="*.txt file with the results produced by 'unit-cell-dipole.py', 'difference-unit-cell-dipoles.py', or 'analyse-unit-cell-dipoles.py'")
-    parser.add_argument("-o" , "--output"      , **argv, required=True , type=str  , help="output file")
+    parser.add_argument("-i" , "--indices"     , **argv, required=True , type=str     , help="input file with the indices produced by 'divide-into-unitcells-with-indices.py'")
+    parser.add_argument("-rm", "--remove_mean" , **argv, required=True , type=str2bool, help="whether to remove the mean from the dipoles (default: %(default)s)", default=True)
+    parser.add_argument("-d" , "--dipoles"     , **argv, required=True , type=str     , help="*.txt file with the results produced by 'unit-cell-dipole.py', 'difference-unit-cell-dipoles.py', or 'analyse-unit-cell-dipoles.py'")
+    parser.add_argument("-o" , "--output"      , **argv, required=True , type=str     , help="output file")
     return parser
 
 #---------------------------------------#
@@ -89,12 +91,18 @@ def main(args):
         dipoles[k] = np.asarray(Lxyz[k])
         
     #------------------#
-    print("\tComputing spatial correlation function ... ",end="")
+    print("\tPreparing spatial correlation function ... ",end="")
     data, info = pandas2ndarray(dipoles,["structure","L1","L2","L3"],["unit_cell"])
     for n,k in enumerate(["L1","L2","L3"]):
         assert np.allclose(np.sort(info[k]),info[k]), f"indices of '{k}' not sorted."
-            
-    data -= np.mean(data,axis=(1,2,3),keepdims=True)
+    print("done")
+    
+    if args.remove_mean:
+        print("\tRemoving mean ... ",end="")
+        data -= np.mean(data,axis=(1,2,3),keepdims=True)
+        print("done")
+        
+    print("\tComputing spatial correlation function ... ",end="")
     autocorr =  spatial_autocorrelation(data,axis=(1,2,3))
     autocorr = np.linalg.norm(autocorr,axis=4)/np.sqrt(3.)
     
