@@ -153,7 +153,7 @@ def main(args):
     factor = np.asarray(fixed_quanta - quanta["LM"])
     intfactor = np.round(factor)
     assert np.sum(np.abs(intfactor)) == 0
-    assert trajectory.is_there(args.out_dipole)
+    assert trajectory.has(args.out_dipole)
 
 
     #------------------#

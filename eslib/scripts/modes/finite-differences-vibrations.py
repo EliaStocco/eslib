@@ -95,7 +95,7 @@ def main(args):
         data = forces.get_array("positions")
         atoms.set_array("forces",data)
     elif args.name is not None:
-        if not atoms.is_there(args.name):
+        if not atoms.has(args.name):
             print("\t{:s}: '{:s}' is not provided in file '{:s}'.".format(error,args.name,args.positions))
             return -1
         forces = atoms.get(args.name,what="arrays")

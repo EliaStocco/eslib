@@ -38,8 +38,8 @@ def main(args):
     print("\tn. of atomic structures: ",len(trajectory),end="\n\n")
 
     #------------------#
-    assert trajectory.is_there(args.ref_name,where="info")
-    assert trajectory.is_there(args.pred_name,where="info")
+    assert trajectory.has(args.ref_name,where="info")
+    assert trajectory.has(args.pred_name,where="info")
     assert args.threshold > 0.
 
     #------------------#

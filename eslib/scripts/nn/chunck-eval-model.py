@@ -141,7 +141,7 @@ def main(args):
     
         #------------------#
         if hasattr(model,"charges_key"):
-            if not structures.is_there(model.charges_key):
+            if not structures.has(model.charges_key):
                 raise ValueError("The atomic structures do not have the key '{:s}'".format(model.charges_key))
 
         #------------------#

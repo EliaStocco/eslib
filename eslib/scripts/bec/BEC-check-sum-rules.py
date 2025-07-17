@@ -117,7 +117,7 @@ def main(args):
     assert np.isnan(BEC).sum() == 0, "Found nan values in BEC"
 
     if args.check:
-        if not trajectory.is_there(args.bec):
+        if not trajectory.has(args.bec):
             print("\n\t{:s}: '{:s}' not found --> it's not possible to check whether BECs are correctly formatted.".format(warning,args.bec))
         else:
             tmp = trajectory.get(args.bec)

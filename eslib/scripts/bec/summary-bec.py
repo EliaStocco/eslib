@@ -34,7 +34,7 @@ def main(args):
     print("done")
     print("\tn. of atomic structures: {:d}".format(len(trajectory)))
 
-    if np.all( [ trajectory.is_there(f'{args.name}{xyz}') for xyz in ["x","y","z"] ] ):
+    if np.all( [ trajectory.has(f'{args.name}{xyz}') for xyz in ["x","y","z"] ] ):
         Zx = trajectory.get_array(f'{args.name}x')
         Zy = trajectory.get_array(f'{args.name}y')
         Zz = trajectory.get_array(f'{args.name}z')
