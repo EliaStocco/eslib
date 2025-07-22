@@ -18,7 +18,7 @@ def levi_civita():
     return tensor
     
 
-def mean_std_err(array: np.ndarray, axis: int) -> Tuple[np.ndarray, np.ndarray]:
+def mean_std_err(array: np.ndarray, axis: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     mean = np.mean(array, axis=axis)
     std, err = std_err(array, axis=axis)
     return mean, std, err
