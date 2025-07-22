@@ -47,7 +47,20 @@ def main(args):
     assert A.shape == B.shape
 
     #------------------#
-    if A.shape[1] == 3:
+    if A.ndim == 1:
+        fig,ax = plt.subplots(figsize=(5,5))
+        ax.scatter(A,B,s=args.size)
+        # plot_bisector(ax)
+        ax.grid()
+        ax.set_xlabel(args.keyword_A)
+        ax.set_ylabel(args.keyword_B)
+
+        plt.tight_layout()
+        print("\tSaving plot to file '{:s}' ... ".format(args.output),end="")
+        plt.savefig(args.output)
+        print("done")
+        
+    elif A.shape[1] == 3:
         fig,axes = plt.subplots(ncols=3,figsize=(15,5))
 
         labels = ["x","y","z"]
