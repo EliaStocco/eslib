@@ -50,7 +50,7 @@ def main(args):
     assert trajectory.subsample(indices) == test, "coding error"
     assert len(test) == args.test_size, "coding error"
     file = os.path.normpath(f"{args.output}/test.extxyz")
-    print(f"\n\tSaving test dataset to file '{file}'",end="")
+    print(f"\n\tSaving test dataset to file '{file}' ({len(test)} structures) ... ",end="")
     test.to_file(file=file)
     print("done")
     
