@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from eslib.classes import Trajectory
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.plot import generate_colors, histogram
 
@@ -16,6 +16,7 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
     parser.add_argument("-i", "--input" , type=str, **argv, required=True , help='input extxyz file')
+    parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str  , help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-n", "--name"  , type=str, **argv, required=True , help="info keyword to be plotted")
     parser.add_argument("-o", "--output", type=str, **argv, required=False, help="output file (default: %(default)s)", default=None)
     return parser# .parse_args()
@@ -59,7 +60,7 @@ def main(args):
     #------------------#
     # atomic structures
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    atoms = Trajectory.from_file(file=args.input)
+    atoms = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done")
 
     #------------------#
