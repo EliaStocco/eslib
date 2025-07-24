@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,7 +10,7 @@ from eslib.plot import hzero
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Check the convergence of energy or forces w.r.t. to a."
+description = "Check the convergence of energy or forces w.r.t. to a parameter."
 
 #---------------------------------------#
 def prepare_args(description):
