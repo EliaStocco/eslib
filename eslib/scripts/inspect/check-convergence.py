@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-import array
-from cycler import V
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
