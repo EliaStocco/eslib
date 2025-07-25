@@ -301,3 +301,15 @@ metrics = {
     "rramse_rmsdar" : RRAMSE_RMSDAR,
     "vecr" : lambda x,y : vectorial_pearson(x,y)
 }
+
+def RMSEforces(pred:np.ndarray,ref:np.ndarray):
+    """Return the RMSE of the forces for a bunch of atomic structures.
+    It does not perform the mean over the structures.
+    """
+    assert pred.ndim == 3, "error"
+    assert pred.shape[1:] == ref.shape[1:], "error"
+    
+    delta = np.square(pred-ref).sum(axis=2) # su over x,y,z
+    err = np.mean(delta,axis=1) # mean over atoms
+    return np.sqrt(err)
+    
