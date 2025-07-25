@@ -4,7 +4,6 @@ from typing import Callable, TypeVar, Union
 
 import numpy as np
 import pandas as pd
-from torch import le
 
 from eslib.classes import Trajectory
 from eslib.classes.io import pickleIO
