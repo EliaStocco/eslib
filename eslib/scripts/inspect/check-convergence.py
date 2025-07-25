@@ -101,9 +101,9 @@ def main(args):
         print("\n\tPlotting ... ", end="")
         fig, ax = plt.subplots(figsize=(6, 4))
 
-        ax.plot(df["x"], df["mean"], label="Mean", color="black", marker="o")
-        ax.plot(df["x"], df["min"], label="Min", color="red", linestyle="--")
-        ax.plot(df["x"], df["max"], label="Max", color="green", linestyle="--")
+        ax.plot(df["x"].to_numpy(), df["mean"].to_numpy(), label="Mean", color="black", marker="o")
+        ax.plot(df["x"].to_numpy(), df["min"].to_numpy(), label="Min", color="red", linestyle="--")
+        ax.plot(df["x"].to_numpy(), df["max"].to_numpy(), label="Max", color="green", linestyle="--")
 
         ax.set_xlabel(args.x_axis)
         ax.set_ylabel(args.y_axis + " (relative to last)")
