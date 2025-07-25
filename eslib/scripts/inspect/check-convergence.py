@@ -73,7 +73,7 @@ def main(args):
         fig, ax = plt.subplots(figsize=(6, 4))
         ax.plot(df["x"].to_numpy(), df["y"].to_numpy(), marker='o', linestyle='-')
         ax.set_xlabel(args.x_axis)
-        ax.set_ylabel(f"{args.y_axis}/atoms [meV]")
+        ax.set_ylabel(f"{args.y_axis} [meV/atoms]")
         # ax.set_title(f"Convergence of {args.y_axis} w.r.t. {args.x_axis}")
         ax.grid(True)
         ax.set_xlim(*args.xlim)
