@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 import numpy as np
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.input import flist
 from eslib.plot import hzero
+matplotlib.use('Agg')
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -19,11 +21,11 @@ def prepare_args(description):
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , **argv, type=str, required=True , help="input file [extxyz]")
     parser.add_argument("-if", "--input_format" , **argv, type=str, required=False, help="input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-x" , "--x_axis"      , **argv, type=str, required=True , help="keyword of the x-axis")
+    parser.add_argument("-x" , "--x_axis"      , **argv, type=str, required=False  , help="keyword of the x-axis (default: %(default)s)", default="N")
     parser.add_argument("-y" , "--y_axis"      , **argv, type=str, required=True , help="keyword of the info/array to check")
     parser.add_argument("-xlim", "--xlim"  , type=flist, **argv, required=False, help="xlim (default: %(default)s)", default=[None,None])
     parser.add_argument("-ylim", "--ylim"  , type=flist, **argv, required=False, help="ylim (default: %(default)s)", default=[None,None])
-    parser.add_argument("-o" , "--output"       , **argv, type=str, required=True , help="output plot file")
+    parser.add_argument("-o" , "--output"       , **argv, type=str, required=True , help="output plot file (default: %(default)s)", default="convergence.png")
     return parser
 
 #---------------------------------------#
@@ -64,7 +66,7 @@ def main(args):
         print("\n\tPlotting ... ", end="")
         
         fig, ax = plt.subplots(figsize=(6, 4))
-        ax.plot(df["x"], df["y"], marker='o', linestyle='-')
+        ax.plot(df["x"].to_numpy(), df["y"].to_numpy(), marker='o', linestyle='-')
         ax.set_xlabel(args.x_axis)
         ax.set_ylabel(args.y_axis)
         ax.set_title(f"Convergence of {args.y_axis} w.r.t. {args.x_axis}")
@@ -80,19 +82,27 @@ def main(args):
     elif what == "arrays":
 
         print("\n\tProcessing array data for statistical plot ... ", end="")
+        
+        from eslib.metrics import RMSEforces
+        
+        rmse = RMSEforces(y,y[-1][None,:,:])
+        # y = y.reshape((y.shape[0], -1))
+        
+        # ytest = RMSE(y,y[-1][:,None])
 
-        # Flatten last two dimensions: (N, A, D) → (N, A*D)
-        # y = y.reshape(y.shape[0], -1)
-        y -= y[-1, :, :]  # subtract last row
-        y = np.linalg.norm(y,axis=2)
-        # y -= y[-1, :]  # subtract last row
+        # # Flatten last two dimensions: (N, A, D) → (N, A*D)
+        # # y = y.reshape(y.shape[0], -1)
+        # y -= y[-1, :, :]  # subtract last row
+        # y = np.linalg.norm(y,axis=2)
+        # # y -= y[-1, :]  # subtract last row
 
         # Compute mean, min, max per structure (i.e., row)
         df = pd.DataFrame({
             "x": x,
-            "mean": np.mean(y, axis=1),
-            "min": np.min(y, axis=1),
-            "max": np.max(y, axis=1)
+            "y": rmse
+            # "mean": np.mean(rmse, axis=0),
+            # "min": np.min(rmse, axis=1),
+            # "max": np.max(rmse, axis=1)
         })
 
         print("done")
@@ -101,9 +111,9 @@ def main(args):
         print("\n\tPlotting ... ", end="")
         fig, ax = plt.subplots(figsize=(6, 4))
 
-        ax.plot(df["x"].to_numpy(), df["mean"].to_numpy(), label="Mean", color="black", marker="o")
-        ax.plot(df["x"].to_numpy(), df["min"].to_numpy(), label="Min", color="red", linestyle="--")
-        ax.plot(df["x"].to_numpy(), df["max"].to_numpy(), label="Max", color="green", linestyle="--")
+        ax.plot(df["x"].to_numpy(), df["y"].to_numpy(), color="black", marker="o")
+        # ax.plot(df["x"].to_numpy(), df["min"].to_numpy(), label="Min", color="red", linestyle="--")
+        # ax.plot(df["x"].to_numpy(), df["max"].to_numpy(), label="Max", color="green", linestyle="--")
 
         ax.set_xlabel(args.x_axis)
         ax.set_ylabel(args.y_axis + " (relative to last)")
@@ -113,7 +123,7 @@ def main(args):
         ax.set_ylim(*args.ylim)
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         hzero(ax)
-        ax.legend()
+        # ax.legend()
         plt.tight_layout()
         plt.savefig(args.output, dpi=300, bbox_inches="tight")
         print("done")
