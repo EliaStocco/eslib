@@ -39,6 +39,7 @@ def main(args):
     print("done")
     N = len(structures) 
     print("\tn. of atomic structures: ",N)
+    Natoms = structures.num_atoms()
     
     #------------------#
     print("\n\tExtracting x-axis ... ", end="")
@@ -62,14 +63,18 @@ def main(args):
         df = df.sort_values(by="x")
         df["y"] -= df["y"].iloc[-1] # values w.r.t. the last one
         
+        df["y"] *= 1000 # ev -> meV
+        df["y"] /= Natoms # global to per atoms
+        
+        
         #------------------#
         print("\n\tPlotting ... ", end="")
         
         fig, ax = plt.subplots(figsize=(6, 4))
         ax.plot(df["x"].to_numpy(), df["y"].to_numpy(), marker='o', linestyle='-')
         ax.set_xlabel(args.x_axis)
-        ax.set_ylabel(args.y_axis)
-        ax.set_title(f"Convergence of {args.y_axis} w.r.t. {args.x_axis}")
+        ax.set_ylabel(f"{args.y_axis}/atoms [meV]")
+        # ax.set_title(f"Convergence of {args.y_axis} w.r.t. {args.x_axis}")
         ax.grid(True)
         ax.set_xlim(*args.xlim)
         ax.set_ylim(*args.ylim)
