@@ -91,6 +91,7 @@ def main(args):
         from eslib.metrics import RMSEforces
         
         rmse = RMSEforces(y,y[-1][None,:,:])
+        rmse *= 1000 # eV/ang -> meV/ang
         # y = y.reshape((y.shape[0], -1))
         
         # ytest = RMSE(y,y[-1][:,None])
@@ -121,7 +122,7 @@ def main(args):
         # ax.plot(df["x"].to_numpy(), df["max"].to_numpy(), label="Max", color="green", linestyle="--")
 
         ax.set_xlabel(args.x_axis)
-        ax.set_ylabel(args.y_axis + " (relative to last)")
+        ax.set_ylabel(args.y_axis + " [meV/ang]")
         ax.set_title(f"Convergence of {args.y_axis} w.r.t. {args.x_axis}")
         ax.grid(True)
         ax.set_xlim(*args.xlim)
