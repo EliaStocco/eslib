@@ -46,7 +46,7 @@ def main(args):
         ax = fig.add_subplot(111, projection='3d')
 
         # Plotting the scatter points
-        scatter = ax.scatter(df['R-mic'], df['structure'], df['autocorr'], c=df['structure'], cmap='viridis', marker='o')
+        scatter = ax.scatter(df['R-mic'], df['structure'], df['autocorr'], c=df['structure'], cmap='viridis', marker='o', vmin=0, vmax=1)
 
         # Labels
         ax.set_xlabel(r'distance $\mathrm{\AA}$')
@@ -87,7 +87,7 @@ def main(args):
 
         X, Y = np.meshgrid(x, y_numeric)
 
-        c = ax.pcolormesh(X, Y, z, shading='nearest', cmap='viridis')  # Faster than 'auto'
+        c = ax.pcolormesh(X, Y, z, shading='nearest', cmap='viridis', vmin=0, vmax=1)
 
         # Optimize ticks
         ax.set_xticks(x[::x_tick_step])
