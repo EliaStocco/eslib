@@ -29,4 +29,4 @@ export PYTHONPATH="${PYTHONPATH}:${ESLIB}/eslib/eslib/fortran"
 
 echo "Done. All the scripts should be available in the PATH."
 
-source ${ESLIB}/cluster/archive.sh
+# source ${ESLIB}/cluster/archive.sh

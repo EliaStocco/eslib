@@ -1,29 +1,29 @@
-# `eslib`
+# ESLib
 Elia Stocco's personal repository.
 
 # Installation
+
 Using `conda`:
 ```bash
-# create a conda environment
 conda create -n eslib python==3.9 -y
 conda activate eslib
-# install packages
-conda install pytorch torchvision torchaudio -c pytorch -y
-pip install torch-scatter -f https://data.pyg.org/whl/torch-2.2.0+cpu.html
-conda install anaconda::pandas -y
-pip install -r requirements.txt
-# optional
+```
+or `python` virtual environment:
+```bash
+python -m venv ~/venvs/eslib
+source ~/venvs/eslib/bin/activate
 ```
 
-Install the package in `edit` mode with:
+Install the package in editable mode with:
 ```bash
+pip install --upgrade pip
 pip install -e .
 ```
 and make all the scripts executable:
 ```bash
 source install.sh
 ```
-In case add `source eslib_path/install.sh` to `~/.bashrc`.
+In case add `source <eslib_path>/install.sh` to `~/.bashrc` to have the scripts always available.
 
 # Testing
 Run the automatic tests using `pytest` by typing
