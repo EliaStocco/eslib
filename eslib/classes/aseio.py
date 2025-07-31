@@ -248,6 +248,11 @@ class aseio(List[Atoms], pickleIO):
         elif format.lower() in ["npz"]:
             from eslib.classes.file_formats.npz import write_npz
             write_npz(file,self.to_list())
+        elif format.lower() in ["pdb"]:
+            from eslib.classes.file_formats.pdb import write_pdb
+            if len(self) > 1:
+                raise ValueError("PDB writing supported only for one structure")
+            write_pdb(file,self[0])
         else:
             io.write(images=self, filename=file, format=format)
 
