@@ -1,10 +1,6 @@
 #!/usr/bin/env python
-# author: Elia Stocco
-# email : elia.stocco@mpsd.mpg.de
-# from ase.io import read
 import numpy as np
 from ase import Atoms
-from ase.cell import Cell
 from ase.io import write
 
 from eslib.classes.atomic_structures import AtomicStructures
@@ -30,7 +26,7 @@ def prepare_parser(description):
     parser.add_argument("-t" , "--threshold"     , type=float   , **argv, help="symmetry threshold (default: %(default)s)", default=1e-3)
     parser.add_argument("-r" , "--rotate"        , type=str2bool, **argv, help="whether to rotate the cell to the upper triangular (default: %(default)s)", default=True)
     parser.add_argument("-s" , "--shift"         , type=str2bool, **argv, help="shift the first atom to the origing (default: %(default)s)", default=False)
-    parser.add_argument("-sp", "--show_positions", type=str2bool, **argv, help="show positions (default: %(default)s)", default=True)
+    parser.add_argument("-sp", "--show_positions", type=str2bool, **argv, help="show positions (default: %(default)s)", default=False)
     parser.add_argument("-c" , "--conversion"    , type=str     , **argv, help=f"structure conversion form {choices}"+" (default: %(default)s)", default=None, choices=choices)
     parser.add_argument("-o" , "--output"        , type=str     , **argv, help="output file of the converted structure (default: %(default)s)", default=None)
     parser.add_argument("-of", "--output_format" , type=str     , **argv, help="output file format (default: %(default)s)", default=None)
