@@ -451,3 +451,34 @@ def merge_dataframes(dfs: List[pd.DataFrame], on: List[str], how: str = 'inner')
         merged = merged.merge(df, on=on, how=how)
     
     return merged
+
+def group_floats_by_decimals(floats: np.ndarray, decimals: int) -> Dict[float, np.ndarray]:
+    """
+    Groups float numbers by rounding them to a fixed number of decimal places,
+    but stores the original (unrounded) float values in the output.
+
+    Parameters:
+        floats (np.ndarray): Input array of float numbers.
+        decimals (int): Number of decimal places to round to for grouping.
+
+    Returns:
+        Dict[float, np.ndarray]: {rounded_value: array of original float values}
+
+    Example:
+        >>> floats = np.array([0.512, 0.515, 0.518, 1.234, 1.236, 2.0001])
+        >>> grouped = group_floats_by_decimals(floats, decimals=0)
+        >>> for key, vals in grouped.items():
+        ...     print(f"{key}: {vals}")
+        1.0: [0.512 0.515 0.518 1.234 1.236]
+        2.0: [2.0001]
+    """
+    from collections import defaultdict
+    floats = np.asarray(floats)
+    rounded_keys = np.round(floats, decimals)
+
+    groups = defaultdict(list)
+    for key, val in zip(rounded_keys, floats):
+        groups[key].append(val)
+
+    return {float(k): np.array(v) for k, v in groups.items()}
+
