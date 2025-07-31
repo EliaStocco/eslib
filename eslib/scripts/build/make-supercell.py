@@ -58,7 +58,7 @@ def main(args):
     #-------------------#
     print("\tReading transformation matrix from file '{:s}' ... ".format(args.matrix), end="")
     if os.path.isfile(args.matrix):
-        matrix = np.loadtxt(args.matrix,dtype=int)
+        matrix = np.loadtxt(args.matrix)
     else:
         try:
             matrix = np.array([int(x) for x in str(args.matrix).split()])
