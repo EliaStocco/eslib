@@ -311,5 +311,7 @@ def RMSEforces(pred:np.ndarray,ref:np.ndarray):
     
     delta = np.square(pred-ref).sum(axis=2) # su over x,y,z
     err = np.mean(delta,axis=1) # mean over atoms
-    return np.sqrt(err)
+    _max = np.max(delta,axis=1) # max over atoms
+    _min = np.min(delta,axis=1) # min over atoms
+    return np.sqrt(err), np.sqrt(_max), np.sqrt(_min)
     
