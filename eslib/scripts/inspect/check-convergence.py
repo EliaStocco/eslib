@@ -90,8 +90,10 @@ def main(args):
         
         from eslib.metrics import RMSEforces
         
-        rmse = RMSEforces(y,y[-1][None,:,:])
+        rmse, max, min = RMSEforces(y,y[-1][None,:,:])
         rmse *= 1000 # eV/ang -> meV/ang
+        max *= 1000
+        min *= 1000
         # y = y.reshape((y.shape[0], -1))
         
         # ytest = RMSE(y,y[-1][:,None])
@@ -105,10 +107,9 @@ def main(args):
         # Compute mean, min, max per structure (i.e., row)
         df = pd.DataFrame({
             "x": x,
-            "y": rmse
-            # "mean": np.mean(rmse, axis=0),
-            # "min": np.min(rmse, axis=1),
-            # "max": np.max(rmse, axis=1)
+            "y": rmse,
+            "min": min,
+            "max": max
         })
 
         print("done")
@@ -118,8 +119,8 @@ def main(args):
         fig, ax = plt.subplots(figsize=(6, 4))
 
         ax.plot(df["x"].to_numpy(), df["y"].to_numpy(), color="black", marker="o")
-        # ax.plot(df["x"].to_numpy(), df["min"].to_numpy(), label="Min", color="red", linestyle="--")
-        # ax.plot(df["x"].to_numpy(), df["max"].to_numpy(), label="Max", color="green", linestyle="--")
+        ax.plot(df["x"].to_numpy(), df["min"].to_numpy(), label="Min", color="red", linestyle="--")
+        ax.plot(df["x"].to_numpy(), df["max"].to_numpy(), label="Max", color="green", linestyle="--")
 
         ax.set_xlabel(args.x_axis)
         ax.set_ylabel(args.y_axis + " [meV/ang]")
@@ -128,7 +129,7 @@ def main(args):
         ax.set_xlim(*args.xlim)
         ax.set_ylim(*args.ylim)
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-        hzero(ax)
+        # hzero(ax)
         # ax.legend()
         plt.tight_layout()
         plt.savefig(args.output, dpi=300, bbox_inches="tight")
