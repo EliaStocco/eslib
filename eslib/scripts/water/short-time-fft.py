@@ -2,9 +2,11 @@
 import os
 import numpy as np
 import pandas as pd
-from eslib.formatting import esfmt, eslog
 from scipy.signal import ShortTimeFFT
 from scipy.signal.windows import gaussian
+import matplotlib.pyplot as plt
+from eslib.formatting import esfmt, eslog
+from eslib.classes.tcf import correlate, compute_spectrum, autocorrelate
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -16,9 +18,32 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"        , **argv, required=True , type=str, help="one of the csv produced by 'dataset4molecules-pairs.py'")
-    parser.add_argument("-k" , "--keyword"      , **argv, required=True , type=str, help="keyword for the dipole")
+    parser.add_argument("-k" , "--keyword"      , **argv, required=False , type=str, help="keyword for the dipole (default: %(default)s)", default="dipole")
     # parser.add_argument("-o" , "--output"       , **argv, required=True , type=str, help="output folder")
     return parser
+
+def power_spectrum(signal, sampling_rate=1):
+    """
+    Compute the power spectrum of a time series using FFT.
+
+    Parameters:
+        signal (array-like): The time-domain signal (1D).
+        sampling_rate (float): Sampling rate in Hz.
+
+    Returns:
+        freqs (numpy array): Frequencies corresponding to the power spectrum.
+        power (numpy array): Power at each frequency.
+    """
+    n = len(signal)
+    fft_vals = np.fft.fft(signal)
+    freqs = np.fft.fftfreq(n, d=1/sampling_rate)
+    
+    # Compute the two-sided power spectrum
+    power = np.abs(fft_vals)**2 / n
+    
+    # Keep only the positive frequencies
+    mask = freqs > 0
+    return freqs[mask], power[mask]
 
 #---------------------------------------#
 @esfmt(prepare_args,description)
@@ -48,6 +73,23 @@ def main(args):
         mu_j = np.asarray(df[j_keys])
     assert mu_i.shape == mu_j.shape, "Dipoles must have the same shape"
     print(f"\t dipole.shape: {mu_i.shape}")
+    
+    plt.plot(mu_i[:,0])
+    plt.plot(mu_i[:,1])
+    plt.plot(mu_i[:,2])
+    plt.show()
+    plt.cla()
+    
+    #mu_i -= np.mean(mu_i,axis=0,kpower_spectrum eepdims=True)
+    corr = autocorrelate(mu_i[:,1])
+    spectrum, freq = compute_spectrum(corr,axis=0,pad=0,dt=1,shift=True)
+    
+    freq, spectrum = power_spectrum(mu_i[:,0])
+    
+    plt.plot(freq,spectrum.real)
+    plt.xlim(0,0.001)
+    plt.show()
+    
     
     with eslog("\nExtracting distances"):
         distances = df["distance"].to_numpy()
@@ -79,7 +121,6 @@ def main(args):
 
     Sx = SFT.stft(x)  # perform the STFT
     
-    import matplotlib.pyplot as plt
     # N = len(mu_i)
     fig1, ax1 = plt.subplots(figsize=(6., 4.))  # enlarge plot a bit
     # t_lo, t_hi = SFT.extent(N)[:2]  # time range of plot
