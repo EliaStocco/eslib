@@ -37,7 +37,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    trajectory:List[Atoms] = list(AtomicStructures.from_file(file=args.input,format=args.input_format,index=":"))
+    trajectory = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done")
     
     #------------------#
@@ -54,7 +54,7 @@ def main(args):
 
     print("\n\tWriting atomic structures to file '{:s}' ... ".format(args.output), end="")
     try:
-        write(images=trajectory,filename=args.output, format=args.output_format) # fmt)
+        trajectory.to_file(file=args.output, format=args.output_format) # fmt)
         print("done")
     except Exception as e:
         print("\n\tError: {:s}".format(e))    
