@@ -80,7 +80,7 @@ def main(args):
         
     maxT = data.shape[args.axis_time]*args.time_step
     maxT = convert(maxT,"time","atomic_unit","picosecond")
-    print("\tmax time: ",maxT)
+    print(f"\tmax time: {maxT:.2f}")
         
     #------------------#
     N = data.shape[args.axis_time]
@@ -135,10 +135,10 @@ def main(args):
     # print("\tautocorr min value: ",autocorr.min()," at ",lags[autocorr.argmin()]," fs")
     
     #------------------#
-    print("\n\tPrinting <mu_i^2>:")
+    print("\n\tPrinting <(d mu_i/d t)^2>:")
     tmp = np.moveaxis(norm_der, [args.axis_samples,args.axis_components], [0,1])
     assert tmp.shape[2] == 1, "the shape of the array is not correct"
-    tmp = tmp[:,:,0]*convert(1,"electric-dipole","atomic_unit","eang")
+    tmp = tmp[:,:,0]# *convert(1,"electric-dipole","atomic_unit","eang")
     print("\t---------------------------------------------------")
     print("\t| {:>8} | {:>10} | {:>10} | {:>10} |".format("sample","x","y","z"))
     print("\t---------------------------------------------------")
@@ -148,12 +148,13 @@ def main(args):
     
     #------------------#
     print("\n\tComputing normalizing factor ... ",end="")
-    norm_std = float(np.std(np.sum(norm_der,axis=args.axis_components)))
-    norm_der = float(np.mean(np.sum(norm_der,axis=args.axis_components)))
+    tmp = np.sum(norm_der,axis=args.axis_components)
+    norm_std = float(np.std(tmp))
+    norm_der = float(np.mean(tmp))
     print("done")
-    print(f"\t    norm. factor: {norm_der:.2e} [e^2ang^2]")
-    print(f"\tnorm. factor std: {norm_std:.2e} [e^2ang^2]")
-    print(f"\tnorm. factor std: {100*norm_std/norm_der:.2f} [%] (this should be small)")
+    print(f"\t    norm. factor: {norm_der:.2e}") # [e^2ang^2]
+    print(f"\tnorm. factor std: {norm_std:.2e} = {100*norm_std/norm_der:.2f}% (this should be small)") # [e^2ang^2]
+    # print(f"\tnorm. factor std:  ")
 
     #------------------#
     if args.axis_components is not None:
@@ -213,7 +214,8 @@ def main(args):
     epsilon = 1/(4*np.pi)
     kB = 1
     c = convert(299792458,"velocity","m/s","atomic_unit")
-    factor = 3*c*volume*args.temperature*kB*epsilon/np.pi
+    # factor = 3*c*volume*args.temperature*kB*epsilon/np.pi
+    factor = 3*c*volume*args.temperature*kB/(2*np.pi)*np.sqrt(3.)
     spectrum /= factor
     spectrum /= convert(1,"length","atomic_unit","centimeter")
     # spectrum *= convert(1,"frequency","atomic_unit","inversecm")
@@ -221,7 +223,7 @@ def main(args):
     # print("\tspectrum norm :",tmp)
     print("\tspectrum max :",np.max(spectrum,axis=1).real.mean())
     
-   #------------------#
+    #------------------#
     print("\n\tComputing the average over the trajectories ... ", end="")
     N = spectrum.shape[args.axis_samples]
     std:np.ndarray      = np.std (spectrum,axis=args.axis_samples)
