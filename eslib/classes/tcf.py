@@ -604,7 +604,7 @@ def compute_spectrum(
     #     freq = np.arange(n) / (2.0 * (n - 1) * dt)
     # elif method == "rfft":
     from scipy.fft import rfft, rfftfreq
-    spectrum = rfft(autocorr, axis=axis)
+    spectrum = rfft(autocorr, axis=axis)*dt # this is an integral in time domain
     freq = rfftfreq(autocorr.shape[axis], dt)
     # else:
     #     raise ValueError(f"Unsupported method: {method}")
