@@ -49,6 +49,8 @@ def main(args):
     print("done")
     print(f"\tFirst layer: {layer_1:.2f}")
     print(f"\tSecond layer: {layer_2:.2f}")
+    z = layer_2 - layer_1
+    print(f"\tDistance between layers: {z:.2f}")
     
     #-------------------#
     print("\tCreating water-only structure ... ",end="")
