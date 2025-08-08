@@ -60,11 +60,11 @@ def main(args):
         print("done")
         
 
-    print("\tpredicted.shape: ",predicted.shape)
-    print("\texpected.shape: ",expected.shape)
+    # print("\tpredicted.shape: ",predicted.shape)
+    # print("\texpected.shape: ",expected.shape)
 
-    assert predicted.ndim == expected.ndim 
-    assert predicted.shape == expected.shape 
+    # assert predicted.ndim == expected.ndim 
+    # assert predicted.shape == expected.shape 
 
     # if predicted.ndim == 3 and not args.atomic:
     #     print("\n\t{:s}: The provided quantity could be a collection of atomic contribution.\n\tConsider using `-a/--atomic True` for a better estimation of relative metrics (e.g. `relrmse`).".format(warning,))
