@@ -315,7 +315,7 @@ class AtomicStructures(Trajectory,aseio):
         pass    
 
     # ToDo: this might be parallelized with 'multiprocessing'
-    def set(self:T,name:str,data:np.ndarray,what:str="unknown")->None:
+    def set(self:T,name:str,data:Union[np.ndarray,List[Union[float,np.ndarray]]],what:str)->None:
         """
         Set information or array attribute values for all structures.
 
@@ -324,24 +324,11 @@ class AtomicStructures(Trajectory,aseio):
         - data: Array of values to set.
         - what: 'info' or 'arrays', if known.
         """
-        # if what == "unknown":
-        #     what = self.search(name)
-        # if what == "info" or what == "arrays":
-        #     pass
-        # else:
-        #     raise ValueError("can not find {:s}".format(name))
-        assert len(self) == data.shape[0]
-        if what == "unknown":
-            what = self.search(name)
-            if what not in ["info","arrays"]:
-                raise ValueError("can not find {:s}".format(name))
+        if what not in ["info","arrays"]:
+            raise ValueError("can not find {:s}".format(name))
+        assert len(self) == len(data), "wrong shape"                
         for n,atoms in enumerate(self):
-            getattr(atoms,what)[name] = data[n]
-            # if what not in ["positions"]:
-            #     getattr(atoms,what)[name] = data[n]
-            # elif what == "positions":
-            #     atoms.set_positions(data[n])
-        pass
+            getattr(atoms,what)[name] = data[n] if what == "info" else np.atleast_1d(data[n])
 
     def convert(self,name,
                 family:str=None,
