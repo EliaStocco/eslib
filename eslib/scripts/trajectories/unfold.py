@@ -85,11 +85,11 @@ def main(args):
         print("done")
 
         #------------------#
-        # print("\tUnfolding fractional/scaled coordinates ... ", end="")
-        # frac_positions = frac_positions.reshape((N,-1))
-        # frac_positions = np.mod(frac_positions,1)
-        # frac_positions = np.unwrap(frac_positions,axis=0,period=1)
-        # print("done")
+        print("\tUnfolding fractional/scaled coordinates ... ", end="")
+        frac_positions = frac_positions.reshape((N,-1))
+        frac_positions = np.mod(frac_positions,1)
+        frac_positions = np.unwrap(frac_positions,axis=0,period=1)
+        print("done")
 
         # Nfolded = np.any( (frac_positions != unfolded_frac_positions ).reshape((len(atoms),-1)) , axis=1).sum()
         # print("\n\tNumber of structures that have been unfolded: {:d}".format(Nfolded))
