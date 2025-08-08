@@ -306,7 +306,14 @@ def get_raw_header(inputfile):
     header = header.finalize()
     return header
     
-def get_property_header(inputfile, N=1000, search=True):
+def get_property_header(inputfile, N=1000, search=True, strip_units=True):
+    """
+    Extracts the property names from the header of a data file.
+    
+    - Keeps extra info in parentheses (e.g. '(atom=O)').
+    - If strip_units=True, removes the '{unit}' part but keeps parentheses.
+    - Returns a list of property names.
+    """
     names = [None] * N
     restart = False
 
@@ -317,124 +324,197 @@ def get_property_header(inputfile, N=1000, search=True):
             nline = line
             if not line:
                 break
-            elif "#" in line:
-                if "-->" not in line:
-                    continue
-                line = line.split("-->")[1]
-                line = line.split(":")[0]
-                line = line.split(" ")[1]
+            elif "#" in line and "-->" in line:
+                # Extract the property name portion after -->
+                prop_part = line.split("-->")[1].split(":")[0].strip()
 
+                # If requested, strip the {unit} part but keep parentheses
+                if strip_units:
+                    prop_part = re.sub(r"\{[^}]*\}", "", prop_part)
+
+                # Figure out the number of columns
                 nline = nline.split("-->")[0]
                 if "column" in nline:
                     length = 1
                 else:
                     nline = nline.split("cols.")[1]
-                    nline = nline.split("-")
-                    a, b = int(nline[0]), int(nline[1])
+                    a, b = map(int, nline.split("-"))
                     length = b - a + 1
 
+                # Store property names
                 if icol < N:
                     if not search:
                         if length == 1:
-                            names[icol] = line
+                            names[icol] = prop_part
                             icol += 1
                         else:
                             for i in range(length):
-                                names[icol] = line + "-" + str(i)
+                                names[icol] = f"{prop_part}-{i}"
                                 icol += 1
                     else:
-                        names[icol] = line
+                        names[icol] = prop_part
                         icol += 1
                 else:
                     restart = True
                     icol += 1
 
     if restart:
-        return get_property_header(inputfile, N=icol)
+        return get_property_header(inputfile, N=icol, search=search, strip_units=strip_units)
     else:
-        out = names[:icol]
-        return [ str(n).split("{")[0] for n in out ]
+        return names[:icol]
 
+def getproperty(inputfile, propertyname, data=None, skip="0", show=False, index=None, return_all=False):
+    """
+    Extract a property from file header-driven columns.
 
-def getproperty(inputfile, propertyname, data=None, skip="0", show=False,index=None):
-    def check(p, l):
-        if not l.find(p):
-            return False  # not found
-        elif l[l.find(p) - 1] != " ":
-            return False  # composite word
-        elif l[l.find(p) + len(p)] == "{":
-            return True
-        elif l[l.find(p) + len(p)] != " ":
-            return False  # composite word
-        else:
-            return True
+    - Matches only the property name portion after '-->' and before ':' to avoid hitting description text.
+    - propertyname may be e.g. "temperature", "temperature(atom=O)", "temperature{kelvin}", etc.
+    - By default returns (ndarray, unit). If return_all=True returns (dict_of_arrays, dict_of_units).
+    """
+    def parse_prop_token(s):
+        """Parse a token like "temperature{kelvin}(atom=O)" into (base, unit, extra)."""
+        if s is None:
+            return None, None, None
+        s = s.strip()
+        # strip external quotes if accidentally supplied: "'temperature(...)'"
+        if (s.startswith("'") and s.endswith("'")) or (s.startswith('"') and s.endswith('"')):
+            s = s[1:-1].strip()
+        # match: base [ {unit} ] [ (extra) ]
+        m = re.match(r'^\s*([^\{\(]+?)\s*(?:\{([^}]*)\})?\s*(?:\(([^)]*)\))?\s*$', s)
+        if not m:
+            # fallback: treat whole string as base
+            return s.strip(), None, None
+        base = m.group(1).strip()
+        unit = m.group(2).strip() if m.group(2) else None
+        extra = m.group(3).strip() if m.group(3) else None
+        return base, unit, extra
 
-    if type(propertyname) in [list, np.ndarray]:
-        out = dict()
-        units = dict()
-        data = np.loadtxt(inputfile)
-        if index is not None:
-            data = data[index]
-        for p in propertyname:
-            p = p.split("{")[0]
-            out[p], units[p] = getproperty(inputfile, p, data, skip=skip)
-        return out, units
-
-    if show:
-        print("\tsearching for '{:s}'".format(propertyname))
+    def norm(s):
+        """Normalize for comparison: lowercase, remove whitespace."""
+        if s is None:
+            return None
+        return re.sub(r'\s+', '', s).lower()
 
     skip = int(skip)
 
-    # propertyname = " " + propertyname + " "
+    # handle list of properties:
+    if isinstance(propertyname, (list, np.ndarray)):
+        out = {}
+        units = {}
+        # load numeric data once
+        data = np.loadtxt(inputfile, skiprows=skip) if data is None else data
+        if index is not None:
+            data = data[index]
+        for p in propertyname:
+            arr, u = getproperty(inputfile, p, data, skip=skip, show=show, index=index, return_all=False)
+            out[p] = arr
+            units[p] = u
+        return out, units
 
-    # opens & parses the input file
+    if show:
+        print(f"\tsearching for '{propertyname}'")
+
+    # ensure numeric data loaded
+    if data is None:
+        data = np.loadtxt(inputfile, skiprows=skip)
+        if index is not None:
+            data = data[index]
+
+    user_base, user_unit, user_extra = parse_prop_token(propertyname)
+    user_base_n = norm(user_base)
+    user_unit_n = norm(user_unit)
+    user_extra_n = norm(user_extra)
+
+    matches = []
+
+    # iterate header lines, but only inspect the property token (after --> and before :)
     with open(inputfile, "r") as ifile:
-        # ifile = open(inputfile, "r")
-
-        # now reads the file one frame at a time, and outputs only the required column(s)
-        icol = 0
-        while True:
+        for line in ifile:
+            if "#" not in line or "-->" not in line:
+                continue
+            # Extract property portion only: between --> and :
             try:
-                line = ifile.readline()
-                if len(line) == 0:
-                    raise EOFError
-                while "#" in line:  # fast forward if line is a comment
-                    line = line.split(":")[0]
-                    if check(propertyname, line):
+                prop_part = line.split("-->")[1].split(":")[0].strip()
+            except Exception:
+                # malformed header, skip
+                continue
+
+            header_base, header_unit, header_extra = parse_prop_token(prop_part)
+            header_base_n = norm(header_base)
+            header_unit_n = norm(header_unit)
+            header_extra_n = norm(header_extra)
+
+            # Matching logic:
+            # - base names must be equal (case/space-insensitive)
+            # - if user specified extra (parentheses) it must match header extra
+            # - if user specified unit it must match header unit
+            if header_base_n == user_base_n:
+                if user_extra_n is not None and header_extra_n != user_extra_n:
+                    continue
+                if user_unit_n is not None and header_unit_n != user_unit_n:
+                    continue
+
+                # found candidate — extract columns from the original full line
+                cols = [int(i) - 1 for i in re.findall(r"\d+", line)]
+                if not cols:
+                    continue
+                if len(cols) == 1:
+                    output = data[:, cols[0]]
+                elif len(cols) == 2:
+                    output = data[:, cols[0]:cols[1] + 1]
+                else:
+                    raise ValueError(f"Unexpected column format in line: {line.strip()}")
+
+                unit = header_unit if header_unit else "atomic_unit"
+                matches.append((output, unit, prop_part, line.strip()))
+
+    if not matches:
+        # As a tolerant fallback, try matching ignoring parentheses content in user string
+        base_only = user_base
+        if user_extra is not None:
+            # attempt search using only base
+            matches = []
+            with open(inputfile, "r") as ifile:
+                for line in ifile:
+                    if "#" not in line or "-->" not in line:
+                        continue
+                    prop_part = line.split("-->")[1].split(":")[0].strip()
+                    header_base, header_unit, header_extra = parse_prop_token(prop_part)
+                    if norm(header_base) == norm(base_only):
                         cols = [int(i) - 1 for i in re.findall(r"\d+", line)]
+                        if not cols:
+                            continue
                         if len(cols) == 1:
-                            icol += 1
                             output = data[:, cols[0]]
                         elif len(cols) == 2:
-                            icol += 1
-                            output = data[:, cols[0] : cols[1] + 1]
-                        elif len(cols) != 0:
-                            raise ValueError("wrong string")
-                        if icol > 1:
-                            raise ValueError(
-                                "Multiple instances for '{:s}' have been found".format(
-                                    propertyname
-                                )
-                            )
-
-                        l = line
-                        p = propertyname
-                        if l[l.find(p) + len(p)] == "{":
-                            unit = l.split("{")[1].split("}")[0]
+                            output = data[:, cols[0]:cols[1] + 1]
                         else:
-                            unit = "atomic_unit"
+                            raise ValueError(f"Unexpected column format in line: {line.strip()}")
+                        unit = header_unit if header_unit else "atomic_unit"
+                        matches.append((output, unit, prop_part, line.strip()))
 
-                    # get new line
-                    line = ifile.readline()
-                    if len(line) == 0:
-                        raise EOFError
-                if icol <= 0:
-                    print("Could not find " + propertyname + " in file " + inputfile)
-                    raise EOFError
-                else:
-                    if show:
-                        print("\tfound '{:s}'".format(propertyname))
-                    return np.asarray(output), unit
+    if not matches:
+        raise ValueError(f"Could not find property '{propertyname}' in file '{inputfile}'")
 
-            except EOFError:
-                break
+    if return_all:
+        # return all found variants keyed by the exact prop_part string
+        return {m[2]: np.asarray(m[0]) for m in matches}, {m[2]: m[1] for m in matches}
+
+    # default: pick the best single match
+    if len(matches) == 1:
+        if show:
+            print(f"\tfound '{propertyname}': {matches[0][3]}")
+        return np.asarray(matches[0][0]), matches[0][1]
+
+    # prefer the one without extra (e.g. the generic 'temperature' vs 'temperature(atom=O)')
+    for m in matches:
+        hb, hu, he = parse_prop_token(m[2])
+        if he is None:
+            if show:
+                print(f"\tselected generic match for '{propertyname}': {m[3]}")
+            return np.asarray(m[0]), m[1]
+
+    # otherwise return first match
+    if show:
+        print(f"\tmultiple matches, defaulting to first for '{propertyname}': {matches[0][3]}")
+    return np.asarray(matches[0][0]), matches[0][1]
