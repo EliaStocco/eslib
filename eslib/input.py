@@ -18,17 +18,18 @@ def literal(value):
 def union_type(s:str,dtype):
     return s
 #---------------------------------------#
-def size_type(s:str,dtype=int,N=None):
-    s = s.replace("[","").replace("]","").replace(","," ").split()
-    # s = s.split("[")[1].split("]")[0].split(",")
-    if N is not None and len(s) != N :
-        raise ValueError("You should provide {:d} values".format(N)) 
+def size_type(s: str, dtype=float, N=None):
+    s = s.replace("[", "").replace("]", "").replace(",", " ").split()
+    if N is not None and len(s) != N:
+        raise ValueError("You should provide {:d} values".format(N))
     else:
-        return np.asarray([ dtype(k) for k in s ])
-        # if dtype != str:
-        #     return np.asarray([ dtype(k) for k in s ])
-        # else:
-        #     return list([ dtype(k) for k in s ])
+        values = []
+        for k in s:
+            if k.lower() == "none":
+                values.append(None)
+            else:
+                values.append(dtype(k))
+        return values  # return list, not np.array, so None stays
     
 flist = lambda s:size_type(s,float) # float list
 ilist = lambda s:size_type(s,int)   # integer list

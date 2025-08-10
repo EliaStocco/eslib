@@ -36,16 +36,30 @@ def main(args):
     print("done")
 
     #------------------#
-    # cellpar
-    cellpar = np.append(args.lengths,args.angles)
-    print("\n\tCellpar: ",cellpar)
-    cell = Cell.fromcellpar(cellpar)
-    
+    # cellpar    
     print("\tSetting the cell ... ", end="")
     for atoms in structures:
+        current_cellpar = atoms.cell.cellpar()
+
+        # Replace only provided lengths
+        new_lengths = [
+            args.lengths[i] if args.lengths[i] is not None else current_cellpar[i]
+            for i in range(3)
+        ]
+        # Replace only provided angles
+        new_angles = [
+            args.angles[i] if args.angles[i] is not None else current_cellpar[i + 3]
+            for i in range(3)
+        ]
+
+        # Create and assign new cell
+        cellpar = np.array(new_lengths + new_angles, dtype=float)
+        cell = Cell.fromcellpar(cellpar)
+
         atoms.set_pbc(True)
         atoms.set_cell(cell)
     print("done")
+
     
     #------------------#
     print("\n\tSaving the atomic structures to file '{:s}' ... ".format(args.output), end="")
