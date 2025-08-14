@@ -99,7 +99,11 @@ def main(args):
     # Plot all histograms on the same figure
     print("\n\tPlotting histograms ...")
 
-    # Strict dimensionality check for all first
+        #------------------#
+    # Plot histograms and violin plots side-by-side
+    print("\n\tPlotting histograms and violin plots ...")
+
+    # Strict dimensionality check
     for k, arr in data.items():
         arr = np.asarray(arr)
         if arr.ndim != 1:
@@ -108,25 +112,59 @@ def main(args):
                 "but histogram plotting requires 1D data."
             )
 
-    plt.figure()
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+    # --- First subplot: histogram ---
     labels = []
     for k, arr in data.items():
-        plt.hist(arr, bins=50, alpha=0.5, edgecolor='black', label=f"{k} [{allproperties.units[k]}]")
+        axes[0].hist(arr, bins=50, alpha=0.5, edgecolor='black', label=f"{k} [{allproperties.units[k]}]")
         labels.append(k)
+    axes[0].set_xlabel("Value")
+    axes[0].set_ylabel("Frequency")
+    axes[0].set_title("Histograms of selected properties")
+    axes[0].legend()
+    axes[0].grid(True)
 
-    plt.xlabel("Value")
-    plt.ylabel("Frequency")
-    plt.title("Histograms of selected properties")
-    plt.legend()
-    plt.grid(True)
+    # --- Second subplot: violin plot with mean & quantiles ---
+    import seaborn as sns
+    combined_data = []
+    combined_labels = []
+    for k, arr in data.items():
+        combined_data.extend(arr)
+        combined_labels.extend([k] * len(arr))
+
+    sns.violinplot(
+        x=combined_labels,
+        y=combined_data,
+        ax=axes[1],
+        inner=None,
+        cut=0
+    )
+
+    # Add mean & quantile lines for each category
+    unique_labels = list(data.keys())
+    for i, k in enumerate(unique_labels):
+        arr = np.array(data[k])
+        mean_val = np.mean(arr)
+        q25, q50, q75 = np.percentile(arr, [25, 50, 75])
+        axes[1].plot(i, mean_val, marker='o', color='red', label='Mean' if i == 0 else "")
+        axes[1].hlines([q25, q50, q75], i - 0.2, i + 0.2, colors='black', linestyles='--', lw=1)
+
+    axes[1].set_xlabel("Property")
+    axes[1].set_ylabel("Value")
+    axes[1].set_title("Violin plot with mean & quantiles")
+    axes[1].legend()
+    axes[1].grid()
+
+    plt.tight_layout()
 
     if args.output:
         plt.savefig(args.output, dpi=300, bbox_inches='tight')
-        print(f"\tSaved combined histogram to '{args.output}'")
+        print(f"\tSaved combined histogram & violin plot to '{args.output}'")
     else:
         plt.show()
 
-    print("\tAll histograms plotted.")
+    print("\tAll plots generated.")
     
 
 #---------------------------------------#
