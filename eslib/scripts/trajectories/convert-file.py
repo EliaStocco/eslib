@@ -102,7 +102,7 @@ def main(args):
     if args.pos_keyword != "positions":
         with eslog(f"Using the keyword '{args.pos_keyword}' as positions"):
             pos = atoms.get(args.pos_keyword)
-            atoms.set("positions",pos)
+            atoms.set("positions",pos,"arrays")
             
     #------------------#
     if args.input_format in ["espresso-in","espresso-out"] and args.output_format in ["espresso-in","espresso-out"] :
