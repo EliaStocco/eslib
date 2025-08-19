@@ -55,7 +55,7 @@ def pbc_distance(vec, box):
     return vec - box * np.round(vec / box)
 
 #---------------------------------------#
-def compute_distances(atoms):
+def compute_distances(atoms:Atoms):
     """Compute O-O, H-H, and H-O distances with PBC."""
     symbols = atoms.get_chemical_symbols()
     cell = atoms.get_cell()
@@ -134,7 +134,7 @@ def main(args):
     # Print stats
     for pair_type, vals in distances.items():
         vals = np.array(vals)
-        print(f"{pair_type}: min={vals.min():.3f} Å, mean={vals.mean():.3f} Å, max={vals.max():.3f} Å")
+        print(f"\t - {pair_type}: min={vals.min():.3f} Å, mean={vals.mean():.3f} Å, max={vals.max():.3f} Å")
 
     # Prepare violin plot
     fig, ax = plt.subplots(figsize=(6, 4))
@@ -143,6 +143,7 @@ def main(args):
     vp = ax.violinplot(data, showmeans=True, showextrema=True, showmedians=False)
 
     ax.set_xticks([1, 2, 3])
+    ax.set_ylim(0,5)
     ax.set_xticklabels(labels)
     ax.set_ylabel("Distance (Å)")
     ax.set_title("Pairwise distances in generated structure")
