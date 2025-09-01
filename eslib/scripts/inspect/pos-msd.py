@@ -7,8 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
-from eslib.input import flist
-from eslib.plot import hzero
+from eslib.geometry import mic_dist
 matplotlib.use('Agg')
 
 #---------------------------------------#
@@ -24,8 +23,10 @@ def prepare_args(description):
     parser.add_argument("-if", "--input_format" , **argv, type=str, required=False, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-r" , "--ref"          , **argv, type=str, required=False, help="reference input file [extxyz] (default: %(default)s)", default=None)
     parser.add_argument("-rf", "--ref_format"   , **argv, type=str, required=False, help="reference input file format (default: %(default)s)" , default=None)
-    parser.add_argument("-oi" , "--output_info" , **argv, type=str, required=False, help="output txt file with the MSD of each atom (default: %(default)s)", default="MSD.array.txt")
-    parser.add_argument("-oa" , "--output_array", **argv, type=str, required=False, help="output txt file with the global MSD (default: %(default)s)", default="MSD.info.txt")
+    parser.add_argument("-o" , "--output"        , **argv, type=str, required=True , help="output file [extxyz]")
+    parser.add_argument("-of", "--output_format" , **argv, type=str, required=False, help="output file format (default: %(default)s)" , default=None)
+    parser.add_argument("-oi" , "--output_info" , **argv, type=str, required=False, help="output txt file with the MSD of each atom (default: %(default)s)", default="MSD-tot")
+    parser.add_argument("-oa" , "--output_array", **argv, type=str, required=False, help="output txt file with the global MSD (default: %(default)s)", default="MSD")
     return parser
 
 #---------------------------------------#
@@ -61,6 +62,38 @@ def main(args):
     print("\tref.shape: ",ref.shape)
     
     print("\n\tComputing MPSD ... ",end="")
+    # squared displacement for each structure relative to reference
+    # disp = pos - ref                    # shape: (Nframes, Natoms, 3)
+    cell = reference.get_cell()
+    disp, _ = mic_dist(pos - ref, cell)
+    sq_disp = np.sum(disp**2, axis=2)   # shape: (Nframes, Natoms)
+    
+    # average over time (frames)
+    msd_atoms = np.sqrt(sq_disp)   # shape: (Nframes, Natoms)
+    
+    # global MSD (average over atoms)
+    msd_global = np.sqrt(np.mean(sq_disp,axis=1))        # shape: (Nframes,)
+    
+    print("done")
+    print("\tmsd_atoms.shape:", msd_atoms.shape)
+    print("\tmsd_global.shape:", msd_global.shape)
+    print()
+    
+    print("\tmean: ", np.mean(msd_global))
+    print("\tmin:  ", np.min(msd_global))
+    print("\tmax:  ", np.max(msd_global))
+
+    #------------------#
+    # Save results
+    print("\n\tSaving results ... ", end="")
+    structures.set(args.output_info, msd_global,"info")
+    structures.set(args.output_array, msd_atoms,"arrays")
+    print("done")
+    
+    #------------------#
+    print("\tWriting the atomic structure to file '{:s}' ... ".format(args.output), end="")
+    structures.to_file(file=args.output,format=args.output_format)
+    print("done")
     
     return
 

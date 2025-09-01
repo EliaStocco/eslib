@@ -2,6 +2,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+import matplotlib
+matplotlib.use('Agg')  # must come first
+
+
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.plot import generate_colors, histogram

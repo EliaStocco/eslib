@@ -55,8 +55,9 @@ def main(args):
     
     #------------------#
     print("\tSubsampling the structures ... ", end="")
-    structure.subsample(indices)
+    structure = structure.subsample(indices)
     print("done")
+    print("\tNumber of structures: ", len(structure))
     
     #------------------#
     print("\tWriting the atomic structure to file '{:s}' ... ".format(args.output), end="")

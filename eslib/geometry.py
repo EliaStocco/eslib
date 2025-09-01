@@ -1,8 +1,9 @@
 from copy import copy
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 
+from ase.cell import Cell
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.tools import cart2frac, frac2cart, is_integer
 
@@ -60,3 +61,68 @@ def fold(trajectory:AtomicStructures)->Tuple[AtomicStructures,np.ndarray]:
         folded[n].positions = positions
 
     return folded, np.asarray(shift)
+
+def mic_dist(dr: np.ndarray, cells: Union[np.ndarray, Cell, List[Cell]]) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Apply Minimum Image Convention (MIC) to displacement vectors.
+
+    Parameters
+    ----------
+    dr : (natoms,3) or (nframes,natoms,3) ndarray
+        Displacement vectors.
+    cells : ase.Cell, list[ase.Cell], or ndarray
+        Cell(s) for each frame:
+        - single Cell or (3,3) ndarray → used for all frames
+        - list of Cells → one per frame
+
+    Returns
+    -------
+    dr_mic : ndarray
+        MIC-corrected displacement vectors (same shape as dr).
+    dist : ndarray
+        Distances corresponding to dr_mic:
+        - shape (natoms,) if dr was (natoms,3)
+        - shape (nframes,natoms) if dr was (nframes,natoms,3)
+    """
+    dr = np.asarray(dr)
+
+    # --- promote dr to (nframes,natoms,3) ---
+    if dr.ndim == 2:  # (natoms,3)
+        dr = dr[None, :, :]
+        single_frame = True
+    elif dr.ndim == 3:
+        single_frame = False
+    else:
+        raise ValueError("dr must have shape (natoms,3) or (nframes,natoms,3)")
+
+    nframes, natoms, _ = dr.shape
+
+    # --- normalize cells ---
+    if isinstance(cells, Cell):
+        cells = np.broadcast_to(cells.array, (nframes, 3, 3))
+    elif isinstance(cells, list) and all(isinstance(c, Cell) for c in cells):
+        cells = np.array([c.array.T for c in cells])
+    else:
+        cells = np.asarray(cells)
+        if cells.ndim == 2:  # single cell matrix
+            cells = np.broadcast_to(cells, (nframes, 3, 3))
+
+    # --- inverse cells (for fractional coords) ---
+    inv_cells = np.linalg.inv(cells)  # (nframes,3,3)
+
+    # --- convert dr -> fractional coordinates ---
+    dr_frac = np.einsum("fij,fkj->fki", inv_cells, dr)
+
+    # --- apply MIC: wrap into [-0.5,0.5) ---
+    dr_frac -= np.round(dr_frac)
+
+    # --- back to Cartesian ---
+    dr_mic = np.einsum("fij,fkj->fki", cells, dr_frac)
+
+    # --- distances ---
+    dist = np.linalg.norm(dr_mic, axis=-1)
+
+    if single_frame:
+        return dr_mic[0], dist[0]
+    else:
+        return dr_mic, dist

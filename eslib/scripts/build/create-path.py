@@ -7,7 +7,7 @@ from eslib.formatting import esfmt
 from eslib.input import str2bool
 
 #---------------------------------------#
-description     = "Create a path bridging two atomic structures (useful for NEB calculations)."
+description     = "Create a path bridging two atomic structures (Cartesian or scaled). Useful for NEB calculations."
 
 #---------------------------------------#
 def prepare_parser(description):
@@ -20,6 +20,7 @@ def prepare_parser(description):
     parser.add_argument("-e", "--external"   ,  type=float   , **argv, help="external structures [between 0 and 1] (default: %(default)s)", default=0)
     parser.add_argument("-f", "--fix_com"    ,  type=str2bool, **argv, help="fix the center of mass (default: %(default)s)", default=False)
     parser.add_argument("-N", "--index_com"  ,  type=int     , **argv, help="index of the structure whose center of mass will be considered (default: %(default)s)", default=0)
+    parser.add_argument("-c", "--cartesian"  ,  type=str2bool, **argv, help="use Cartesian coordinates (default: %(default)s)", default=False)
     parser.add_argument("-o", "--output"     ,  type=str     , **argv, help="output file with the path", default="path.xyz")
     return parser
 
@@ -42,20 +43,24 @@ def main(args):
         raise ValueError("The two structures do not have the same cell.")
 
     #-------------------#
-    print("\n\tComputing the path positions ... ", end="")
     N=args.number
     pathpos = np.zeros((N + 2, *A.positions.shape))
-    # pm = np.full(A.positions.shape,1)
-    As = A.get_scaled_positions()
-    Bs = B.get_scaled_positions()
-    Bs[( As - Bs ) > +0.5] += 1
-    Bs[( As - Bs ) < -0.5] -= 1
     T = np.linspace(0-args.external, 1+args.external, N + 2)
-    # N = 0 -> t=0,1
-    # N = 1 -> t=0,0.5,1
-    for n, t in enumerate(T):
-        # t = float(n)/(N+1)
-        pathpos[n] = As * (1 - t) + t * Bs
+
+    if args.cartesian:
+        print("\n\tComputing the path positions (Cartesian) ... ", end="")
+        Apos = A.get_positions()
+        Bpos = B.get_positions()
+        for n, t in enumerate(T):
+            pathpos[n] = Apos * (1 - t) + t * Bpos
+    else:
+        print("\n\tComputing the path positions (Scaled) ... ", end="")
+        As = A.get_scaled_positions()
+        Bs = B.get_scaled_positions()
+        Bs[( As - Bs ) > +0.5] += 1
+        Bs[( As - Bs ) < -0.5] -= 1
+        for n, t in enumerate(T):
+            pathpos[n] = As * (1 - t) + t * Bs
     print("done")
 
     #-------------------#
@@ -67,7 +72,10 @@ def main(args):
     path:List[Atoms] = [None]*N
     for n in range(N):
         path[n] = A.copy()
-        path[n].set_scaled_positions(pathpos[n])
+        if args.cartesian:
+            path[n].set_positions(pathpos[n])
+        else:
+            path[n].set_scaled_positions(pathpos[n])
     print("done")
     
     #-------------------#
@@ -82,7 +90,7 @@ def main(args):
     #-------------------#
     print("\n\tSaving the path to file '{:s}' ... ".format(args.output), end="")
     try:
-        write(images=path,filename=args.output) # fmt)
+        write(images=path,filename=args.output)
     except Exception as e:
         print("\n\tError: {:s}".format(e))
     print("done")
