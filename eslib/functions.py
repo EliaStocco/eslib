@@ -463,3 +463,26 @@ def get_file_size_human_readable(file_path):
         size /= 1024.0
     return round(size, 2), units[-1]
 
+def map2unique(array)->dict[Any,List[Any]]:
+    """
+    Map each unique element in the array to the list of indices where it appears.
+
+    Parameters:
+    - array: A list or numpy array of elements.
+
+    Returns:
+    - A dictionary where keys are unique elements from the array and values are lists of indices.
+    """
+    unique_elements = np.unique(array)
+    mapping = {element: [] for element in unique_elements}
+    
+    for index, value in enumerate(array):
+        mapping[value].append(index)
+        
+    try:
+        for key in mapping:
+            mapping[key] = np.asarray(mapping[key], dtype=int)
+    except:
+        pass
+    
+    return mapping
