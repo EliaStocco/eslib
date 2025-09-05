@@ -92,17 +92,21 @@ def main(args):
 
         print("\n\tComputing fractional/scaled coordinates into the primitive cell ... ", end="")
         
-        frac_positions = np.full((N,*shape),np.nan)
+        frac_positions = [None]*len(atoms)
         for n in range(len(atoms)):
-            frac_positions[n,:,:] = cart2frac(atoms[n].get_cell(),atoms[n].positions)
+            frac_positions[n] = cart2frac(atoms[n].get_cell(),atoms[n].positions)
         print("done")
 
         print("\tFolding fractional/scaled coordinates ... ", end="")
         old_frac = frac_positions.copy()
-        frac_positions = np.mod(frac_positions,1)
+        for n in range(len(atoms)):
+            frac_positions[n] = np.mod(frac_positions[n],1)
         print("done")
-        Nfolded = np.any( (frac_positions != old_frac ).reshape((len(atoms),-1)) , axis=1).sum()
-        print("\n\tNumber of structures that have been folded: {:d}".format(Nfolded))
+        try:
+            Nfolded = np.any( (frac_positions != old_frac ).reshape((len(atoms),-1)) , axis=1).sum()
+            print("\n\tNumber of structures that have been folded: {:d}".format(Nfolded))
+        except:
+            pass
 
         #------------------#
         print("\tSetting unfolded fractional/scaled coordinates ... ", end="")
