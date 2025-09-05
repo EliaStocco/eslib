@@ -120,6 +120,10 @@ def main(args):
         y_fit = intercept + slope * x
         ax.plot(x, y_fit, label=f"Slope = {slope:.4f}",linestyle="dashed",color="red")
         
+        if quantity == "peak_freq":
+            delta_peaks = y[-1] - y[0]
+            ax.text(0.05, 0.95, r"$\Delta \nu$=" +f"{delta_peaks:.2f} cm-1", transform=ax.transAxes, fontsize=10, verticalalignment='top')
+        
         ax.set_ylabel(title)
         ax.legend(**legend_options)
         ax.grid(True)
