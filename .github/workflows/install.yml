@@ -1,9 +1,6 @@
 name: Run pytest tests
 
-on:
-  push:
-    branches:
-      - master  # Adjust this to match your branch name
+on: [push]
 
 jobs:
   test:
@@ -19,7 +16,4 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run pytest
-        run: python -m pytest
+        run: pip install .
