@@ -4,7 +4,7 @@ import pandas as pd
 from typing import Tuple, List, Optional, Dict, Any
 from warnings import warn
 
-from functional import extend2NDarray
+from eslib.functional import extend2NDarray
 
 def levi_civita():
     """Returns the 3x3x3 Levi-Civita tensor."""
