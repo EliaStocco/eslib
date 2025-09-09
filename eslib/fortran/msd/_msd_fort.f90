@@ -224,7 +224,7 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
                 progress = progress + 1
                 progress_fraction = real(progress) / real(M * nbeads)
 
-                if (int(progress_fraction*100) /= last_printed) then
+                ! if (int(progress_fraction*100) /= last_printed) then
                     last_printed = int(progress_fraction*100)
 
                     ! Elapsed and ETA
@@ -246,7 +246,7 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
                         I3.3,"%%] ETA: ",F6.1," s")', advance='no') &
                         dt(1), dt(2), dt(3), dt(4), dt(5), dt(6), dt(7), last_printed, eta
 
-                end if
+                ! end if
             end if
         end do
     end do
