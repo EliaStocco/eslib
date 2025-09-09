@@ -11,6 +11,7 @@ from eslib.input import itype, slist, str2bool
 from eslib.plot import add_common_legend
 from eslib.fortran import shift_msd_beads
 from eslib.mathematics import std_err
+from eslib.io_tools import pattern2data
 
 #---------------------------------------#
 description = "Compute the Mean Squared Displacement (MSD) and the diffusion coefficient from the beads positions."
@@ -21,12 +22,11 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i" , "--input"       , **argv, required=False, type=slist, help="input file")
-    parser.add_argument("-if", "--input_format", **argv, required=False, type=str  , help="input file format (default: %(default)s)", default=None)
-    parser.add_argument("-in", "--index"       , **argv, required=False, type=itype, help="index to be read from input file (default: %(default)s)", default=':')
+    parser.add_argument("-i" , "--input"       , **argv, required=True, type=str, help="txt input files produced by 'eslib/scripts/analysis/msd-shift.py' from the flag '--output_displacement'")
+    # parser.add_argument("-in", "--index"       , **argv, required=False, type=itype, help="index to be read from input file (default: %(default)s)", default=':')
     parser.add_argument("-dt", "--time_step"   , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
-    parser.add_argument("-e" , "--element"     , **argv, required=True , type=str  , help="element")
-    parser.add_argument("-v" , "--verbose"     , **argv, required=False, type=str2bool, help="verbose (default: %(default)s)",default=True)
+    # parser.add_argument("-e" , "--element"     , **argv, required=True , type=str  , help="element")
+    # parser.add_argument("-v" , "--verbose"     , **argv, required=False, type=str2bool, help="verbose (default: %(default)s)",default=True)
     # parser.add_argument("-od" , "--output_displacement", **argv, required=False, type=str, help="output txt file with 'delta_squared' (default: %(default)s)",default="delta_squared.txt")
     parser.add_argument("-o" , "--output"      , **argv, type=str  , help="output file (default: %(default)s)", default="msd.csv")
     parser.add_argument("-p" , "--plot"        , **argv, type=str  , help="plot (default: %(default)s)", default=None)
@@ -40,58 +40,22 @@ def main(args):
     args.time_step /= 1000 # fs to ps
 
     #------------------#
-    trajectories:List[AtomicStructures] = [None]*len(args.input)
-    for n,file in enumerate(args.input):
-        with eslog(f"\nReading atomic structures from file '{file}'"):
-            trajectories[n] = AtomicStructures.from_file(file=file, format=args.input_format,index=args.index)
-        N = len(trajectories[n])
-        print(f"\t n. of atomic structures: {N}")
-    Nall = [len(t) for t in trajectories]
-    assert np.allclose(Nall,N), f"The trajectories have different number of snapshots: {Nall}"
-    print(f"\t simulation time: {N*args.time_step}ps")
+    with eslog(f"\nReading data from pattern '{args.input}'"):
+        delta_squared = pattern2data(args.input)
+    print(" \t data.shape:",delta_squared.shape)
     
-    #------------------#
-    positions = np.asarray([ trajectory.get("positions") for trajectory in trajectories])
-    print(f"\t positions.shape: {positions.shape}")
+    with eslog(f"\nAveraging over the beads"):
+        delta_squared = np.mean(delta_squared,axis=0)
+    print(" \t data.shape:",delta_squared.shape)
     
-    #------------------#
-    symbols = trajectories[0][0].get_chemical_symbols()
-    indices = [ n for n,s in enumerate(symbols) if args.element == s ]
-    
-    with eslog(f"\nExtracting positions of '{args.element}' atoms"):
-        positions = positions[:,:,indices,:]
-    print(f"\t positions.shape: {positions.shape}") # (time, atoms, xyz)
+    M = delta_squared.shape[0]
     
     #------------------#
     # Mean Squared Displacement (MSD)
     with eslog(f"Computing the Mean Squared Displacement (MSD)"):
         
-        M = int(positions.shape[1]/2)
-        
         MSD = pd.DataFrame(columns=["time","MSD","MSD-std","MSD-err","D","D-err","MSD/time","MSD/time-std","MSD/time-err"])
         MSD["time"] = np.arange(M)*args.time_step
-        
-        Natoms = positions.shape[2]
-        
-        delta_squared = np.zeros((M,Natoms),order="F")
-        pos = np.zeros(positions.shape,order="F")
-        pos[:,:,:,:] = positions
-        shift_msd_beads(delta_squared,pos,msg=args.verbose)
-        
-        # np.savetxt(args.output_displacement, delta_squared, fmt=float_format)
-        
-        # # This is what the Fortran routine called within shift_msd is doing
-        # delta_squared_test = np.zeros((M,Natoms)) # (time, atoms)
-        # k = 0
-        # for i in range(M):
-        #     ref = positions[i]
-        #     # add extra dim
-        #     pos = positions[i:i+M]
-        #     delta_squared_test[:,:]  += np.sum(np.square(pos - ref),axis=2) # (time, atoms)
-        #     k += 1
-        # assert k == M,  "coding error"
-        # delta_squared_test /= k # (time, atoms)
-        # assert np.allclose(delta_squared,delta_squared_test), "Fortran and python routine do not match"
         
         MSD["MSD"]     = np.mean(delta_squared,axis=1) # (time)
         MSD["MSD-std"],MSD["MSD-err"] = std_err(delta_squared,axis=1)
