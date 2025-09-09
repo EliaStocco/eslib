@@ -393,7 +393,7 @@ def print_message(message: str, prefix: str = "", suffix: str = " ... ", end: st
     # if N > 0 :
     #     N = 8 # somehow it works
     # prefix = f"{prefix:<s} "
-    full_message = f"{prefix:<s} {message}{suffix}"+" "*100
+    full_message = f"{prefix:<s} {message}{suffix}" +" "*10
     # Print the padded message
     print(full_message, end=end, flush=flush)
 
