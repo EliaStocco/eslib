@@ -228,10 +228,13 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
                     ! Current timestamp
                     call date_and_time(values=dt)
 
-                    ! Print progress
-                    write(*, '(A)', advance='no') char(13)
-                    write(*,'(I4.4,"-",I2.2,"-",I2.2," ",I2.2,":",I2.2,":",I2.2,".",I3.3," Progress: [",I3.3,"%%] ETA: ",F6.1," s")', advance='no') &
+                    ! Print timestamped progress bar with ETA
+                    write(*,'(A)', advance='no') char(13)  ! return carriage
+
+                    write(*,'(I4.4,"-",I2.2,"-",I2.2," ",I2.2,":",I2.2,":",I2.2,".",I3.3," Progress: [", &
+                        I3.3,"%%] ETA: ",F6.1," s")', advance='no') &
                         dt(1), dt(2), dt(3), dt(4), dt(5), dt(6), dt(7), last_printed, eta
+
                 end if
             end if
         end do
