@@ -205,11 +205,11 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
                 if (progress == 1) then
                     ! For the first iteration, print progress and move to a new line
                     write(*, '(A)') ""  ! Newline after the first print
-                    write(*, '(A,I3,A)', advance='no') "Progress: [", progress * 100 / M, "%]"                
+                    write(*, '(A,I3,A)', advance='no') "Progress: [", progress * 100 / (M*nbeads), "%]"                
                 else
                     ! For subsequent iterations, update the progress on the same line
                     write(*, '(A)', advance='no') char(13)  ! Return carriage to overwrite the previous progress
-                    write(*, '(A,I3,A)', advance='no') "Progress: [", progress * 100 / M, "%]"
+                    write(*, '(A,I3,A)', advance='no') "Progress: [", progress * 100 / (M*nbeads), "%]"
                 end if
             end if
         end do
