@@ -1,5 +1,6 @@
 
 # To Do
+- optimize `eslib/fortran/msd/_msd_fort.f90` and use `MPI`
 - fix all `time-series` scripts as done for `tacf+IR.py`
 - `dot` and `rbc` in `physical_tensor.py` should be made the same function (debugging necessary)
 - the dynamical matrix eigenvetors are not correctly normalized when computed from `phonopy`
