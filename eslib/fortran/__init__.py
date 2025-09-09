@@ -10,6 +10,13 @@ def shift_msd(delta_squared:np.ndarray,positions:np.ndarray,msg:bool=False):
         import eslib.fortran.msd._msd_fort as MSD  # type: ignore
     MSD.shifted_msd(positions,delta_squared,msg)
     
+def shift_msd_beads(delta_squared:np.ndarray,positions:np.ndarray,msg:bool=False):
+    try:
+        import eslib.fortran._msd_fort as MSD  # type: ignore
+    except:
+        import eslib.fortran.msd._msd_fort as MSD  # type: ignore
+    MSD.shifted_msd_beads(positions,delta_squared,msg)
+    
 def fortran_intermolecular_rdfs_fixed_cell(rdf,posA,posB,rmin,rmax,cell,invcell,partitionA,partitionB,massA,massB)->None:                
     try:
         import eslib.fortran._rdfs_fort as RDF  # type: ignore

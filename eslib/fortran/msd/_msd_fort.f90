@@ -128,3 +128,103 @@ subroutine shifted_msd(positions, delta_squared, verbose, nsnapshots, natoms, M)
 
     ! if (verbose) print *, "Subroutine compute_delta_squared completed successfully"
 end subroutine shifted_msd
+
+subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapshots, natoms, M)
+    implicit none
+
+    ! Input arguments
+    integer, intent(in) :: nbeads, nsnapshots, natoms, M
+    logical, intent(in) :: verbose
+    real(8), intent(in) :: positions(nbeads,nsnapshots, natoms, 3)  ! (time_steps, natoms, 3)
+
+    ! Output argument
+    real(8), intent(inout) :: delta_squared(M, natoms)  ! (M, natoms)
+
+    ! Local variables
+    integer :: snapshot_idx, atom_idx, ref_idx, b
+    real(8), dimension(natoms, 3) :: ref_positions  ! Reference configuration
+    real(8) :: displacement_squared  ! Temporary variable for squared displacement
+    integer :: valid_snapshots_count  ! Counter for valid snapshots processed
+    integer :: progress  ! Progress variables
+
+    !-------------------------------------------------------------------
+    ! Input validation
+    !-------------------------------------------------------------------
+    if (nbeads .le. 1) then
+        print *, "Error: nbeads must be larger than 1"
+        stop
+    end if
+    if (nsnapshots < 2 * M) then
+        print *, "Error: nsnapshots must be at least 2*M"
+        stop
+    end if
+    if (M <= 0) then
+        print *, "Error: M must be greater than 0"
+        stop
+    end if
+    if (natoms <= 0) then
+        print *, "Error: natoms must be greater than 0"
+        stop
+    end if
+
+    ! if (verbose) print *, "Input validation successful"
+
+    !-------------------------------------------------------------------
+    ! Initialization
+    !-------------------------------------------------------------------
+    delta_squared(:,:) = 0.0  ! Reset the output array
+    valid_snapshots_count = 0  ! Initialize counter for valid snapshots
+    progress = 0              ! Initialize progress counter
+
+    ! if (verbose) print *, "Initialization complete"
+
+    !-------------------------------------------------------------------
+    ! Main computation loop
+    !-------------------------------------------------------------------
+    do b = 1, nbeads
+        do ref_idx = 1, M
+            ! Reference configuration at snapshot ref_idx
+            ref_positions = positions(b,ref_idx, :, :)  
+
+            do snapshot_idx = ref_idx, ref_idx + M - 1
+                if (snapshot_idx > nsnapshots) exit  ! Prevent out-of-bounds access
+
+                do atom_idx = 1, natoms
+                    ! Compute squared displacement of atom atom_idx
+                    displacement_squared = sum((positions(b,snapshot_idx, atom_idx, :) - ref_positions(atom_idx, :))**2)
+                    delta_squared(snapshot_idx - ref_idx + 1, atom_idx) = &
+                        delta_squared(snapshot_idx - ref_idx + 1, atom_idx) + displacement_squared
+                end do
+            end do
+
+            valid_snapshots_count = valid_snapshots_count + 1
+
+            ! Update progress bar
+            if (verbose) then
+                progress = progress + 1
+                if (progress == 1) then
+                    ! For the first iteration, print progress and move to a new line
+                    write(*, '(A)') ""  ! Newline after the first print
+                    write(*, '(A,I3,A)', advance='no') "Progress: [", progress * 100 / M, "%]"                
+                else
+                    ! For subsequent iterations, update the progress on the same line
+                    write(*, '(A)', advance='no') char(13)  ! Return carriage to overwrite the previous progress
+                    write(*, '(A,I3,A)', advance='no') "Progress: [", progress * 100 / M, "%]"
+                end if
+            end if
+        end do
+    end do
+
+    !-------------------------------------------------------------------
+    ! Normalize results
+    !-------------------------------------------------------------------
+    if (valid_snapshots_count > 0) then
+        delta_squared = delta_squared / real(valid_snapshots_count, 8) / nbeads
+        ! if (verbose) print *, "Normalization complete"
+    else
+        print *, "Error: No valid iterations were performed (valid_snapshots_count=0)"
+        stop
+    end if
+
+    ! if (verbose) print *, "Subroutine compute_delta_squared completed successfully"
+end subroutine shifted_msd_beads
