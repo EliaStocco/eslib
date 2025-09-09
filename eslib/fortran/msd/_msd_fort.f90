@@ -135,7 +135,7 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
     ! Input arguments
     integer, intent(in) :: nbeads, nsnapshots, natoms, M
     logical, intent(in) :: verbose
-    real(8), intent(in) :: positions(nbeads,nsnapshots, natoms, 3)  ! (time_steps, natoms, 3)
+    real(8), intent(in) :: positions(3,natoms,nsnapshots,nbeads)
 
     ! Output argument
     real(8), intent(inout) :: delta_squared(M, natoms)  ! (M, natoms)
@@ -184,14 +184,14 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
     do b = 1, nbeads
         do ref_idx = 1, M
             ! Reference configuration at snapshot ref_idx
-            ref_positions = positions(b,ref_idx, :, :)  
+            ref_positions = positions(:, :,ref_idx,b)  
 
             do snapshot_idx = ref_idx, ref_idx + M - 1
                 if (snapshot_idx > nsnapshots) exit  ! Prevent out-of-bounds access
 
                 do atom_idx = 1, natoms
                     ! Compute squared displacement of atom atom_idx
-                    displacement_squared = sum((positions(b,snapshot_idx, atom_idx, :) - ref_positions(atom_idx, :))**2)
+                    displacement_squared = sum((positions(:,atom_idx,snapshot_idx,b) - ref_positions(atom_idx, :))**2)
                     delta_squared(snapshot_idx - ref_idx + 1, atom_idx) = &
                         delta_squared(snapshot_idx - ref_idx + 1, atom_idx) + displacement_squared
                 end do
