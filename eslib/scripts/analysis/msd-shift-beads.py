@@ -27,7 +27,7 @@ def prepare_args(description):
     parser.add_argument("-dt", "--time_step"   , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
     parser.add_argument("-e" , "--element"     , **argv, required=True , type=str  , help="element")
     parser.add_argument("-v" , "--verbose"     , **argv, required=False, type=str2bool, help="verbose (default: %(default)s)",default=True)
-    parser.add_argument("-od" , "--output_displacement", **argv, required=False, type=str2bool, help="output txt file with 'delta_squared' (default: %(default)s)",default="delta_squared.txt")
+    # parser.add_argument("-od" , "--output_displacement", **argv, required=False, type=str, help="output txt file with 'delta_squared' (default: %(default)s)",default="delta_squared.txt")
     parser.add_argument("-o" , "--output"      , **argv, type=str  , help="output file (default: %(default)s)", default="msd.csv")
     parser.add_argument("-p" , "--plot"        , **argv, type=str  , help="plot (default: %(default)s)", default=None)
     return parser 
@@ -78,7 +78,7 @@ def main(args):
         pos[:,:,:,:] = positions
         shift_msd_beads(delta_squared,pos,msg=args.verbose)
         
-        np.savetxt(args.output_displacement, delta_squared, fmt=float_format)
+        # np.savetxt(args.output_displacement, delta_squared, fmt=float_format)
         
         # # This is what the Fortran routine called within shift_msd is doing
         # delta_squared_test = np.zeros((M,Natoms)) # (time, atoms)
