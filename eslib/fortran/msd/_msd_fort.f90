@@ -134,15 +134,16 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
 
     !-------------------------------------------------------------------
     ! Input arguments
-    !-------------------------------------------------------------------
     integer, intent(in) :: nbeads, nsnapshots, natoms, M
     logical, intent(in) :: verbose
-    real(8), intent(in) :: positions(3,natoms,nsnapshots,nbeads)
+    real(8), intent(in) :: positions(nbeads,nsnapshots, natoms, 3)  ! (time_steps, natoms, 3)
+    real(8), dimension(natoms,3,nsnapshots,nbeads) :: positions_fast
+    !-------------------------------------------------------------------
 
     !-------------------------------------------------------------------
     ! Output argument
-    !-------------------------------------------------------------------
     real(8), intent(inout) :: delta_squared(M, natoms)  ! (M, natoms)
+    !-------------------------------------------------------------------
 
     !-------------------------------------------------------------------
     ! Local variables
@@ -190,41 +191,53 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
     progress = 0
     call cpu_time(start_time)
 
+
+    do b = 1, nbeads
+        do snapshot_idx = 1, nsnapshots
+            do atom_idx = 1, natoms
+                positions_fast(atom_idx, 1, snapshot_idx, b) = positions(b, snapshot_idx, atom_idx, 1)
+                positions_fast(atom_idx, 2, snapshot_idx, b) = positions(b, snapshot_idx, atom_idx, 2)
+                positions_fast(atom_idx, 3, snapshot_idx, b) = positions(b, snapshot_idx, atom_idx, 3)
+            end do
+        end do
+    end do
+
     !-------------------------------------------------------------------
     ! Main computation loop
     !-------------------------------------------------------------------
+
     do b = 1, nbeads
         do ref_idx = 1, M
-            ! Reference configuration
-            ref_positions = positions(:, :, ref_idx, b)
-
+            ref_positions = positions_fast(:, :, ref_idx, b)
             do snapshot_idx = ref_idx, ref_idx + M - 1
-                if (snapshot_idx > nsnapshots) exit
-
+                if (snapshot_idx > nsnapshots) exit  ! Prevent out-of-bounds access
                 do atom_idx = 1, natoms
-                    displacement_squared = sum((positions(:, atom_idx, snapshot_idx, b) - &
+                    displacement_squared = sum((positions_fast(atom_idx, :, snapshot_idx, b) - &
                                                 ref_positions(atom_idx, :))**2)
-                    delta_squared(snapshot_idx - ref_idx + 1, atom_idx) = &
-                        delta_squared(snapshot_idx - ref_idx + 1, atom_idx) + displacement_squared
+                    delta_squared(snapshot_idx - ref_idx + 1,atom_idx) = &
+                        delta_squared(snapshot_idx - ref_idx + 1,atom_idx) + displacement_squared
 
                     ! Inside your main loop (for example, after incrementing progress):
                     inquire(file="EXIT", exist=exit_flag)
                     if (exit_flag) then
                         print *, "ERROR: File 'EXIT' found. Terminating subroutine."
+                        call flush(6)  ! Force output to terminal
                         stop 1   ! Exit the program with an error code
                     end if
-
                 end do
             end do
-
-            valid_snapshots_count = valid_snapshots_count + 1
 
             ! Update progress bar
             if (verbose) then
                 progress = progress + 1
                 progress_fraction = real(progress) / real(M * nbeads)
+                if (progress_fraction > 1.0) then
+                    print *, "ERROR: progress_fraction greater than 1."
+                    call flush(6)  ! Force output to terminal
+                    stop 1   ! Exit the program with an error code
+                end if
 
-                ! if (int(progress_fraction*100) /= last_printed) then
+                if (int(progress_fraction*100) /= last_printed) then
                     last_printed = int(progress_fraction*100)
 
                     ! Elapsed and ETA
@@ -239,15 +252,20 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
                     ! Current timestamp
                     call date_and_time(values=dt)
 
-                    ! Print timestamped progress bar with ETA
-                    write(*,'(A)', advance='no') char(13)  ! return carriage
+                    ! Return carriage to overwrite the line
+                    write(*,'(A)', advance='no') char(13)
+                    call flush(6)
 
-                    write(*,'(I4.4,"-",I2.2,"-",I2.2," ",I2.2,":",I2.2,":",I2.2,".",I3.3," Progress: [", &
-                        I3.3,"%%] ETA: ",F6.1," s")', advance='no') &
+                    ! Print timestamped progress with ETA
+                    write(*,'(I4.4,"-",I2.2,"-",I2.2," ",I2.2,":",I2.2,":",I2.2,".",I2.2," Progress: [", &
+                        I3.3,"%] ETA: ",F10.0,"s")', advance='no') &
                         dt(1), dt(2), dt(3), dt(4), dt(5), dt(6), dt(7), last_printed, eta
+                    call flush(6)
 
-                ! end if
+                end if
             end if
+
+            
         end do
     end do
 
