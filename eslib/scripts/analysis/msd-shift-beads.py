@@ -7,7 +7,7 @@ from uncertainties import unumpy as unp
 from uncertainties import ufloat
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, eslog
-from eslib.input import itype, slist
+from eslib.input import itype, slist, str2bool
 from eslib.plot import add_common_legend
 from eslib.fortran import shift_msd_beads
 from eslib.mathematics import std_err
@@ -26,6 +26,8 @@ def prepare_args(description):
     parser.add_argument("-in", "--index"       , **argv, required=False, type=itype, help="index to be read from input file (default: %(default)s)", default=':')
     parser.add_argument("-dt", "--time_step"   , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
     parser.add_argument("-e" , "--element"     , **argv, required=True , type=str  , help="element")
+    parser.add_argument("-v" , "--verbose"     , **argv, required=False, type=str2bool, help="verbose (default: %(default)s)",default=True)
+    # parser.add_argument("-m" , "--mpi"         , **argv, required=False, type=str2bool, help="verbose (default: %(default)s)",default=False)
     parser.add_argument("-o" , "--output"      , **argv, type=str  , help="output file (default: %(default)s)", default="msd.csv")
     parser.add_argument("-p" , "--plot"        , **argv, type=str  , help="plot (default: %(default)s)", default=None)
     return parser 
@@ -74,7 +76,7 @@ def main(args):
         delta_squared = np.zeros((M,Natoms),order="F")
         pos = np.zeros(positions.shape,order="F")
         pos[:,:,:,:] = positions
-        shift_msd_beads(delta_squared,pos,msg=False)
+        shift_msd_beads(delta_squared,pos,msg=args.verbose)
         
         # # This is what the Fortran routine called within shift_msd is doing
         # delta_squared_test = np.zeros((M,Natoms)) # (time, atoms)
