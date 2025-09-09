@@ -1,9 +1,6 @@
 name: Run pytest tests
 
-on:
-  push:
-    branches:
-      - master  # Adjust this to match your branch name
+on: [push]
 
 jobs:
   test:
