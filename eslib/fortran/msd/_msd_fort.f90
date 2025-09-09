@@ -132,31 +132,37 @@ end subroutine shifted_msd
 subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapshots, natoms, M)
     implicit none
 
+    !-------------------------------------------------------------------
     ! Input arguments
+    !-------------------------------------------------------------------
     integer, intent(in) :: nbeads, nsnapshots, natoms, M
     logical, intent(in) :: verbose
     real(8), intent(in) :: positions(3,natoms,nsnapshots,nbeads)
 
+    !-------------------------------------------------------------------
     ! Output argument
+    !-------------------------------------------------------------------
     real(8), intent(inout) :: delta_squared(M, natoms)  ! (M, natoms)
 
+    !-------------------------------------------------------------------
     ! Local variables
+    !-------------------------------------------------------------------
     integer :: snapshot_idx, atom_idx, ref_idx, b
-    real(8), dimension(natoms, 3) :: ref_positions  ! Reference configuration
-    real(8) :: displacement_squared  ! Temporary variable for squared displacement
-    integer :: valid_snapshots_count  ! Counter for valid snapshots processed
+    real(8), dimension(natoms, 3) :: ref_positions
+    real(8) :: displacement_squared
+    integer :: valid_snapshots_count
 
-    ! Variables to track progress and timing
+    ! Progress tracking
     integer :: progress = 0
     integer :: last_printed = -1
     real :: start_time, current_time, elapsed, eta
     real :: progress_fraction
-    
+    integer :: dt(8)  ! For date_and_time
 
     !-------------------------------------------------------------------
     ! Input validation
     !-------------------------------------------------------------------
-    if (nbeads .le. 1 ) then
+    if (nbeads <= 1) then
         print *, "Error: nbeads must be larger than 1"
         stop
     end if
@@ -173,38 +179,28 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
         stop
     end if
 
-    ! if (verbose) print *, "Input validation successful"
-
     !-------------------------------------------------------------------
     ! Initialization
     !-------------------------------------------------------------------
-    delta_squared(:,:) = 0.0  ! Reset the output array
-    valid_snapshots_count = 0  ! Initialize counter for valid snapshots
-    progress = 0              ! Initialize progress counter
-
-    ! At the start of your loop
+    delta_squared(:,:) = 0.0
+    valid_snapshots_count = 0
+    progress = 0
     call cpu_time(start_time)
-
-    ! Inside your main loop
-    progress = progress + 1
-    progress_fraction = real(progress) / real(M*nbeads)
-
-    ! if (verbose) print *, "Initialization complete"
 
     !-------------------------------------------------------------------
     ! Main computation loop
     !-------------------------------------------------------------------
     do b = 1, nbeads
         do ref_idx = 1, M
-            ! Reference configuration at snapshot ref_idx
-            ref_positions = positions(:, :,ref_idx,b)  
+            ! Reference configuration
+            ref_positions = positions(:, :, ref_idx, b)
 
             do snapshot_idx = ref_idx, ref_idx + M - 1
-                if (snapshot_idx > nsnapshots) exit  ! Prevent out-of-bounds access
+                if (snapshot_idx > nsnapshots) exit
 
                 do atom_idx = 1, natoms
-                    ! Compute squared displacement of atom atom_idx
-                    displacement_squared = sum((positions(:,atom_idx,snapshot_idx,b) - ref_positions(atom_idx, :))**2)
+                    displacement_squared = sum((positions(:, atom_idx, snapshot_idx, b) - &
+                                                ref_positions(atom_idx, :))**2)
                     delta_squared(snapshot_idx - ref_idx + 1, atom_idx) = &
                         delta_squared(snapshot_idx - ref_idx + 1, atom_idx) + displacement_squared
                 end do
@@ -214,11 +210,13 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
 
             ! Update progress bar
             if (verbose) then
-                ! Only update if different from last printed percentage
+                progress = progress + 1
+                progress_fraction = real(progress) / real(M * nbeads)
+
                 if (int(progress_fraction*100) /= last_printed) then
                     last_printed = int(progress_fraction*100)
 
-                    ! Estimate elapsed time and remaining time
+                    ! Elapsed and ETA
                     call cpu_time(current_time)
                     elapsed = current_time - start_time
                     if (progress_fraction > 0.0) then
@@ -227,9 +225,13 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
                         eta = 0.0
                     end if
 
-                    ! Print progress bar
-                    write(*, '(A)', advance='no') char(13)  ! Return carriage to overwrite line
-                    write(*, '(A,I3,A,F6.1,A)', advance='no') "Progress: [", last_printed, "%] ETA: ", eta, " s"
+                    ! Current timestamp
+                    call date_and_time(values=dt)
+
+                    ! Print progress
+                    write(*, '(A)', advance='no') char(13)
+                    write(*,'(I4.4,"-",I2.2,"-",I2.2," ",I2.2,":",I2.2,":",I2.2,".",I3.3," Progress: [",I3.3,"%%] ETA: ",F6.1," s")', advance='no') &
+                        dt(1), dt(2), dt(3), dt(4), dt(5), dt(6), dt(7), last_printed, eta
                 end if
             end if
         end do
@@ -240,11 +242,11 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
     !-------------------------------------------------------------------
     if (valid_snapshots_count > 0) then
         delta_squared = delta_squared / real(valid_snapshots_count*nbeads, 8)
-        ! if (verbose) print *, "Normalization complete"
     else
         print *, "Error: No valid iterations were performed (valid_snapshots_count=0)"
         stop
     end if
 
-    ! if (verbose) print *, "Subroutine compute_delta_squared completed successfully"
+    ! Print newline after completion
+    if (verbose) write(*,*)
 end subroutine shifted_msd_beads
