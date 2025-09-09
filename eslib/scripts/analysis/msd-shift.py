@@ -5,7 +5,7 @@ import pandas as pd
 from uncertainties import unumpy as unp
 from uncertainties import ufloat
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import esfmt, eslog
+from eslib.formatting import esfmt, eslog, float_format
 from eslib.input import itype
 from eslib.plot import add_common_legend
 from eslib.fortran import shift_msd
@@ -25,6 +25,7 @@ def prepare_args(description):
     parser.add_argument("-in", "--index"       , **argv, required=False, type=itype, help="index to be read from input file (default: %(default)s)", default=':')
     parser.add_argument("-dt", "--time_step"   , **argv, required=False, type=float, help="time step [fs] (default: %(default)s)", default=1)
     parser.add_argument("-e" , "--element"     , **argv, required=True , type=str  , help="element")
+    parser.add_argument("-od" , "--output_displacement", **argv, required=False, type=str, help="output txt file with 'delta_squared' (default: %(default)s)",default="delta_squared.txt")
     parser.add_argument("-o" , "--output"      , **argv, type=str  , help="output file (default: %(default)s)", default="msd.csv")
     parser.add_argument("-p" , "--plot"        , **argv, type=str  , help="plot (default: %(default)s)", default=None)
     return parser 
@@ -70,6 +71,8 @@ def main(args):
         pos = np.zeros(positions.shape,order="F")
         pos[:,:,:] = positions
         shift_msd(delta_squared,pos,msg=False)
+        
+        np.savetxt(args.output_displacement, delta_squared, fmt=float_format)
         
         # # This is what the Fortran routine called within shift_msd is doing
         # delta_squared_test = np.zeros((M,Natoms)) # (time, atoms)
