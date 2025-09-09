@@ -159,6 +159,9 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
     real :: progress_fraction
     integer :: dt(8)  ! For date_and_time
 
+    ! Declare a logical variable to check for the EXIT file
+    logical :: exit_flag
+
     !-------------------------------------------------------------------
     ! Input validation
     !-------------------------------------------------------------------
@@ -203,6 +206,14 @@ subroutine shifted_msd_beads(positions, delta_squared, verbose, nbeads, nsnapsho
                                                 ref_positions(atom_idx, :))**2)
                     delta_squared(snapshot_idx - ref_idx + 1, atom_idx) = &
                         delta_squared(snapshot_idx - ref_idx + 1, atom_idx) + displacement_squared
+
+                    ! Inside your main loop (for example, after incrementing progress):
+                    inquire(file="EXIT", exist=exit_flag)
+                    if (exit_flag) then
+                        print *, "ERROR: File 'EXIT' found. Terminating subroutine."
+                        stop 1   ! Exit the program with an error code
+                    end if
+
                 end do
             end do
 
