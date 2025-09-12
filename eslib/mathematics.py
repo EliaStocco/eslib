@@ -482,3 +482,41 @@ def group_floats_by_decimals(floats: np.ndarray, decimals: int) -> Dict[float, n
 
     return {float(k): np.array(v) for k, v in groups.items()}
 
+def gaussian_cluster_indices(floats: np.ndarray, n_components: int = 2, random_state: int = 0) -> Dict[float, np.ndarray]:
+    """
+    Cluster 1D float data into Gaussian components and return a mapping
+    from cluster center to original indices.
+
+    Parameters
+    ----------
+    floats : np.ndarray
+        1D array of float values
+    n_components : int, default=2
+        Number of Gaussian clusters to fit
+    random_state : int, default=0
+        Random seed for reproducibility
+
+    Returns
+    -------
+    Dict[float, np.ndarray]
+        Keys = Gaussian centers (means)
+        Values = np.ndarray of indices mapping to original floats
+    """
+    from sklearn.mixture import GaussianMixture
+    floats = np.asarray(floats).reshape(-1, 1)
+    gmm = GaussianMixture(n_components=n_components, random_state=random_state)
+    gmm.fit(floats)
+    
+    labels = gmm.predict(floats)
+    centers = gmm.means_.flatten()
+    
+    # Sort centers for consistency
+    sorted_idx = np.argsort(centers)
+    centers = centers[sorted_idx]
+
+    cluster_dict = {}
+    for i, center_idx in enumerate(sorted_idx):
+        indices = np.where(labels == center_idx)[0]
+        cluster_dict[float(centers[i])] = indices
+
+    return cluster_dict
