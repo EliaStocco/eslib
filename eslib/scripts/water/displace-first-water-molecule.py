@@ -48,7 +48,7 @@ def main(args):
             for xyz in range(9):
                 pos = pos_original.copy()
                 atoms = trajectory[n].copy()
-                pos[xyz] += args.displacement
+                pos[xyz] -= args.displacement
                 
                 atoms.positions[ii] = pos.reshape((3,3))
                 
