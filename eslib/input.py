@@ -19,7 +19,10 @@ def union_type(s:str,dtype):
     return s
 #---------------------------------------#
 def size_type(s: str, dtype=float, N=None):
-    s = s.replace("[", "").replace("]", "").replace(",", " ").split()
+    s = s.replace("[", "").replace("]", "")
+    if "," in s:
+        s = s.replace(",", " ")
+    s = s.split()
     if N is not None and len(s) != N:
         raise ValueError("You should provide {:d} values".format(N))
     else:
