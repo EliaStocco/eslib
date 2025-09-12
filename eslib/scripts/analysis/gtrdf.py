@@ -80,8 +80,8 @@ def main(args):
         ]
     natomsA = len(species_A)
     natomsB = len(species_B)
-    print("\t n. of {:s} atoms: {:d}".format(args.elements[0], natomsA))
-    print("\t n. of {:s} atoms: {:d}".format(args.elements[1], natomsB))
+    print("\t n. of {:s} atoms: {:d}".format(args.elements[0], int(natomsA/3)))
+    print("\t n. of {:s} atoms: {:d}".format(args.elements[1], int(natomsB/3)))
     
     #---------------------------------------#
     print()
