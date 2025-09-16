@@ -126,3 +126,26 @@ def mic_dist(dr: np.ndarray, cells: Union[np.ndarray, Cell, List[Cell]]) -> Tupl
         return dr_mic[0], dist[0]
     else:
         return dr_mic, dist
+
+def max_mic_distance(cell: Cell) -> float:
+    """
+    Compute the maximum distance that can be computed with the minimum image convention (MIC).
+    
+    Parameters
+    ----------
+    cell : ase.cell.Cell
+        The unit cell object containing lattice vectors.
+    
+    Returns
+    -------
+    float
+        Maximum possible distance between two atoms considering PBC.
+    """
+    # Get the lattice vectors
+    a, b, c = cell.array  # shape (3,3)
+    
+    # Compute the "body diagonal" vector (sum of 0.5 * each vector)
+    diag_vec = 0.5 * (a + b + c)
+    
+    # Maximum MIC distance is the length of this vector
+    return np.linalg.norm(diag_vec)

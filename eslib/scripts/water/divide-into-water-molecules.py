@@ -31,7 +31,7 @@ def prepare_args(description):
     return parser# .parse_args()
 
 #---------------------------------------#
-@esfmt(prepare_args,description)
+@esfmt(prepare_args,description,documentation)
 def main(args):
 
     #------------------#

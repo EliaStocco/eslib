@@ -1,5 +1,6 @@
 import inspect
 import json
+from math import e
 import os
 import sys
 from argparse import ArgumentParser
@@ -77,7 +78,7 @@ def handle_errors(enable: bool = True, file: Optional[str] = "error.log"):
 def line(start="",end="",N=30,mult=1):
     to_print = start+"-"*mult*N+end
     to_print = Fore.MAGENTA + to_print + Style.RESET_ALL
-    print(to_print)
+    return to_print
 
 #---------------------------------------#
 def get_path(main):
@@ -136,7 +137,7 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
     # @contextmanager
     def print_header(args:dict,main:callable,help=False):
         
-        line(start="@")
+        print(line(start="@"))
         try: 
             local_path, global_path = get_path(main)
             print("{:20s}: {:s}".format("script file",local_path))
@@ -149,6 +150,23 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
                 command_line = ' '.join(tmp)   
                 local_path, global_path = get_path(main)
                 print("{:20}: {:s} ".format("running script as",local_path),command_line)
+                try:
+                    if os.getenv("ESLIB_LOG", False):
+                        log_folder = os.path.normpath(__file__+"/../../.log")
+                        os.makedirs(log_folder, exist_ok=True)
+                        subfolder = os.path.normpath(global_path+"/../").split("/")[-1]
+                        log_file = os.path.join(log_folder, f"{subfolder}.log")
+                        with open(log_file, "a") as f:
+                            f.write("@"+"-"*20+"\n")
+                            f.write("{:20s}: {:s}\n".format("script file",local_path))
+                            f.write("{:20s}: {:s}\n".format("script global path",global_path))
+                            f.write("{:20s}: {:s}\n".format("working directory",os.getcwd()))
+                            f.write("{:20}: \"args\" : {:s} \n".format("VScode debugging",vscode_args))
+                            f.write("{:20}: {:s} ".format("running script as",local_path)+command_line+"\n")
+                            f.write("\n\n\n")
+                except :
+                    pass
+                    
         except: 
             pass    
         if not help:
@@ -174,7 +192,7 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
             print("{:20s}: {:d}".format("PID",os.getpid()))
             print("{:20s}: {:s}".format("start date",start_date))
             print("{:20s}: {:s}".format("start time",start_time))
-        line(start="@")
+        print(line(start="@"))
         
         global _documentation
         global _description
@@ -218,12 +236,12 @@ def esfmt(prepare_parser:callable=None, description:str=None,documentation:str=N
         # hours   = int(elapsed_seconds // 3600)
         # minutes = int(elapsed_seconds % 3600 // 60)
         # seconds = int(elapsed_seconds % 60)
-        line(end="@")
+        print(line(end="@"))
         print("end date: {:s}".format(end_date))
         print("end time: {:s}s ".format(end_time))
         print("elapsed seconds: {:d}s".format(elapsed_seconds))
         print("elapsed time: {:s}".format(format_seconds_to_hhmmss(elapsed_seconds)))
-        line(end="@\n")
+        print(line(end="@\n"))
         
     def wrapper(main: callable):
         # Conditionally wrap the main function with handle_errors

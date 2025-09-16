@@ -1,4 +1,5 @@
 from copy import deepcopy
+from operator import is_
 from typing import Any, List, TypeVar, Union, Tuple, Callable, Optional
 from warnings import warn
 
@@ -61,6 +62,36 @@ class AtomicStructures(Trajectory,aseio):
             return False
         symbols = self.call(lambda x: x.get_chemical_symbols()) # [s.get_chemical_symbols() for s in self]
         return all([s == symbols[0] for s in symbols])
+    
+    def remove_elements(self:T,symbols:List[str],return_index:Optional[bool]=False)->Union[T,Tuple[T,np.ndarray,np.ndarray]]:
+        """
+        Remove atoms with specified chemical symbols from all structures.
+
+        Parameters:
+        - symbols (List[str]): List of chemical symbols to remove.
+
+        Returns:
+        - AtomicStructures: New AtomicStructures object with specified atoms removed.
+        """
+        if self.is_trajectory():
+            first = self[0]
+            to_keep = np.array([atom.symbol not in symbols for atom in first])
+            to_remove = np.array([not m for m in to_keep])
+            new_structures = self.call(lambda x: x[to_keep])
+        else:  
+            new_structures = [None]*len(self)
+            to_keep = [None]*len(self)
+            to_remove = [None]*len(self)
+            for n,structure in enumerate(self):
+                mask = np.array([atom.symbol not in symbols for atom in structure])
+                to_keep[n] = mask
+                to_remove[n] = np.array([not m for m in mask])
+                new_structure = structure[mask]
+                new_structures[n] = new_structure
+        if return_index:
+            return AtomicStructures(new_structures), np.asarray(to_keep), np.asarray(to_remove)
+        else:
+            return AtomicStructures(new_structures)
     
     def get_keys(self:T,what:str="all")->List[str]:
         """
@@ -537,13 +568,13 @@ class AtomicStructures(Trajectory,aseio):
         """Unwrap the positions of the atoms in the structures"""
         assert self.is_trajectory(), "The atomic structures should all have the same number of atoms."
         frac = self.get_scaled_positions()
-        frac = frac % 1
+        # frac = frac % 1
         assert frac.shape == (len(self),self.num_atoms(),3)
         new_frac = np.unwrap(frac,axis=0,period=1)
         cells = self.get_cells(as_numpy=True)
         pos = np.einsum("sij,saj->sai", cells, new_frac) # s: structure, a: atom, i,j: xyz
         if inplace:
-            self.set("positions",pos)
+            self.set("positions",pos,"arrays")
         return pos
           
     def apply(self, func: Callable[[Atoms], None], parallel: bool = None, processes: Optional[int] = None):

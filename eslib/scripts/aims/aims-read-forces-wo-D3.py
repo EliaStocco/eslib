@@ -142,12 +142,12 @@ def main(args):
     forces_with_d3 = forces_with_d3.reshape((-1, 3))
     
     file = f"{args.output}.no-D3.txt"
-    print(f"\nWriting forces without D3 to file '{file}' ...",end="")
+    print(f"\tWriting forces without D3 to file '{file}' ...",end="")
     np.savetxt(file, forces_no_d3,fmt=float_format)
     print("done")
     
     file = f"{args.output}.D3.txt"
-    print(f"\nWriting forces with D3 to file '{file}' ...",end="")
+    print(f"\tWriting forces with D3 to file '{file}' ...",end="")
     np.savetxt(file, forces_with_d3,fmt=float_format)
     print("done")
 

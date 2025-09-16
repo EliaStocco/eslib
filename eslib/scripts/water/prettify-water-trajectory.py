@@ -42,7 +42,19 @@ def main(args):
     species = trajectory.get_chemical_symbols(unique=True)
     print("\tUnique atomic species: ",species)
     species = set(species)
-    assert species == set(["O","H"]), "The input file should contain only O and H atoms."
+    filter = False
+    if species != set(["O","H"]):
+        print(f"\t{warning}: the input file should contain only O and H atoms, but it contains {species}.")
+        filter = True
+        
+    #------------------#
+    if filter:
+        print("\tFiltering out all atoms except O and H ... ", end=" ")
+        old = trajectory.copy()
+        species.remove("H")
+        species.remove("O")
+        trajectory, to_keep, to_remove = trajectory.remove_elements(symbols=species,return_index=True)
+        print("done")
 
     #------------------#
     print("\tWrapping the first snapshot into the unit cell ... ", end=" ")
@@ -101,6 +113,15 @@ def main(args):
     print("\tUnwrapping the remaining snapshots ... ", end=" ")
     trajectory.unwrap(inplace=True)
     print("done")
+    
+    #------------------#
+    if filter:
+        print("\tRe-inserting the filtered atoms ... ", end=" ")
+        pos = old.get("positions")
+        pos[:,to_keep,:] = trajectory.get("positions")
+        old.set("positions",pos,"arrays")
+        trajectory = old.copy()
+        print("done")
     
     #------------------#
     print("\n\tWriting unwrapped atomic structure to file '{:s}' ... ".format(args.output), end="")

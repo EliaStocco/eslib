@@ -34,7 +34,7 @@ def main(args):
     
     #------------------#
     with eslog("Displacing atoms"):
-        out_traj = [None]*(9*Ns+Ns)
+        out_traj = [None]*(19*Ns)  # 1 original + 9*2 displacements per structure
         k = 0
         for n in range(Ns):
             
@@ -46,15 +46,16 @@ def main(args):
             pos_original = np.asarray(trajectory[n].get_positions()[ii]).flatten().copy()
             
             for xyz in range(9):
-                pos = pos_original.copy()
-                atoms = trajectory[n].copy()
-                pos[xyz] -= args.displacement
-                
-                atoms.positions[ii] = pos.reshape((3,3))
-                
-                out_traj[k] = atoms.copy()
-                
-                k += 1
+                for factor in [-1,1]:
+                    pos = pos_original.copy()
+                    atoms = trajectory[n].copy()
+                    pos[xyz] += factor*args.displacement
+                    
+                    atoms.positions[ii] = pos.reshape((3,3))
+                    
+                    out_traj[k] = atoms.copy()
+                    
+                    k += 1
          
     displaced = AtomicStructures(out_traj)       
     
