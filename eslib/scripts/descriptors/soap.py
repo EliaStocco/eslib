@@ -4,7 +4,8 @@ import json
 import numpy as np
 # Some problems with librascal
 # Import `rascal` after `pandas`
-from rascal.representations import SphericalInvariants as SOAP
+from featomic import SphericalExpansion as SOAP
+from featomic import SoapPowerSpectrum
 from tqdm.auto import tqdm
 
 from eslib.classes.atomic_structures import AtomicStructures
@@ -65,12 +66,26 @@ def main(args):
 
     print("\n\tUsing the following SOAP hyperparameters:")
     SOAP_HYPERS = {
-        "interaction_cutoff": 3.5,
-        "max_radial": 8,
-        "max_angular": 6,
-        "gaussian_sigma_constant": 0.4,
-        "cutoff_smooth_width": 0.5,
-        "gaussian_sigma_type": "Constant",
+        "cutoff": {
+            "radius": 6.0,
+            "smoothing": {
+                "type": "ShiftedCosine",
+                "width": 0.1
+            }
+        },
+        "density": {
+            "type": "Gaussian",
+            "width": 0.3
+        },
+        "basis": {
+            "type": "TensorProduct",
+            "max_angular": 6,
+            "radial": {
+                "type": "Gto",
+                "max_radial": 5
+            },
+            "spline_accuracy": 1e-06
+        }
     }
 
     SOAP_HYPERS = add_default(user_soap_hyper,SOAP_HYPERS)
@@ -82,11 +97,36 @@ def main(args):
     numbers = list(sorted(set([int(n) for frame in frames for n in frame.numbers])))
 
     # initialize SOAP
-    soap = SOAP(
-        global_species=numbers,
-        expansion_by_species_method='user defined',
-        **SOAP_HYPERS
-    )
+    HYPER_PARAMETERS = {
+        "cutoff": {
+            "radius": 5.0,
+            "smoothing": {"type": "ShiftedCosine", "width": 0.5},
+        },
+        "density": {
+            "type": "Gaussian",
+            "width": 0.3,
+        },
+        "basis": {
+            "type": "TensorProduct",
+            "max_angular": 4,
+            "radial": {"type": "Gto", "max_radial": 6},
+        },
+    }
+
+    calculator = SoapPowerSpectrum(**HYPER_PARAMETERS)
+    
+    descriptors = [None]*len(frames)
+    for n,frame in enumerate(frames):
+        descriptor = calculator.compute(frame)
+        descriptor = descriptor.keys_to_samples("center_type")
+        descriptor = descriptor.keys_to_properties(["neighbor_1_type", "neighbor_2_type"])
+        descriptors[n] = descriptor.block().values.mean(axis=0)
+
+    # soap = SOAP(**SOAP_HYPERS)
+    #     # global_species=numbers,
+    #     # expansion_by_species_method='user defined',
+    #     # **SOAP_HYPERS
+    # # )
     print("done")
 
     X = None
@@ -99,7 +139,7 @@ def main(args):
             frame.pbc = True
         frame.wrap(eps=1e-16)
 
-        x = soap.transform(frame).get_features(soap).mean(axis=0) # here it takes mean over atoms in the frame
+        x = soap.compute(frame).get_features(soap).mean(axis=0) # here it takes mean over atoms in the frame
         if X is None:
             X = np.zeros((len(frames), x.shape[-1]))
         X[i] = x
