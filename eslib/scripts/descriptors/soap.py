@@ -79,7 +79,14 @@ def main(args):
     #         #     descriptors[n] = des
     # else:
     print(f"\tProcessing {len(structures)} structures sequentially ...",end="")
-    descriptors = [process_structure(atoms,HYPER_PARAMETERS,calculator) for atoms in  structures]
+    # descriptors = [process_structure(atoms,HYPER_PARAMETERS,calculator) for atoms in  structures]
+    # descriptors = np.asarray(descriptors)
+    descriptors = [None]*len(structures)
+    for n,frame in enumerate(structures):
+        descriptor = calculator.compute(frame)
+        descriptor = descriptor.keys_to_samples("center_type")
+        descriptor = descriptor.keys_to_properties(["neighbor_1_type", "neighbor_2_type"])
+        descriptors[n] = descriptor.block().values.mean(axis=0)
     descriptors = np.asarray(descriptors)
     print("done")
     print(f"\n\tSOAP features shape: {descriptors.shape}")
