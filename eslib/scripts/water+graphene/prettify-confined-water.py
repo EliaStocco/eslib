@@ -6,7 +6,7 @@ from ase import Atoms
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.mathematics import gaussian_cluster_indices
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor
 
 #---------------------------------------#
 # Description of the script's purpose
