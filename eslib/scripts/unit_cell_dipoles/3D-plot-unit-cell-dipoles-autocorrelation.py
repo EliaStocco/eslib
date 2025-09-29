@@ -9,7 +9,6 @@ from eslib.mathematics import pandas2ndarray, melt, merge_dataframes
 from eslib.dataframes import df2txt
 from ase.geometry import get_distances
 from multiprocessing import Pool, cpu_count
-from tqdm import tqdm
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 

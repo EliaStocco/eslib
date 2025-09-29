@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 from itertools import chain
 from multiprocessing import Process, Manager, cpu_count
 from ase.cell import Cell
