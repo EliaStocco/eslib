@@ -1,102 +1,87 @@
 #!/usr/bin/env python
 import numpy as np
 from ase import Atoms
-# from concurrent.futures import ProcessPoolExecutor, as_completed
-from featomic import SoapPowerSpectrum
+from typing import List
+from dscribe.descriptors import SOAP
 from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import esfmt
+from eslib.formatting import esfmt, float_format
+from eslib.classes.append import AppendableList
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Compute the SOAP descriptors for a bunch of atomic structures."
+description = "Compute the SOAP descriptors for a bunch of atomic structures, with optional chunking to limit memory use."
 
 #---------------------------------------#
 def prepare_parser(description):
     # Define the command-line argument parser with a description
     import argparse
     parser = argparse.ArgumentParser(description=description)
-    argv = {"metavar" : "\b"}
-    parser.add_argument("-i"  , "--input"       , type=str, required=True , **argv, help="input file [au]")
-    parser.add_argument("-if" , "--input_format", type=str, required=False, **argv, help="input file format (default: %(default)s)", default=None)
-    parser.add_argument("-o"  , "--output"      , type=str, required=False, **argv, help="output file with SOAP descriptors (default: %(default)s)", default='soap.npy')
-    # parser.add_argument("-j" , "--jobs"         , **argv, required=False, type=int  , help="number of parallel processes (default: %(default)s)", default=2)
+    argv = {"metavar": "\b"}
+    parser.add_argument("-i" , "--input"       , type=str, required=True , **argv, help="input file [au]")
+    parser.add_argument("-if", "--input_format", type=str, required=False, **argv, help="input file format (default: %(default)s)", default=None)
+    parser.add_argument("-o" , "--output"      , type=str, required=False, **argv, help="output file with SOAP descriptors (default: %(default)s)", default="soap.npy")
+    parser.add_argument("-N" , "--chunk_size"  , type=int, required=False, **argv, help="number of structures per chunk (default: process all at once)", default=100)
     return parser
-
-#---------------------------------------#
-def process_structure(frame:Atoms,hypers:dict,calculator: SoapPowerSpectrum=None)->np.ndarray:
-    if calculator is not None:
-        calculator = SoapPowerSpectrum(**hypers)
-    descriptor = calculator.compute(frame)
-    descriptor = descriptor.keys_to_samples("center_type")
-    descriptor = descriptor.keys_to_properties(["neighbor_1_type", "neighbor_2_type"])
-    return descriptor.block().values.mean(axis=0)
 
 #---------------------------------------#
 @esfmt(prepare_parser, description)
 def main(args):
 
-    #
-    print("\n\tReading positions from file '{:s}' ... ".format(args.input),end="")
-    structures = AtomicStructures.from_file(file=args.input, format=args.input_format)
+    #-------------------#
+    print(f"\n\tReading structures from file '{args.input}' ... ", end="")
+    structures: List[Atoms] = AtomicStructures.from_file(file=args.input, format=args.input_format)
     print("done")
-    print("\tn. of structures: ",len(structures))
-    
-    print("\n\tPreparing SOAP object ... ",end="")
-    
-    # initialize SOAP
-    HYPER_PARAMETERS = {
-        "cutoff": {
-            "radius": 5.0,
-            "smoothing": {"type": "ShiftedCosine", "width": 0.5},
-        },
-        "density": {
-            "type": "Gaussian",
-            "width": 0.3,
-        },
-        "basis": {
-            "type": "TensorProduct",
-            "max_angular": 4,
-            "radial": {"type": "Gto", "max_radial": 6},
-        },
-    }
-
-    calculator = SoapPowerSpectrum(**HYPER_PARAMETERS)
-    print("done")
-    
-    # #-------------------#
-    # if args.jobs > 1:
-    #     print(f"\tProcessing {len(structures)} structures in parallel with {args.jobs} workers ...",end="")
-    #     with ProcessPoolExecutor(max_workers=args.jobs) as executor:
-    #         # ii = list(executor.map(process_structure, structures))
-            
-    #         inputs = [(atoms,HYPER_PARAMETERS) for atoms in structures]
-    #         descriptors = list(executor.map(process_structure, inputs))
-    #         # N = len(structures)
-    #         # futures = {executor.submit(process_structure, frame, HYPER_PARAMETERS) for frame in structures}
-    #         # descriptors = [None]*N
-    #         # for future in as_completed(futures):
-    #         #     n, des = future.result()
-    #         #     descriptors[n] = des
-    # else:
-    print(f"\tProcessing {len(structures)} structures sequentially ...",end="")
-    # descriptors = [process_structure(atoms,HYPER_PARAMETERS,calculator) for atoms in  structures]
-    # descriptors = np.asarray(descriptors)
-    descriptors = [None]*len(structures)
-    for n,frame in enumerate(structures):
-        descriptor = calculator.compute(frame)
-        descriptor = descriptor.keys_to_samples("center_type")
-        descriptor = descriptor.keys_to_properties(["neighbor_1_type", "neighbor_2_type"])
-        descriptors[n] = descriptor.block().values.mean(axis=0)
-    descriptors = np.asarray(descriptors)
-    print("done")
-    print(f"\n\tSOAP features shape: {descriptors.shape}")
+    n_structures = len(structures)
+    print(f"\tn. of structures: {n_structures}")
+    Natoms = structures.call(lambda x: x.get_global_number_of_atoms())
+    print(f"\tn. of atoms: {np.unique(Natoms)}")
+    species = structures.get_chemical_symbols(unique=True)
+    print(f"\tspecies: {species}")
 
     #-------------------#
-    print("\tSaving SOAP descriptors to file '{:s}' ... ".format(args.output),end="")
+    print("\n\tPreparing SOAP object ... ", end="")
+    soap = SOAP(
+        species=species,
+        r_cut=5.0,
+        n_max=8,
+        l_max=6,
+        sigma=0.3,
+        periodic=False,
+        sparse=False,
+    )
+    print("done")
+
+    #-------------------#
+    if args.chunk_size is None or args.chunk_size <= 0:
+        chunk_size = n_structures
+    else:
+        chunk_size = args.chunk_size
+
+    print("\tComputing SOAP descriptors: ")
+
+    X_list = AppendableList()
+    for i in range(0, n_structures, chunk_size):
+        chunk = structures[i : i + chunk_size]
+        print(f"\t\tprocessing structures {i}-{min(i+chunk_size, n_structures)} ... ", end="")
+        X_chunk = soap.create(chunk)
+        X_list.append(X_chunk)
+        print("done")
+
+    X = np.vstack(X_list.finalize())
+    print("\n\tAll chunks processed.")
+    print(f"\tSOAP (atom-wise) feature matrix shape: {X.shape}")
+
+    # Global average over atoms
+    Xglobal = X.mean(axis=1)
+    print(f"\tSOAP (global) feature matrix shape: {Xglobal.shape}")
+
+    #-------------------#
+    print(f"\n\tSaving SOAP descriptors to file '{args.output}' ... ", end="")
     if str(args.output).endswith("npy"):
-        np.save(args.output, descriptors)
+        np.save(args.output, Xglobal.T)
     elif str(args.output).endswith("txt"):
-        np.savetxt(args.output, descriptors)
+        header = "Rows: SOAP descriptor\nCols: structures"
+        np.savetxt(args.output, Xglobal.T, fmt=float_format, header=header)
     print("done")
 
 
