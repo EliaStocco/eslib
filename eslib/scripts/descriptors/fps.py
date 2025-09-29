@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
-from ase.io import read, write
 from skmatter.feature_selection import FPS
-
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.input import str2bool
@@ -40,9 +38,9 @@ def main(args):
 
     print("\tReading SOAP descriptors from file '{:s}' ... ".format(args.soap_descriptors),end="")
     if str(args.soap_descriptors).endswith("npy"):
-        X = np.load(args.soap_descriptors)
+        X = np.load(args.soap_descriptors).T
     elif str(args.soap_descriptors).endswith("txt"):
-        X = np.loadtxt(args.soap_descriptors)
+        X = np.loadtxt(args.soap_descriptors).T
     print("done")
     
     assert X.shape[0] == len(frames), f"SOAP descriptors have shape {X.shape} while n. of structures is {len(frames)}."
