@@ -6,8 +6,9 @@ import re
 import sys
 from copy import copy
 import numpy as np
-from typing import Any, List, Union
+from typing import Any, List, Union, Dict
 import subprocess
+from collections import defaultdict
 
 #------------------#
 class FakeList:
@@ -486,3 +487,69 @@ def map2unique(array)->dict[Any,List[Any]]:
         pass
     
     return mapping
+
+#------------------#
+def list2dict(list_of_dicts: List[Dict[str, Any]]) -> Dict[str, List[Any]]:
+    """
+    Convert a list of dictionaries into a dictionary of lists.
+
+    Each key in the output dictionary corresponds to a key that appeared
+    in at least one of the input dicts. The values are lists containing
+    all the values for that key (which may be of mixed types).
+
+    Example:
+        >>> data = [
+        ...     {"a": 1, "b": "x"},
+        ...     {"a": 2.5, "b": [10, 20], "c": {"x": 1}},
+        ... ]
+        >>> list_of_dicts_to_dict_of_lists(data)
+        {'a': [1, 2.5], 'b': ['x', [10, 20]], 'c': [{'x': 1}]}
+    """
+    out: Dict[str, List[Any]] = defaultdict(list)
+    for d in list_of_dicts:
+        for key, val in d.items():
+            out[key].append(val)
+    return dict(out)
+
+#------------------#
+def dict_lists2np(data: Dict[str, List[Any]]) -> Dict[str, Union[np.ndarray, list]]:
+    """
+    Convert a dict of lists into a dict of numpy arrays when possible.
+
+    For each key:
+      - Try converting its list to a numpy array.
+      - If conversion fails (due to mixed types, irregular shapes, etc.),
+        keep the original list.
+
+    Example:
+        >>> data = {
+        ...     "charge": [0.1, 0.2, 0.3],
+        ...     "label": ["O", "H", "H"],
+        ...     "dipole": [[0.1, 0.2, 0.3], [0.0, 0.1, 0.0], [0.0, 0.0, 0.1]],
+        ...     "mixed": [1, "a", None],
+        ... }
+        >>> dict_of_lists_to_arrays(data)
+        {
+          'charge': array([0.1, 0.2, 0.3]),
+          'label': array(['O', 'H', 'H'], dtype='<U1'),
+          'dipole': array([[0.1, 0.2, 0.3],
+                           [0.0, 0.1, 0.0],
+                           [0.0, 0.0, 0.1]]),
+          'mixed': [1, 'a', None]
+        }
+    """
+    converted = {}
+    for key, val in data.items():
+        try:
+            arr = np.array(val)
+            # if dtype is object but all elements are numeric, recast properly
+            if arr.dtype == object:
+                # check if all elements are numeric
+                if all(isinstance(x, (int, float, np.number)) for x in val):
+                    arr = np.array(val, dtype=float)
+                else:
+                    raise ValueError("mixed types")
+            converted[key] = arr
+        except Exception:
+            converted[key] = val  # fallback to original list
+    return converted
