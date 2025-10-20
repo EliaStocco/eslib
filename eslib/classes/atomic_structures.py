@@ -1,6 +1,5 @@
 from copy import deepcopy
-from operator import is_
-from typing import Any, List, TypeVar, Union, Tuple, Callable, Optional
+from typing import Any, List, TypeVar, Union, Tuple, Callable, Optional, Dict
 from warnings import warn
 
 from ase import Atoms
@@ -9,7 +8,7 @@ import numpy as np
 import pandas as pd
 from os import cpu_count
 
-from eslib.classes import Trajectory
+# from eslib.classes import Trajectory
 from eslib.classes.aseio import aseio, integer_to_slice_string
 from eslib.functional import custom_deprecated
 from eslib.tools import convert
@@ -23,7 +22,7 @@ PARALLEL = True
 NPROC = min(NPROC_DEFAULT,cpu_count())
 
 #---------------------------------------#
-class AtomicStructures(Trajectory,aseio):
+class AtomicStructures(aseio):
     """
     Class to handle atomic structures with additional functionality:
         - automatic extraction of `info` and `array` from the list of structures
@@ -147,7 +146,6 @@ class AtomicStructures(Trajectory,aseio):
 
         return list(check.keys())
        
-
     # ToDo: this might be parallelized with 'multiprocessing'
     def get_info(self:T,name:str,default:np.ndarray=None)->np.ndarray:
         """
@@ -224,7 +222,7 @@ class AtomicStructures(Trajectory,aseio):
         except:
             return output
 
-    def get(self:T,name:str,default:np.ndarray=None,what:str="all")->np.ndarray:
+    def get(self:T,name:str,default:np.ndarray=None,what:str="all")->Union[np.ndarray,List[np.ndarray]]:
         """
         Get information or array attribute values for all structures.
 
@@ -315,6 +313,27 @@ class AtomicStructures(Trajectory,aseio):
                 df.at[n,"shape"] = None
 
         return df
+    
+    def infoarrays2dict(self:T,remove=["numbers","positions"])->Dict[str,List]:
+        keys = self.get_keys()
+        for key in remove:
+            keys.remove(key)
+        out = {}
+        for key in keys:
+            what = self.search(key)
+            out[key] = {
+                "what" : what,
+                "data": self.get(key)
+            }
+            if what == "info":
+                out[key]["ncols"] = None
+            else:
+                value = self[0].arrays[key]
+                if value.ndim == 1:
+                    value = np.atleast_2d(value).T
+                out[key]["ncols"] = value.shape[1]
+            
+        return out
 
     # ToDo: this might be parallelized with 'multiprocessing'
     @custom_deprecated(reason="Use `set` instead")
@@ -480,10 +499,6 @@ class AtomicStructures(Trajectory,aseio):
                     del structure.arrays[key]
         else:
             raise ValueError(f"Unknown attribute '{key}' in {what}.")
-
-    # def call(self: T, func) -> np.ndarray:
-    #     t = easyvectorize(Atoms)(self)
-    #     return t.call(func)
     
     def copy(self:T)->T:
         out = deepcopy(self)
@@ -524,13 +539,6 @@ class AtomicStructures(Trajectory,aseio):
             else:
                 warn (f"Skipping {key} with shape {row['shape']}")
         return output
-        
-    # def fold(self:T):
-    #     pos = self.get("positions")
-    #     cells = self.get_cells()
-    #     pos = pos % 1 
-    #     for n,_ in enumerate(self):
-    #         self[n].set_scaled_positions(pos[n])
     
     def get_cells(self:T,as_numpy:bool=False)->List[Cell]:
         """Return a list of ase.cell.Cells"""

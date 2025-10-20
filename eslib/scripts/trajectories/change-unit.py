@@ -58,9 +58,11 @@ def main(args):
     #------------------#
     if args.what is not None:
         if args.what == 'i':
+            args.what = 'info'
             if args.name not in atoms[0].info:
                 raise ValueError("{:s} not in 'info'".format(args.name))
         elif args.what == 'a':
+            args.what = 'arrays'
             if args.name not in atoms[0].arrays:
                 raise ValueError("{:s} not in 'arrays'".format(args.name))
         else:
@@ -74,7 +76,7 @@ def main(args):
     print("\tConverting '{:s}' from '{:s}' to '{:s}' ... ".format(args.name,args.in_unit,args.out_unit),end="")
     data = atoms.get(args.name)
     data *= factor
-    atoms.set(args.name,data)
+    atoms.set(args.name,data,args.what)
     # for structure in atoms:
     #     if args.what == 'i':
     #         structure.set(args.name,structure.info[args.name]*factor)
@@ -86,6 +88,7 @@ def main(args):
     #------------------#
     print("\n\tWriting atomic structures to file '{:s}' ... ".format(args.output), end="")
     atoms.to_file(file=args.output,format=args.output_format)
+    print("done")
     
 
 #---------------------------------------#
