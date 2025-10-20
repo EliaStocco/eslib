@@ -11,7 +11,7 @@ import pandas as pd
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Analyse the results from 'displace-first-water-molecule.py'."
+description = "Analyse the results from 'displace-first-water-molecule.py' and 'aims-read-hirshfeld.py'."
 
 #---------------------------------------#
 def prepare_args(description):
@@ -101,6 +101,8 @@ def main(args):
     forces = trajectory.get(args.keyword)
     print("done")
     print("\tforces.shape:", forces.shape)
+    if forces.ndim == 2:
+        forces = forces[:,:,None]
     forces = forces[1:,:,:]
     
     plus  = forces[0::2,:,:]
@@ -133,9 +135,9 @@ def main(args):
                 "displaced-atom": n,         # store the atom index
                 "atom": np.arange(hessian.shape[1])[ii],  # store the atom index
                 "molecule" : molecule[ii], 
-                "delta_F_x": 1000*delta_F[k, ii, 0],
-                "delta_F_y": 1000*delta_F[k, ii, 1],
-                "delta_F_z": 1000*delta_F[k, ii, 2],
+                # "delta_F_x": 1000*delta_F[k, ii, 0],
+                # "delta_F_y": 1000*delta_F[k, ii, 1],
+                # "delta_F_z": 1000*delta_F[k, ii, 2],
             })
             # Append to main DataFrame
             df_list.append(temp_df)

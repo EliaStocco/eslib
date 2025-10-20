@@ -113,7 +113,7 @@ def parse_hirshfeld_blocks_text(text: str) -> List[Dict]:
     return results
 
 def process_file(n,file):
-    atoms = read(file,format="aims-output")
+    atoms = AtomicStructures.from_file(file=file,format="aims-output",index=0)[0]
     with open(file, 'r') as fh:
         txt = fh.read()
     info = parse_hirshfeld_blocks_text(txt)
