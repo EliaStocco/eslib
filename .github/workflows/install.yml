@@ -1,4 +1,4 @@
-name: Run pytest tests
+name: Test pip installation
 
 on: [push]
 
