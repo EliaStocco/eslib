@@ -9,7 +9,7 @@ from eslib.classes.append import AppendableList
 
 #---------------------------------------#
 # Description of the script's purpose
-description = "Compute the SOAP descriptors for a bunch of atomic structures, with optional chunking to limit memory use."
+description = "Compute the SOAP descriptors (using DScribe) for a bunch of atomic structures, with optional chunking to limit memory use."
 
 #---------------------------------------#
 def prepare_parser(description):

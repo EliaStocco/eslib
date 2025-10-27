@@ -520,3 +520,31 @@ def gaussian_cluster_indices(floats: np.ndarray, n_components: int = 2, random_s
         cluster_dict[float(centers[i])] = indices
 
     return cluster_dict
+
+def find_duplicates(arr:np.ndarray)->Dict[str,np.ndarray]:
+    """
+    Find duplicate integers in a NumPy array.
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        1D array of integers.
+
+    Returns
+    -------
+    dict
+        {value: [positions]} for each duplicated value.
+    """
+    assert arr.ndim == 1, "Input array must be 1D."
+    duplicates = {}
+
+    # unique values, inverse indices, and counts
+    unique_vals, inverse, counts = np.unique(arr, return_inverse=True, return_counts=True)
+
+    # iterate over values that occur more than once
+    for val, count in zip(unique_vals, counts):
+        if count > 1:
+            positions = np.where(arr == val)[0]# .tolist()
+            duplicates[val] = positions
+
+    return duplicates

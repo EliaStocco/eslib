@@ -306,19 +306,19 @@ def read_trajectory(file:str,
     f = "extxyz" if format in ["i-pi","ipi"] else format
     remove_replicas = False if format not in ["i-pi","ipi"] else remove_replicas
 
-    if format in [None,"xyz","extxyz"]:
-        # `extxyz.read`` from https://github.com/libAtoms/extxyz
-        # this function should be faster than `ASE.io.read``
-        # try:
-        #     from extxyz import read
-        #     atoms = read(file,index=index)
-        #     if len(atoms) == 0 :
-        #         raise ValueError("some error occurred")
-        # except:
-        atoms = io.read(file,index=index,format=f)
-    else:
-        # ASE.io.read
-        atoms = io.read(file,index=index,format=f)
+    # if format in [None,"xyz","extxyz"]:
+    #     # `extxyz.read`` from https://github.com/libAtoms/extxyz
+    #     # this function should be faster than `ASE.io.read``
+    #     # try:
+    #     #     from extxyz import read
+    #     #     atoms = read(file,index=index)
+    #     #     if len(atoms) == 0 :
+    #     #         raise ValueError("some error occurred")
+    #     # except:
+    #     atoms = io.read(file,index=index,format=f)
+    # else:
+    #     # ASE.io.read
+    atoms = io.read(file,index=index,format=f)
         
     index = integer_to_slice_string(index)
 

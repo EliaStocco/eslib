@@ -251,10 +251,6 @@ class TimeAutoCorrelation:
 # def autocorrelate(data,mean=0.0,method='auto', normalize=False):
 #     return correlate(data1=data,data2=data,mean1=mean,mean2=mean,method=method,normalize=normalize)
 
-@extend2NDarray
-def autocorrelate(data,*argv,**kwargs):
-    return correlate(data1=data,data2=data,*argv,**kwargs)
-
 # @extend2NDarray
 # def autocorrelate(data,*argv,**kwargs):
 #     return PL_correlate(data)
@@ -267,8 +263,11 @@ def PL_correlate(observable):
     # autoCorr = autoCorr.mean(axis=1)
     return autoCorr
 
+@extend2NDarray
+def autocorrelate(data,*argv,**kwargs):
+    return correlate(data1=data,data2=data,*argv,**kwargs)
 
-def correlate(data1, data2, mean1=0.0, mean2=0.0, method='auto', normalize=False,mode="full"):
+def correlate(data1:np.ndarray, data2:np.ndarray, mean1=0.0, mean2=0.0, method='auto', normalize=False,mode="full"):
     """Correlation function of `data1` and `data2`.
 
     The mean of the input data can be shifted before calculating the CF using
@@ -289,6 +288,9 @@ def correlate(data1, data2, mean1=0.0, mean2=0.0, method='auto', normalize=False
     Returns:
         array, 1D, length n1 + n2 -1
     """
+    
+    assert data1.ndim == data2.ndim, "Input arrays must have the same number of dimensions"
+    assert data1.ndim == 1, "Input arrays must be 1D"
     
     if mode not in ["half","full","shift"]:
         raise ValueError("`mode` can be only `half`, `full` or `shift`")
@@ -340,8 +342,6 @@ def correlate(data1, data2, mean1=0.0, mean2=0.0, method='auto', normalize=False
         pass
     else:
         raise ValueError("`mode` can be only `half`, `full` or `shift`")
-    
-    lags = signal.correlation_lags(len(data1), len(data2), mode="full")
 
     return cf
 
