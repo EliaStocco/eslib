@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 from os import cpu_count
 
-# from eslib.classes import Trajectory
 from eslib.classes.aseio import aseio, integer_to_slice_string
 from eslib.functional import custom_deprecated
 from eslib.tools import convert
