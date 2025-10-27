@@ -5,23 +5,23 @@ from ase.io.cube import read_cube
 from dataclasses import dataclass, field
 from typing import Tuple, Union
 
-    
 @dataclass
 class CubeData:
     """
     Class to handle volumetric cube data (Hartree potential, density, etc.)
     """
-    data: np.ndarray
+    data: np.ndarray # 3D dimensional data of a scalar or vector field
     origin: np.ndarray # always in real space
-    vectors: np.ndarray
+    vectors: np.ndarray # three 3D lattice vectors
     space:str = field(default="real") # must be "real" or "reciprocal"
 
+    #------------------#
+    # initialization and construction
     #------------------#
     def __post_init__(self):
         if self.space not in ("real", "reciprocal"):
             raise ValueError(f"space must be 'real' or 'reciprocal', got '{self.space}'")
-        
-    #------------------#
+    
     @classmethod
     def from_file(cls, filename: str):
         """
@@ -47,6 +47,8 @@ class CubeData:
         else:
             raise ValueError(f"Format '{format}' is not supported.")
         
+    #------------------#
+    # properties
     #------------------#
     @property
     def shape(self):
@@ -97,6 +99,9 @@ class CubeData:
         """
         return self.data.ndim == 3
 
+    #------------------#
+    # summary/debugging 
+    #------------------#
     def summary(self, title: str = "CubeData summary", prefix: str = "") -> str:
         """
         Generate a summary of the CubeData, including shape, origin,
@@ -135,6 +140,27 @@ class CubeData:
         print(f"\n{prefix}" + "="*60, file=buffer)
         return buffer.getvalue()
 
+    def __eq__(self, other:'CubeData')->bool:
+        """Check if two CubeData instances have the same space, data, origin, and vectors."""
+        if not isinstance(other, CubeData):
+            return NotImplemented
+
+        # Check that space is the same
+        if self.space != other.space:
+            return False
+
+        # Check arrays using allclose for floating point data
+        arrays_equal = (
+            np.allclose(self.data, other.data, rtol=1e-8, atol=1e-12) and
+            np.allclose(self.origin, other.origin, rtol=1e-8, atol=1e-12) and
+            np.allclose(self.vectors, other.vectors, rtol=1e-8, atol=1e-12)
+        )
+
+        return arrays_equal
+
+    #------------------#
+    # mathematical operations
+    #------------------#
     def kspace(self) -> 'CubeData':
         """
         Compute the Fourier transform of the cube data and return
@@ -180,24 +206,6 @@ class CubeData:
 
         return CubeData(data=data_real, origin=self.origin.copy(), vectors=vectors_real, space="real")
     
-    def __eq__(self, other:'CubeData')->bool:
-        """Check if two CubeData instances have the same space, data, origin, and vectors."""
-        if not isinstance(other, CubeData):
-            return NotImplemented
-
-        # Check that space is the same
-        if self.space != other.space:
-            return False
-
-        # Check arrays using allclose for floating point data
-        arrays_equal = (
-            np.allclose(self.data, other.data, rtol=1e-8, atol=1e-12) and
-            np.allclose(self.origin, other.origin, rtol=1e-8, atol=1e-12) and
-            np.allclose(self.vectors, other.vectors, rtol=1e-8, atol=1e-12)
-        )
-
-        return arrays_equal
-
     def integrate(self, axis:Union[int,Tuple[int]]=(0,1,2)) -> np.ndarray:
         """
         Integrate the cube data along one or more axes, taking into account voxel spacing.
@@ -227,7 +235,7 @@ class CubeData:
         return np.sum(self.data, axis=axes) * voxel_vol
     
 #------------------#
-# Pytest for CubeData
+# pytest for CubeData
 #------------------#
 def test_cubedata_basic():
     # Random data
@@ -302,7 +310,7 @@ def test_cubedata_triclinic():
     # Should have same shape as original
     assert cube_r.data.shape == cube.data.shape
 
-
+#------------------#
 if __name__ == "__main__":
     import pytest
     pytest.main([__file__])
