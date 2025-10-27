@@ -1,4 +1,5 @@
 import io
+import pytest
 import numpy as np
 from ase.io.cube import read_cube
 from dataclasses import dataclass, field
@@ -64,14 +65,37 @@ class CubeData:
         return np.array([self.vectors[i] / shape[i] for i in range(3)])
     
     @property
+    def coordinates(self) -> np.ndarray:
+        """
+        Cartesian coordinates of each voxel in the cube.
+
+        Returns
+        -------
+        coords : np.ndarray
+            Array of shape (nx, ny, nz, 3) with the Cartesian coordinates
+            of each voxel in real or reciprocal space depending on `self.space`.
+        """
+        nx, ny, nz = self.data.shape
+        # Fractional coordinates along each axis (0 to 1)
+        frac_x = np.linspace(0, 1, nx, endpoint=False)
+        frac_y = np.linspace(0, 1, ny, endpoint=False)
+        frac_z = np.linspace(0, 1, nz, endpoint=False)
+
+        # 3D fractional grid
+        FX, FY, FZ = np.meshgrid(frac_x, frac_y, frac_z, indexing='ij')
+
+        # Convert to Cartesian coordinates: r = fx*a1 + fy*a2 + fz*a3
+        a1, a2, a3 = self.vectors
+        coords = FX[..., None] * a1 + FY[..., None] * a2 + FZ[..., None] * a3
+
+        return coords
+    
+    @property
     def is_scalar(self) -> bool:
         """
         Return True if the data represents a scalar field.
         """
         return self.data.ndim == 3
-    
-    # def __repr__(self):
-    #     self.summary(prefix="")
 
     def summary(self, title: str = "CubeData summary", prefix: str = "") -> str:
         """
@@ -92,20 +116,11 @@ class CubeData:
             The full summary as a string.
         """
         buffer = io.StringIO()
-
         print(f"\n{prefix}" + "="*60, file=buffer)
         print(f"{prefix}{title}", file=buffer)
-        
-        # Space
         print(f"{prefix} - space: {self.space}", file=buffer)
-        
-        # Shape
         print(f"{prefix} - shape: {self.data.shape}", file=buffer)
-        
-        # Origin
         print(f"{prefix} - origin (always real space): {self.origin}", file=buffer)
-        
-        # Lattice vectors
         print(f"{prefix} - lattice vectors (cartesian coordinates):", file=buffer)
         for i, vec in enumerate(self.vectors):
             length = np.linalg.norm(vec)
@@ -117,18 +132,9 @@ class CubeData:
             print(f"{prefix}\t\t - number of points along axis: {n_points}", file=buffer)
             print(f"{prefix}\t\t - edge density ({kunit}): {n_points / length:.5f}", file=buffer)
             print(f"{prefix}\t\t - edge spacing ({runit}): {length/n_points:.5f}", file=buffer)
-        
-        # Data statistics
-        print(f"\n{prefix} - data statistics:", file=buffer)
-        print(f"{prefix}\t - min: {np.min(self.data):.5e}", file=buffer)
-        print(f"{prefix}\t - max: {np.max(self.data):.5e}", file=buffer)
-        print(f"{prefix}\t - mean: {np.mean(self.data):.5e}", file=buffer)
-        
         print(f"\n{prefix}" + "="*60, file=buffer)
-
         return buffer.getvalue()
 
-  
     def kspace(self) -> 'CubeData':
         """
         Compute the Fourier transform of the cube data and return
@@ -174,32 +180,6 @@ class CubeData:
 
         return CubeData(data=data_real, origin=self.origin.copy(), vectors=vectors_real, space="real")
     
-    @property
-    def coordinates(self) -> np.ndarray:
-        """
-        Cartesian coordinates of each voxel in the cube.
-
-        Returns
-        -------
-        coords : np.ndarray
-            Array of shape (nx, ny, nz, 3) with the Cartesian coordinates
-            of each voxel in real or reciprocal space depending on `self.space`.
-        """
-        nx, ny, nz = self.data.shape
-        # Fractional coordinates along each axis (0 to 1)
-        frac_x = np.linspace(0, 1, nx, endpoint=False)
-        frac_y = np.linspace(0, 1, ny, endpoint=False)
-        frac_z = np.linspace(0, 1, nz, endpoint=False)
-
-        # 3D fractional grid
-        FX, FY, FZ = np.meshgrid(frac_x, frac_y, frac_z, indexing='ij')
-
-        # Convert to Cartesian coordinates: r = fx*a1 + fy*a2 + fz*a3
-        a1, a2, a3 = self.vectors
-        coords = FX[..., None] * a1 + FY[..., None] * a2 + FZ[..., None] * a3
-
-        return coords
-    
     def __eq__(self, other:'CubeData')->bool:
         """Check if two CubeData instances have the same space, data, origin, and vectors."""
         if not isinstance(other, CubeData):
@@ -218,44 +198,6 @@ class CubeData:
 
         return arrays_equal
 
-    
-    def gradient(self)->'CubeData':
-        """
-        Compute the gradient of the cube data using FFT and return
-        a CubeData instance with the gradient stored as a 4D array (nx, ny, nz, 3).
-
-        Returns:
-            CubeData: gradient stored in data[..., 0] = ∂/∂x, etc.
-        """
-        # Compute k-space CubeData
-        cube_k = self.kspace()
-        data_k = cube_k.data  # FFT of the data
-
-        shape = np.array(self.data.shape)
-        spacing = self.spacing  # voxel vectors
-
-        # Build k-vectors along each axis
-        k_axes = np.zeros((3,n))
-        for i in range(3):
-            n = shape[i]
-            freqs = np.fft.fftfreq(n, d=1.0)
-            # Multiply by 2*pi and voxel vector to get Cartesian k-vector
-            k_axes[i] = 2 * np.pi * freqs[:, None] @ spacing[i][None, :]  # shape (n_i, 3)
-
-        # Prepare empty gradient array in k-space
-        grad_k = np.empty(data_k.shape + (3,), dtype=complex)
-
-        # Multiply FFT data by i*k for each axis (broadcast properly)
-        grad_k[..., 0] = 1j * np.einsum("ijk,",k_axes[0],data_k)
-        grad_k[..., 1] = 1j * k_axes[1][None, :, None, :] * data_k
-        grad_k[..., 2] = 1j * k_axes[2][None, None, :, :] * data_k
-
-        # Inverse FFT to get gradient in real space
-        grad_real = np.fft.ifftn(grad_k, axes=(0, 1, 2)).real
-
-        # Return as a CubeData object
-        return CubeData(data=grad_real, origin=self.origin.copy(), vectors=self.vectors.copy())
-    
     def integrate(self, axis:Union[int,Tuple[int]]=(0,1,2)) -> np.ndarray:
         """
         Integrate the cube data along one or more axes, taking into account voxel spacing.
@@ -283,3 +225,84 @@ class CubeData:
         voxel_vol = np.prod([np.linalg.norm(self.spacing[a]) for a in axes])
 
         return np.sum(self.data, axis=axes) * voxel_vol
+    
+#------------------#
+# Pytest for CubeData
+#------------------#
+def test_cubedata_basic():
+    # Random data
+    nx, ny, nz = 10, 12, 8
+    data = np.random.rand(nx, ny, nz)
+    origin = np.array([0.0, 0.0, 0.0])
+    vectors = np.array([[10.0, 0.0, 0.0],
+                        [0.0, 12.0, 0.0],
+                        [0.0, 0.0, 8.0]])
+
+    cube = CubeData(data, origin, vectors)
+
+    # Test properties
+    assert cube.is_scalar
+    assert cube.shape == (nx, ny, nz)
+    coords = cube.coordinates
+    assert coords.shape == (nx, ny, nz, 3)
+
+    # Test summary returns a string
+    summary_str = cube.summary()
+    assert isinstance(summary_str, str)
+    assert "shape" in summary_str
+
+    # Test integrate
+    total = cube.integrate(axis=(0,1,2))
+    assert np.isscalar(total)
+
+    # Test kspace/rspace round-trip
+    cube_k = cube.kspace()
+    assert cube_k.space == "reciprocal"
+    cube_r = cube_k.rspace()
+    assert cube_r.space == "real"
+    assert cube_r == cube, "They differ"
+    
+#------------------#
+# Pytest for CubeData with triclinic lattice
+#------------------#
+def test_cubedata_triclinic():
+    # Random data
+    nx, ny, nz = 6, 7, 5
+    data = np.random.rand(nx, ny, nz)
+    origin = np.array([0.0, 0.0, 0.0])
+
+    # Triclinic lattice vectors
+    vectors = np.array([[5.0, 1.0, 0.0],
+                        [0.5, 6.0, 1.0],
+                        [0.0, 1.0, 4.0]])
+
+    cube = CubeData(data, origin, vectors)
+
+    # Check shape and scalar property
+    assert cube.shape == (nx, ny, nz)
+    assert cube.is_scalar
+
+    # Check coordinates
+    coords = cube.coordinates
+    assert coords.shape == (nx, ny, nz, 3)
+
+    # Integrate along z-axis
+    integral_z = cube.integrate(axis=2)
+    assert integral_z.shape == (nx, ny)
+
+    # k-space transform
+    cube_k = cube.kspace()
+    assert cube_k.space == "reciprocal"
+    # Check that vectors are 3x3
+    assert cube_k.vectors.shape == (3, 3)
+
+    # r-space transform back
+    cube_r = cube_k.rspace()
+    assert cube_r.space == "real"
+    # Should have same shape as original
+    assert cube_r.data.shape == cube.data.shape
+
+
+if __name__ == "__main__":
+    import pytest
+    pytest.main([__file__])
