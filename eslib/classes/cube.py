@@ -1,12 +1,72 @@
-import io
+import io, os, copy
 import pytest
 import numpy as np
 from ase.io.cube import read_cube
 from dataclasses import dataclass, field
-from typing import Tuple, Union
+from typing import Tuple, Union, TypeVar, Any, Type
+# A TypeVar that refers to the subclass (e.g., CubeData)
+T = TypeVar("T", bound="NumpyLike")
 
+#---------------------------------------#
+class NumpyLike:
+    """
+    A mixin class that makes objects behave like NumPy arrays.
+
+    - Delegates all NumPy operations to self.data
+    - Preserves attributes when operations produce new instances
+    - Supports ufuncs (np.sin, np.add, etc.)
+    - Supports high-level functions (np.mean, np.concatenate, etc.)
+    """
+
+    data: np.ndarray
+
+    # ---------- Core conversion ----------
+    def __array__(self, dtype=None):
+        """Return the underlying NumPy array."""
+        return np.asarray(self.data, dtype=dtype)
+
+    # ---------- Internal helper ----------
+    def _wrap_result(self, result):
+        """Wrap ndarray results back into this class, copying metadata."""
+        if isinstance(result, np.ndarray):
+            attrs = copy.deepcopy(self.__dict__)
+            attrs.pop("data", None)  # don't reuse old array
+            return self.__class__(result, **attrs)
+        return result
+
+    # ---------- NumPy ufunc protocol ----------
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        """Support for NumPy ufuncs (e.g., np.add, np.sin)."""
+        unwrapped = [x.data if isinstance(x, NumpyLike) else x for x in inputs]
+        result = getattr(ufunc, method)(*unwrapped, **kwargs)
+        return self._wrap_result(result)
+
+    # ---------- NumPy high-level function protocol ----------
+    def __array_function__(self, func, types, args, kwargs):
+        """Support for NumPy functions (e.g., np.mean, np.stack)."""
+        if not any(issubclass(t, NumpyLike) for t in types):
+            return NotImplemented
+        unwrapped_args = [a.data if isinstance(a, NumpyLike) else a for a in args]
+        result = func(*unwrapped_args, **kwargs)
+        return self._wrap_result(result)
+
+    # ---------- Attribute + indexing delegation ----------
+    def __getattr__(self, name):
+        """Delegate unknown attributes to the underlying NumPy array."""
+        return getattr(self.data, name)
+
+    def __getitem__(self, key):
+        """Support slicing and indexing."""
+        result = self.data[key]
+        return self._wrap_result(result)
+
+    def __setitem__(self, key, value):
+        """Allow item assignment."""
+        self.data[key] = value
+
+#---------------------------------------#
 @dataclass
-class CubeData:
+class CubeData(NumpyLike):
     """
     Class to handle volumetric cube data (Hartree potential, density, etc.)
     """
@@ -22,28 +82,78 @@ class CubeData:
         if self.space not in ("real", "reciprocal"):
             raise ValueError(f"space must be 'real' or 'reciprocal', got '{self.space}'")
     
+    # -------------------- Loading --------------------
     @classmethod
-    def from_file(cls, filename: str):
+    def from_file(cls, filename: str, format: str = None):
         """
-        Factory method to create a CubeData instance from a cube file.
-        Only stores data, origin, and vectors.
+        Factory method to create a CubeData instance from a file.
+        Supports cube, npz, and YAML.
         """
-        with open(filename, "r") as f:
-            cube_dict = read_cube(f)  # ignore atoms
+        if format is None:
+            _, format = os.path.splitext(filename)
+            format = format[1:]
+        if format == "cube":
+            with open(filename, "r") as f:
+                cube_dict = read_cube(f)  # ignore atoms
 
-        data = np.asarray(cube_dict['data'])
-        origin = np.array(cube_dict['origin'])
-        spacing = np.array(cube_dict['spacing'])  # shape (3,3)
+            data = np.asarray(cube_dict['data'])
+            origin = np.array(cube_dict['origin'])
+            spacing = np.array(cube_dict['spacing'])  # shape (3,3)
+            vectors = np.array([spacing[i] * data.shape[i] for i in range(3)])
+            return cls(data, origin, vectors)
 
-        # Calculate the full lattice vectors of the cube
-        # Each vector = voxel spacing * number of voxels along that axis
-        vectors = np.array([spacing[i] * data.shape[i] for i in range(3)])
+        elif format in ("yaml", "yml"):
+            import yaml
+            with open(filename, "r") as f:
+                loaded = yaml.safe_load(f)
+            return cls(
+                data=np.array(loaded['data']),
+                origin=np.array(loaded['origin']),
+                vectors=np.array(loaded['vectors']),
+                space=loaded.get('space', "real")
+            )
 
-        return cls(data, origin, vectors)
-    
-    def to_file(self,filename:str,format="npy"):
+        elif format == "npz":
+            f = np.load(filename)
+            return cls(
+                data=f['data'],
+                origin=f['origin'],
+                vectors=f['vectors'],
+                space=str(f['space'])
+            )
+
+        else:
+            raise ValueError(f"Format '{format}' is not supported.")
+
+    # -------------------- Saving --------------------
+    def to_file(self, filename: str, format: str = None):
+        """
+        Save CubeData to a file. Supports npy, npz, YAML.
+        """
+        if format is None:
+            _, format = os.path.splitext(filename)
+            format = format[1:]
         if format == "npy":
-            np.save(filename,self.data)
+            np.save(filename, self.data)
+
+        elif format == "npz":
+            np.savez(filename,
+                     data=self.data,
+                     origin=self.origin,
+                     vectors=self.vectors,
+                     space=self.space)
+
+        elif format in ("yaml", "yml"):
+            import yaml
+            to_save = {
+                'data': self.data.tolist(),
+                'origin': self.origin.tolist(),
+                'vectors': self.vectors.tolist(),
+                'space': self.space
+            }
+            with open(filename, "w") as f:
+                yaml.dump(to_save, f)
+
         else:
             raise ValueError(f"Format '{format}' is not supported.")
         
@@ -140,6 +250,9 @@ class CubeData:
         print(f"\n{prefix}" + "="*60, file=buffer)
         return buffer.getvalue()
 
+    def __repr__(self):
+        return self.summary()
+    
     def __eq__(self, other:'CubeData')->bool:
         """Check if two CubeData instances have the same space, data, origin, and vectors."""
         if not isinstance(other, CubeData):
@@ -206,6 +319,34 @@ class CubeData:
 
         return CubeData(data=data_real, origin=self.origin.copy(), vectors=vectors_real, space="real")
     
+    def gradient(self) -> 'CubeData':
+        """
+        Compute the gradient of the data using the Fourier transform.
+
+        Let the data be represented by n(r).
+
+        The spatial Fourier transform is defined as:
+            n'(k) = N Σ_r [ e^{-i k·r} n(r) ]
+
+        and its inverse as:
+            n(r) = Σ_k [ e^{i k·r} n'(k) ]
+
+        Therefore, the gradient is:
+            ∇n(r) = Σ_k [ i k e^{i k·r} n'(k) ]
+                = Σ_k [ i k e^{i k·r} N Σ_{r'} e^{-i k·r'} n(r') ]
+
+        Workflow: n(r) → Fourier → n'(k) → (i·k) → i·k·n'(k) → Inverse Fourier → ∇n(r)
+        """
+        if self.space != "real":
+            raise ValueError("CubeData is not in real space.")
+        
+        n_k = self.kspace()
+        k_points = n_k.coordinates
+        _n_k = n_k[:,:,:,None]
+        ik_nk:CubeData = 1.j * k_points * _n_k
+        dn_dr = ik_nk.rspace()
+        return dn_dr
+        
     def integrate(self, axis:Union[int,Tuple[int]]=(0,1,2)) -> np.ndarray:
         """
         Integrate the cube data along one or more axes, taking into account voxel spacing.
@@ -233,10 +374,59 @@ class CubeData:
         voxel_vol = np.prod([np.linalg.norm(self.spacing[a]) for a in axes])
 
         return np.sum(self.data, axis=axes) * voxel_vol
-    
-#------------------#
-# pytest for CubeData
-#------------------#
+ 
+#---------------------------------------#   
+import tempfile
+
+@pytest.fixture
+def cube_data():
+    data = np.random.rand(4,4,4)
+    origin = np.array([0.0, 0.0, 0.0])
+    vectors = np.array([[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]])
+    return CubeData(data=data, origin=origin, vectors=vectors, space="real")
+
+def test_npy_io(cube_data):
+    with tempfile.NamedTemporaryFile(suffix=".npy", delete=False) as tmp:
+        filename = tmp.name
+    try:
+        cube_data.to_file(filename, format="npy")
+        loaded_data = np.load(filename)
+        np.testing.assert_allclose(loaded_data, cube_data.data)
+    finally:
+        os.remove(filename)
+
+def test_npz_io(cube_data):
+    with tempfile.NamedTemporaryFile(suffix=".npz", delete=False) as tmp:
+        filename = tmp.name
+    try:
+        cube_data.to_file(filename, format="npz")
+        loaded_cube = CubeData.from_file(filename, format="npz")
+        np.testing.assert_allclose(loaded_cube.data, cube_data.data)
+        np.testing.assert_allclose(loaded_cube.origin, cube_data.origin)
+        np.testing.assert_allclose(loaded_cube.vectors, cube_data.vectors)
+        assert loaded_cube.space == cube_data.space
+    finally:
+        os.remove(filename)
+
+def test_yaml_io(cube_data):
+    with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False, mode='w') as tmp:
+        filename = tmp.name
+    try:
+        cube_data.to_file(filename, format="yaml")
+        loaded_cube = CubeData.from_file(filename, format="yaml")
+        np.testing.assert_allclose(loaded_cube.data, cube_data.data)
+        np.testing.assert_allclose(loaded_cube.origin, cube_data.origin)
+        np.testing.assert_allclose(loaded_cube.vectors, cube_data.vectors)
+        assert loaded_cube.space == cube_data.space
+    finally:
+        os.remove(filename)
+
+def test_invalid_format_io(cube_data):
+    with pytest.raises(ValueError):
+        cube_data.to_file("dummy.invalid", format="invalid")
+    with pytest.raises(ValueError):
+        CubeData.from_file("dummy.invalid", format="invalid")
+
 def test_cubedata_basic():
     # Random data
     nx, ny, nz = 10, 12, 8
