@@ -16,9 +16,10 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i"  , "--input"        , **argv, required=True , type=str, help="input file [extxyz]")
-    parser.add_argument("-if" , "--input_format" , **argv, required=False, type=str, help="input file format (default: %(default)s)", default=None)
-    parser.add_argument("-o"  , "--output"       , **argv, required=False, type=str, help="output file prefix (default: %(default)s)", default=None)
+    parser.add_argument("-i"  , "--input"         , **argv, required=True , type=str, help="input file [extxyz]")
+    parser.add_argument("-if" , "--input_format"  , **argv, required=False, type=str, help="input file format (default: %(default)s)", default=None)
+    parser.add_argument("-oi" , "--output_indices", **argv, required=False, type=str, help="output file prefix for the inidices (default: %(default)s)", default='split-index')
+    parser.add_argument("-o"  , "--output"        , **argv, required=False, type=str, help="output file prefix (default: %(default)s)", default='split')
     return parser
 
 #---------------------------------------#
@@ -48,11 +49,25 @@ def main(args):
             indices_with_nan = np.logical_or(indices_with_nan,nan_mask)
             
     assert np.sum(indices_without_nan)+np.sum(indices_with_nan) == Ns, "Error in the nan splitting!"
-    assert np.all(np.logical_not(np.logical_and(indices_without_nan,indices_with_nan))), "Error in the nan splitting!"       
+    assert np.all(np.logical_not(np.logical_and(indices_without_nan,indices_with_nan))), "Error in the nan splitting!"  
     
     #------------------#
-    structures_without_nan = structures.subsample(arange[indices_without_nan])
-    structures_with_nan = structures.subsample(arange[indices_with_nan])
+    indices_without_nan = arange[indices_without_nan]
+    indices_with_nan = arange[indices_with_nan]
+    
+    #------------------#
+    file_without_nan = f"{args.output_indices}.wo-nan.txt"
+    file_with_nan = f"{args.output_indices}.nan.txt"
+    
+    with eslog(f"Saving indices to file '{file_without_nan}'"):
+        np.savetxt(file_without_nan,indices_without_nan,fmt='%d')
+        
+    with eslog(f"Saving indices to file '{file_with_nan}'"):
+        np.savetxt(file_with_nan,indices_with_nan,fmt='%d')   
+    
+    #------------------#
+    structures_without_nan = structures.subsample(indices_without_nan)
+    structures_with_nan = structures.subsample(indices_with_nan)
     
     file_without_nan = f"{args.output}.wo-nan.extxyz"
     file_with_nan = f"{args.output}.nan.extxyz"
@@ -62,7 +77,7 @@ def main(args):
         structures_without_nan.to_file(file=file_without_nan,format="extxyz")
         
     with eslog(f"Saving structures to file '{file_with_nan}'"):
-        structures_with_nan.to_file(file=file_with_nan,format="extxyz")
+        structures_with_nan.to_file(file=file_with_nan,format="extxyz")    
             
     return
         
