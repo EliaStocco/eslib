@@ -452,17 +452,23 @@ def merge_dataframes(dfs: List[pd.DataFrame], on: List[str], how: str = 'inner')
     
     return merged
 
-def group_floats_by_decimals(floats: np.ndarray, decimals: int) -> Dict[float, np.ndarray]:
+def group_floats_by_decimals(
+    floats: np.ndarray,
+    decimals: int,
+    return_indices: bool = False
+) -> Dict[float, np.ndarray]:
     """
-    Groups float numbers by rounding them to a fixed number of decimal places,
-    but stores the original (unrounded) float values in the output.
+    Groups float numbers by rounding them to a fixed number of decimal places.
 
     Parameters:
         floats (np.ndarray): Input array of float numbers.
         decimals (int): Number of decimal places to round to for grouping.
+        return_indices (bool): If True, returns indices of the original array
+                               instead of the original values.
 
     Returns:
-        Dict[float, np.ndarray]: {rounded_value: array of original float values}
+        Dict[float, np.ndarray]: 
+            {rounded_value: array of original float values or their indices}
 
     Example:
         >>> floats = np.array([0.512, 0.515, 0.518, 1.234, 1.236, 2.0001])
@@ -471,16 +477,23 @@ def group_floats_by_decimals(floats: np.ndarray, decimals: int) -> Dict[float, n
         ...     print(f"{key}: {vals}")
         1.0: [0.512 0.515 0.518 1.234 1.236]
         2.0: [2.0001]
+
+        >>> grouped_idx = group_floats_by_decimals(floats, decimals=0, return_indices=True)
+        >>> for key, idxs in grouped_idx.items():
+        ...     print(f"{key}: {idxs}")
+        1.0: [0 1 2 3 4]
+        2.0: [5]
     """
     from collections import defaultdict
     floats = np.asarray(floats)
     rounded_keys = np.round(floats, decimals)
 
     groups = defaultdict(list)
-    for key, val in zip(rounded_keys, floats):
-        groups[key].append(val)
+    for i, (key, val) in enumerate(zip(rounded_keys, floats)):
+        groups[key].append(i if return_indices else val)
 
     return {float(k): np.array(v) for k, v in groups.items()}
+
 
 def gaussian_cluster_indices(floats: np.ndarray, n_components: int = 2, random_state: int = 0) -> Dict[float, np.ndarray]:
     """
@@ -547,4 +560,62 @@ def find_duplicates(arr:np.ndarray)->Dict[str,np.ndarray]:
             positions = np.where(arr == val)[0]# .tolist()
             duplicates[val] = positions
 
-    return duplicates
+    return duplicates    
+
+def voigt_to_tensor(v: np.ndarray) -> np.ndarray:
+    """
+    Convert a Voigt-form rank-2 tensor into a full 3x3 symmetric tensor
+    **without applying shear scaling**.
+
+    Supports both:
+      - a single Voigt vector of shape (6,)
+      - multiple Voigt vectors of shape (N, 6)
+
+    The Voigt notation is interpreted as:
+        v = [xx, yy, zz, yz, xz, xy]
+
+    The returned full tensor(s) follow:
+        [[xx, xy, xz],
+         [xy, yy, yz],
+         [xz, yz, zz]]
+
+    Parameters
+    ----------
+    v : np.ndarray
+        Array containing Voigt-form tensor(s).
+        Must have shape (6,) or (N, 6). No shear-factor adjustments are applied.
+
+    Raises
+    ------
+    ValueError
+        If the input array does not have shape (6,) or (N, 6).
+
+    Returns
+    -------
+    np.ndarray
+        If input is (6,), returns a (3, 3) tensor.
+        If input is (N, 6), returns an array of shape (N, 3, 3).
+
+    """
+    v = np.asarray(v)
+
+    # Case: single vector (6,)
+    if v.ndim == 1:
+        return np.array([
+            [v[0], v[5], v[4]],
+            [v[5], v[1], v[3]],
+            [v[4], v[3], v[2]]
+        ])
+
+    # Case: multiple vectors (N,6)
+    if v.ndim == 2 and v.shape[1] == 6:
+        return np.stack([
+            np.array([
+                [v[:, 0], v[:, 5], v[:, 4]],
+                [v[:, 5], v[:, 1], v[:, 3]],
+                [v[:, 4], v[:, 3], v[:, 2]]
+            ]).transpose(1, 2, 0)   # shape (N,3,3)
+        ], axis=0)[0]
+
+    raise ValueError("Input must have shape (6,) or (N,6)")
+
