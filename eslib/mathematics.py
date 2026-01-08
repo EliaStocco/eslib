@@ -619,3 +619,42 @@ def voigt_to_tensor(v: np.ndarray) -> np.ndarray:
 
     raise ValueError("Input must have shape (6,) or (N,6)")
 
+def atleast_3d(arr: np.ndarray) -> np.ndarray:
+    """
+    Ensure the input array has at least 3 dimensions.
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        Input array.
+
+    Returns
+    -------
+    np.ndarray
+        Array with at least 3 dimensions.
+    """
+    arr = np.asarray(arr)
+    if arr.ndim == 1:
+        arr = arr[:, np.newaxis, np.newaxis]
+    elif arr.ndim == 2:
+        arr = arr[:, :, np.newaxis]
+    return arr
+
+def atleast_2d(arr: np.ndarray) -> np.ndarray:
+    """
+    Ensure the input array has at least 2 dimensions.
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        Input array.
+
+    Returns
+    -------
+    np.ndarray
+        Array with at least 2 dimensions.
+    """
+    arr = np.asarray(arr)
+    if arr.ndim == 1:
+        arr = arr[:, np.newaxis]
+    return arr

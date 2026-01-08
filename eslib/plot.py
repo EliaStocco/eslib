@@ -209,17 +209,24 @@ def vzero(ax, shift=0, **argv):
     """
     return straigh_line(ax, shift, ax.get_ylim, ax.vlines, ax.set_ylim, **argv)
 
-def square_plot(ax,lims:tuple=None):
-    if lims is None :
+def square_plot(ax, lims: tuple = None):
+    # Make sure limits reflect plotted data first
+    ax.relim()
+    ax.autoscale()
+
+    if lims is None:
         x = ax.get_xlim()
         y = ax.get_ylim()
-
         l, r = min(x[0], y[0]), max(x[1], y[1])
     else:
-        l,r = lims
+        l, r = lims
 
     ax.set_xlim(l, r)
     ax.set_ylim(l, r)
+
+    # *** This is the crucial missing line ***
+    ax.set_aspect('equal', adjustable='box')
+
     return ax
 
 def plot_bisector(ax, shiftx=0, shifty=0, argv:dict=None):
