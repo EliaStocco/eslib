@@ -76,7 +76,7 @@ def print_info(structure:Atoms,threshold:float,title:str,show_pos:bool):
             print("\n\tPositions (cartesian):")
             line = matrix2str(structure.get_positions(),digits=3,col_names=["Rx","Ry","Rz"],cols_align="^",width=8,row_names=structure.get_chemical_symbols())
             print(line)
-    return
+    return strinfo
 
 #---------------------------------------#
 @esfmt(prepare_parser,description)
@@ -109,7 +109,7 @@ def main(args):
     print("done") 
     
     
-    print_info(structure,args.threshold,"Original structure information:",args.show_positions)
+    info = print_info(structure,args.threshold,"Original structure information:",args.show_positions)
 
     if args.conversion is not None:
         args.conversion  = str(args.conversion )
