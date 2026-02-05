@@ -1,0 +1,38 @@
+# ===============================
+# APS PRB / REVTeX 4.2 style
+# ===============================
+
+# Use LaTeX for text rendering
+text.usetex : True
+
+# Figure size (two-column APS)
+figure.figsize : 6, 3
+
+# Font setup
+font.family : serif
+font.size : 9
+
+# Axes labels
+axes.labelsize : 9
+axes.titlesize : 9
+
+# Tick labels
+xtick.labelsize : 8
+ytick.labelsize : 8
+
+# Legend
+legend.fontsize : 8
+legend.loc : best
+legend.facecolor : white
+legend.edgecolor : black
+legend.framealpha : 1
+
+# Line and marker defaults
+lines.linewidth : 1.2
+lines.markersize : 4
+
+# DPI for vector output
+savefig.dpi : 300
+
+# Tight layout works better for journals
+figure.autolayout : True

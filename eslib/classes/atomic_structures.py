@@ -49,7 +49,7 @@ class AtomicStructures(aseio):
             raise ValueError("Not all atomic structures have the same number of atoms")
         return n_atoms[0]
 
-    def is_trajectory(self:T)->bool:
+    def is_trajectory(self:T,check_symbols=True)->bool:
         """
         Check if the object is a trajectory.
         """
@@ -58,8 +58,11 @@ class AtomicStructures(aseio):
         n_atoms = np.unique(n_atoms)
         if len(n_atoms) > 1:
             return False
-        symbols = self.call(lambda x: x.get_chemical_symbols()) # [s.get_chemical_symbols() for s in self]
-        return all([s == symbols[0] for s in symbols])
+        if check_symbols:
+            symbols = self.call(lambda x: x.get_chemical_symbols()) # [s.get_chemical_symbols() for s in self]
+            return all([s == symbols[0] for s in symbols])
+        else:
+            return True
     
     def remove_elements(self:T,symbols:List[str],return_index:Optional[bool]=False)->Union[T,Tuple[T,np.ndarray,np.ndarray]]:
         """
@@ -281,7 +284,7 @@ class AtomicStructures(aseio):
         info = self.get_keys("info")
         array = self.get_keys("arrays")
         
-        is_traj = self.is_trajectory()
+        is_traj = self.is_trajectory(check_symbols=False)
 
         # Iterate over the columns
         for n,key in enumerate(df["key"]):

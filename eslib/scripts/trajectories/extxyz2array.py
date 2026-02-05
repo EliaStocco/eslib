@@ -4,7 +4,7 @@ from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt, float_format, eslog
 from eslib.input import ilist, str2bool
 from eslib.tools import get_files
-from eslib.classes.physical_tensor import PhysicalTensor
+# from eslib.classes.physical_tensor import PhysicalTensor
 import concurrent.futures
 from typing import List
 
@@ -24,7 +24,7 @@ def prepare_args(description):
     parser.add_argument("-s"  , "--shape"        , **argv, required=False, type=ilist   , help="reshape the data (default: %(default)s", default=None)  
     parser.add_argument("-a"  , "--append"       , **argv, required=False, type=str2bool, help="append the trajectories (default: %(default)s)", default=True)
     parser.add_argument("-par", "--parallel"     , **argv, required=False, type=str2bool, help="use parallel algorithm to read files (default: %(default)s)", default=False)
-    parser.add_argument("-o"  , "--output"       , **argv, required=False, type=str     , help="output file (default: %(default)s)", default=None)
+    parser.add_argument("-o"  , "--output"       , **argv, required=True , type=str     , help="output file (default: %(default)s)", default=None)
     parser.add_argument("-of" , "--output_format", **argv, required=False, type=str     , help="output format for np.savetxt (default: %(default)s)", default=float_format)
     return parser
 
@@ -102,19 +102,28 @@ def main(args):
         print("done")
 
     #------------------#
-    print("\n\t Converting data into PhysicalTensor ... ", end="")
-    data = PhysicalTensor(data)
-    print("done")
-
-    #------------------#
-    if args.output is None:
-        file = "{:s}.txt".format(args.keyword)
+    # print("\n\t Converting data into PhysicalTensor ... ", end="")
+    # data = PhysicalTensor(data)
+    # print("done")
+    
+    if str(args.output).endswith(".npy"):
+        print("\t Saving '{:s}' to file '{:s}' ... ".format(args.keyword,args.output), end="")
+        np.save(args.output,data)
+        print("done")
+    elif str(args.output).endswith(".txt"):
+        if data.ndim > 2:
+            data = data.reshape((data.shape[0],-1))
+        print("\t Saving '{:s}' to file '{:s}' ... ".format(args.keyword,args.output), end="")
+        np.savetxt(args.output,data,fmt=float_format)
+        print("done")
+    elif str(args.output).endswith(".csv"):
+        if data.ndim > 2:
+            data = data.reshape((data.shape[0],-1))
+        print("\t Saving '{:s}' to file '{:s}' ... ".format(args.keyword,args.output), end="")
+        np.savetxt(args.output,data,fmt=float_format,delimiter=',')
+        print("done")
     else:
-        file = str(args.output)
-
-    print("\t Storing '{:s}' to file '{:s}' ... ".format(args.keyword,file), end="")
-    data.to_file(file=file,fmt=args.output_format)
-    print("done")
+        raise ValueError("Only 'txt', 'csv', and 'npy' extensions are supported for output file.")
 
 #---------------------------------------#
 if __name__ == "__main__":

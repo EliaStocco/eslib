@@ -113,32 +113,5 @@ def main(args):
 if __name__ == "__main__":
     main()
 
-# {
-#     // Use IntelliSense to learn about possible attributes.
-#     // Hover to view descriptions of existing attributes.
-#     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-#     "version": "0.2.0",
-#     "configurations": [
-#         {
-#             "name": "Python: Current File",
-#             "type": "debugpy",
-#             "request": "launch",
-#             "program": "/home/stoccoel/google-personal/codes/eslib/eslib/scripts/convert/fix-water-bonds.py",
-#             "cwd" : "/home/stoccoel/google-personal/works/water/MACE/",
-#             "console": "integratedTerminal",
-#             "justMyCode": false,
-#             "args": [
-#                 "-i", "MACE_test.extxyz", 
-#                 // "-m", "model/dipole_32.model", 
-#                 // "-p", "your_port_number", 
-#                 // "-a", "your_address", 
-#                 // "-d", "cpu"
-#             ],
-#             "env": {
-#                 "PYTHONPATH": "/home/stoccoel/google-personal/codes/mace/mace/"
-#             }
-#         }
-#     ]
-# }
 
 

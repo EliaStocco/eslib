@@ -212,7 +212,7 @@ def unit_to_internal(family, unit, number):
     """
 
     if not (family == "number" or family in UnitMap):
-        raise IndexError(family + " is an undefined units kind.")
+        raise IndexError(family + " is an undefined units kind. Available families: " + ", ".join(UnitMap.keys()) + ".")
     if family == "number":
         return number
 

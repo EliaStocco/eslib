@@ -7,6 +7,12 @@ from matplotlib.axes import Axes
 from typing import Any
 from eslib.functions import add_default
 
+import matplotlib.pyplot as plt
+from importlib import resources
+
+def use_default_style(style:str="settings"):
+    with resources.path("eslib", f"{style}.mplstyle") as style_path:
+        plt.style.use(style_path)
 
 def draw_sphere(ax, center, radius, color='blue',**kwargs):
     """

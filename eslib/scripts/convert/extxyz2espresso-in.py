@@ -14,6 +14,7 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
     parser.add_argument("-i"  , "--input"            , **argv,required=True , type=str     , help="input file")
+    parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
     return parser
 
 #---------------------------------------#
@@ -23,7 +24,7 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    structure:Atoms = AtomicStructures.from_file(file=args.input,format="extxyz",index=0)[0]
+    structure:Atoms = AtomicStructures.from_file(file=args.input,format=args.input_format,index=0)[0]
     print("done")
     
     file = "positions.txt"
