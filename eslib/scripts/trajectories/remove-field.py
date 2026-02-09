@@ -33,26 +33,39 @@ def main(args):
     df = trajectory.summary()
     tmp = "\n"+df.to_string(index=False)
     print(tmp.replace("\n", "\n\t"))
-
+    
     #---------------------------------------#
     for name in args.name:
-        print("\n\tLooking for '{:s}' in the trajectory fields ... ".format(name), end="")
-        what = trajectory.search(name)
-        if what not in ['info','arrays']:
-            print("{:s}: {:s} not found.".format(error,name))
-            return -1
-        print("done")
-
-        print("\t'{:s}' was found in '{:s}'.".format(name,what))
 
         #---------------------------------------#
         print("\tDeleting '{:s}' from the trajectory ... ".format(name), end="")
         for atoms in trajectory:
-            if what == 'info':
+            if name in atoms.info:
                 del atoms.info[name]
-            else:
+            elif name in atoms.arrays:
                 del atoms.arrays[name]
         print("done")
+
+
+    # #---------------------------------------#
+    # for name in args.name:
+    #     print("\n\tLooking for '{:s}' in the trajectory fields ... ".format(name), end="")
+    #     what = trajectory.search(name)
+    #     if what not in ['info','arrays']:
+    #         print("{:s}: {:s} not found.".format(error,name))
+    #         return -1
+    #     print("done")
+
+    #     print("\t'{:s}' was found in '{:s}'.".format(name,what))
+
+    #     #---------------------------------------#
+    #     print("\tDeleting '{:s}' from the trajectory ... ".format(name), end="")
+    #     for atoms in trajectory:
+    #         if what == 'info':
+    #             del atoms.info[name]
+    #         else:
+    #             del atoms.arrays[name]
+    #     print("done")
 
     #---------------------------------------#
     print("\n\tFinal information: ")

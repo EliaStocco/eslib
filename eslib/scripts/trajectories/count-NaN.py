@@ -28,8 +28,8 @@ def main(args):
 
     with eslog(f"Reading atomic structures from file '{args.input}'"):
         trajectory = AtomicStructures.from_file(file=args.input,format=args.input_format)
-        
-    print("\tn. of atomic structures: ",len(trajectory))
+    N = len(trajectory)
+    print("\tn. of atomic structures: ",N)
     
     prop = trajectory.get(args.keyword)
     n_nan = 0
@@ -37,7 +37,7 @@ def main(args):
         if np.any(np.isnan(val)):
             n_nan += 1
             print(f"\tSnapshot {n} has NaN in '{args.keyword}'")
-    print(f"\n\tTotal number of snapshots with NaN in '{args.keyword}': {n_nan} out of {len(trajectory)}")
+    print(f"\n\tTotal number of snapshots with NaN in '{args.keyword}': {n_nan} out of {N} --> ({N-n_nan}/{N} have the keyword)")
 
 #---------------------------------------#
 if __name__ == "__main__":
