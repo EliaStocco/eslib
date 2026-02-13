@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import numpy as np 
 from ase import Atoms
-from eslib.formatting import esfmt, float_format
+from eslib.formatting import esfmt
 from eslib.classes.atomic_structures import AtomicStructures
+from eslib.input import itype
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -13,8 +14,9 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar" : "\b",}
-    parser.add_argument("-i"  , "--input"            , **argv,required=True , type=str     , help="input file")
-    parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
+    parser.add_argument("-i"  , "--input"      , **argv,required=True , type=str     , help="input file")
+    parser.add_argument("-if", "--input_format", **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
+    parser.add_argument("-n"  , "--index"      , **argv,required=False, type=itype   , help="index to be read from input file (default: %(default)s)", default=0)
     return parser
 
 #---------------------------------------#
@@ -24,8 +26,10 @@ def main(args):
     #------------------#
     # trajectory
     print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-    structure:Atoms = AtomicStructures.from_file(file=args.input,format=args.input_format,index=0)[0]
+    structures = AtomicStructures.from_file(file=args.input,format=args.input_format,index=args.index)
     print("done")
+    assert len(structures) == 1, "Only one structrure allowed"
+    structure = structures[0]
     
     file = "positions.txt"
     print(f"\tSaving positions to {file} ... ", end="")
