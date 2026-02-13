@@ -2,19 +2,11 @@
 import seekpath
 import json
 from ase import Atoms
-from itertools import product
-
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.functions import suppress_output
-from eslib.input import str2bool, ilist
-
-# # import matplotlib.pyplot as plt
-# import warnings
-
-# # Suppress all DeprecationWarnings
-# warnings.simplefilter("ignore", category=DeprecationWarning)
-
+from eslib.input import str2bool
+from fractions import Fraction
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -33,15 +25,21 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"         , **argv, required=True , type=str, help="file with an atomic structure")
     parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-tr", "--time_reversal" , **argv, required=False, type=str2bool, help="time reversal (default: %(default)s)", default=True)
-    parser.add_argument("-n" , "--names"         , **argv, required=False, type=str  , help="JSON file with the names of the phonon modes (default: %(default)s)", default=None)
+    parser.add_argument("-n" , "--names"         , **argv, required=False, type=str  , help="output JSON file with the names of the phonon modes (default: %(default)s)", default=None)
     # parser.add_argument("-s" , "--size"          , **argv, required=False, type=ilist  , help="size of the considered supercell (default: %(default)s)", default=None)
     parser.add_argument("-t" , "--tolerance"     , **argv, required=False, type=float,  help="spglib tolerance (default: %(default)s)" , default=1e-3)
-    parser.add_argument("-o" , "--output"        , **argv, required=False, type=str, help="output file (default: %(default)s)", default=None)
+    parser.add_argument("-b" , "--band_output"        , **argv, required=False, type=str, help="output file for band (default: %(default)s)", default='band.conf')
+    parser.add_argument("-q" , "--qpoints_output"        , **argv, required=False, type=str, help="output file for qpoints (default: %(default)s)", default='qpoints.conf')
     # parser.add_argument("-p" , "--plot"          , **argv, required=False, type=str, help="plot (default: %(default)s)", default="band.pdf")
     # parser.add_argument("-of", "--output_format" , **argv, required=False, type=str, help="output file format (default: %(default)s)", default=None)
     return parser# .parse_args()
 
+def tofrac(arr):
+    return [str(Fraction(x).limit_denominator()) for x in arr]  
+
 def point2LaTeX(point):
+    if "'" in point:
+        raise ValueError("Labels with broken time reversal symmetry not yet implemented.")
     if point in  ["GAMMA","G"]:
         return r"$\Gamma$"
     elif len(point) == 1:
@@ -49,6 +47,8 @@ def point2LaTeX(point):
         return point
     elif len(point) == 3:
         return "$\\rm " + "{:s}".format(point[0]) + "_{" + "{:s}".format(point[2]) + "}$"
+    elif "SIGMA" in point:
+        return "$\\rm \Sigma_{" + "{:s}".format(point[-1]) + "}$"
     else:
         raise ValueError("unknown point: '{:s}'".format(point))
     
@@ -175,28 +175,38 @@ def main(args):
     # Step 4: Format the band path as a string for the Phonopy configuration file
     band_string = ""
     for segment in band_path:
-        start_point = point_coords[segment[0]]
-        end_point = point_coords[segment[1]]
+        start_point = tofrac(point_coords[segment[0]])
+        end_point = tofrac(point_coords[segment[1]])
         band_string += " ".join(map(str, start_point)) + " "
         band_string += " ".join(map(str, end_point)) + " "
 
     qpoints_string = ""
     for kpoint in point_coords.values():
+        kpoint = tofrac(kpoint)
         qpoints_string += " ".join(map(str, kpoint)) + " "
 
     # Remove trailing space
     band_string = band_string.strip()
     qpoints_string = qpoints_string.strip()
     print("done")
+    
+    print("\n\tFor phonopy *.conf files:")
+    print("\tBAND ", band_string)
+    print("\tBAND_LABELS ", " ".join(map(str, labels)) + " ")
+    print("\tQPOINTS ", qpoints_string)
 
     #------------------#
-    if args.output is not None:
-        print("\tSaving the BAND and QPOINTS to file '{:s}' ... ".format(args.output), end="")
-        # Step 5: Save the BAND string to the file
-        with open(args.output, 'w') as f:
-            f.write("BAND = " + band_string + "\n")
-            f.write("\nQPOINTS = " + qpoints_string + "\n")
-        print("done")
+    print("\n\tSaving the BAND  to file '{:s}' ... ".format(args.band_output), end="")
+    with open(args.band_output, 'w') as f:
+        f.write("BAND = " + band_string + "\n" )
+        f.write("BAND_LABELS " + " ".join(map(str, labels)) + " ")
+    print("done")
+    
+    #------------------#
+    print("\tSaving the QPOINTS  to file '{:s}' ... ".format(args.qpoints_output), end="")
+    with open(args.qpoints_output, 'w') as f:
+        f.write("QPOINTS = " + qpoints_string)
+    print("done")
 
 #---------------------------------------#
 if __name__ == "__main__":
