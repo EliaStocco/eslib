@@ -454,7 +454,7 @@ def getproperty(inputfile, propertyname, data=None, skip="0", show=False, index=
                     continue
 
                 # found candidate — extract columns from the original full line
-                cols = [int(i) - 1 for i in re.findall(r"\d+", line)]
+                cols = [int(i) - 1 for i in re.findall(r"\d+", line.split(user_base_n)[0])]
                 if not cols:
                     continue
                 if len(cols) == 1:
