@@ -570,8 +570,6 @@ def add_info_array(traj:List[Atoms],props:Dict[str,np.ndarray],shapes)->List[Ato
     props (Dict[str,np.ndarray]): Dictionary of properties to be added.
     shapes (Dict[str,Tuple[int,...]]): Dictionary of shapes of the properties.
 
-    Returns:
-    List[Atoms]: Trajectory with the added properties.
     """
     new_traj = copy(traj)
     props, whereto = reshape_info_array(traj,props,shapes)

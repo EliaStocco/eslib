@@ -57,7 +57,7 @@ def print_info(structure:Atoms,threshold:float,title:str,show_pos:bool):
     density = tot_mass/V
     density = convert(density,"density","atomic_unit","g/cm3")
     print("\t{:<30}:".format("density [g/cm^3]"),density)
-    print("\t{:<30}:".format("chemical symbols"),structure.get_chemical_symbols())
+    # print("\t{:<30}:".format("chemical symbols"),structure.get_chemical_symbols())
 
     if np.all(structure.get_pbc()):
         print("\n\tCell:")

@@ -4,7 +4,6 @@ from ase.io import read
 
 from eslib.classes.models.dipole.baseclass import DipoleModel
 
-# from elia.classes.trajectory import trajectory as Trajectory
 
 #---------------------------------------#
 # Description of the script's purpose

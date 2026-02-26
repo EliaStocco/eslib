@@ -5,7 +5,6 @@ from typing import Callable, TypeVar, Union
 import numpy as np
 import pandas as pd
 
-from eslib.classes import Trajectory
 from eslib.classes.io import pickleIO
 from eslib.tools import convert
 from eslib.classes.append import AppendableList
@@ -30,7 +29,7 @@ def is_1D(x:np.ndarray):
     shape = np.asarray(x.shape)[1:].astype(int)
     return np.allclose(shape,1)
 
-class Properties(Trajectory):
+class Properties:
 
     def __init__(self,info:dict=None):
 

@@ -30,7 +30,7 @@ def prepare_args(description):
     parser.add_argument("-f" , "--fmax"        , **argv, required=False, type=float   , help="max force (default: %(default)s)", default=0.05)
     parser.add_argument("-op" , "--opt_par"    , **argv, required=False, type=str     , help="JSON file with the optimizer parameters (default: %(default)s)", default=None)
     parser.add_argument("-l" , "--logger"      , **argv, required=False, type=str     , help="logging file (default: %(default)s)", default=None)
-    parser.add_argument("-t", "--trajectory"     , **argv, required=False, type=str   , help="minimization trajectory (default: %(default)s)", default='minimization-trajectory.pickle')
+    parser.add_argument("-t", "--trajectory"     , **argv, required=False, type=str   , help="minimization trajectory (default: %(default)s)", default='minimization-trajectory.extxyz')
     parser.add_argument("-r" , "--restart"     , **argv, required=False, type=str     , help="file to restart the optimization from (default: %(default)s)", default=None)
     parser.add_argument("-ms", "--maxstep"     , **argv, required=False, type=int     , help="maximum step size (default: %(default)s)", default=100)
 

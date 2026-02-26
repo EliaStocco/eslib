@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 
-from eslib.classes import Trajectory
+from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.plot import histogram
 
@@ -35,7 +35,7 @@ def main(args):
     # atomic structures
     if args.input is not None:
         print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
-        atoms = Trajectory.from_file(file=args.input)
+        atoms = AtomicStructures.from_file(file=args.input)
         print("done")
 
         predicted = atoms.get(args.predicted)

@@ -81,6 +81,7 @@ def main(args):
     elif args.what == 'stress':
         
         if ref.shape == (N,3,3):
+            from ase.stress import full_3x3_to_voigt_6_stress
             ref = full_3x3_to_voigt_6_stress(ref)
         if pred.shape == (N,3,3):
             pred = full_3x3_to_voigt_6_stress(pred)
