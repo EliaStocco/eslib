@@ -113,7 +113,7 @@ def main(args):
         axes[1].grid(True)
 
         plt.tight_layout()
-        plt.savefig(args.plot)
+        plt.savefig(args.plot,dpi=600)
         plt.close(fig)
 
         print("done")
