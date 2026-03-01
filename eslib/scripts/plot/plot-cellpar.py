@@ -61,15 +61,17 @@ def main(args):
             df.loc[n,std[i]] = data[:,i].std()
             df.loc[n,err[i]] = data[:,i].std()/np.sqrt(data.shape[0])
         if args.sort:
-            
             for cc in [["a", "b", "c"],["alpha", "beta", "gamma"]]:
                 cmean = [f"{c}-mean" for c in cc]
                 cstd = [f"{c}-std" for c in cc]
                 cerr = [f"{c}-err" for c in cc]
                 ii = np.argsort(df.loc[n,cmean])
-                df.loc[n,cmean] = df.loc[n,cmean][ii]
-                df.loc[n,cstd] = df.loc[n,cstd][ii]
-                df.loc[n,cerr] = df.loc[n,cerr][ii]
+                if list(ii) != [0,1,2]:
+                    df.loc[n,cmean] = df.loc[n,cmean].values[ii]
+                    df.loc[n,cstd] = df.loc[n,cstd].values[ii]
+                    df.loc[n,cerr] = df.loc[n,cerr].values[ii]
+                    ii = np.argsort(df.loc[n,cmean])
+                    assert list(ii) == [0,1,2], "codging error"
                 pass
     print("done")
     
