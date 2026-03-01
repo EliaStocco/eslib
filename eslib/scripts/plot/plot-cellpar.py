@@ -76,7 +76,7 @@ def main(args):
             y = df[f"{c}-mean"].to_numpy(dtype=float).astype(float)
             err = df[f"{c}-err"].to_numpy(dtype=float).astype(float)
 
-            axes[0].plot(x, y, "o-", label=c)
+            axes[0].plot(x, y, label=c)
             axes[0].fill_between(x, y - err, y + err, alpha=0.3)
 
         axes[0].set_ylabel("Lattice parameters (Å)")
@@ -89,7 +89,7 @@ def main(args):
             y = df[f"{c}-mean"].to_numpy(dtype=float).astype(float)
             err = df[f"{c}-err"].to_numpy(dtype=float).astype(float)
 
-            axes[1].plot(x, y, "o-", label=c)
+            axes[1].plot(x, y, label=c)
             axes[1].fill_between(x, y - err, y + err, alpha=0.3)
 
         axes[1].set_xlabel(args.name)
