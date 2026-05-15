@@ -41,7 +41,7 @@ def main(args):
     what = atoms.search(args.old_name)
     if what not in ['info','arrays']:
         print("{:s}: {:s} not found.".format(error,args.old_name))
-        return -1
+        what = "still looking"
     print("done")
 
     print("\t'{:s}' was found in '{:s}'.".format(args.old_name,what))
@@ -51,14 +51,19 @@ def main(args):
     # reshape
     print("\tChanging the name from '{:s}' to '{:s}'... ".format(args.old_name,args.new_name), end="")
     N = len(atoms)
-    if what == "info":
-        for n in range(N):
-            atoms[n].info[args.new_name] = atoms[n].info.pop(args.old_name)
-    elif what == "arrays":
-        for n in range(N):
-            atoms[n].arrays[args.new_name] = atoms[n].arrays.pop(args.old_name)
-    else:
-        raise ValueError("coding error")
+    for n in range(N):
+        if what == "info" or what == "still looking":
+            if args.old_name in atoms[n].info:
+                atoms[n].info[args.new_name] = atoms[n].info[args.old_name]
+                del atoms[n].info[args.old_name]
+                what = "info"
+        elif what == "arrays" or what == "still looking":
+            if args.old_name in atoms[n].arrays:
+                atoms[n].arrays[args.new_name] = atoms[n].arrays[args.old_name]
+                del atoms[n].arrays[args.old_name]
+                what = "arrays"
+        else:
+            raise ValueError("coding error")
     print("done")
 
     #---------------------------------------#

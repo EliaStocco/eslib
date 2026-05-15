@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import matplotlib.pyplot as plt
-
+import numpy as np
 from eslib.classes.trajectory import AtomicStructures
 from eslib.formatting import esfmt
 from eslib.plot import plot_bisector
+from eslib.input import str2bool
 
 #---------------------------------------#
 # Description of the script's purpose
@@ -17,6 +18,7 @@ def prepare_args(description):
     parser.add_argument("-i", "--input"     , type=str, **argv, required=True , help='input extxyz file')
     parser.add_argument("-a" , "--keyword_A", type=str, **argv, required=True , help="property A keyword")
     parser.add_argument("-b" , "--keyword_B", type=str, **argv, required=True , help="property B keyword")
+    parser.add_argument("-f" , "--flatten"  , type=str2bool, **argv, required=False , help="flatten arrays (default: %(default)s)", default=False)
     parser.add_argument("-s", "--size"  , type=float, **argv, required=False, help="point size (default: %(default)s)", default=1)
     parser.add_argument("-o", "--output"    , type=str, **argv, required=False, help="output file (default: %(default)s)", default='corr.pdf')
     return parser# .parse_args()
@@ -36,12 +38,22 @@ def main(args):
     print("\tExtracting '{:s}' from the trajectory ... ".format(args.keyword_A), end="")
     A = atoms.get(args.keyword_A)  
     print("done")
-    print("\t'{:s}' shape: ".format(args.keyword_A),A.shape)
+    try:
+        print("\t'{:s}' shape: ".format(args.keyword_A),A.shape)
+    except:
+        pass
 
     print("\tExtracting '{:s}' from the trajectory ... ".format(args.keyword_B), end="")
     B = atoms.get(args.keyword_B)  
     print("done")
-    print("\t'{:s}' shape: ".format(args.keyword_B),B.shape)
+    try:
+        print("\t'{:s}' shape: ".format(args.keyword_B),B.shape)
+    except:
+        pass
+    
+    if args.flatten:
+        A = np.asarray([a.flatten() for a in A]).flatten()
+        B = np.asarray([b.flatten() for b in B]).flatten()
 
     #------------------#
     assert A.shape == B.shape

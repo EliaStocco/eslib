@@ -83,7 +83,7 @@ def main(args):
 
         print(f"\n\tPlotting data to '{args.plot}' ... ", end="")
 
-        fig, axes = plt.subplots(1, 2, figsize=(8, 4), sharex=True)
+        fig, axes = plt.subplots(2, 1, figsize=(6,6), sharex=True)
 
         x = df[args.keyword].to_numpy(dtype=float).astype(float)
 

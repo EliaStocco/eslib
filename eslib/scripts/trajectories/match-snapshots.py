@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import numpy as np
+import pandas as pd
 from eslib.mathematics import find_duplicates
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt, warning, everythingok, error
@@ -19,14 +20,17 @@ def prepare_args(description):
     import argparse
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
-    parser.add_argument("-i" , "--input"           , **argv, required=True , type=str  , help="file with an atomic structure")
+    parser.add_argument("-i" , "--input"           , **argv, required=True , type=str  , help="input file")
     parser.add_argument("-if", "--input_format"    , **argv, required=False, type=str  , help="input file format (default: %(default)s)", default=None)
-    parser.add_argument("-r" , "--reference"       , **argv, required=True , type=str  , help="file with an atomic structure")
-    parser.add_argument("-rf", "--reference_format", **argv, required=False, type=str  , help="input file format (default: %(default)s)", default=None)
+    parser.add_argument("-it", "--input_tag"       , **argv, required=False, type=str  , help="input file tag (default: %(default)s)", default=None)
+    parser.add_argument("-r" , "--reference"       , **argv, required=True , type=str  , help="reference file")
+    parser.add_argument("-rf", "--reference_format", **argv, required=False, type=str  , help="reference file format (default: %(default)s)", default=None)
+    parser.add_argument("-rt", "--reference_tag"   , **argv, required=False, type=str  , help="reference file tag (default: %(default)s)", default=None)
     parser.add_argument("-d" , "--duplicate"       , **argv, required=False, type=str  , help="file with the duplicate indices (default: %(default)s)", default='duplicates.txt')
     parser.add_argument("-u" , "--unique"          , **argv, required=False, type=str  , help="file with the unique indices (default: %(default)s)", default='unique.txt')
     parser.add_argument("-t" , "--tolerance"       , **argv, required=False, type=float, help="tolerance (default: %(default)s)", default=1e-8)
     parser.add_argument("-o" , "--output"          , **argv, required=False, type=str  , help="txt output file (default: %(default)s)", default='indices.txt')
+    # parser.add_argument("-ot", "--output_tag"      , **argv, required=False, type=str  , help="txt output file (default: %(default)s)", default='indices.txt')
     return parser
 
 #---------------------------------------#
@@ -63,6 +67,25 @@ def main(args):
         idx = np.argmin(dist)  
         indices[n] = idx  if dist[idx] < args.tolerance else -1
     print("done")
+    
+    #------------------#
+    if args.input_tag is not None and args.reference_tag is not None:
+        input_tag = structure.get(args.input_tag,"info")
+        reference_tag = reference.get(args.reference_tag,"info")
+        
+        rows = []
+        for n in range(len(structure)):
+            m = indices[n] if indices[n] != -1 else "none"
+            row = {
+                args.input_tag: input_tag[n],
+                args.reference_tag: reference_tag[m] if m != "none" else "none",
+                "input-index": n,
+                "reference-index": f"{m}",
+            }
+            rows.append(row)
+        df = pd.DataFrame(rows)
+        df.to_csv("input_mapping.csv",index=False)
+        
     
     #------------------#
     if os.path.exists(args.duplicate):

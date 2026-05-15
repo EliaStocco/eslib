@@ -94,7 +94,7 @@ class AtomicStructures(aseio):
         else:
             return AtomicStructures(new_structures)
     
-    def get_keys(self:T,what:str="all")->List[str]:
+    def get_keys(self:T,what:str="all",warn=True)->List[str]:
         """
         Get the keys present in all atomic structures, according to the `what` parameter.
 
@@ -138,9 +138,10 @@ class AtomicStructures(aseio):
 
         check = {**check_info,**check_array}
         
-        for key,value in check.items():
-            if not value:
-                print(f"{warning}: '{key}' is not present in all structrues.")
+        if warn:
+            for key,value in check.items():
+                if not value:
+                    print(f"{warning}: '{key}' is not present in all structrues.")
         # if False in check.values():
         #     raise ValueError("Some checks failed")
 
@@ -281,8 +282,8 @@ class AtomicStructures(aseio):
         """
         df = pd.DataFrame(columns=["key","i/a","numeric","dtype","shape"])
         df["key"] = self.get_keys()
-        info = self.get_keys("info")
-        array = self.get_keys("arrays")
+        info = self.get_keys("info",warn=False)
+        array = self.get_keys("arrays",warn=False)
         
         is_traj = self.is_trajectory(check_symbols=False)
 

@@ -19,8 +19,8 @@ def prepare_args(description):
     parser.add_argument("-r" , "--reference"         , **argv, required=True , type=str  , help="file with the reference structure")
     parser.add_argument("-rf", "--reference_format"  , **argv, required=False, type=str  , help="reference file format (default: %(default)s)" , default=None)
     parser.add_argument("-k" , "--keyword"     , **argv, required=False, type=str, help="keyword (default: %(default)s)", default="distance")
-    parser.add_argument("-o" , "--output"       , required=True,**argv,type=str, help="txt output file")
-    parser.add_argument("-of", "--output_format", required=False,**argv,type=str, help="txt output format for np.savetxt (default: %(default)s)", default=None)
+    parser.add_argument("-o" , "--output"       , required=True,**argv,type=str, help="output file")
+    parser.add_argument("-of", "--output_format", required=False,**argv,type=str, help="output format (default: %(default)s)", default=None)
     return parser
 
 #---------------------------------------#

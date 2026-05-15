@@ -3,6 +3,8 @@
 # email : elia.stocco@mpsd.mpg.de
 # from ase.io import read
 import numpy as np
+import spglib
+from ase import Atoms
 from ase.spacegroup import get_spacegroup
 from ase.spacegroup.spacegroup import Spacegroup
 
@@ -23,13 +25,20 @@ def prepare_parser(description):
     parser.add_argument("-t" , "--threshold"   , type=flist, **argv, required=False, help="list of thresholds (default: %(default)s)" , default=[1e-6,1e-5,1e-4,1e-3,1e-2,1e-1])
     return parser
 
+def ase2spglib_cell(atoms:Atoms):
+    return atoms.get_cell()[:], atoms.get_scaled_positions(), atoms.get_atomic_numbers()
+
+def ase2spglib_dataset(atoms:Atoms,**kwargs) -> spglib.SpglibDataset:
+    cell = ase2spglib_cell(atoms)
+    return spglib.get_symmetry_dataset(cell, **kwargs)
+
 #---------------------------------------#
 @esfmt(prepare_parser,description)
 def main(args):
 
     #------------------#
     print("\tReading the first atomic structure from file '{:s}' ... ".format(args.input), end="")
-    atoms = AtomicStructures.from_file(file=args.input,format=args.input_format,index=0)[0]
+    atoms:Atoms = AtomicStructures.from_file(file=args.input,format=args.input_format,index=0)[0]
     print("done")
 
     #------------------#
@@ -46,7 +55,8 @@ def main(args):
     print("\t"+line)
     print("\t|"+"-"*N+"|")
     for symprec in args.threshold:
-        spacegroup:Spacegroup = get_spacegroup(atoms,symprec=symprec)
+        dataset = ase2spglib_dataset(atoms,symprec=symprec)
+        # spacegroup:Spacegroup = get_spacegroup(atoms,symprec=symprec)
         line = "|{:>12.2e}   |{:^15s}|{:^15d}|{:^15d}|".format(symprec,spacegroup.symbol,spacegroup.no,spacegroup.nsymop)
         print("\t"+line)
         # print("\tThreshold: {:>.2e}  Spacegroup: {:>6s}".format(symprec,spacegroup.symbol,spacegroup.no,spacegroup.nsymop))

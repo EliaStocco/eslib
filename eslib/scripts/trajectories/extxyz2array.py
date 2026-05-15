@@ -114,13 +114,13 @@ def main(args):
         if data.ndim > 2:
             data = data.reshape((data.shape[0],-1))
         print("\t Saving '{:s}' to file '{:s}' ... ".format(args.keyword,args.output), end="")
-        np.savetxt(args.output,data,fmt=float_format)
+        np.savetxt(args.output,data,fmt=args.output_format)
         print("done")
     elif str(args.output).endswith(".csv"):
         if data.ndim > 2:
             data = data.reshape((data.shape[0],-1))
         print("\t Saving '{:s}' to file '{:s}' ... ".format(args.keyword,args.output), end="")
-        np.savetxt(args.output,data,fmt=float_format,delimiter=',')
+        np.savetxt(args.output,data,fmt=args.output_format,delimiter=',')
         print("done")
     else:
         raise ValueError("Only 'txt', 'csv', and 'npy' extensions are supported for output file.")

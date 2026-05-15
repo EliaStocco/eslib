@@ -15,14 +15,47 @@ def prepare_args(description):
     argv = {"metavar": "\b"}
     parser.add_argument("-i", "--input", **argv, required=True, type=str, help="input file")
     parser.add_argument("-if", "--input_format", **argv, required=False, type=str, help="input file format", default=None)
-    parser.add_argument("-iph", "--input_ph", **argv, required=True, type=str, help="Quantum ESPRESSO (ph.x) output file")
+    parser.add_argument("-oph", "--output_ph", **argv, required=True, type=str, help="Quantum ESPRESSO (ph.x) output file")
     parser.add_argument("-p", "--prefix", **argv, required=False, type=str, help="prefix for properties", default="REF_")
+    parser.add_argument("-e" , "--epsilon"          , **argv, required=False, type=str, help="output file with the dielectric constant (default: %(default)s)", default='epsilon.txt')
+    parser.add_argument("-a" , "--alpha"          , **argv, required=False, type=str, help="output file with the polarizability (default: %(default)s)", default='alpha.txt')
     parser.add_argument("-z" , "--bec"          , **argv, required=False, type=str, help="output file with the BEC tensors (default: %(default)s)", default='bec.txt')
     parser.add_argument("-o", "--output", **argv, required=False, type=str, help="extxyz output file", default='qe.extxyz')
     parser.add_argument("-of", "--output_format", **argv, required=False, type=str, help="output file format", default=None)
     return parser
 
 #---------------------------------------#
+def symmetrize(arr: np.ndarray) -> np.ndarray:
+    return 0.5 * (arr + arr.T)
+
+def epsilon2alpha(epsilon: np.ndarray, volume: float) -> np.ndarray:
+    """
+    Convert the dielectric tensor of a periodic system to the polarizability tensor.
+
+    The relation used is
+    
+    αᵢⱼ = V (εᵢⱼ − δᵢⱼ) / (4π)
+
+    where ε is the dimensionless dielectric tensor, V is the cell volume,
+    and I is the 3×3 identity matrix. 
+    In atomic units, the vacuum permittivity satisfies ε₀ = 1 / (4π).
+
+    Parameters
+    ----------
+    epsilon : np.ndarray
+        3×3 dielectric tensor of the periodic system (dimensionless).
+
+    volume : float
+        Simulation cell volume in Å³.
+
+    Returns
+    -------
+    np.ndarray
+        3×3 polarizability tensor α with units of
+        elementary charge × Å² / V.
+    """
+    return volume * (epsilon - np.eye(3)) / (4 * np.pi)
+
 def parse_dielectric(file_path):
     """Parse dielectric tensor from QE output"""
     pattern = re.compile(r"Dielectric constant in cartesian axis")
@@ -84,17 +117,45 @@ def parse_born_charges(file_path, asr=True):
 @esfmt(prepare_args, description)
 def main(args):
     
-    print(f"\tReading dielectric constant from '{args.input_ph}' ... ", end="")
-    epsilon = parse_dielectric(args.input_ph)
+    # Read structure from QE output using ASE (assuming the file is extended XYZ compatible)
+    print(f"\tReading structure from '{args.input}' with ASE ... ", end="")
+    atoms: Atoms = AtomicStructures.from_file(file=args.input, format=args.input_format,index=0)[0]  # may need to adapt format
+    print("done")
+    
+    print(f"\tReading dielectric constant from '{args.output_ph}' ... ", end="")
+    epsilon = parse_dielectric(args.output_ph)
     print("done")
     print("\tDielectric constant:")
     print("\t   x y z")
     print("\t x ",*list(epsilon[:,0]))
     print("\t y ",*list(epsilon[:,1]))
     print("\t z ",*list(epsilon[:,2]))
+    
+    diff = epsilon - symmetrize(epsilon)
+    print("\tNon-symmetric epsilon:",diff.tolist())
+    
+    epsilon = symmetrize(epsilon)
+    print(f"\tSaving (symmetrized) dielectric constant to '{args.epsilon}' ... ", end="")
+    np.savetxt(args.epsilon, epsilon, fmt=float_format)
+    print("done")
+    
+    alpha = epsilon2alpha(epsilon,atoms.get_volume())
+    print("\Polarizability:")
+    print("\t   x y z")
+    print("\t x ",*list(epsilon[:,0]))
+    print("\t y ",*list(epsilon[:,1]))
+    print("\t z ",*list(epsilon[:,2]))
+    
+    diff = alpha - symmetrize(alpha)
+    print("\tNon-symmetric alpha:",diff.tolist())
+    
+    alpha = symmetrize(alpha)
+    print(f"\tSaving (symmetrized) polarizability to '{args.epsilon}' ... ", end="")
+    np.savetxt(args.alpha, alpha, fmt=float_format)
+    print("done")
 
-    print(f"\tReading Born charges (with ASR) from '{args.input_ph}' ... ", end="")
-    born_asr = parse_born_charges(args.input_ph, asr=True)
+    print(f"\tReading Born charges (with ASR) from '{args.output_ph}' ... ", end="")
+    born_asr = parse_born_charges(args.output_ph, asr=True)
     print("done")
 
     # reshape to (natoms, 9)
@@ -110,19 +171,18 @@ def main(args):
     np.savetxt(args.bec, born, fmt=float_format, header=header)
     print("done")
 
-    # Read structure from QE output using ASE (assuming the file is extended XYZ compatible)
-    print(f"\tReading structure from '{args.input}' with ASE ... ", end="")
-    atoms: Atoms = AtomicStructures.from_file(file=args.input, format=args.input_format,index=0)[0]  # may need to adapt format
-    print("done")
 
     # attach BECs and dielectric tensor
-    atoms.arrays[f"{args.prefix}BEC"] = born
+    # atoms.arrays[f"{args.prefix}BEC"] = born
     atoms.arrays[f"{args.prefix}BECx"] = born[:, 0:3]
     atoms.arrays[f"{args.prefix}BECy"] = born[:, 3:6]
     atoms.arrays[f"{args.prefix}BECz"] = born[:, 6:9]
 
     atoms.info[f"{args.prefix}epsilon"] = epsilon
-    atoms.info[f"{args.prefix}epsilon_sym"] = 0.5 * (epsilon + epsilon.T)
+    # atoms.info[f"{args.prefix}epsilon_sym"] = 0.5 * (epsilon + epsilon.T)
+    
+    atoms.info[f"{args.prefix}alpha"] = alpha
+    # atoms.info[f"{args.prefix}alpha_sym"] = 0.5 * (alpha + alpha.T)
 
     structures = AtomicStructures([atoms])
 
