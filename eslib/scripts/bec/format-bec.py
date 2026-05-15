@@ -43,10 +43,12 @@ def main(args):
                 BEC[n][:,0,:] = BECx[n]
                 BEC[n][:,1,:] = BECy[n]
                 BEC[n][:,2,:] = BECz[n]
-            else:
+            elif args.axis == 2:
                 BEC[n][:,:,0] = BECx[n]
                 BEC[n][:,:,1] = BECy[n]
                 BEC[n][:,:,2] = BECz[n]
+                
+            BEC[n] = BEC[n].reshape((Na,9))
         
         print(f"\tSetting the new BEC tensors to '{args.output_keyword}' ... ", end="")
         structures.set(args.output_keyword,BEC,"arrays")
@@ -60,7 +62,7 @@ def main(args):
                 BECx[n] = BEC[n].reshape((Na,3,3))[:,0,:]
                 BECy[n] = BEC[n].reshape((Na,3,3))[:,1,:]
                 BECz[n] = BEC[n].reshape((Na,3,3))[:,2,:]
-            else:
+            elif args.axis == 2:
                 BECx[n] = BEC[n].reshape((Na,3,3))[:,:,0]
                 BECy[n] = BEC[n].reshape((Na,3,3))[:,:,1]
                 BECz[n] = BEC[n].reshape((Na,3,3))[:,:,2]
