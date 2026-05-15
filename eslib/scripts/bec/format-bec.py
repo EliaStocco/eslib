@@ -57,13 +57,13 @@ def main(args):
         BECx, BECy, BECz  = [ [None]*len(structures) for _ in range(3)]
         for n,Na in enumerate(Natoms):
             if args.axis == 1:
-                BECx[n] = BEC[n][:,0,:]
-                BECy[n] = BEC[n][:,1,:]
-                BECz[n] = BEC[n][:,2,:]
+                BECx[n] = BEC[n].reshape((Na,3,3))[:,0,:]
+                BECy[n] = BEC[n].reshape((Na,3,3))[:,1,:]
+                BECz[n] = BEC[n].reshape((Na,3,3))[:,2,:]
             else:
-                BECx[n] = BEC[n][:,:,0]
-                BECy[n] = BEC[n][:,:,1]
-                BECz[n] = BEC[n][:,:,2]
+                BECx[n] = BEC[n].reshape((Na,3,3))[:,:,0]
+                BECy[n] = BEC[n].reshape((Na,3,3))[:,:,1]
+                BECz[n] = BEC[n].reshape((Na,3,3))[:,:,2]
         
         for z,a in zip([BECx,BECy,BECz],["x","y","z"]):
             print(f"\tSetting the new BEC{a} tensors to '{args.output_keyword}{a}' ... ", end="")
