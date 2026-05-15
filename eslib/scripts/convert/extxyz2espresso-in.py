@@ -25,7 +25,7 @@ def main(args):
 
     #------------------#
     # trajectory
-    print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
+    print(f"\tReading atomic structures from file '{args.input}' ... ", end="")
     structures = AtomicStructures.from_file(file=args.input,format=args.input_format,index=args.index)
     print("done")
     assert len(structures) == 1, "Only one structrure allowed"

@@ -24,7 +24,7 @@ def prepare_parser(description):
 def main(args):
 
     #-------------------#
-    print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
+    print(f"\tReading atomic structures from file '{args.input}' ... ", end="")
     atoms:Atoms = AtomicStructures.from_file(file=args.input,format=args.input_format,index=0)[0]
     print("done")
     

@@ -109,7 +109,7 @@ def main(args):
 
     #---------------------------------------#
     # Write the data to the specified output file with the specified format
-    print("\n\tWriting data to file '{:s}' ... ".format(args.output), end="")
+    print(f"\n\tWriting data to file '{args.output}' ... ", end="")
     atoms.to_file(file=args.output,format=args.output_format)
     print("done")   
     # try:

@@ -29,7 +29,7 @@ def main(args):
 
     #---------------------------------------#
     # atomic structures
-    print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
+    print(f"\tReading atomic structures from file '{args.input}' ... ", end="")
     atoms = read(args.input,format=args.input_format,index=":")
     print("done")
 

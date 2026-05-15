@@ -35,7 +35,7 @@ def main(args):
 
     ###
     # read the MD trajectory from file
-    print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
+    print(f"\tReading atomic structures from file '{args.input}' ... ", end="")
     # atoms = read(args.input,format='extxyz',index=":")
     atoms = AtomicStructures.from_file(file=args.input,format=None)
     print("done")

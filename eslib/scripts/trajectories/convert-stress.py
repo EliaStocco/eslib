@@ -65,7 +65,7 @@ def main(args):
     print(f"\t'{args.output_keyword}' shape: ",stress.shape)
     
     #---------------------------------------#
-    print("\n\tWriting data to file '{:s}' ... ".format(args.output), end="")
+    print(f"\n\tWriting data to file '{args.output}' ... ", end="")
     structures.to_file(file=args.output, format=args.output_format)
     print("done")
 

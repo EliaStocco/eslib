@@ -146,7 +146,7 @@ def main():
 
     #---------------------------------------#
     # Write the data to the specified output file with the specified format
-    print("\n\tWriting data to file '{:s}' ... ".format(args.output), end="")
+    print(f"\n\tWriting data to file '{args.output}' ... ", end="")
     try:
         write(images=atoms,filename=args.output) # fmt)
         print("done")

@@ -85,7 +85,7 @@ def main(args):
     
     #------------------#
     # write 
-    print("\n\tWriting data to file '{:s}' ... ".format(args.output), end="")
+    print(f"\n\tWriting data to file '{args.output}' ... ", end="")
     allproperties.to_ipi(file=args.output)
     print("done")
     

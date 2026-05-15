@@ -95,7 +95,7 @@ def main(args):
     
     #------------------#
     # write 
-    print("\n\tWriting data to file '{:s}' ... ".format(args.output), end="")
+    print(f"\n\tWriting data to file '{args.output}' ... ", end="")
     if str(args.output).endswith("npy"):
         np.save(args.output,data)
     else:

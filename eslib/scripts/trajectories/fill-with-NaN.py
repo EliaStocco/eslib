@@ -70,7 +70,7 @@ def prepare_args(description):
 def main(args):
     
     #------------------#
-    print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
+    print(f"\tReading atomic structures from file '{args.input}' ... ", end="")
     structures = AtomicStructures.from_file(file=args.input, format=args.input_format)
     print("done")
     print(f"\tn. of atomic structures: {len(structures)}")
@@ -136,7 +136,7 @@ def main(args):
     print(tmp.replace("\n", "\n\t"))
     
     #---------------------------------------#
-    print("\n\tWriting data to file '{:s}' ... ".format(args.output), end="")
+    print(f"\n\tWriting data to file '{args.output}' ... ", end="")
     structures.to_file(file=args.output, format=args.output_format)
     print("done")
 

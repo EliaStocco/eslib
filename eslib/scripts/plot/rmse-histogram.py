@@ -34,7 +34,7 @@ def main(args):
     #------------------#
     # atomic structures
     if args.input is not None:
-        print("\tReading atomic structures from file '{:s}' ... ".format(args.input), end="")
+        print(f"\tReading atomic structures from file '{args.input}' ... ", end="")
         atoms = AtomicStructures.from_file(file=args.input)
         print("done")
 
