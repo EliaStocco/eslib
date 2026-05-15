@@ -32,7 +32,7 @@ def main(args):
     print("done")
     
     #------------------#
-    Natoms = structures.num_atoms()
+    Natoms = structures.call(lambda x: x.get_global_number_of_atoms())
     if args.what == "a": # aggregate
         BECx, BECy, BECz  = [ structures.get(f"{args.input_keyword}{a}",None,"arrays") for a in ["x","y","z"]]
         BEC = [None]*len(structures)
