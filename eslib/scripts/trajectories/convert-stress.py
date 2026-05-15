@@ -55,6 +55,11 @@ def main(args):
     print(f"\tSetting the new stress tensors to '{args.output_keyword}' ... ", end="")
     structures.set(args.output_keyword,stress,"info")  
     print("done")
+    
+    #---------------------------------------#
+    print("\n\tWriting data to file '{:s}' ... ".format(args.output), end="")
+    structures.to_file(file=args.output, format=args.output_format)
+    print("done")
 
     return
     
