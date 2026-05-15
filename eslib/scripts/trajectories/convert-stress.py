@@ -17,7 +17,7 @@ def prepare_args(description):
     parser.add_argument("-ik", "--input_keyword" , type=str, **argv, required=True , help="input stress keyword")
     parser.add_argument("-ok", "--output_keyword", type=str, **argv, required=True , help="output stress keyword")
     parser.add_argument("-s" , "--shape"         , type=str, **argv, required=True , help="output shape (e.g. 'voigt' for (6,), 'cartesian' for 3x3 tensor)", default='voigt', choices=['voigt','cartesian'])   
-    parser.add_argument("-o ", "--output"        , type=str, **argv, required=True, help="output file")
+    parser.add_argument("-o" , "--output"        , type=str, **argv, required=True, help="output file")
     return parser# .parse_args()
 
 #---------------------------------------#
