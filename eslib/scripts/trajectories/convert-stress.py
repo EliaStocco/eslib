@@ -14,10 +14,12 @@ def prepare_args(description):
     parser = argparse.ArgumentParser(description=description)
     argv = {"metavar":"\b"}
     parser.add_argument("-i" , "--input"         , type=str, **argv, required=True , help='input extxyz file')
+    parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str, help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-ik", "--input_keyword" , type=str, **argv, required=True , help="input stress keyword")
     parser.add_argument("-ok", "--output_keyword", type=str, **argv, required=True , help="output stress keyword")
     parser.add_argument("-s" , "--shape"         , type=str, **argv, required=True , help="output shape (e.g. 'voigt' for (6,), 'cartesian' for 3x3 tensor)", default='voigt', choices=['voigt','cartesian'])   
     parser.add_argument("-o" , "--output"        , type=str, **argv, required=True, help="output file")
+    parser.add_argument("-of" , "--output_format", **argv, required=False, type=str, help="output file format (default: %(default)s)", default=None)
     return parser# .parse_args()
 
 #---------------------------------------#
@@ -27,7 +29,7 @@ def main(args):
     #------------------#
     # atomic structures
     print(f"\tReading atomic structures from file '{args.input}' ... ", end="")
-    structures = AtomicStructures.from_file(file=args.input)
+    structures = AtomicStructures.from_file(file=args.input,format=args.input_format)
     print("done")
 
     #------------------#
