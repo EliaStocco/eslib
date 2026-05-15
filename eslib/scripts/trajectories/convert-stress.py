@@ -56,6 +56,12 @@ def main(args):
     structures.set(args.output_keyword,stress,"info")  
     print("done")
     
+    #------------------#
+    print(f"\tExtracting stress tensors from '{args.output_keyword}' from the trajectory ... ", end="")
+    stress = structures.get(args.output_keyword,None,"info")  
+    print("done")
+    print(f"\t'{args.output_keyword}' shape: ",stress.shape)
+    
     #---------------------------------------#
     print("\n\tWriting data to file '{:s}' ... ".format(args.output), end="")
     structures.to_file(file=args.output, format=args.output_format)
