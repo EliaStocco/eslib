@@ -88,7 +88,8 @@ def main(args):
     print("done")
 
     #------------------#
-    assert args.port >= 1025 and args.port <= 65535, "'port' should be between 1025 and 65535"
+    if args.port is not None:
+        assert args.port >= 1025 and args.port <= 65535, "'port' should be between 1025 and 65535"
     port = args.port
     unixsocket = args.address if args.unix else None
     print(f"\tunitsocket: {unixsocket}")
