@@ -60,12 +60,12 @@ def main(args):
         print()
         file = "{:s}/dipole.linear-model.txt".format(args.folder)
         print("\tSaving dipoles computed from the linear model to file '{:s}' ... ".format(file), end="")
-        np.savetxt(file,linear,fmt=float_format)
+        np.savetxt(file,linear,fmt='%.18g')
         print("done")
 
         file = "{:s}/dipole.dft.txt".format(args.folder)
         print("\tSaving dipoles computed from DFT to file '{:s}' ... ".format(file), end="")
-        np.savetxt(file,dft,fmt=float_format)
+        np.savetxt(file,dft,fmt='%.18g')
         print("done")
 
         file = "{:s}/dipole.correlation.pdf".format(args.folder)
@@ -98,27 +98,27 @@ def main(args):
 
         file = "{:s}/quanta.dft.txt".format(args.folder)
         print("\tSaving quanta computed from DFT to file '{:s}' ... ".format(file), end="")
-        np.savetxt(file,quanta["DFT"],fmt=float_format)
+        np.savetxt(file,quanta["DFT"],fmt='%.18g')
         print("done")
 
         file = "{:s}/quanta.lm.txt".format(args.folder)
         print("\tSaving quanta computed from LM to file '{:s}' ... ".format(file), end="")
-        np.savetxt(file,quanta["LM"],fmt=float_format)
+        np.savetxt(file,quanta["LM"],fmt='%.18g')
         print("done")
 
         file = "{:s}/factors.float.txt".format(args.folder)
         print("\tSaving differences between DFT and LM dipoles to file '{:s}' ... ".format(file), end="")
-        np.savetxt(file,factor,fmt=float_format)
+        np.savetxt(file,factor,fmt='%.18g')
         print("done")
 
         file = "{:s}/factors.int.txt".format(args.folder)
         print("\tSaving (rounded to integers) differences between DFT and LM dipoles to file '{:s}' ... ".format(file), end="")
-        np.savetxt(file,intfactor,fmt='%d')
+        np.savetxt(file,intfactor,fmt='%.18g')
         print("done")
 
         file = "{:s}/factors.diff.txt".format(args.folder)
         print("\tSaving differences between teh previous two saved quantities to file '{:s}' ... ".format(file), end="")
-        np.savetxt(file,factor-intfactor,fmt=float_format)
+        np.savetxt(file,factor-intfactor,fmt='%.18g')
         print("done")
 
         file = "{:s}/quanta.correlation.pdf".format(args.folder)
@@ -145,14 +145,14 @@ def main(args):
     # set info
     print("\n\tAdding fixed dipole as info '{:s}'  to atomic structures ... ".format(args.out_dipole), end="")
     trajectory.set(args.out_dipole,fixed_dipole,"info")
-    assert np.allclose(trajectory.get(args.out_dipole),fixed_dipole)
+    assert np.allclose(trajectory.get(args.out_dipole),fixed_dipole,equal_nan=True)
     print("done")
 
 
     _,fixed_quanta =  compute_dipole_quanta(trajectory,in_keyword=args.out_dipole)
     factor = np.asarray(fixed_quanta - quanta["LM"])
     intfactor = np.round(factor)
-    assert np.sum(np.abs(intfactor)) == 0
+    assert np.nansum(np.abs(intfactor)) == 0
     assert trajectory.has(args.out_dipole)
 
 
@@ -168,7 +168,7 @@ def main(args):
         file = "{:s}/quanta.fixed.txt".format(args.folder)
         print("\tSaving quanta of the fixed dipoles to file '{:s}' ... ".format(file), end="")
         _,fixed_quanta = compute_dipole_quanta(trajectory,in_keyword=args.out_dipole)
-        np.savetxt(file,fixed_quanta,fmt=float_format)
+        np.savetxt(file,fixed_quanta,fmt='%.18g')
         print("done")
 
         file = "{:s}/quanta-fixed.correlation.pdf".format(args.folder)
@@ -182,11 +182,11 @@ def main(args):
         correlation_plot(_fixed_dipole,linear,"DFT","LM",file,bisectors=False)
         print("done")
         
-        assert np.allclose(_fixed_dipole,fixed_dipole)
+        assert np.allclose(_fixed_dipole,fixed_dipole,equal_nan=True)
 
         file = "{:s}/dipole.fixed.txt".format(args.folder)
         print("\tSaving the fixed dipoles to file '{:s}' ... ".format(args.output), end="")
-        np.savetxt(file,fixed_dipole,fmt=float_format)
+        np.savetxt(file,fixed_dipole,fmt='%.18g')
         print("done")
 
 #---------------------------------------#

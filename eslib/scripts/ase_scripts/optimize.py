@@ -29,7 +29,7 @@ def prepare_args(description):
     
     parser.add_argument("-f" , "--fmax"        , **argv, required=False, type=float   , help="max force (default: %(default)s)", default=0.05)
     parser.add_argument("-op" , "--opt_par"    , **argv, required=False, type=str     , help="JSON file with the optimizer parameters (default: %(default)s)", default=None)
-    parser.add_argument("-l" , "--logger"      , **argv, required=False, type=str     , help="logging file (default: %(default)s)", default=None)
+    # parser.add_argument("-l" , "--logger"      , **argv, required=False, type=str     , help="logging file (default: %(default)s)", default=None)
     parser.add_argument("-t", "--trajectory"     , **argv, required=False, type=str   , help="minimization trajectory (default: %(default)s)", default='minimization-trajectory.extxyz')
     parser.add_argument("-r" , "--restart"     , **argv, required=False, type=str     , help="file to restart the optimization from (default: %(default)s)", default=None)
     parser.add_argument("-ms", "--maxstep"     , **argv, required=False, type=int     , help="maximum step size (default: %(default)s)", default=100)
@@ -88,28 +88,24 @@ def main(args):
     print("done")
 
     #------------------#
+    assert args.port >= 1025 and args.port <= 65535, "'port' should be between 1025 and 65535"
     port = args.port
     unixsocket = args.address if args.unix else None
-    log = args.logger
+    print(f"\tunitsocket: {unixsocket}")
+    print(f"\tport: {port}")
 
     print("\tRunning BFGS optimizer  ... ")
-    try:
-        with SocketIOCalculator(log=log,
-                                port=port,
-                                unixsocket=unixsocket) as calc:
-            # Server is now running and waiting for connections.
-            # If you want to launch the client process here directly,
-            # instead of manually in the terminal, uncomment these lines:
-            #
-            # from subprocess import Popen
-            # proc = Popen([sys.executable, 'example_client_gpaw.py'])
+    with SocketIOCalculator(port=port,unixsocket=unixsocket) as calc:
+        # Server is now running and waiting for connections.
+        # If you want to launch the client process here directly,
+        # instead of manually in the terminal, uncomment these lines:
+        #
+        # from subprocess import Popen
+        # proc = Popen([sys.executable, 'example_client_gpaw.py'])
 
-            atoms.calc = calc
-            opt.run(fmax=args.fmax, 
-                    steps=args.maxstep)
-    except Exception as e:
-        print("\tError: {:s}".format(e))
-        return -1
+        atoms.calc = calc
+        opt.run(fmax=args.fmax, 
+                steps=args.maxstep)
         
     print("\tFinished running BFGS optimizer")    
 

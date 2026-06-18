@@ -41,6 +41,7 @@ def main(args):
     # trajectory
     print("\n\tReading the BEC tensor from file '{:s}' ... ".format(args.bec), end="")
     Z = np.loadtxt(args.bec)
+    Z = Z.reshape((-1,3))
     print("done")
 
     print("\tZ shape: ",Z.shape)
