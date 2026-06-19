@@ -24,7 +24,7 @@ def prepare_args(description):
     parser.add_argument("-i" , "--input"       , **argv, required=True , type=str     , help="file with an atomic structure")
     parser.add_argument("-if", "--input_format", **argv, required=False, type=str     , help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-p" , "--port"        , **argv, required=False, type=int     , help="TCP/IP port number. Ignored when using UNIX domain sockets.")
-    parser.add_argument("-a" , "--address"     , **argv, required=True , type=str     , help="Host name (for INET sockets) or name of the UNIX domain socket to connect to.")
+    parser.add_argument("-a" , "--address"     , **argv, required=False, type=str     , help="Host name (for INET sockets) or name of the UNIX domain socket to connect to (default: %(default)s)" , default=None)
     parser.add_argument("-u" , "--unix"        , **argv, required=False, type=str2bool, help="Use a UNIX domain socket (default: %(default)s)", default=False)
     
     parser.add_argument("-f" , "--fmax"        , **argv, required=False, type=float   , help="max force (default: %(default)s)", default=0.05)
@@ -91,7 +91,7 @@ def main(args):
     if args.port is not None:
         assert args.port >= 1025 and args.port <= 65535, "'port' should be between 1025 and 65535"
     port = args.port
-    unixsocket = args.address if args.unix else None
+    unixsocket = args.address # if args.unix else None
     print(f"\tunitsocket: {unixsocket}")
     print(f"\tport: {port}")
 
