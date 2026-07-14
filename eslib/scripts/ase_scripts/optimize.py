@@ -1,19 +1,24 @@
 #!/usr/bin/env python
+# External dependencies: install NumPy and ASE with
+#     python -m pip install numpy ase
+# FixSymmetry additionally requires spglib:
+#     python -m pip install spglib
+# All other imported modules below are included with Python.
+import argparse
+import functools
 import json
+import os
+import sys
+from datetime import datetime
 import numpy as np
 from pathlib import Path
 from ase import Atoms
 from ase.calculators.socketio import SocketIOCalculator
 from ase.constraints import FixSymmetry
 from ase.filters import UnitCellFilter
-from ase.io import write
+from ase.io import read, write
 from ase.optimize import BFGS
 from typing import List, Optional
-
-from eslib.classes.atomic_structures import AtomicStructures
-from eslib.formatting import esfmt
-from eslib.input import str2bool
-from eslib.show import show_dict
 
 #---------------------------------------#
 description = "Run an ASE optimizer with constrained symmetries."
@@ -31,10 +36,93 @@ Examples:
       --cell-constraints az bz cz --constrain-symmetry true -o relaxed.extxyz
 """
 
+
+def str2bool(value):
+    """Parse the boolean spellings accepted by the original eslib CLI."""
+    if isinstance(value, bool):
+        return value
+    if value.lower() in ("yes", "true", "t", "y", "1"):
+        return True
+    if value.lower() in ("no", "false", "f", "n", "0"):
+        return False
+    raise argparse.ArgumentTypeError("Boolean value expected.")
+
+
+def show_dict(values, prefix="", width=30):
+    """Print dictionary entries using the layout of the original script."""
+    for key, value in values.items():
+        print(f"\t{prefix}{key:<{width}} : {value}")
+
+
+def _separator():
+    return "@" + "-" * 30
+
+
+def _print_header(args, function, started):
+    script_path = Path(__file__).resolve()
+    print(_separator())
+    print(f"{'script file':20s}: {script_path.name}")
+    print(f"{'script global path':20s}: {script_path}")
+    print(f"{'working directory':20s}: {Path.cwd()}")
+    print(f"{'VScode debugging':20s}: \"args\" : {json.dumps(sys.argv[1:])}")
+    print(f"{'running script as':20s}: {script_path.name} {' '.join(sys.argv[1:])}")
+    print(f"{'python --version':20s}: {sys.version.replace(chr(10), ' ')}")
+    print(f"{'which python':20s}: {sys.executable}")
+    print(f"{'conda env':20s}: {os.environ.get('CONDA_DEFAULT_ENV', 'none')}")
+    print(f"{'SLURM job ID':20s}: {os.environ.get('SLURM_JOB_ID', 'none')}")
+    print(f"{'PID':20s}: {os.getpid()}")
+    print(f"{'start date':20s}: {started:%Y-%m-%d}")
+    print(f"{'start time':20s}: {started:%H:%M:%S}")
+    print(_separator())
+    print(f"\n\t {description}")
+    print("\n\t Documentation:")
+    print("\t " + documentation.strip().replace("\n", "\n\t "))
+    print("\n\t Input arguments:")
+    for key, value in vars(args).items():
+        print(f"\t {key:>20s}: {value}")
+    print()
+
+
+def _print_end(started):
+    ended = datetime.now()
+    elapsed = int((ended - started).total_seconds())
+    hours, remainder = divmod(elapsed, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    print("\n\t Job done :)\n")
+    print("-" * 30 + "@")
+    print(f"end date: {ended:%Y-%m-%d}")
+    print(f"end time: {ended:%H:%M:%S}s")
+    print(f"elapsed seconds: {elapsed}s")
+    print(f"elapsed time: {hours:02d}:{minutes:02d}:{seconds:02d}")
+    print("-" * 30 + "@\n")
+
+
+def script_format(prepare_parser):
+    """Standalone replacement for eslib's command-line formatting decorator."""
+    def decorator(function):
+        @functools.wraps(function)
+        def wrapper(args=None):
+            if args is None:
+                args = prepare_parser(description).parse_args()
+            elif isinstance(args, dict):
+                args = argparse.Namespace(**args)
+
+            started = datetime.now()
+            _print_header(args, function, started)
+            result = function(args)
+            if result is None or result == 0:
+                _print_end(started)
+            return result
+        return wrapper
+    return decorator
+
 #---------------------------------------#
 def prepare_args(description):
-    import argparse
-    parser = argparse.ArgumentParser(description=description)
+    parser = argparse.ArgumentParser(
+        description=description,
+        epilog=documentation,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     argv = {"metavar" : "\b",}
     parser.add_argument("-i" , "--input"       , **argv, required=True , type=str     , help="file with an atomic structure")
     parser.add_argument("-if", "--input_format", "--input-format", **argv, required=False, type=str, help="input file format (default: %(default)s)", default=None)
@@ -242,14 +330,14 @@ def validate_args(args) -> None:
 
 
 #---------------------------------------#
-@esfmt(prepare_args,description,documentation)
+@script_format(prepare_args)
 def main(args):
 
     validate_args(args)
 
     #------------------#
     print("\tReading the first atomic structure from file '{:s}' ... ".format(args.input), end="")
-    atoms:Atoms = AtomicStructures.from_file(file=args.input,format=args.input_format,index=0)[0]
+    atoms: Atoms = read(args.input, format=args.input_format, index=0)
     print("done")
     print("\tn. of atoms: ",atoms.get_global_number_of_atoms())
 
@@ -297,7 +385,7 @@ def main(args):
             )
         print("done")
         print("\tOptimizer parameters:")
-        show_dict(opt_par,string="\t")
+        show_dict(opt_par, prefix="\t")
     
     #------------------#
     print("\tAllocating BFGS optimizer  ... ", end="")
