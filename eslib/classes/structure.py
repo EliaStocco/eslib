@@ -64,8 +64,9 @@ class StructureInfo:
                     pbc=True,
                 )
                 self.add_info("sym_thresh", sym_thresh, "Symmetry Threshold")
-                self.add_info("spacegroup", dataset["number"], "Spacegroup number")
-                self.add_info("hall_symbol", dataset["hall"], "Hall symbol")
+                self.add_info("spacegroup", dataset.number, "Spacegroup number")
+                self.add_info("hall_symbol", dataset.hall, "Hall symbol")
+                self.add_info("international_symbol", dataset.international, "International symbol")
                 self.add_info(
                     "occupied_wyckoffs",
                     np.unique(dataset["wyckoffs"]),

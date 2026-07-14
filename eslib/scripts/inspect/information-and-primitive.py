@@ -32,6 +32,20 @@ def prepare_parser(description):
     parser.add_argument("-of", "--output_format" , type=str     , **argv, help="output file format (default: %(default)s)", default=None)
     return parser
 
+# Define the helper function inline (or place it globally in your script)
+def msg_to_latex(msg_string: str) -> str:
+    import re
+    symbol = msg_string.strip()
+    
+    # FIX: Change \d+ to \d so it only applies the bar to the single leading digit
+    # Example: -31m' -> \bar{3}1m'
+    symbol = re.sub(r'-(\d)', r'\\bar{\1}', symbol)
+    
+    # Convert subscripts (e.g., 4_1 -> 4_{1})
+    symbol = re.sub(r'_([a-zA-Z0-9]+)', r'_{\1}', symbol)
+    
+    return f"${symbol}$"
+                        
 #---------------------------------------#
 def print_info(structure:Atoms,threshold:float,title:str,show_pos:bool):
     from eslib.classes.structure import StructureInfo
@@ -76,6 +90,93 @@ def print_info(structure:Atoms,threshold:float,title:str,show_pos:bool):
             print("\n\tPositions (cartesian):")
             line = matrix2str(structure.get_positions(),digits=3,col_names=["Rx","Ry","Rz"],cols_align="^",width=8,row_names=structure.get_chemical_symbols())
             print(line)
+            
+    #---------------------------------------#
+    # Magnetic space group analysis
+    print("\n\tMagnetic space group information:")
+
+    try:
+        import spglib
+        from pymatgen.io.ase import AseAtomsAdaptor
+
+        # Get magnetic moments from ASE
+        magmoms = None
+
+        if "magmom" in structure.arrays:
+            magmoms = structure.arrays["magmom"]
+
+        elif "initial_magmoms" in structure.arrays:
+            magmoms = structure.arrays["initial_magmoms"]
+
+        elif hasattr(structure, "get_initial_magnetic_moments"):
+            magmoms = structure.get_initial_magnetic_moments()
+
+        if magmoms is None:
+            print("\t\tNo magnetic moments found.")
+
+        else:
+            magmoms = np.asarray(magmoms)
+
+            if np.allclose(magmoms, 0.0):
+                print("\t\tAll magnetic moments are zero.")
+
+            else:
+                # spglib expects:
+                # (lattice, fractional_positions, atomic_numbers, magnetic_moments)
+
+                lattice = structure.cell.array
+                positions = structure.get_scaled_positions()
+                numbers = structure.get_atomic_numbers()
+
+                cell = (
+                    lattice,
+                    positions,
+                    numbers,
+                    magmoms
+                )
+                
+                spg_dataset = spglib.get_symmetry_dataset(cell,
+                    symprec=threshold)
+
+                dataset = spglib.get_magnetic_symmetry_dataset(
+                    cell,
+                    symprec=threshold
+                )
+
+                if dataset is None:
+                    print("\t\tMagnetic symmetry could not be determined.")
+
+                else:
+                    msg = spglib.get_magnetic_spacegroup_type(
+                        dataset.uni_number
+                    )
+                    print("\t\tBNS magnetic space group:", msg.bns_number)
+                    print("\t\tOG number:", msg.og_number)
+                    print("\t\tMSG type:", msg.type)
+
+                    # --- ADD THIS PART TO GET THE SYMBOL ---
+                    try:
+                        from pymatgen.symmetry.maggroups import MagneticSpaceGroup
+
+                        # Parse OG string (e.g., "162.4.1306") into list of integers for pymatgen
+                        og = [int(a) for a in msg.og_number.split(".")]
+                        m_group = MagneticSpaceGroup.from_og(og)
+                        
+                        # Retrieve and format the symbol
+                        symbol_str = m_group.sg_symbol
+                        latex_str = msg_to_latex(symbol_str)
+                        
+                        print("\t\tMagnetic Group Symbol:", symbol_str, "| LaTeX: ", latex_str)
+                        print("\t\tSpace Group Symbol:", spg_dataset.international, "| LaTeX: ", msg_to_latex(spg_dataset.international))
+                        
+                    except Exception as sym_err:
+                        print("\t\tCould not retrieve text symbol from pymatgen:", sym_err)
+
+
+    except Exception as e:
+        print("\t\tMagnetic symmetry analysis failed:")
+        print("\t\t", e)
+        
     return strinfo
 
 #---------------------------------------#
