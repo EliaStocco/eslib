@@ -82,6 +82,7 @@ def print_info(structure:Atoms,threshold:float,title:str,show_pos:bool):
             print("\n\tPositions (cartesian and fractional):")
             cartesian = structure.get_positions()
             fractional = ( np.linalg.inv(structure.get_cell().T) @ cartesian.T ).T
+            fractional -= fractional[0,:]
             M = np.concatenate([cartesian,fractional], axis=1)
             line = matrix2str(M,digits=3,col_names=["Rx","Ry","Rz","fx","fy","fy"],cols_align="^",width=8,row_names=structure.get_chemical_symbols())
             print(line)
