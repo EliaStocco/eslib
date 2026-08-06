@@ -4,7 +4,7 @@ from ase.io import write
 from ase.cell import Cell
 from eslib.classes.atomic_structures import AtomicStructures
 from eslib.formatting import esfmt
-from eslib.input import flist
+from eslib.input import flist, str2bool
 
 from typing import List
 
@@ -21,6 +21,7 @@ def prepare_args(description):
     parser.add_argument("-if" , "--input_format" , **argv, required=False, type=str  , help="input file format (default: %(default)s)" , default=None)
     parser.add_argument("-abc", "--lengths"      , **argv, required=True , type=flist, help="list with the lattice vectors length [angstrom]")
     parser.add_argument("-ABC", "--angles"       , **argv, required=False, type=flist, help="list with the angles between the lattice vectors [deg] (default: %(default)s)" , default=[90,90,90])
+    parser.add_argument("-kf" , "--keep_fractional", **argv, required=False, type=str2bool, help="whether to keep fractional coordinates fixed when changing the cell (default: %(default)s)", default=True)
     parser.add_argument("-o"  , "--output"       , **argv, required=True , type=str  , help="output file with the atomic structures")
     parser.add_argument("-of" , "--output_format", **argv, required=False, type=str  , help="output file format (default: %(default)s)", default=None)
     return parser# .parse_args()
@@ -57,7 +58,7 @@ def main(args):
         cell = Cell.fromcellpar(cellpar)
 
         atoms.set_pbc(True)
-        atoms.set_cell(cell)
+        atoms.set_cell(cell, scale_atoms=args.keep_fractional)
     print("done")
 
     
