@@ -425,8 +425,10 @@ def main(args):
         opt.run(fmax=args.fmax, 
                 steps=args.max_steps)
         
-    print("\tFinished running BFGS optimizer")    
-
+    print("\tFinished running BFGS optimizer")
+    # Clear constraints right before writing
+    atoms.set_constraint()
+                
     #------------------#
     # Save the relaxed structure and optimizer state to file
     print(f"\tSaving the relaxed atomic structure and optimizer state to file '{args.output}' ... ", end="")
