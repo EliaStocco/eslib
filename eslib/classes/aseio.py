@@ -220,7 +220,7 @@ class aseio(List[Atoms], pickleIO):
     @correct_pbc_static
     @calc_none_static # try to comment it if you encounter ay problem
     @pickleIO.correct_extension_out
-    def to_file(self: T, file: str, format: Union[str, None] = None):
+    def to_file(self: T, file: str, format: Union[str, None] = None, unit: str = "angstrom"):
         """
         Write atomic structures to file.
         
@@ -231,7 +231,12 @@ class aseio(List[Atoms], pickleIO):
                 format = filetype(file, read=False)
             except:
                 _,format = os.path.splitext(file)
-        if format in ["ipi","i-pi"]:
+                format = format.lstrip(".")
+        format_name = format.lower() if isinstance(format, str) else format
+        if format_name == "espresso-in":
+            from eslib.classes.file_formats.espresso import write_espresso_in
+            write_espresso_in(file, self, unit=unit)
+        elif format_name in ["ipi","i-pi"]:
             if os.path.exists(file):
                 os.remove(file)
             for atoms in self:
@@ -241,14 +246,14 @@ class aseio(List[Atoms], pickleIO):
                 string = " positions{angstrom} cell{angstrom}"
                 comment = fmt_header%(*params,string)
                 io.write(file, atoms, format="xyz", append=True, comment=comment)
-        elif format.lower() in ["h5","hdf5"]:
+        elif format_name in ["h5","hdf5"]:
             raise ValueError("Disabled HDF5")
             from eslib.classes.file_formats.hdf5 import write_hdf5
             write_hdf5(file,self.to_list())
-        elif format.lower() in ["npz"]:
+        elif format_name in ["npz"]:
             from eslib.classes.file_formats.npz import write_npz
             write_npz(file,self.to_list())
-        elif format.lower() in ["pdb"]:
+        elif format_name in ["pdb"]:
             from eslib.classes.file_formats.pdb import write_pdb
             if len(self) > 1:
                 raise ValueError("PDB writing supported only for one structure")
@@ -495,4 +500,3 @@ def parallel_steps(comment: str)->int:
         return int(string)
     else:
         raise ValueError("Invalid comment format")
-

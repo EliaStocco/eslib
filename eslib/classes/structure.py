@@ -67,6 +67,7 @@ class StructureInfo:
                 self.add_info("spacegroup", dataset.number, "Spacegroup number")
                 self.add_info("hall_symbol", dataset.hall, "Hall symbol")
                 self.add_info("international_symbol", dataset.international, "International symbol")
+                self.add_info("crystal_class", dataset.pointgroup, "Crystal class")
                 self.add_info(
                     "occupied_wyckoffs",
                     np.unique(dataset["wyckoffs"]),

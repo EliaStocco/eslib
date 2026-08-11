@@ -38,7 +38,6 @@ def prepare_args(description):
     parser.add_argument("-ou" , "--output_unit"      , **argv,required=False, type=str     , help="output unit (default: %(default)s)", default=None)
     parser.add_argument("-pk" , "--pos_keyword"      , **argv,required=False, type=str     , help="positions keyword (default: %(default)s)", default="positions")
     parser.add_argument("-sc" , "--same_cell"        , **argv,required=False, type=str2bool, help="whether the atomic structures have all the same cell (default: %(default)s)", default=False)
-    parser.add_argument("-s"  , "--scaled"           , **argv,required=False, type=str2bool, help="whether to output the scaled positions (default: %(default)s)", default=False)
     parser.add_argument("-r"  , "--rotate"           , **argv,required=False, type=str2bool, help="whether to rotate the cell s.t. to be compatible with i-PI (default: %(default)s)", default=False)
     parser.add_argument("-n"  , "--index"            , **argv,required=False, type=itype   , help="index to be read from input file (default: %(default)s)", default=':')
     parser.add_argument("-o"  , "--output"           , **argv,required=True , type=str     , help="output file")
@@ -71,8 +70,15 @@ def main(args):
             print("failed")
     if args.output_format is None:
         print("\t Deducing output file format: ", end="")
-        from ase.io.formats import filetype
-        args.output_format = filetype(args.output, read=False)
+        try:
+            from ase.io.formats import filetype
+            args.output_format = filetype(args.output, read=False)
+        except:
+            extension = os.path.splitext(args.output)[1].lower()
+            if extension in [".in", ".espresso-in"]:
+                args.output_format = "espresso-in"
+            else:
+                args.output_format = None
         print(args.output_format)
 
     if args.input_format is None:
@@ -178,15 +184,6 @@ def main(args):
         print("done")
 
     #------------------#
-    # scale
-    if args.scaled:
-        print("\t Replacing the cartesian positions with the fractional/scaled positions: ... ",end="")        
-        for n in range(len(atoms)):
-            atoms[n].set_positions(atoms[n].get_scaled_positions())
-        print("done")
-        print("\n\t {:s}: in the output file the positions will be indicated as 'cartesian'.".format(warning) + \
-              "\n\t {:s}".format(keywords))
-        
     #------------------#
     # remove properties
     if args.remove_properties:
@@ -221,7 +218,8 @@ def main(args):
     # Write the data to the specified output file with the specified format
     if args.folder is None:
         with eslog(f"\nWriting data to file '{args.output}'"):
-            atoms.to_file(file=args.output,format=args.output_format)
+            atoms.to_file(file=args.output,format=args.output_format,
+                          unit=args.output_unit or "angstrom")
             
         # print("done")
         # try:
@@ -239,7 +237,8 @@ def main(args):
                 file = f"{args.folder}/{file_name}.n={n}{file_extension}"
                 file = os.path.normpath(file)
                 structure = AtomicStructures([structure])
-                structure.to_file(file=file,format=args.output_format)
+                structure.to_file(file=file,format=args.output_format,
+                                 unit=args.output_unit or "angstrom")
                 # try:
                 #     write(images=structure,filename=file, format=args.output_format) # fmt)
                 # except Exception as e:
