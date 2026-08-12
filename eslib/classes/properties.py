@@ -371,21 +371,32 @@ def getproperty(inputfile, propertyname, data=None, skip="0", show=False, index=
     - By default returns (ndarray, unit). If return_all=True returns (dict_of_arrays, dict_of_units).
     """
     def parse_prop_token(s):
-        """Parse a token like "temperature{kelvin}(atom=O)" into (base, unit, extra)."""
+        """Parse an i-PI property token into ``(base, unit, extra)``.
+
+        i-PI uses both ``name{unit}(extra)`` and ``name(extra){unit}``,
+        depending on the property.
+        """
         if s is None:
             return None, None, None
         s = s.strip()
         # strip external quotes if accidentally supplied: "'temperature(...)'"
         if (s.startswith("'") and s.endswith("'")) or (s.startswith('"') and s.endswith('"')):
             s = s[1:-1].strip()
-        # match: base [ {unit} ] [ (extra) ]
-        m = re.match(r'^\s*([^\{\(]+?)\s*(?:\{([^}]*)\})?\s*(?:\(([^)]*)\))?\s*$', s)
+        # Match either base{unit}(extra) or base(extra){unit}.
+        m = re.match(
+            r'^\s*([^\{\(]+?)\s*'
+            r'(?:(?:\{([^}]*)\}\s*(?:\(([^)]*)\))?)'
+            r'|(?:\(([^)]*)\)\s*(?:\{([^}]*)\})?))?\s*$',
+            s,
+        )
         if not m:
             # fallback: treat whole string as base
             return s.strip(), None, None
         base = m.group(1).strip()
-        unit = m.group(2).strip() if m.group(2) else None
-        extra = m.group(3).strip() if m.group(3) else None
+        unit_match = m.group(2) or m.group(5)
+        extra_match = m.group(3) or m.group(4)
+        unit = unit_match.strip() if unit_match else None
+        extra = extra_match.strip() if extra_match else None
         return base, unit, extra
 
     def norm(s):
