@@ -3,7 +3,7 @@
 # ===============================
 
 # Use LaTeX for text rendering
-text.usetex : True
+text.usetex : False
 
 # Figure size (two-column APS)
 figure.figsize : 6, 3
