@@ -25,7 +25,8 @@ description = "Run an ASE optimizer with constrained symmetries."
 documentation = """Optimize the first structure in an input file with ASE's BFGS optimizer.
 Energies, forces, and stresses are obtained from an external calculator through
 a TCP or UNIX socket. The script can preserve the initial symmetry, relax the
-cell, fix selected deformation-gradient components, and write an ASE trajectory.
+cell, fix selected deformation-gradient components, and write an extended-XYZ
+trajectory containing the initial structure and every optimization step.
 
 Examples:
   # Relax atomic positions using a TCP-connected calculator
@@ -131,7 +132,7 @@ def prepare_args(description):
     socket_group.add_argument("-u", "--unixsocket", **argv, type=str,help="UNIX-domain socket name/path; selects UNIX mode")
     parser.add_argument("-f" , "--fmax"        , **argv, required=False, type=float   , help="force convergence threshold in eV/A (default: %(default)s)", default=0.05)
     parser.add_argument("-op", "--opt_par", "--opt-par", **argv, required=False, type=str, help="JSON file containing BFGS constructor parameters (default: %(default)s)", default=None)
-    parser.add_argument("-t", "--trajectory"     , **argv, required=False, type=str   , help="ASE binary trajectory file (default: %(default)s)", default='minimization-trajectory.traj')
+    parser.add_argument("-t", "--trajectory"     , **argv, required=False, type=str   , help="extended-XYZ optimization trajectory (default: %(default)s)", default='minimization-trajectory.extxyz')
     parser.add_argument("-r" , "--restart"     , **argv, required=False, type=str     , help="file to restart the optimization from (default: %(default)s)", default=None)
     parser.add_argument("-ms", "--max-steps", "--maxstep", dest="max_steps", **argv, required=False, type=int,
                         help="maximum number of optimizer steps (default: %(default)s)", default=100)
@@ -325,8 +326,8 @@ def validate_args(args) -> None:
     if args.unixsocket is None:
         if not (1025 <= args.port <= 65535):
             raise ValueError("--port must be between 1025 and 65535")
-    if Path(args.trajectory).suffix.lower() != ".traj":
-        raise ValueError("--trajectory must use the .traj extension (ASE binary format)")
+    if Path(args.trajectory).suffix.lower() != ".extxyz":
+        raise ValueError("--trajectory must use the .extxyz extension")
 
 
 #---------------------------------------#
@@ -391,8 +392,25 @@ def main(args):
     print("\tAllocating BFGS optimizer  ... ", end="")
     
     opt = BFGS(atoms if filter is None else filter,
-               restart=args.restart,trajectory=args.trajectory,**opt_par)
+               restart=args.restart, **opt_par)
     print("done")
+
+    # BFGS's ``trajectory`` argument always creates an ASE binary trajectory.
+    # Use an observer instead so that the initial structure and every
+    # optimization step are written directly as a multi-frame extxyz file.
+    first_trajectory_frame = True
+
+    def write_trajectory_frame():
+        nonlocal first_trajectory_frame
+        write(
+            args.trajectory,
+            atoms,
+            format="extxyz",
+            append=not first_trajectory_frame,
+        )
+        first_trajectory_frame = False
+
+    opt.attach(write_trajectory_frame, interval=1)
     
     if filter is not None and args.print_cell:
         def print_cell_and_stress():
