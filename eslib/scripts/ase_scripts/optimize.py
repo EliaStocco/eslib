@@ -14,7 +14,6 @@ import numpy as np
 from pathlib import Path
 from ase import Atoms
 from ase.calculators.socketio import SocketIOCalculator
-from ase.constraints import FixSymmetry
 from ase.filters import UnitCellFilter
 from ase.io import read, write
 from ase.optimize import BFGS
@@ -344,6 +343,14 @@ def main(args):
 
     #------------------#
     if args.constrain_symmetry:
+        try:
+            import spglib
+        except ImportError:
+            raise ImportError(
+                "FixSymmetry requires spglib. Install it with:\n"
+                "    python -m pip install spglib"
+            )
+        from ase.constraints import FixSymmetry
         print("\tSetting constraints for preserving symmetries ... ")
         symmetry_constraint = FixSymmetry(
             atoms,
