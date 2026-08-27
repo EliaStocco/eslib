@@ -14,6 +14,7 @@ import numpy as np
 from pathlib import Path
 from ase import Atoms
 from ase.calculators.socketio import SocketIOCalculator
+from ase.calculators.singlepoint import SinglePointCalculator
 from ase.filters import UnitCellFilter
 from ase.io import read, write
 from ase.optimize import BFGS
@@ -329,6 +330,37 @@ def validate_args(args) -> None:
         raise ValueError("--trajectory must use the .extxyz extension")
 
 
+def atoms_snapshot_for_extxyz(atoms: Atoms) -> Atoms:
+    """Return an extxyz-safe snapshot of *atoms* and its calculated results.
+
+    Some SocketIO clients return array-valued results as Python lists.  ASE's
+    extxyz writer expects NumPy arrays and otherwise raises an AttributeError
+    while an optimizer observer is running.  Write a detached snapshot with
+    normalized arrays/results so that trajectory I/O cannot abort a relaxation.
+    """
+    snapshot = atoms.copy()
+    for name, values in snapshot.arrays.items():
+        if not isinstance(values, np.ndarray):
+            snapshot.arrays[name] = np.asarray(values)
+
+    results = {}
+    if atoms.calc is not None:
+        for name, getter in (
+            ("energy", atoms.get_potential_energy),
+            ("forces", atoms.get_forces),
+            ("stress", atoms.get_stress),
+        ):
+            try:
+                value = getter()
+            except Exception:
+                continue
+            results[name] = value if name == "energy" else np.asarray(value)
+
+    if results:
+        snapshot.calc = SinglePointCalculator(snapshot, **results)
+    return snapshot
+
+
 #---------------------------------------#
 @script_format(prepare_args)
 def main(args):
@@ -411,7 +443,7 @@ def main(args):
         nonlocal first_trajectory_frame
         write(
             args.trajectory,
-            atoms,
+            atoms_snapshot_for_extxyz(atoms),
             format="extxyz",
             append=not first_trajectory_frame,
         )
@@ -457,7 +489,12 @@ def main(args):
     #------------------#
     # Save the relaxed structure and optimizer state to file
     print(f"\tSaving the relaxed atomic structure and optimizer state to file '{args.output}' ... ", end="")
-    write(args.output, atoms, format=args.output_format)
+    output_atoms = (
+        atoms_snapshot_for_extxyz(atoms)
+        if args.output_format in (None, "extxyz")
+        else atoms
+    )
+    write(args.output, output_atoms, format=args.output_format)
     print("done")
 
 #---------------------------------------#
