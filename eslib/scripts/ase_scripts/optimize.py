@@ -441,9 +441,10 @@ def main(args):
 
     def write_trajectory_frame():
         nonlocal first_trajectory_frame
+        snapshot = atoms_snapshot_for_extxyz(atoms)
         write(
             args.trajectory,
-            atoms_snapshot_for_extxyz(atoms),
+            snapshot,
             format="extxyz",
             append=not first_trajectory_frame,
         )
@@ -479,8 +480,15 @@ def main(args):
         # proc = Popen([sys.executable, 'example_client_gpaw.py'])
 
         atoms.calc = calc
-        opt.run(fmax=args.fmax, 
-                steps=args.max_steps)
+        converged = opt.run(fmax=args.fmax,
+                            steps=args.max_steps)
+
+    if not converged:
+        raise RuntimeError(
+            "Optimization reached the maximum number of steps without "
+            "converging; the latest checkpoint was written to "
+            f"'{args.output}'."
+        )
         
     print("\tFinished running BFGS optimizer")
     # Clear constraints right before writing
