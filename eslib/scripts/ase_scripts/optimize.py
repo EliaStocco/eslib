@@ -333,8 +333,10 @@ def validate_args(args) -> None:
 def atoms_snapshot_for_extxyz(atoms: Atoms) -> Atoms:
     """Return an extxyz-safe snapshot of *atoms* and its calculated results.
 
-    Some SocketIO clients return array-valued results as Python lists.  ASE's
-    extxyz writer expects NumPy arrays and otherwise raises an AttributeError
+    Some SocketIO clients return forces and stresses as Python lists, and may
+    return the scalar energy as a one-element list. ASE's extxyz writer expects
+    NumPy arrays for array-valued results and a scalar energy; otherwise it raises
+    an AttributeError
     while an optimizer observer is running.  Write a detached snapshot with
     normalized arrays/results so that trajectory I/O cannot abort a relaxation.
     """
@@ -354,7 +356,15 @@ def atoms_snapshot_for_extxyz(atoms: Atoms) -> Atoms:
                 value = getter()
             except Exception:
                 continue
-            results[name] = value if name == "energy" else np.asarray(value)
+            if name == "energy":
+                energy = np.asarray(value)
+                if energy.size != 1:
+                    raise ValueError(
+                        f"Expected a scalar energy from the calculator, got shape {energy.shape}."
+                    )
+                results[name] = energy.item()
+            else:
+                results[name] = np.asarray(value)
 
     if results:
         snapshot.calc = SinglePointCalculator(snapshot, **results)
