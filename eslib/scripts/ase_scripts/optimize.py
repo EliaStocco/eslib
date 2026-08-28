@@ -341,6 +341,12 @@ def atoms_snapshot_for_extxyz(atoms: Atoms) -> Atoms:
     normalized arrays/results so that trajectory I/O cannot abort a relaxation.
     """
     snapshot = atoms.copy()
+    # FixSymmetry is meaningful only while optimizing. ASE's extxyz writer
+    # assumes every constraint can be represented as a per-atom ``move_mask``;
+    # it cannot serialize FixSymmetry and otherwise passes its constraint list
+    # to the column formatter, which expects a NumPy array. This is a detached
+    # output snapshot, so omitting constraints does not affect the relaxation.
+    snapshot.set_constraint()
     for name, values in snapshot.arrays.items():
         if not isinstance(values, np.ndarray):
             snapshot.arrays[name] = np.asarray(values)
