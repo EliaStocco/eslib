@@ -51,7 +51,7 @@ def submit_jobs(n, filepath, dependency_type, existing_job_id=None):
         # Submit the job with or without dependency and capture the output
         result = subprocess.run(command, capture_output=True, text=True)
         
-        time.sleep(0.1)
+        time.sleep(0.2)
         
         # Extract the job ID from the captured output
         output_lines = result.stdout.splitlines()
@@ -93,5 +93,6 @@ if __name__ == "__main__":
     for n in range(args.N):
         print(f"Submitting batch {n + 1}/{args.N} ... ")
         submit_jobs(args.n, args.f, args.d, args.e)
+        time.sleep(1)
     
     
