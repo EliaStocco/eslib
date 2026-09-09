@@ -22,6 +22,7 @@ max_times = []
 work_dirs = []
 dependencies = []
 num_nodes_list = []
+job_states = []
 
 # Process each job ID
 for job_id in job_ids:
@@ -38,6 +39,7 @@ for job_id in job_ids:
     max_time_match   = re.search(r'TimeLimit=(\S+)', job_info_output)
     dependency_match = re.search(r'Dependency=(\S+)', job_info_output)
     num_nodes_match  = re.search(r'NumNodes=(\d+)', job_info_output)
+    job_state_match  = re.search(r'JobState=(\S+)', job_info_output)
 
     if work_dir_match:
         work_dir = os.path.normpath(work_dir_match.group(1))
@@ -75,6 +77,11 @@ for job_id in job_ids:
     else:
         num_nodes = "not found"
 
+    if job_state_match:
+        job_state = job_state_match.group(1)
+    else:
+        job_state = "not found"
+
     # Append the extracted values to the lists
     job_names.append(job_name)
     job_ids_list.append(job_id)
@@ -83,6 +90,7 @@ for job_id in job_ids:
     max_times.append(max_time)
     dependencies.append(dependency)
     num_nodes_list.append(num_nodes)
+    job_states.append(job_state)
 
 # Create a Pandas DataFrame
 data = {
@@ -92,7 +100,8 @@ data = {
     'max time': max_times,
     'working directory': work_dirs,
     'dependencies': dependencies,
-    'nodes': num_nodes_list
+    'nodes': num_nodes_list,
+    'job state': job_states
 }
 
 df = pd.DataFrame(data)
@@ -109,6 +118,24 @@ def max_len_col(df, col):
         return 5
     else:
         return max(max([len(str(i)) for i in df[col]]), len(col))
+
+
+# ANSI colors used for the complete job row.
+RESET = '\033[0m'
+QUEUED_COLOR = '\033[33m'      # yellow
+RUNNING_COLOR = '\033[32m'     # green
+DEPENDENCY_COLOR = '\033[36m'  # cyan
+
+
+def job_color(row):
+    """Return the color that describes the job's current scheduling state."""
+    if row['dependencies']:
+        return DEPENDENCY_COLOR
+    if row['job state'] == 'RUNNING':
+        return RUNNING_COLOR
+    if row['job state'] == 'PENDING':
+        return QUEUED_COLOR
+    return ''
 
 # Calculate maximum string lengths for each column
 max_lengths = {
@@ -139,8 +166,10 @@ lines(len(header))
 
 # Print the sorted DataFrame in the desired format
 for index, row in df.iterrows():
-    print('\t| {:<{}} | {:<{}} | {:<{}} | {:<{}} | {:<{}} | {:^{}} | {:<{}} |'.\
-          format(row['job name'], max_lengths['job name'], row['job ID'], max_lengths['job ID'], row['run time'], max_lengths['run time'], row['max time'], max_lengths['max time'], row["dependencies"], max_lengths['dependency'], row['nodes'], max_lengths['nodes'], row['working directory'], max_lengths['working directory']))
+    line = '\t| {:<{}} | {:<{}} | {:<{}} | {:<{}} | {:<{}} | {:^{}} | {:<{}} |'.\
+        format(row['job name'], max_lengths['job name'], row['job ID'], max_lengths['job ID'], row['run time'], max_lengths['run time'], row['max time'], max_lengths['max time'], row["dependencies"], max_lengths['dependency'], row['nodes'], max_lengths['nodes'], row['working directory'], max_lengths['working directory'])
+    color = job_color(row)
+    print(f'{color}{line}{RESET if color else ""}')
 
 lines(len(header))
 print("\n")
