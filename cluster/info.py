@@ -3,7 +3,12 @@ import os
 import re
 import subprocess
 
+import colorama
 import pandas as pd
+from colorama import Fore, Style
+
+
+colorama.init(autoreset=True)
 
 # Replace 'your_username' with your actual SLURM username
 username = 'elsto'
@@ -120,11 +125,10 @@ def max_len_col(df, col):
         return max(max([len(str(i)) for i in df[col]]), len(col))
 
 
-# ANSI colors used for the complete job row.
-RESET = '\033[0m'
-QUEUED_COLOR = '\033[33m'      # yellow
-RUNNING_COLOR = '\033[32m'     # green
-DEPENDENCY_COLOR = '\033[36m'  # cyan
+# Colors used for the complete job row.
+QUEUED_COLOR = Fore.YELLOW + Style.BRIGHT
+RUNNING_COLOR = Fore.GREEN + Style.BRIGHT
+DEPENDENCY_COLOR = Fore.CYAN + Style.BRIGHT
 
 
 def job_color(row):
@@ -169,7 +173,7 @@ for index, row in df.iterrows():
     line = '\t| {:<{}} | {:<{}} | {:<{}} | {:<{}} | {:<{}} | {:^{}} | {:<{}} |'.\
         format(row['job name'], max_lengths['job name'], row['job ID'], max_lengths['job ID'], row['run time'], max_lengths['run time'], row['max time'], max_lengths['max time'], row["dependencies"], max_lengths['dependency'], row['nodes'], max_lengths['nodes'], row['working directory'], max_lengths['working directory'])
     color = job_color(row)
-    print(f'{color}{line}{RESET if color else ""}')
+    print(color + line + Style.RESET_ALL)
 
 lines(len(header))
 print("\n")
