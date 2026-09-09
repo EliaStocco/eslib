@@ -68,7 +68,8 @@ def submit_jobs(n, filepath, dependency_type, existing_job_id=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Submit Slurm jobs with dependencies")
-    parser.add_argument("-n", type=int, metavar="\b",help="number of jobs to submit (default=%(default)s)", default=1)
+    parser.add_argument("-n", type=int, metavar="\b",help="number of dependent jobs to submit (default=%(default)s)", default=1)
+    parser.add_argument("-N", type=int, metavar="\b", help="number of times to repeat the submitted jobs (default=%(default)s)", default=1)
     parser.add_argument("-f", type=str, metavar="\b",help="filepath of the job script (default=%(default)s)", default=SCRIPT)
     parser.add_argument("-d", type=str, metavar="\b",help="dependency type [ok, any, none] (default: %(default)s)", default="any",choices=["ok", "any", "none"])
     parser.add_argument("-e", type=str, metavar="\b",help="slurm job ID to use as a prerequisite (default: %(default)s)",default=None)
@@ -88,7 +89,9 @@ if __name__ == "__main__":
     if not os.path.exists(new_folder_path):
         os.makedirs(new_folder_path)
 
-    submit_jobs(args.n, args.f, args.d, args.e)
+    print(f"Submitting {args.N} batches of {args.n} jobs each.")
+    for n in range(args.N):
+        print(f"Submitting batch {n + 1}/{args.N} ... ")
+        submit_jobs(args.n, args.f, args.d, args.e)
     
     
-
