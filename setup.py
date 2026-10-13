@@ -41,6 +41,7 @@ setup(
         "matscipy",
         "pandas",
         "pint",
+        "plotly",
         "scikit-learn",
         "scipy>=1.2.3",
         "seekpath",

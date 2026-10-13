@@ -18,7 +18,7 @@ def prepare_args(description):
     parser.add_argument("-if", "--input_format"  , **argv, required=False, type=str  , help="input file format (default: %(default)s)", default=None)
     parser.add_argument("-s" , "--supercell_size", **argv, required=True , type=int , help="number of unitcells in the supercell along each direction")
     parser.add_argument("-n" , "--indices"       , **argv, required=True , type=str  , help="file with indices of the unitcell")
-    parser.add_argument("-p" , "--plot"          , **argv, required=False, type=str  , help="foldr for the plots (default: %(default)s)", default=None)
+    parser.add_argument("-p" , "--plot"          , **argv, required=False, type=str  , help="folder for the plots (default: %(default)s)", default=None)
     parser.add_argument("-o" , "--output"        , **argv, required=False, type=str  , help="*.txt output file with index of the unitcell (default: %(default)s)", default="unit-cells.txt")
     return parser
 
