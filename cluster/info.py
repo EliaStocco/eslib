@@ -2,6 +2,7 @@
 import os
 import re
 import subprocess
+from datetime import datetime
 
 import colorama
 import pandas as pd
@@ -28,6 +29,36 @@ work_dirs = []
 dependencies = []
 num_nodes_list = []
 job_states = []
+start_times = []
+wait_times = []
+
+
+def format_duration(seconds):
+    """Format a duration as a compact, human-readable value."""
+    seconds = abs(int(seconds))
+    days, seconds = divmod(seconds, 24 * 60 * 60)
+    hours, seconds = divmod(seconds, 60 * 60)
+    minutes, seconds = divmod(seconds, 60)
+    prefix = f"{days}d " if days else ""
+    return f"{prefix}{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+
+def format_start_time(value, now):
+    """Return Slurm's predicted start timestamp and its offset from now."""
+    if value in (None, "Unknown", "N/A"):
+        return "Unknown", "Unknown"
+    try:
+        start = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S")
+    except ValueError:
+        return value, "Unknown"
+    offset = (start - now).total_seconds()
+    display = start.strftime("%Y-%m-%d %H:%M:%S")
+    if offset < 0:
+        return display, f"started {format_duration(offset)} ago"
+    return display, format_duration(offset)
+
+
+now = datetime.now()
 
 # Process each job ID
 for job_id in job_ids:
@@ -45,6 +76,7 @@ for job_id in job_ids:
     dependency_match = re.search(r'Dependency=(\S+)', job_info_output)
     num_nodes_match  = re.search(r'NumNodes=(\d+)', job_info_output)
     job_state_match  = re.search(r'JobState=(\S+)', job_info_output)
+    start_time_match = re.search(r'StartTime=(\S+)', job_info_output)
 
     if work_dir_match:
         work_dir = os.path.normpath(work_dir_match.group(1))
@@ -87,6 +119,10 @@ for job_id in job_ids:
     else:
         job_state = "not found"
 
+    start_time, wait_time = format_start_time(
+        start_time_match.group(1) if start_time_match else None, now
+    )
+
     # Append the extracted values to the lists
     job_names.append(job_name)
     job_ids_list.append(job_id)
@@ -96,6 +132,8 @@ for job_id in job_ids:
     dependencies.append(dependency)
     num_nodes_list.append(num_nodes)
     job_states.append(job_state)
+    start_times.append(start_time)
+    wait_times.append(wait_time)
 
 # Create a Pandas DataFrame
 data = {
@@ -106,7 +144,9 @@ data = {
     'working directory': work_dirs,
     'dependencies': dependencies,
     'nodes': num_nodes_list,
-    'job state': job_states
+    'job state': job_states,
+    'start date/time': start_times,
+    'time to start': wait_times
 }
 
 df = pd.DataFrame(data)
@@ -141,39 +181,36 @@ def job_color(row):
         return QUEUED_COLOR
     return ''
 
-# Calculate maximum string lengths for each column
-max_lengths = {
-    'job name': max_len_col(df, "job name"),
-    'job ID': max_len_col(df, "job ID"),
-    'run time': max_len_col(df, "run time"),
-    'max time': max_len_col(df, "max time"),
-    'dependency': max_len_col(df, "dependencies"),
-    'working directory': max_len_col(df, "working directory"),
-    'nodes': max_len_col(df, "nodes")
-}
+# Columns displayed in the status table. The last two are Slurm predictions.
+columns = [
+    "job name", "job ID", "run time", "max time", "dependencies", "nodes",
+    "start date/time", "time to start", "working directory",
+]
+max_lengths = {column: max_len_col(df, column) for column in columns}
+
+
+def border(width):
+    print("\t|" + "-" * (width - 3) + "|")
+
 
 print("\n")
-
-# Print the header
-header = '\t| {:<{}} | {:<{}} | {:<{}} | {:<{}} | {:<{}} | {:<{}} | {:<{}} |'.\
-    format("job name", max_lengths['job name'], \
-           "job ID", max_lengths['job ID'], \
-           "run time", max_lengths['run time'], \
-           "max time", max_lengths['max time'], \
-           "dependency", max_lengths['dependency'], \
-           "nodes", max_lengths['nodes'], \
-           "working directory", max_lengths['working directory'])
-
-lines(len(header))
+header = "\t| " + " | ".join(
+    f"{column:<{max_lengths[column]}}" for column in columns
+) + " |"
+border(len(header))
 print(header)
-lines(len(header))
+border(len(header))
 
-# Print the sorted DataFrame in the desired format
-for index, row in df.iterrows():
-    line = '\t| {:<{}} | {:<{}} | {:<{}} | {:<{}} | {:<{}} | {:^{}} | {:<{}} |'.\
-        format(row['job name'], max_lengths['job name'], row['job ID'], max_lengths['job ID'], row['run time'], max_lengths['run time'], row['max time'], max_lengths['max time'], row["dependencies"], max_lengths['dependency'], row['nodes'], max_lengths['nodes'], row['working directory'], max_lengths['working directory'])
-    color = job_color(row)
-    print(color + line + Style.RESET_ALL)
+for _, row in df.iterrows():
+    cells = []
+    for column in columns:
+        value = str(row[column])
+        cells.append(
+            f"{value:^{max_lengths[column]}}" if column == "nodes"
+            else f"{value:<{max_lengths[column]}}"
+        )
+    line = "\t| " + " | ".join(cells) + " |"
+    print(job_color(row) + line + Style.RESET_ALL)
 
-lines(len(header))
+border(len(header))
 print("\n")
