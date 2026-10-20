@@ -10,8 +10,8 @@ from colorama import Fore, Style
 
 colorama.init(autoreset=True)
 
-# Replace 'your_username' with your actual SLURM username
-username = 'elsto'
+# Use the login username from the environment rather than hard-coding it.
+username = os.environ['USER']
 
 # Get the list of SLURM job IDs for your user
 job_list_command = f'squeue -u {username} -h -o "%A"'
